@@ -34,7 +34,7 @@
 
 
 
-## 注解讲解
+## [注解讲解](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/bind/annotation/package-summary.html)
 
 | 注解                                                         | 说明                                                         |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
@@ -45,16 +45,16 @@
 | @Import                                                      | 支持导入普通的java类,并将其声明成一个bean                    |
 | @[ImportResource](http://www.cnblogs.com/duanxz/p/3787757.html) | 导入资源文件，配合@value 注入值到bean中                      |
 | @EnableAutoConfiguration                                     | enable Spring Boot’s auto-configuration mechanism            |
-| @Autowired                                                   | to do constructor injection                                  |
-| @Controller                                                  |                                                              |
-| @Service                                                     |                                                              |
-| @Repository                                                  |                                                              |
-| @Component                                                   |                                                              |
+| [@Autowired](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/annotation/Autowired.html) | to do constructor injection                                  |
+| [@Controller](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/stereotype/Controller.html) | This annotation serves as a specialization of [`@Component`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/stereotype/Component.html), allowing for implementation classes to be autodetected through classpath scanning. It is typically used in combination with annotated handler methods based on the [`RequestMapping`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/bind/annotation/RequestMapping.html) annotation. 标注一个控制器组件类 |
+| [@Service](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/stereotype/Service.html) | May also indicate that a class is a "Business Service Facade" (in the Core J2EE patterns sense), or something similar. This annotation is a general-purpose stereotype and individual teams may narrow their semantics and use as appropriate.  This annotation serves as a specialization of [`@Component`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/stereotype/Component.html), allowing for implementation classes to be autodetected through classpath scanning.  标注一个业务逻辑组件类 |
+| [@Repository](https://blog.csdn.net/u010648555/article/details/76299467) | 标注一个DAO组件类 。 an annotated class is a "Repository", originally defined by Domain-Driven Design (Evans, 2003) as "a mechanism for encapsulating storage, retrieval, and search behavior which emulates a collection of objects" |
+| [@Component](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/stereotype/Component.html) | 标准一个普通的spring Bean类  Such classes are considered as candidates for auto-detection when using annotation-based configuration and classpath scanning. |
 | @Value                                                       | @Value("${property}") to inject configuration properties。is a core container feature, and it does not provide the same features as |
 | @ConfigurationProperties.                                    | Relaxed binding，Meta-data support                           |
 | @Profile                                                     | to limit when it is loaded                                   |
-| @RequestMapping                                              |                                                              |
-| @RestController                                              |                                                              |
+| @RequestMapping                                              | 提供路由信息                                                 |
+| @RestController                                              | 告诉Spring以字符串的形式渲染结果，并直接返回给调用者         |
 | @JsonComponent                                               |                                                              |
 | @EnableHypermediaSupport                                     |                                                              |
 | @Embeddable                                                  |                                                              |
@@ -69,7 +69,15 @@
 | @AutoConfigureOrder                                          |                                                              |
 | @ConditionalOnProperty                                       |                                                              |
 | @ConditionalOnResource                                       |                                                              |
-| @Bean                                                        |                                                              |
+| @Bean                                                        | a method produces a bean to be managed by the Spring container.  主要用于方法上 |
+| @PathVaribale                                                | 获取url中的数据                                              |
+| @RequestParam                                                | 获取请求参数的值                                             |
+| @GetMapping                                                  | 组合注解                                                     |
+| @PostConstruct                                               | 实现初始化                                                   |
+| @PreDestroy                                                  | 销毁bean                                                     |
+| @Resource                                                    | 标注在字段或属性的setter方法上                               |
+| @Qualifier                                                   |                                                              |
+| @Scope                                                       |                                                              |
 |                                                              |                                                              |
 |                                                              |                                                              |
 |                                                              |                                                              |
@@ -79,14 +87,36 @@
 |                                                              |                                                              |
 |                                                              |                                                              |
 |                                                              |                                                              |
-|                                                              |                                                              |
-|                                                              |                                                              |
-|                                                              |                                                              |
-|                                                              |                                                              |
-|                                                              |                                                              |
-|                                                              |                                                              |
-|                                                              |                                                              |
-|                                                              |                                                              |
+
+## 注解精讲
+
+### @Autowired
+
+配合着@Component，@Configuration，@ConfigurationProperties用起来会比较方便
+
+功能：主要就是从配置文件读取默认的信息，然后将信息自动配置到已有的java类。也就是javabean。需要@Component来注解，才能配置成功。
+
+
+
+### [@Controller](https://blog.csdn.net/u010412719/article/details/69710480)
+
+- 处理http请求
+- 必须配合模版来使用 
+
+
+
+### @RestController
+
+- 返回json需要@ResponseBody和@Controller配合 
+- 是@ResponseBody和@Controller的组合注解 
+
+
+
+### [@Component](https://blog.csdn.net/u010648555/article/details/76299467) 
+
+
+
+
 
 
 
@@ -413,3 +443,12 @@ section on WebClient.
 
 ### 什么是ApplicationContext 
 
+
+
+
+
+
+
+## 推荐网站
+
+#### http://www.shangyang.me/2017/03/28/spring-framework-sourcecode-analysis-routine-and-environment-init/
