@@ -71,14 +71,14 @@
 | @ConditionalOnResource                                       |                                                              |
 | @Bean                                                        | a method produces a bean to be managed by the Spring container.  主要用于方法上 |
 | @PathVaribale                                                | 获取url中的数据                                              |
-| @RequestParam                                                | 获取请求参数的值                                             |
-| @GetMapping                                                  | 组合注解                                                     |
-| @PostConstruct                                               | 实现初始化                                                   |
+| @RequestParam                                                | 获取请求参数的值。 handler methods in Servlet and Portlet environments 。  a method parameter should be bound to a web request parameter. |
+| @GetMapping                                                  | 组合注解。  is a *composed annotation* that acts as a shortcut for `@RequestMapping(method = RequestMethod.GET)` |
+| @PostConstruct                                               | 实现初始化  is a *composed annotation* that acts as a shortcut for `@RequestMapping(method = RequestMethod.POST)` |
 | @PreDestroy                                                  | 销毁bean                                                     |
 | @Resource                                                    | 标注在字段或属性的setter方法上                               |
 | @Qualifier                                                   |                                                              |
 | @Scope                                                       |                                                              |
-|                                                              |                                                              |
+| @RequestMapping                                              |                                                              |
 |                                                              |                                                              |
 |                                                              |                                                              |
 |                                                              |                                                              |
@@ -116,12 +116,41 @@
 
 
 
+### @RequestParam
+
+- Annotation which indicates that a method parameter should be bound to a web request parameter.
+
+- Supported for annotated handler methods in Servlet and Portlet environments.
+
+- If the method parameter type is `Map` and a request parameter name is specified, then the request parameter value is converted to a `Map` assuming an appropriate conversion strategy is available.
+
+- If the method parameter is `Map<String, String>` or [`MultiValueMap`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/util/MultiValueMap.html) and a parameter name is not specified, then the map parameter is populated with all request parameter names and values.
+
+
+
+## 深入理解
+
+### @RestController和@Controller的区别
+
+- 在刚开始学习的时候，做最基础的返回页面html时，@RestController 表示返回的内容都是HTTP Content不会被模版引擎处理的 。所以就是单纯的字符串
+- [@Controller 返回才能扫描到资源中html文件](https://blog.csdn.net/baidu_27222643/article/details/78965320)
+
+  
+
+
+
+  
+
+  
+
+  
+
+  
 
 
 
 
-
-## **执行流程** 
+## springboot的**加载过程** 
 
 
 
@@ -300,15 +329,55 @@ section on WebClient.
 
 
 
-## Manage your application
+## 如何启动你的应用
+
+### 说明
+
+在开发中，尤其是在springboot的环境中，尽管我们可以在网上可以找到许多demo代码，但是我们总是无法顺利启动应用或者说执行代码。这里我特别总结一下。启动一个应用到底还需要注意些什么问题。
 
 
 
-暂无。有了更多开发经验再更新吧。
+### 顺利使用@Scheduled这个功能
+
+问题：这里启动应用的时候我遇到了在不同包情况下无法启动应用。因为我把主应用Application.java。放在和我的ScheduledTasks.java文件下同一层次但是不同包名。
+
+操作：应该将Application.java放在ScheduledTasks.java之上。这样可以顺利启动了。
 
 
 
 
+
+### 顺利使用@ConfigurationProperties这个功能
+
+问题：始终无法读取配置文件中的固定好的常量
+
+操作：要额外加上@PropertySource和@Autowired，路径问题
+
+
+
+### 顺利实现文件上传功能
+
+参考链接：https://spring.io/guides/gs/uploading-files/
+
+问题：
+
+- 无法返回html资源，get无法读取文件，post无法读取文件
+
+问题参数：
+
+- [Required request part 'file' is not present](https://www.jianshu.com/p/424017b3ac18) 
+- Current request is not a multipart request
+- 返回资源问题
+
+
+
+操作：
+
+- 绝对是配置问题。最终问题出在bootstrap.yml.  spring:  servlet:    multipart:   改成   spring:  http:    multipart:
+- 在postman中删除Headers里面的Content-Type 
+- 参考@RestController和@Controller
+- get无法读取文件 是因为内部的文件操作，本身就是读取目录的时候有问题。因为已经映射服务器成功了。所以bug好找
+- post无法读取文件 主要是配置中的 servlet 和 http 区别。照着例子是过不了的 
 
 
 

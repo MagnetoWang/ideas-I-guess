@@ -157,9 +157,9 @@ Built directly on Spring Boot's innovative approach to enterprise Java, Spring C
 
 
 
+### [什么是MockMvc](https://blog.csdn.net/zhang289202241/article/details/62042842)
 
-
-
+MockMvc实现了对Http请求的模拟，能够直接使用网络的形式，转换到Controller的调用，这样可以使得测试速度快、不依赖网络环境，而且提供了一套验证的工具，这样可以使得请求的验证统一而且很方便。 
 
 
 
