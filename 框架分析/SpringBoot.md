@@ -26,11 +26,59 @@
 
 
 
+## 如何学习Spring Boot
+
+- sprIng系列的框架都是为了方便开发者快速建立应用而产生的
+- 所以在学习sprIngboot的过程中，应该多注重文档和实践。有问题应该多看文档，积累了一定开发经验之后，有余力，有兴趣就可以考虑看看源码
+- 当然我认为看源码因人而异，没有一定的技术高度，还是感知不到源码的用处。
+- 我更注重sprng的设计和框架的思想。更高效的利用他们的框架，对于职业的发展比较有利。
+- 多了解springboot执行流程。
+- 
+
+
+
+
+
+
 ## Spring Boot 支持哪些 [Servlet](# 什么是servlet)
 
 - Tomcat 8.5
 - Jetty 9.4
 - Undertow 1.4
+
+## [如何定位并解决SpringBoot的bug](https://mermaidjs.github.io/mermaid-live-editor/#/view/eyJjb2RlIjoiZ3JhcGggVERcbnJvb3Qo5oCd57u05YWl5Y-jKVxucHJvYmxlbXMo6Zeu6aKYKVxuXG5EZWJ1Z1BhcmFtZXRlcihkZWJ1Z-eahGVycm9y5Y-C5pWwKVxubWV0aG9kcyjmlrnms5UpXG5EZW1vKOahiOS-i-S7o-eggSlcbnZlcnNpb24o54mI5pysKVxuQ2xhc3Mo57G7KVxuTWV0aG9kKOaWueazlSlcblxuXG5yb290LS0-fOiOt-WPlnxtZXRob2RzXG5yb290LS0-fOehruWumnxwcm9ibGVtc1xuXG5cbnByb2JsZW1zLS0-fOehruWumnxEZWJ1Z1BhcmFtZXRlclxucHJvYmxlbXMtLT5856Gu5a6afHZlcnNpb25cblxudmVyc2lvbi0tPnzlt7Lnu4_ov4fml7bnmoR8Q2xhc3NcbnZlcnNpb24tLT585bey57uP5pS55Y-Y55qEfE1ldGhvZFxuXG5cbm1ldGhvZHMtLT585bC95Y-v6IO955qE5om-5b6I5aSafERlbW9cbiIsIm1lcm1haWQiOnsidGhlbWUiOiJkZWZhdWx0In19)
+
+```mermaid
+graph TD
+root(思维入口)
+problems(问题)
+
+DebugParameter(debug的error参数)
+methods(方法)
+Demo(案例代码)
+version(版本)
+Class(类)
+Method(方法)
+
+
+root-->|获取|methods
+root-->|确定|problems
+
+
+problems-->|确定|DebugParameter
+problems-->|确定|version
+
+version-->|已经过时的|Class
+version-->|已经改变的|Method
+
+
+methods-->|尽可能的找很多|Demo
+
+```
+
+
+
+
 
 
 
@@ -39,19 +87,19 @@
 | 注解                                                         | 说明                                                         |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | @SpringBootApplication                                       | is equivalent to using @Configuration,@EnableAutoConfiguration, and @ComponentScan with their default attributes |
-| @ComponentScan                                               | to find your beans。enable @Component scan on the package where the application is located |
+| @ComponentScan                                               | to find your beans。enable @Component scan on the package where the application is located。 tells Spring to look for other components, configurations, and services in the `hello` package, allowing it to find the controllers. |
 | @EntityScan                                                  | Set the [`packages scanned`](https://docs.spring.io/spring-framework/docs/5.0.7.RELEASE/javadoc-api/org/springframework/orm/jpa/LocalContainerEntityManagerFactoryBean.html?is-external=true#setPackagesToScan-java.lang.String...-) for JPA entities.  Set the packages used with Neo4J's `SessionFactory`.  Set the `initial entity set` used with Spring Data `MongoDB`, `Cassandra` and `Couchbase` mapping contexts. |
-| @Configuration                                               | allow to register extra beans in the context or import additional configuration |
+| @Configuration                                               | allow to register extra beans in the context or import additional configuration。 tags the class as a source of bean definitions for the application context. |
 | @Import                                                      | 支持导入普通的java类,并将其声明成一个bean                    |
 | @[ImportResource](http://www.cnblogs.com/duanxz/p/3787757.html) | 导入资源文件，配合@value 注入值到bean中                      |
-| @EnableAutoConfiguration                                     | enable Spring Boot’s auto-configuration mechanism            |
+| @EnableAutoConfiguration                                     | enable Spring Boot’s auto-configuration mechanism;  tells Spring Boot to start adding beans based on classpath settings, other beans, and various property settings. |
 | [@Autowired](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/annotation/Autowired.html) | to do constructor injection                                  |
 | [@Controller](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/stereotype/Controller.html) | This annotation serves as a specialization of [`@Component`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/stereotype/Component.html), allowing for implementation classes to be autodetected through classpath scanning. It is typically used in combination with annotated handler methods based on the [`RequestMapping`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/bind/annotation/RequestMapping.html) annotation. 标注一个控制器组件类 |
 | [@Service](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/stereotype/Service.html) | May also indicate that a class is a "Business Service Facade" (in the Core J2EE patterns sense), or something similar. This annotation is a general-purpose stereotype and individual teams may narrow their semantics and use as appropriate.  This annotation serves as a specialization of [`@Component`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/stereotype/Component.html), allowing for implementation classes to be autodetected through classpath scanning.  标注一个业务逻辑组件类 |
 | [@Repository](https://blog.csdn.net/u010648555/article/details/76299467) | 标注一个DAO组件类 。 an annotated class is a "Repository", originally defined by Domain-Driven Design (Evans, 2003) as "a mechanism for encapsulating storage, retrieval, and search behavior which emulates a collection of objects" |
 | [@Component](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/stereotype/Component.html) | 标准一个普通的spring Bean类  Such classes are considered as candidates for auto-detection when using annotation-based configuration and classpath scanning. |
 | @Value                                                       | @Value("${property}") to inject configuration properties。is a core container feature, and it does not provide the same features as |
-| @ConfigurationProperties.                                    | Relaxed binding，Meta-data support                           |
+| @ConfigurationProperties                                     | Relaxed binding，Meta-data support                           |
 | @Profile                                                     | to limit when it is loaded                                   |
 | @RequestMapping                                              | 提供路由信息                                                 |
 | @RestController                                              | 告诉Spring以字符串的形式渲染结果，并直接返回给调用者         |
@@ -75,11 +123,11 @@
 | @GetMapping                                                  | 组合注解。  is a *composed annotation* that acts as a shortcut for `@RequestMapping(method = RequestMethod.GET)` |
 | @PostConstruct                                               | 实现初始化  is a *composed annotation* that acts as a shortcut for `@RequestMapping(method = RequestMethod.POST)` |
 | @PreDestroy                                                  | 销毁bean                                                     |
-| @Resource                                                    | 标注在字段或属性的setter方法上                               |
+| @Resource                                                    | 标注在字段或属性的setter方法上.Interface for a resource descriptor that abstracts from the actual type of underlying resource, such as a file or class path resource.An InputStream can be opened for every resource if it exists in physical form, but a URL or File handle can just be returned for certain resources. The actual behavior is implementation-specific. |
 | @Qualifier                                                   |                                                              |
 | @Scope                                                       |                                                              |
 | @RequestMapping                                              |                                                              |
-|                                                              |                                                              |
+| @EnableWebMvc                                                | Spring Boot adds it automatically when it sees **spring-webmvc** on the classpath. This flags the application as a web application and activates key behaviors such as setting up a `DispatcherServlet`. |
 |                                                              |                                                              |
 |                                                              |                                                              |
 |                                                              |                                                              |
@@ -95,6 +143,12 @@
 配合着@Component，@Configuration，@ConfigurationProperties用起来会比较方便
 
 功能：主要就是从配置文件读取默认的信息，然后将信息自动配置到已有的java类。也就是javabean。需要@Component来注解，才能配置成功。
+
+可以对成员变量、方法和构造函数进行标注，来完成自动装配的工作。 
+无需再通过传统的在bean的xml文件中进行bean的注入配置。而是使用注解，系统自动为你注入，即隐式配置。
+
+**首先要知道**：@Autowired是根据类型进行标注的，如需要按照名称进行装配，则需要配合@Qualifier使用 
+进行指定包扫描的component
 
 
 
@@ -119,12 +173,27 @@
 ### @RequestParam
 
 - Annotation which indicates that a method parameter should be bound to a web request parameter.
-
 - Supported for annotated handler methods in Servlet and Portlet environments.
-
 - If the method parameter type is `Map` and a request parameter name is specified, then the request parameter value is converted to a `Map` assuming an appropriate conversion strategy is available.
-
 - If the method parameter is `Map<String, String>` or [`MultiValueMap`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/util/MultiValueMap.html) and a parameter name is not specified, then the map parameter is populated with all request parameter names and values.
+
+
+
+### [@Bean](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/Bean.html)
+
+- Indicates that a method produces a bean to be managed by the Spring container. 
+- 
+
+
+
+### @Resource
+
+- Interface for a resource descriptor that abstracts from the actual type of underlying resource, such as a file or class path resource. 
+- An InputStream can be opened for every resource if it exists in physical form, but a URL or File handle can just be returned for certain resources. The actual behavior is implementation-specific. 
+
+
+
+
 
 
 
@@ -381,7 +450,61 @@ section on WebClient.
 
 
 
+### 顺利添加网站用户名和密码
 
+参考链接：https://spring.io/guides/gs/securing-web/
+
+问题：
+
+- 无法解决一些变量问题，如何理解只用两个类完成功能，
+
+问题参数：
+
+- UserDetails 和 userDetailsService
+- MvcConfig.java
+- WebSecurityConfig.java
+
+
+
+操作：
+
+- 修改为 AuthenticationManagerBuilder 类即可
+- 专门加载html页面。方便加载扫描
+- 两个方法，一个负责设置用户名信息，还有一个作为接受请求的类，类似controller功能。
+
+总结：
+
+- 这两个类相当于java版本的xml配置。因为注解的原因，可以将方法的功能变成xml对应的标签。
+- 不断互相映射所需要的资源实现理想的功能
+
+
+
+### 顺利实现网站收发消息以及订阅功能
+
+参考链接：https://spring.io/guides/gs/messaging-rabbitmq/
+
+问题：
+
+- 按照demo来做很成功，以致于不知道发生了什么
+
+问题参数：
+
+- 发送和接受运行机制
+- rabbitTemplate.convertAndSend
+- 
+
+
+
+操作：
+
+- 修改为 AuthenticationManagerBuilder 类即可
+- 专门加载html页面。方便加载扫描
+- 两个方法，一个负责设置用户名信息，还有一个作为接受请求的类，类似controller功能。
+
+总结：
+
+- 这两个类相当于java版本的xml配置。因为注解的原因，可以将方法的功能变成xml对应的标签。
+- 不断互相映射所需要的资源实现理想的功能
 
 
 
@@ -487,13 +610,14 @@ section on WebClient.
 
 ### 什么是Bean
 
+- @Bean is a method produces a bean to be managed by the Spring container. 
 - 使用Spring框架所做的就是两件事：开发Bean、配置Bean 
 - 根据配置文件来创建Bean实例，并调用Bean实例的方法完成“依赖注入” 
 - beans 是根目录  里面 有许多 bean.
 - 支持5种作用域： Singleton：单例模式 ， Prototype：原型模式 ，
--  request：对于每次HTTP请求，使用request定义的Bean都将产生一个新的实例，即每次HTTP请求都会产生不同的Bean实例。当然只有在WEB应用中使用Spring时，该作用域才真正有效。 
+- request：对于每次HTTP请求，使用request定义的Bean都将产生一个新的实例，即每次HTTP请求都会产生不同的Bean实例。当然只有在WEB应用中使用Spring时，该作用域才真正有效。 
 - session：对于每次HTTPSession，使用session定义的Bean都将产生一个新的实例时，即每次HTTP Session都将产生不同的Bean实例。同HTTP一样，只有在WEB应用才会有效。 
--  global session：每个全局的HTTPSession对应一个Bean实例。仅在portlet Context的时候才有效。 
+- global session：每个全局的HTTPSession对应一个Bean实例。仅在portlet Context的时候才有效。 
 
 ```xml
 
@@ -510,11 +634,59 @@ section on WebClient.
 </beans>
 ```
 
-### 什么是ApplicationContext 
+
+
+### [什么是ApplicationContext](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/ApplicationContext.html) 
+
+- spring 中较高级的容器 
+- 以加载配置文件中定义的 bean ，将所有的 bean 集中在一起，当有请求的时候分配 bean 。
+- 从属性文件从解析文本信息和将事件传递给所指定的监听器。 
+- 包含 *BeanFactory* 所有的功能 
+- *BeanFactory* 仍然可以在轻量级应用中使用，比如移动设备或者基于 applet 的应用程序。 
+- 官网解释
+- Central interface to provide configuration for an application. This is read-only while the application is running, but may be reloaded if the implementation supports this. 
+- Bean factory methods for accessing application components. Inherited from [`ListableBeanFactory`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/ListableBeanFactory.html).
+- The ability to load file resources in a generic fashion. Inherited from the [`ResourceLoader`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/core/io/ResourceLoader.html) interface.
+- The ability to publish events to registered listeners. Inherited from the [`ApplicationEventPublisher`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/ApplicationEventPublisher.html) interface.
+- The ability to resolve messages, supporting internationalization. Inherited from the [`MessageSource`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/MessageSource.html) interface.
+- Inheritance from a parent context. Definitions in a descendant context will always take priority. This means, for example, that a single parent context can be used by an entire web application, while each servlet has its own child context that is independent of that of any other servlet.
+- In addition to standard [`BeanFactory`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/BeanFactory.html) lifecycle capabilities, ApplicationContext implementations detect and invoke [`ApplicationContextAware`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/ApplicationContextAware.html) beans as well as [`ResourceLoaderAware`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/ResourceLoaderAware.html), [`ApplicationEventPublisherAware`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/ApplicationEventPublisherAware.html) and [`MessageSourceAware`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/MessageSourceAware.html) beans. 
+
+
+
+### 什么是DispatcherServlet
+
+- 是前端控制器设计模式的实现，提供Spring Web MVC的集中访问点，而且负责职责的分派，而且与Spring IoC容器无缝集成，从而可以获得Spring的所有好处 
+- 主要用作职责调度工作，本身主要用于控制流程 
+- 文件上传解析，如果请求类型是multipart将通过MultipartResolver进行文件上传解析； 
+- 通过HandlerMapping，将请求映射到处理器（返回一个HandlerExecutionChain，它包括一个处理器、多个HandlerInterceptor拦截器）； 
+- 通过HandlerAdapter支持多种类型的处理器(HandlerExecutionChain中的处理器)； 
+- 通过ViewResolver解析逻辑视图名到具体视图实现； 
+- 本地化解析； 
+- 渲染具体的视图等； 
+- 如果执行过程中遇到异常将交给HandlerExceptionResolver来解析。 
+
+
+
+![dispatcherServlet](resourse/dispatcherServlet.JPG)
+
+
+
+### 什么是RabbitMQ 
+
+- is an AMQP server 
 
 
 
 
+
+### [什么是 CommandLineRunner]()
+
+- 在项目服务启动的时候就去加载一些数据或做一些事情这样的需求 需要用到
+- 直接实现这个接口
+- @Order(value=2)  多个实现接口，需要用到的顺序 
+- 简单描述：程序启动以后，才会开始执行CommandLineRunner相关代码。
+- 就好像帮你打开命令行，执行相关的命令
 
 
 
