@@ -7,7 +7,7 @@
 | 邮箱 | 暂无                                                         |
 | 说明 | 其实把概念弄清楚也就好理解spring boot到底是做什么的。跟着目录走！！！ |
 | 注意 | 请不要用于商业用途。分享学习经验是种有趣的爱好。             |
-| 参考 | 官方文档和https://github.com/aalansehaiyang/technology-talk/blob/master/basic-knowledge/springboo-note.md |
+| 参考 | 官方文档和https://spring.io/guides                           |
 
 
 
@@ -32,8 +32,10 @@
 - 所以在学习sprIngboot的过程中，应该多注重文档和实践。有问题应该多看文档，积累了一定开发经验之后，有余力，有兴趣就可以考虑看看源码
 - 当然我认为看源码因人而异，没有一定的技术高度，还是感知不到源码的用处。
 - 我更注重sprng的设计和框架的思想。更高效的利用他们的框架，对于职业的发展比较有利。
+- 总之
 - 多了解springboot执行流程。
-- 
+- 多看spring系列文档
+- 好记性不如烂笔头。记录下你的学习记录。可以更好把握你的学习情况
 
 
 
@@ -59,6 +61,7 @@ Demo(案例代码)
 version(版本)
 Class(类)
 Method(方法)
+document(文档)
 
 
 root-->|获取|methods
@@ -73,7 +76,7 @@ version-->|已经改变的|Method
 
 
 methods-->|尽可能的找很多|Demo
-
+methods-->|多看|document
 ```
 
 
@@ -128,9 +131,9 @@ methods-->|尽可能的找很多|Demo
 | @Scope                                                       |                                                              |
 | @RequestMapping                                              |                                                              |
 | @EnableWebMvc                                                | Spring Boot adds it automatically when it sees **spring-webmvc** on the classpath. This flags the application as a web application and activates key behaviors such as setting up a `DispatcherServlet`. |
-|                                                              |                                                              |
-|                                                              |                                                              |
-|                                                              |                                                              |
+| @Entity                                                      |                                                              |
+| @GeneratedValue                                              |                                                              |
+| @SecondaryTable                                              |                                                              |
 |                                                              |                                                              |
 |                                                              |                                                              |
 |                                                              |                                                              |
@@ -195,6 +198,12 @@ methods-->|尽可能的找很多|Demo
 
 
 
+### @Entity
+
+
+
+
+
 
 
 ## 深入理解
@@ -208,7 +217,11 @@ methods-->|尽可能的找很多|Demo
 
 
 
-  
+###   [@Entity和@Table的区别](https://www.cnblogs.com/softidea/p/6216722.html)
+
+- @Entity说明这个class是实体类，并且使用默认的orm规则，即class名即数据库表中表名，class字段名即表中的字段名 
+- 如果想改变这种默认的orm规则，就要使用@Table来改变class名与数据库中表名的映射规则，@Column来改变class中字段名与db中表的字段名的映射规则 
+- 
 
   
 
@@ -479,7 +492,7 @@ section on WebClient.
 
 
 
-### 顺利实现网站收发消息以及订阅功能
+### 顺利实现网站收发消息
 
 参考链接：https://spring.io/guides/gs/messaging-rabbitmq/
 
@@ -491,20 +504,74 @@ section on WebClient.
 
 - 发送和接受运行机制
 - rabbitTemplate.convertAndSend
-- 
-
-
 
 操作：
 
-- 修改为 AuthenticationManagerBuilder 类即可
-- 专门加载html页面。方便加载扫描
-- 两个方法，一个负责设置用户名信息，还有一个作为接受请求的类，类似controller功能。
+- 需要先定义接受的类
+  - queue ： 消息队列
+  - exchange ： 类似于邮箱的性质，需要域名
+  - binding ： 绑定所有必要信息，比如队列，邮箱，路由之类的
+  - container ： 监听消息的容器，通过它构造连接
+  - listenerAdapter ： 监听适配器，用来适配我们自定义的接受类。就想苹果转接头才能充电
+- 然后才是发送相关的类
+  - convertAndSend。已经封装成可以发送任意对象的接口，特别好用。附加必要的信息，就可以一键发送了
+- 
 
 总结：
 
-- 这两个类相当于java版本的xml配置。因为注解的原因，可以将方法的功能变成xml对应的标签。
-- 不断互相映射所需要的资源实现理想的功能
+- 这个demo过于简单，还是没能充分感受到MQ的好处
+
+
+
+### 顺利实现在网站整合数据
+
+参考链接：https://spring.io/guides/gs/integration/
+
+问题：
+
+- 按照demo来做很成功，以致于不知道发生了什么
+- 为什么一个xml就完成rss的数据流动
+
+操作：
+
+- 对接数据源，转换，写入本机文件。只用了一个xml文件完成
+- 主要疑问在对接数据源中的xml
+  - schemaLocation : 后面是需要扫描的网站  
+  - 可以自行了解xml和xsd格式和内容
+
+
+
+总结：
+
+- 最终在指定目录下可以看到数据流下载到本机
+- 但是很明显，操控性不是很强
+
+
+
+### 顺利实现JPA接口
+
+参考链接：https://spring.io/guides/gs/accessing-data-jpa/
+
+问题：
+
+- 出现无法识别的方法类，findById
+- 
+
+操作：
+
+- 根据我的springboot问题树，很快就发现是版本问题。5分钟解决
+- 主要疑问在对接数据源中的xml
+  - schemaLocation : 后面是需要扫描的网站  
+  - 可以自行了解xml和xsd格式和内容
+
+
+
+总结：
+
+- 最终在指定目录下可以看到数据流下载到本机
+- 但是很明显，操控性不是很强
+
+
 
 
 
@@ -608,6 +675,16 @@ section on WebClient.
 - TransactionManager：托管模式 (managed mode) 下，TransactionManager接口是被应用服务器调用，以控制事务的边界的。 
 - UserTransaction：非托管模式 (non-managed mode) 下，应用程序可以通过UserTransaction接口控制事务的边界 
 
+
+
+### 什么是JPA
+
+- JPA是Java Persistence API的简称，中文名Java持久层API，是JDK 5.0注解或XML描述对象－关系表的映射关系，并将运行期的实体[对象持久化](https://baike.baidu.com/item/%E5%AF%B9%E8%B1%A1%E6%8C%81%E4%B9%85%E5%8C%96)到数据库中 
+
+
+
+
+
 ### 什么是Bean
 
 - @Bean is a method produces a bean to be managed by the Spring container. 
@@ -692,4 +769,6 @@ section on WebClient.
 
 ## 推荐网站
 
-#### http://www.shangyang.me/2017/03/28/spring-framework-sourcecode-analysis-routine-and-environment-init/
+- http://www.shangyang.me/2017/03/28/spring-framework-sourcecode-analysis-routine-and-environment-init/
+- https://github.com/aalansehaiyang/technology-talk/blob/master/basic-knowledge/springboot-hot-reload.md
+
