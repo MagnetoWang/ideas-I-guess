@@ -116,8 +116,7 @@ spring 的目标和愿景
 
 
 
-https://github.com/anxpp/JavaDesignPattern
 
 
-http://plantuml.com/
-http://www.gravizo.com/
+
+

@@ -31,6 +31,12 @@
 
 
 
+## 基础算法
+
+- [八大排序算法](https://github.com/MagnetoWang/paste/tree/master/paste/src/main/java/sortUtils)
+
+
+
 
 
 ## 学习过程中的体会
