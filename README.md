@@ -8,32 +8,33 @@
 ## 工程项目
 
 - 简单的搜索引擎项目（实现中）
-- Spring系列Demo（实现中）
-- paste(实现中)
-- ACam相机应用
-- 计算机图形学的实践
-- 简单的MySQL编译器
-- 算法练习（永远都在实现）
+- [Spring系列Demo（实现中）](https://github.com/MagnetoWang/SpringCloudDemo)
+- [paste(实现中)](https://github.com/MagnetoWang/paste)
+- [ACam相机应用-后面代码涉及密钥，想要apk可以提issue](https://github.com/MagnetoWang/ACam)
+- [计算机图形学的实践](https://github.com/MagnetoWang/ComputerGraphics)
+- [简单的MySQL编译器](https://github.com/MagnetoWang/Compiler_MYSQL_HOMEWORKs)
+- [算法练习（永远都在实现）](https://github.com/MagnetoWang/Algorithm-learning)
 - 
 
 
 
 ## 笔记总结
 
-- Spring boot
-- Spring cloud
-- 模式识别
-- 软件工程
-- 网络字典
-- Spring技术内幕
-- 深入理解Java虚拟机
-- Java并发编程实战
+- [Spring Boot](https://github.com/MagnetoWang/ideas-I-guess/blob/master/框架分析/SpringBoot.md)
+- [Spring Cloud](https://github.com/MagnetoWang/ideas-I-guess/blob/master/%E6%A1%86%E6%9E%B6%E5%88%86%E6%9E%90/SpringCloud.md)
+- [模式识别](https://github.com/MagnetoWang/machine-learning-notes/blob/master/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%A8%A1%E5%BC%8F%E8%AF%86%E5%88%AB%E8%AF%BE%E5%A0%82%E7%AC%94%E8%AE%B0.md)
+- [软件工程](https://github.com/MagnetoWang/ideas-I-guess/blob/master/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1.md)
+- [网络字典](https://github.com/MagnetoWang/ideas-I-guess/blob/master/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/%E7%BD%91%E7%BB%9C%E5%AD%97%E5%85%B8.md)
+- [Spring技术内幕](https://github.com/MagnetoWang/ideas-I-guess/blob/master/Java%E7%B3%BB%E5%88%97/%E3%80%8ASpring%E6%8A%80%E6%9C%AF%E5%86%85%E5%B9%95%E3%80%8B%E7%AC%94%E8%AE%B0.md)
+- [深入理解Java虚拟机](https://github.com/MagnetoWang/ideas-I-guess/blob/master/Java%E7%B3%BB%E5%88%97/%E3%80%8A%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E3%80%8B%E7%AC%94%E8%AE%B0.md)
+- [Java并发编程实战](https://github.com/MagnetoWang/ideas-I-guess/blob/master/Java%E7%B3%BB%E5%88%97/%E3%80%8AJava%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%AE%9E%E6%88%98%E3%80%8B%E7%AC%94%E8%AE%B0.md)
 
 
 
 ## 基础算法
 
 - [八大排序算法](https://github.com/MagnetoWang/paste/tree/master/paste/src/main/java/sortUtils)
+- [23种设计模式](https://github.com/MagnetoWang/paste/tree/master/paste/src/main/java/design/pattern)
 
 
 
