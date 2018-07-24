@@ -1,4 +1,4 @@
-![测试文档](https://github.com/MagnetoWang/ideas-I-guess/blob/master/markdown-for-document-organization-management/manage-pictures/logstash.png)
+![logstash](https://github.com/MagnetoWang/ideas-I-guess/blob/master/markdown-for-document-organization-management/manage-pictures/logstash.png)
 
 
 
