@@ -40,8 +40,23 @@
 
 - java.lang.IllegalStateException: ApplicationEventMulticaster not initialized
   - 依赖问题，有冲突。重新检查
+
 - java.lang.[NoClassDefFoundError](https://blog.csdn.net/u014427391/article/details/79743318):org/springframework/cloud/stream/binding/StreamListenerSetupMethodOrchestrator
   - 在运行时JVM加载不到类或者找不到类 
+
 - ClassNotfoundException 
   - 在编译时JVM加载不到类或者找不到类导致的 
--  @Autowired-could not autowire
+
+- @Autowired-could not autowire
+
+- Unregistering JMX-exposed beans
+
+  - 这是启动的正常信息。因为你刚刚生成的项目，没有加载任何的模块 
+
+  - ```
+    <dependency>
+       <groupId>org.springframework.boot</groupId>
+       <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    ```
+
