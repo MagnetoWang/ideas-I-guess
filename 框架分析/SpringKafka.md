@@ -18,8 +18,13 @@
   - https://blog.csdn.net/clypm/article/details/79498646
 - spring-kafka快速入门（含有代码）：https://docs.spring.io/spring-kafka/docs/2.1.7.RELEASE/reference/html/
 - spring-kafka-clien文档：https://docs.spring.io/spring-kafka/reference/htmlsingle/#_kafka_client_version
-- Kafka入门简介：https://zhuanlan.zhihu.com/p/31731892
-- kafka技术分享系列：https://blog.csdn.net/lizhitao/article/details/39499283
+- Kafka入门简介
+  - https://zhuanlan.zhihu.com/p/31731892
+  - http://dataunion.org/6275.html
+  - https://www.jianshu.com/p/f56b794ccc4c
+- kafka进阶：
+  - https://blog.csdn.net/lizhitao/article/details/39499283
+  - https://blog.csdn.net/xingfulangren/article/details/74185282
 - kafka中文笔记：http://www.cnblogs.com/cyfonly/p/5954614.html
 - 安装kafka：https://zhuanlan.zhihu.com/p/32780543
 - Kafka Shell基本命令（包括topic的增删改查）：https://www.cnblogs.com/xiaodf/p/6093261.html
