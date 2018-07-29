@@ -18,19 +18,14 @@
   - https://blog.csdn.net/clypm/article/details/79498646
 - spring-kafka快速入门（含有代码）：https://docs.spring.io/spring-kafka/docs/2.1.7.RELEASE/reference/html/
 - spring-kafka-clien文档：https://docs.spring.io/spring-kafka/reference/htmlsingle/#_kafka_client_version
-- Kafka原理
-  - https://blog.xiaoxiaomo.com/2016/05/14/Kafka-Consumer%E6%B6%88%E8%B4%B9%E8%80%85/
-  - https://segmentfault.com/a/1190000003922549
 - Kafka入门简介
   - https://zhuanlan.zhihu.com/p/31731892
   - http://dataunion.org/6275.html
   - https://www.jianshu.com/p/f56b794ccc4c
-  - https://www.cnblogs.com/kangoroo/p/7353330.html
+  - https://toutiao.io/posts/508935/app_preview
 - kafka进阶：
   - https://blog.csdn.net/lizhitao/article/details/39499283
   - https://blog.csdn.net/xingfulangren/article/details/74185282
-  - https://blog.csdn.net/u011622226/article/details/72500713
-  - http://www.cnblogs.com/huxi2b/p/6124937.html
 - kafka中文笔记：http://www.cnblogs.com/cyfonly/p/5954614.html
 - 安装kafka：https://zhuanlan.zhihu.com/p/32780543
 - Kafka Shell基本命令（包括topic的增删改查）：https://www.cnblogs.com/xiaodf/p/6093261.html
@@ -40,12 +35,23 @@
 
 ### 配置
 
-- 查看kafka数据
-- 再用本地kafka进行连接测试
-- 最后抓取测试
-- 再和spring cloud data stream 结合
+- spring bootstrap 
 
+  - ```
+    kafka:
+      consumer:
+        bootstrap-servers:kafka的机器和端口 
+        group-id: log_test
+        auto-offset-reset: latest  设置offset
+        enable-auto-commit: true
+    ```
 
+### 常见问题
+
+- 如何重复消费kafka数据
+  - https://blog.csdn.net/xiaoyu_BD/article/details/52319302
+- 如何导出zk中的偏移量
+	- https://blog.csdn.net/xiaoyu_bd/article/details/52398330
 
 ### 异常问题
 
