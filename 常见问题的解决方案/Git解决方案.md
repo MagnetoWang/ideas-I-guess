@@ -3,3 +3,9 @@
 - git reset --hard $HEAD
 - git pull
 
+
+
+### 拉取远程分支
+
+- git pull
+- git checkout  xxx
