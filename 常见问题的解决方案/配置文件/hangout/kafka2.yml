@@ -1,0 +1,50 @@
+inputs:
+    - NewKafka:
+        topic:
+            dp-bigc-base-log: 3
+        codec: plain
+        consumer_settings:
+            bootstrap.servers: kafka05-online.zeus.ljnode.com:9092,kafka11-online.zeus.ljnode.com:9092
+            value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+            key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+            group.id: hangout-ch-new
+filters:
+    - Json:
+        field: message
+        remove_fields: ['message','wifi']
+    - Convert:
+        fields:
+            client_timestamp:
+                to: long
+    - Add:
+        fields:
+           event_uuid: '[uuid]'
+    - Add:
+        fields:
+           event_uuid: '[device_uid]'
+        if:
+           - '<#if device_uid=="">false<#else>true</#if>'
+    - Rename:
+        fields:
+          wifi: is_wifi
+          exp_key: exp.keys
+          exp_value: exp.values
+    - Gsub:
+        fields:
+           exp.values: ['"',""]
+           exp.keys: ['"',""]
+    - Gsub:
+        fields:
+           exp.values: [']',""]
+           exp.keys: [']',""]
+    - Gsub:
+        fields:
+           exp.values: ['\[',""]
+           exp.keys: ['\[',""]
+outputs:
+    - com.sina.bip.hangout.outputs.Clickhouse:
+        host: 127.0.0.1:8123
+        database: compass
+        table: logs_all
+        fields: ['event_uuid','event','client_timestamp','system_type','client_app_version','city_code','pid','evt_id','referer','is_spider','uicode','client_ip','device_name','client_browser','client_os_type','net_provider','client_app_source','is_wifi','net','utm_source','utm_medium','utm_campaign','utm_content','utm_term','data_date','exp.values','exp.keys']
+        bulk_size: 5000

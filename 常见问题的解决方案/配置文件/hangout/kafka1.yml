@@ -1,0 +1,30 @@
+inputs:
+    - NewKafka:
+        topic:
+            playback: 8
+        topic_pattern:
+            playback.*: 16
+        codec: plain
+        consumer_settings:
+            bootstrap.servers: xx.xx.xx.xx:9092
+            value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+            key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+            group.id: xxx
+
+filters:
+    - Json:
+        field: message
+        format: TabSeparated
+        remove_fields: ['message','hostname','timestamp']
+
+outputs:
+   - com.sina.bip.hangout.outputs.Clickhouse:
+        host: xx.xx.xx.xx:8123
+        database: search
+        table: playback
+        fields: ['id','pt','operation_type','operation_timestamp','click_timestamp','click_fb_expo_id','click_housecode','total','search_docs','fb_query_id','fb_service_id',
+                'search_index','qfs','requestFunctionScores','queryOperator','requestId','route','search_query','strategyId','fls','aggregations','returnRelativeScore',
+                'size','cityIds','page','queryMinimumShouldMatch','queryFuzziness','sortedQueryMinimumShouldMatch','sorts','filters','ucid','cost','fb_ab_test_flag','uuid','dig_timestamp',
+                'client','summary','create_timestamp']
+        bulk_size: 1000
+   - Stdout: {}
