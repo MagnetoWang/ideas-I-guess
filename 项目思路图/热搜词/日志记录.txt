@@ -2,3 +2,13 @@
 第一部分用core,service，api三个模块实现
 
 第二部分用jpa,删除service。好不容易写好第一部分，结果一堆依赖代码被删除。写个鬼啊
+
+
+
+2018-08-14 13:24:36.652  INFO 59680 --- [  XNIO-2 task-1] c.n.l.DynamicServerListLoadBalancer      : DynamicServerListLoadBalancer for client playback-service initialized: DynamicServerListLoadBalancer:{NFLoadBalancer:name=playback-service,current list of Servers=[10.33.194.91:9009],Load balancer stats=Zone stats: {defaultzone=[Zone:defaultzone;	Instance count:1;	Active connections count: 0;	Circuit breaker tripped count: 0;	Active connections per server: 0.0;]
+},Server stats: [[Server:10.33.194.91:9009;	Zone:defaultZone;	Total Requests:0;	Successive connection failure:0;	Total blackout seconds:0;	Last connection made:Thu Jan 01 08:00:00 CST 1970;	First connection made: Thu Jan 01 08:00:00 CST 1970;	Active Connections:0;	total failure count in last (1000) msecs:0;	average resp time:0.0;	90 percentile resp time:0.0;	95 percentile resp time:0.0;	min resp time:0.0;	max resp time:0.0;	stddev resp time:0.0]
+]}ServerList:org.springframework.cloud.netflix.ribbon.eureka.DomainExtractingServerList@64734e8c
+Hibernate: insert into hot_word (city_id, count, create_timestamp, day_time, search_word, type) values (?, ?, ?, ?, ?, ?)
+2018-08-14 13:24:37.036  WARN 59680 --- [  XNIO-2 task-1] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Error: 1406, SQLState: 22001
+2018-08-14 13:24:37.036 ERROR 59680 --- [  XNIO-2 task-1] o.h.engine.jdbc.spi.SqlExceptionHelper   : Data truncation: Data too long for column 'count' at row 1
+2018-08-14 13:24:37.090 ERROR 59680 --- [  XNIO-2 task-1] io.undertow.request                      : UT005023: Exception handling request to /playback/hotwords
