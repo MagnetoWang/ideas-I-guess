@@ -236,6 +236,6 @@ DELETE /customer/doc/2?pretty
 
 - 更多查询参考上面链接
 
-  ### 聚合查询
+### 聚合查询
 
   - https://www.elastic.co/guide/en/elasticsearch/reference/current/_executing_aggregations.html
