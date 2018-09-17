@@ -239,3 +239,10 @@ DELETE /customer/doc/2?pretty
 ### 聚合查询
 
   - https://www.elastic.co/guide/en/elasticsearch/reference/current/_executing_aggregations.html
+
+
+
+
+
+## 原理解析
+
