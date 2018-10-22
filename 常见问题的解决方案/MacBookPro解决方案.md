@@ -35,22 +35,18 @@
   - https://brew.sh/：/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
   - brew help：查看相关命令
   - brew install wget
-
 - 安装XCode
 
   - xcode-select --install 
-
 - 启动shadowsocks服务
 
   - /usr/local/opt/shadowsocks-libev/bin/ss-local -c /usr/local/etc/shadowsocks-libev.json -u
-
 - 安装python3
 
   - brew install python3
   - pip安装：curl <https://bootstrap.pypa.io/get-pip.py> | python3
   - pip list
   - pip -version
-
 - 文件跳转
 
   - " / "  ：根目录
@@ -60,5 +56,22 @@
   - clear 清空当前输入
   - history 查看输入历史记录
   - 切换英文目录：cd Library/AAA\ English\ Path/
-  - 
+  - ls -a：显示所有文件包括隐藏文件
+  - rm -rf 文件/文件夹名字：直接删除不做任何提示。慎用服务器中
+- Finder软件操作
+  - defaults write com.apple.finder _FXShowPosixPathInTitle -bool TRUE;killall Finder：显示当前路径在显示栏目上面
+  - defaults delete com.apple.finder _FXShowPosixPathInTitle;killall Finder：只显示文件名，不显示路径
+  - Option+Cmd+P：可以快速切换路径，底部显示路径栏
+- 文本操作
+  - open -t settings.xml ：默认编辑本打开
+  - open -e settings.xml ：文本编辑本打开
+  - open -a vscode settings.xml ：指定应用打开
+  - https://blog.csdn.net/example440982/article/details/80220270
+  - code settings.xml：用vscode打开文本
+
+
+
+## 文件夹直通车
+
+- 
 
