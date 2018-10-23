@@ -9,6 +9,10 @@
 
 
 
+[TOC]
+
+
+
 ## 命令行问题
 
 - ls：显示文件目录
@@ -373,9 +377,37 @@
 - 上线效果：上线后发现在调用量几乎没怎么变的情况下，性能提升明显，如下图：
   ![优化效果图_3](https://tech.meituan.com/img/%E4%BC%98%E5%8C%96%E6%95%88%E6%9E%9C%E5%9B%BE_3.png)
 
-# 其他
+## 其他
 
 除了上面介绍的之外，优化还涉及前端、分布式文件系统、CDN、全文索引、空间索引等几方面。限于篇幅，我们留到未来再做介绍。
 
 
+
+
+
+# Linux基础
+
+## 基本概念
+
+- POSIX：https://en.wikipedia.org/wiki/POSIX
+  - The Portable Operating System Interface (POSIX)
+
+
+
+## 基本操作
+
+- vim
+  - 保存退出：:wq
+  - 不保存退出：:q!
+  - 
+- make
+  - 默认编译makefile
+  - -j5：同时运行5个jobs
+- cmake
+  - 默认编译CMakeLists.txt
+  - 
+
+
+
+[TOC]
 
