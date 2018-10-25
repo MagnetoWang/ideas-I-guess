@@ -20,5 +20,11 @@
 
 
 
+### 指针
+
+- 强弱应用：https://www.jianshu.com/p/4b047fc3b0be
+
+
+
 [TOC]
 
