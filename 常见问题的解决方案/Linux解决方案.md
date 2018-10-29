@@ -405,7 +405,20 @@
   - -j5：同时运行5个jobs
 - cmake
   - 默认编译CMakeLists.txt
-  - 
+
+
+
+## 基本功能
+
+- 查询系统版本
+  -  cat /proc/version
+  - https://www.qiancheng.me/post/coding/show-linux-issue-version
+- 安装java和配置路径
+  - vi ~/.bash_profile
+  - export JAVA_HOME=/usr/java/jdk1.5.0_07/bin/java
+  - export PATH=$PATH:/usr/java/jdk1.5.0_07/bin
+  - source ~/.bash_profile
+  - https://www.cyberciti.biz/faq/linux-unix-set-java_home-path-variable/
 
 
 

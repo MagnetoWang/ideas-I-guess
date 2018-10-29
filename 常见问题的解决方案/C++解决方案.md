@@ -26,5 +26,9 @@
 
 
 
+### 语法问题
+
+- FileReceiver(const FileReceiver&) = delete;
+
 [TOC]
 
