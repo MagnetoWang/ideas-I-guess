@@ -75,3 +75,11 @@
 
 - 
 
+
+
+## 终端
+
+- 安装iterm
+- 安装ohmyzsh：https://segmentfault.com/a/1190000014992947
+  - sh -c "$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"
+  - https://segmentfault.com/a/1190000014992947
