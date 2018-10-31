@@ -413,12 +413,40 @@
 - 查询系统版本
   -  cat /proc/version
   - https://www.qiancheng.me/post/coding/show-linux-issue-version
+
 - 安装java和配置路径
+
+  - wget http://pkg.4paradigm.com/jdk/jdk-8u141-linux-x64.tar.gz
+  - 解压：https://blog.csdn.net/FX677588/article/details/76100538
+  - tar -zxvf ×××.tar.gz
   - vi ~/.bash_profile
-  - export JAVA_HOME=/usr/java/jdk1.5.0_07/bin/java
-  - export PATH=$PATH:/usr/java/jdk1.5.0_07/bin
+  - export JAVA_HOME=/home/wangzixian/java/jdk1.8.0_141/bin/java
+  - export PATH=$PATH:/home/wangzixian/java/jdk1.8.0_141/bin
   - source ~/.bash_profile
   - https://www.cyberciti.biz/faq/linux-unix-set-java_home-path-variable/
+
+- 安装和配置maven和路径
+
+  - https://www.baeldung.com/install-maven-on-windows-linux-mac
+
+  - http://maven.apache.org/download.cgi
+
+  - ```
+    export JAVA_HOME=/home/wangzixian/java/jdk1.8.0_141
+    export JRE_HOME=home/wangzixian/java/jdk1.8.0_141/jre
+    export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib
+    export PATH=$PATH:/home/wangzixian/java/jdk1.8.0_141/bin
+    
+    export MAVEN_HOME=/home/wangzixian/maven/apache-maven-3.5.4
+    export PATH=${MAVEN_HOME}/bin:${PATH}
+    ```
+
+  - mvn -X 可以查看settings.xml路径位置
+
+- 打开文件
+
+  - 显示行号：http://blog.sina.com.cn/s/blog_716844910100tfxv.html
+  - cat -n filename
 
 
 
