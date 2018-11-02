@@ -448,7 +448,8 @@
   - 显示行号：http://blog.sina.com.cn/s/blog_716844910100tfxv.html
   - cat -n filename
 
-
+- 性能查找
+  - https://www.cnblogs.com/emanlee/p/3587571.html
 
 [TOC]
 

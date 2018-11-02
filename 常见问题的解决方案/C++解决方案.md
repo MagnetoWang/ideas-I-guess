@@ -23,6 +23,8 @@
 ### 指针
 
 - 强弱应用：https://www.jianshu.com/p/4b047fc3b0be
+- 多个***，代表什么意思：https://blog.csdn.net/soonfly/article/details/51131141
+- 图解多级指针：https://www.cnblogs.com/chenyangyao/p/5222696.html
 
 
 

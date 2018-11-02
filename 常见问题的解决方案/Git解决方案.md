@@ -5,6 +5,7 @@
 ### 命令清单
 
 - http://www.ruanyifeng.com/blog/2015/12/git-cheat-sheet.html
+- https://git-scm.com/book/zh/v1/Git-%E5%B7%A5%E5%85%B7-%E5%82%A8%E8%97%8F%EF%BC%88Stashing%EF%BC%89
 
 ### 远程仓库代码覆盖本地代码
 
