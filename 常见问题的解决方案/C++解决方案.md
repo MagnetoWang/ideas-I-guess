@@ -6,6 +6,10 @@
 
 [TOC]
 
+## 资源
+
+- https://github.com/fffaraz/awesome-cpp
+
 
 
 ## C++解决方案
@@ -31,6 +35,27 @@
 ### 语法问题
 
 - FileReceiver(const FileReceiver&) = delete;
+
+
+
+### 参数
+
+- 默认参数和缺省参数：https://blog.csdn.net/CHF_VIP/article/details/8586921
+- 初始化的参数，可以可以赋值也可以不赋值
+
+### 线程
+
+#### 线程池
+
+- 简单实现：https://www.cnblogs.com/lzpong/p/6397997.html
+- 介绍：https://zhuanlan.zhihu.com/p/26025722
+- 
+
+
+
+## GLog
+
+- 日志的声明：http://www.voidcn.com/article/p-cfnlsnnv-os.html
 
 [TOC]
 

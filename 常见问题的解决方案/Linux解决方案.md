@@ -449,7 +449,18 @@
   - cat -n filename
 
 - 性能查找
+
   - https://www.cnblogs.com/emanlee/p/3587571.html
+
+- 解压
+
+  - tar -zxvf ×××.tar.gz
+  - tar -jxvf ×××.tar.bz2
+  - https://blog.csdn.net/FX677588/article/details/76100538
+
+- 安装zsh
+
+  - https://harttle.land/2016/10/25/install-oh-my-zsh-locally.html
 
 [TOC]
 
