@@ -404,7 +404,18 @@
   - 默认编译makefile
   - -j5：同时运行5个jobs
 - cmake
+
   - 默认编译CMakeLists.txt
+- 查看系统编码
+
+  - locale：https://blog.csdn.net/jbxue123/article/details/17909913
+- 一切皆文件
+
+  - lsof ：https://linuxtools-rst.readthedocs.io/zh_CN/latest/tool/lsof.html
+- top
+  - 查看cpu占用率
+- vscode同步服务器
+  - https://www.jianshu.com/p/390c68a0cc58
 
 
 
@@ -461,6 +472,8 @@
 - 安装zsh
 
   - https://harttle.land/2016/10/25/install-oh-my-zsh-locally.html
+
+- 
 
 [TOC]
 

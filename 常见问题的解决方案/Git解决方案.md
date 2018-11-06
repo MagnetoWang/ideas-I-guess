@@ -35,5 +35,6 @@
   - ssh-add 密钥文件名字：无后缀名pub
   - 代表本机git也添加了该密钥
   - 都添加以后双方就有权限访问了
+- Cannot update paths and switch to branch at the same time
   - 
 
