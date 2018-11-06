@@ -27,8 +27,16 @@
 ### 指针
 
 - 强弱应用：https://www.jianshu.com/p/4b047fc3b0be
+
 - 多个***，代表什么意思：https://blog.csdn.net/soonfly/article/details/51131141
+
 - 图解多级指针：https://www.cnblogs.com/chenyangyao/p/5222696.html
+
+- 结构体指针：http://c.biancheng.net/cpp/html/94.html
+
+- 类对象指针：https://www.cnblogs.com/flylong0204/p/4731318.html
+
+- make_shared & shared_ptr：https://www.jianshu.com/p/4b047fc3b0be
 
 
 
