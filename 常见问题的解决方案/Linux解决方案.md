@@ -416,6 +416,13 @@
   - 查看cpu占用率
 - vscode同步服务器
   - https://www.jianshu.com/p/390c68a0cc58
+- date -R
+  - 查看当前时区
+  - https://www.cnblogs.com/h2appy/archive/2008/11/27/1342029.html
+- ip address
+  - 查看本机ip地址
+- kill -s 9 pid
+  - 杀死进程
 
 
 
@@ -472,6 +479,7 @@
 - 安装zsh
 
   - https://harttle.land/2016/10/25/install-oh-my-zsh-locally.html
+  - 全路径显示：https://blog.csdn.net/s_gy_zetrov/article/details/80158409
 
 - 
 
