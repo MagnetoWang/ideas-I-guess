@@ -423,6 +423,10 @@
   - 查看本机ip地址
 - kill -s 9 pid
   - 杀死进程
+- netstat -an | grep 6181 
+  - 查看端口
+  - lsof -i;2181
+  - 查看端口
 
 
 
