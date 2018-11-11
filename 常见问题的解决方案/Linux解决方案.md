@@ -427,6 +427,9 @@
   - 查看端口
   - lsof -i;2181
   - 查看端口
+- cp sourceDir destDir
+  - 复制文件
+  - 同时可以修改名字
 
 
 
@@ -485,7 +488,21 @@
   - https://harttle.land/2016/10/25/install-oh-my-zsh-locally.html
   - 全路径显示：https://blog.csdn.net/s_gy_zetrov/article/details/80158409
 
+
+
+
+## Linux下的C++
+
+### 基本编译运行
+
+- g++ helloworld.cpp -o helloworld
+- ./helloworld
+
+### 复杂文件编译运行
+
 - 
+
+
 
 [TOC]
 
