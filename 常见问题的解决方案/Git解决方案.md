@@ -21,6 +21,12 @@
 
 
 
+
+
+## 查看修改内容
+
+- git log -p filename
+
 ### 问题
 
 - error: RPC failed; curl 18 transfer closed with outstanding read data remaining
