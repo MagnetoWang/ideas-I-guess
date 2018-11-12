@@ -43,8 +43,40 @@
 ### 语法问题
 
 - FileReceiver(const FileReceiver&) = delete;
+- std::basic_string<char> 和 std::string区别
+  - https://stackoverflow.com/questions/1662107/whats-the-difference-between-stdstring-and-stdbasic-string-and-why-are-bot
+
+- 类型转换问题
+
+```
+error: no matching function for call to 'std::vector<std::basic_string<char> >::insert(std::string&)'
+                 endpoints.insert(endpoint);
+       
+       
+将insert改成push_back就ok了
+```
+
+- map无法insert
+
+```
+std::map<std::pair<uint32_t,uint32_t>, std::vector<std::string>> pos_endpoints;
+
+这种复杂类型，无法insert。我查了7个小时终于找到了
+
+多套一重make_pair
+pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partition(idx).pid()), endpoints));
+```
 
 
+
+
+
+### Map使用
+
+- map需要make_pair多重insert
+- Map.find（key)。返回的是迭代器
+- 在迭代器的基础上，iter->second。就可以返回value
+- 一般返回迭代器都会判断一下
 
 ### 参数
 
@@ -57,7 +89,11 @@
 
 - 简单实现：https://www.cnblogs.com/lzpong/p/6397997.html
 - 介绍：https://zhuanlan.zhihu.com/p/26025722
-- 
+
+#### 锁机制
+
+- 锁相关函数：http://www.cnblogs.com/haippy/p/3346477.html
+- Lock_guard如何释放锁：https://my.oschina.net/yangcol/blog/123433
 
 
 
