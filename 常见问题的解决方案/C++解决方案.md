@@ -77,6 +77,8 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
 - Map.find（key)。返回的是迭代器
 - 在迭代器的基础上，iter->second。就可以返回value
 - 一般返回迭代器都会判断一下
+- key中的类对象，必须实现比较函数，不然编译错误
+- 不要用指针当key！！！
 
 ### 参数
 

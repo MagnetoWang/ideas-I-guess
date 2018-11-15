@@ -430,6 +430,10 @@
 - cp sourceDir destDir
   - 复制文件
   - 同时可以修改名字
+- date +%s
+  - 获取时间戳
+- $(cd "$(dirname "$0")"; pwd)
+  - 这个文件当前路径，shell脚本中使用
 
 
 
