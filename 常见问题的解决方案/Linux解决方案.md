@@ -434,6 +434,8 @@
   - 获取时间戳
 - $(cd "$(dirname "$0")"; pwd)
   - 这个文件当前路径，shell脚本中使用
+- touch file
+  - 修改文件时间戳
 
 
 
@@ -492,6 +494,12 @@
   - https://harttle.land/2016/10/25/install-oh-my-zsh-locally.html
   - 全路径显示：https://blog.csdn.net/s_gy_zetrov/article/details/80158409
 
+### 非root情况下安装python的nose
+
+- python setup.py install --user
+- 加一个user
+- https://stackoverflow.com/questions/21093002/error-could-not-create-usr-local-lib-python2-7-dist-packages-virtualenv-suppo
+
 
 
 
@@ -507,6 +515,28 @@
 - 
 
 
+
+# Linux下的Shell
+
+## 基础
+
+### /dev/null 含义
+
+- /dev/null ：代表空设备文件
+
+- echo log > /dev/null 2>&1
+
+  >  ：代表重定向到哪里，例如：echo "123" > /home/123.txt
+  >  1  ：表示stdout标准输出，系统默认值是1，所以">/dev/null"等同于"1>/dev/null"
+  >  2  ：表示stderr标准错误
+  >  &  ：表示等同于的意思，2>&1，表示2的输出重定向等同于1
+
+- https://blog.csdn.net/ithomer/article/details/9288353
+
+### if语法
+
+- https://blog.csdn.net/yf210yf/article/details/9207147
+- 
 
 [TOC]
 
