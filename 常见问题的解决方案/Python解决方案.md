@@ -26,6 +26,16 @@
 
 - 调用子进程的函数：http://www.cnblogs.com/vamei/archive/2012/09/23/2698014.html
 
+### 并行自动化测试
+
+- -m 和 .py 冲突
+  - https://docs.python.org/2/using/cmdline.html#cmdoption-m
+  - AttributeError: 'module' object has no attribute 'py'
+  - https://stackoverflow.com/questions/39527284/module-object-has-no-attribute-py-when-running-from-cmd
+- 多进程插件
+  - nosetests --plugins：查看插件
+  - https://blog.csdn.net/jianhong1990/article/details/8268876
+
 
 
 
