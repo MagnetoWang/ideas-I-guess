@@ -42,5 +42,10 @@
   - 代表本机git也添加了该密钥
   - 都添加以后双方就有权限访问了
 - Cannot update paths and switch to branch at the same time
-  - 
+  - 命令行写错别字
+- git push
+  - Everything up-to-date
+  - 已经commit了
+  - 无法push上去
+  - 解决：必须和远程分支的名字一样
 
