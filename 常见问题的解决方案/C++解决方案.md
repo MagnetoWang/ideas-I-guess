@@ -103,5 +103,9 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
 
 - 日志的声明：http://www.voidcn.com/article/p-cfnlsnnv-os.html
 
+## Gflags
+
+- 基本调用：http://dreamrunner.org/blog/2014/03/09/gflags-jian-ming-shi-yong/
+
 [TOC]
 
