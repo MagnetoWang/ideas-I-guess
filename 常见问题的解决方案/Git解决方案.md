@@ -48,4 +48,7 @@
   - 已经commit了
   - 无法push上去
   - 解决：必须和远程分支的名字一样
+- git commit 撤销
+  - https://www.jianshu.com/p/9f11d398111f
+  - git reset HEAD~
 
