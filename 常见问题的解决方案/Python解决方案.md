@@ -25,6 +25,14 @@
 ### subprocess
 
 - 调用子进程的函数：http://www.cnblogs.com/vamei/archive/2012/09/23/2698014.html
+- 进程文本基本通信：http://www.cnblogs.com/vamei/archive/2012/09/23/2698014.html
+- 多轮通信：
+  - 2.7版本是阻塞方式，不管怎么使用都会读到EOF然后终止通信
+  - 所以需要其他小技巧来实现交互
+  - https://stackoverflow.com/questions/50434204/running-interactive-program-from-within-python：可行
+  - https://stackoverflow.com/questions/3065060/communicate-multiple-times-with-a-process-without-breaking-the-pipe
+  - https://www.cnblogs.com/suwings/p/6216279.html
+- 文档：https://docs.python.org/2.7/library/subprocess.html#module-subprocess
 
 ### 并行自动化测试
 
@@ -56,6 +64,7 @@
 
 - 命令行解析包
   - 入门使用：https://www.jianshu.com/p/fef2d215b91d
+  - 官方文档：https://docs.python.org/3/library/argparse.html
 
 
 
