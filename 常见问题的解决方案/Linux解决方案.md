@@ -536,7 +536,48 @@
 ### if语法
 
 - https://blog.csdn.net/yf210yf/article/details/9207147
-- 
+
+### export
+
+### unset
+
+
+
+### ulimit -c unlimited
+
+
+
+### sed
+
+- 修改文件内容，结合nl配合在文件的具体位置修改
+- 详细用法：https://www.cnblogs.com/ggjucheng/archive/2013/01/13/2856901.html
+- sed -i '73c DEFINE_int32\(make_snapshot_threshold_offset, 0, \"config the offset to reach the threshold\"\);' flags.cc
+- -i 必须要加，表示原文件要修改。不加的话，不修改原文件，只是临时修改
+- 73c 表示73行要被替换，后面跟替换字符串，注意转义字符
+
+
+### nl
+
+- 计算文件的行号
+- 详细用法：http://www.cnblogs.com/peida/archive/2012/11/01/2749048.html
+
+### mkdir -p build
+
+- 如果存在不会返回错误。没有-p就会返回
+
+### cmake ..
+
+- 编译上级目录的makefile
+
+
+
+### Make -j8 rtidb
+
+- 8个进程编译文件，并且最终可执行文件是名字叫rtidb
+
+
+
+
 
 [TOC]
 
