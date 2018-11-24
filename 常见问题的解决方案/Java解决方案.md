@@ -68,6 +68,27 @@
 - future之后将会做一系列动作，然后接收返回结果到future变量中
 - 我们可以通过打印future变量，获取结果信息
 
+
+
+### ByteBuffer
+
+- 常用的缓冲区
+- 信道的读写方法只接收ByteBuffer
+- 图解：https://my.oschina.net/flashsword/blog/159613
+- 文档
+  - http://tutorials.jenkov.com/java-nio/buffers.html
+  - https://docs.oracle.com/javase/7/docs/api/java/nio/ByteBuffer.html
+
+#### 实战
+
+- ByteBuffer buffer=ByteBuffer.allocate(256);
+- 更常用的是从byte获取
+-  ByteBuffer buffer=ByteBuffer.wrap(byteArray);
+- byte类似于一个中间类型，是bytebuffer的桥梁
+- buffer.clear(); 清楚数据，实际只是变更索引值，回到第一个位置，之后重写数据
+- bytebuffer to byte ： buffer.get(new byte[6])   String value = new String(byte);
+- Byte to bytebuffer :    ByteBuffer.wrap(byteArray);  buffer.put(byteArray)
+
 ## 问题
 
 ### 命令端
