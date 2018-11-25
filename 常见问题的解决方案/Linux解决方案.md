@@ -424,9 +424,12 @@
 - kill -s 9 pid
   - 杀死进程
 - netstat -an | grep 6181 
+
+
   - 查看端口
   - lsof -i;2181
   - 查看端口
+  - Proto Recv-Q Send-Q Local Address           Foreign Address         State
 - cp sourceDir destDir
   - 复制文件
   - 同时可以修改名字
@@ -436,6 +439,15 @@
   - 这个文件当前路径，shell脚本中使用
 - touch file
   - 修改文件时间戳
+- 批量删除进程
+  - ps -ef | grep xxx | grep -v root | awk '{print $2}' | xargs kill -9
+  - awk 是核心把单列打印出来
+  - xargs 一口气全部删除
+- ps -xf 
+
+  - 只显示自己的进程
+
+
 
 
 
@@ -568,6 +580,10 @@
 ### cmake ..
 
 - 编译上级目录的makefile
+
+### cp
+
+- cp source_name dest_name
 
 
 
