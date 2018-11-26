@@ -67,7 +67,49 @@ std::map<std::pair<uint32_t,uint32_t>, std::vector<std::string>> pos_endpoints;
 pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partition(idx).pid()), endpoints));
 ```
 
+### Iterator使用
 
+- 解决一些常规函数的重复编写
+- iterators give us indirect access to an object.
+- In the case of an iterator, that object is an element in a container or a character in a string. We can use an iterator to fetch an element and iterators have operations to move from one element to another. As with pointers, an iterator may be valid or invalid. A valid iterator either denotes an element or denotes a position one past the last element in a container. All other iterator values are invalid.
+- note
+  - If the container is empty, the iterators returned by begin and end are equal —they are both off-the-end iterators.
+- 文档：http://www.cplusplus.com/reference/iterator/
+- 用法
+  - s.begin() != s.end() 确保迭代器不为空
+  - s++ 表示移动迭代器到下一位
+  - != 来判断相关条件，是因为要表示使用的是迭代器而不是下标
+  - vector\<int\> ::iterator   类对象::迭代器
+  - vector\<int\> ::const_iterator. 只能读不能写
+  - 解除迭代器和对象的引用
+    - ( * iit).empty()
+    - It -> empty()
+- 算术操作
+  - 类似加减可以当作下标直接操作
+- 难点
+  -  friend iterator; // Make it a friend 
+  -  friend class iterator
+  -  https://stackoverflow.com/questions/6195954/what-is-the-difference-of-friend-iterator-and-friend-class-iterator-which-encoun/6196028
+
+
+
+### Class的正确使用
+
+-  classes are data abstraction and encapsulation. 
+   -  Data abstraction is a programming (and design) technique that relies on the separation of interface and implementation. The interface of a class consists of the operations that users of the class can execute. The implementation includes the class’ data members, the bodies of the functions that constitute the interface, and any functions needed to define the class that are not intended for general use.
+   -  Encapsulation enforces the separation of a class’ interface and implementation. A class that is encapsulated hides its implementation—users of the class can use the interface but have no access to the implementation.
+-  The only difference between using class and using struct to define a class is the default access level.
+
+#### 用法
+
+- 局部类和嵌套类
+  - https://www.jianshu.com/p/2e4de807526e
+  - 局部类是在函数中，临时定义的类，作用域有限
+  - 嵌套类是在类中又定义的类，相当于复合结构的类。为了扩展类的数据类型丰富度。一般类内部自己使用不对外
+  - https://zh.cppreference.com/w/cpp/language/nested_types
+  - 局部类不常用
+  - 嵌套类常用，两个独立的类，更多的是作用域的考量
+  - 为了更好的使用，外部类在使用嵌套类的时候，最好声明，然后再使用
 
 
 
