@@ -440,7 +440,8 @@
 - touch file
   - 修改文件时间戳
 - 批量删除进程
-  - ps -ef | grep xxx | grep -v root | awk '{print $2}' | xargs kill -9
+  - ps -ef | grep xxx | grep -v root | awk '{print $1}' | xargs kill -9
+  - ps -ef | grep --zk_root_path=/onebox | awk '{print $1}' | xargs kill -9
   - awk 是核心把单列打印出来
   - xargs 一口气全部删除
 - ps -xf 
