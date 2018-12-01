@@ -12,6 +12,23 @@
 
 ### 异常
 
+#### 异常介绍
+
+- https://www.geeksforgeeks.org/checked-vs-unchecked-exceptions-in-java/
+
+#### 只读异常
+
+- ReadOnlyBufferException
+- Unchecked exception thrown when a content-mutation method such as `put` or `compact` is invoked upon a read-only buffer.
+- **1) Checked:** are the exceptions that are checked at compile time. If some code within a method throws a checked exception, then the method must either handle the exception or it must specify the exception using *throws* keyword.
+- **2) Unchecked** are the exceptions that are not checked at compiled time. In C++, all exceptions are unchecked, so it is not forced by the compiler to either handle or specify the exception. It is up to the programmers to be civilized, and specify or catch the exceptions.
+- In Java exceptions under *Error* and *RuntimeException* classes are unchecked exceptions, everything else under throwable is checked.
+- Throwable
+  - Error:unchecked
+  - Exception
+    - checked
+    - RuntimeException:unchecked
+
 #### 并发
 
 - java.util.concurrent.TimeoutException
@@ -49,6 +66,15 @@
 - jar的可执行
   - 如果涉及到外部包的依赖，一定要添加插件
   - https://blog.csdn.net/change_on/article/details/79379400
+
+
+
+### 命令行下创建完整java项目
+
+- mvn archetype:generate
+- 回车
+- 填写groupID等信息，就行了
+- 注意填写package的时候，写的是包名
 
 ## Java类的使用
 
@@ -88,6 +114,19 @@
 - buffer.clear(); 清楚数据，实际只是变更索引值，回到第一个位置，之后重写数据
 - bytebuffer to byte ： buffer.get(new byte[6])   String value = new String(byte);
 - Byte to bytebuffer :    ByteBuffer.wrap(byteArray);  buffer.put(byteArray)
+
+
+
+### Builder
+
+- 一般用于创建对象同时配置对象的内容
+- 我在google的proto 里面正好用到这个builder
+- 不深究，先给粗浅的用法对于proto生成的java 代码
+
+#### 实战
+
+- .build()之后一般直接生成好了对象
+- 如果要动态配置build，就需要Builder对象，然后set配置。set相关内容后，才能build最终对象出来
 
 ## 问题
 
