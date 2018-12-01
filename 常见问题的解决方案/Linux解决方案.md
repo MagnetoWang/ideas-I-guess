@@ -447,6 +447,9 @@
 - ps -xf 
 
   - 只显示自己的进程
+- 创建文件
+
+  - touch filename
 
 
 

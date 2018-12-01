@@ -8,7 +8,11 @@
 
 ## Python解决方案
 
+### 文档
 
+- python必须跟官方的来写，因为2和3语法很令人恼火
+- https://docs.python.org/2/tutorial/inputoutput.html#methods-of-file-objects
+- 所有函数的库文档：https://docs.python.org/2.7/library/stdtypes.html#file-objects
 
 ### 单元测试
 
@@ -44,7 +48,13 @@
   - nosetests --plugins：查看插件
   - https://blog.csdn.net/jianhong1990/article/details/8268876
 
+### 文件路径问题
 
+- read_path = "/tmp/server_in"
+  - 格式错误。没办法打开
+  - IOError: [Errno 2] No such file or directory: 'test.txt'
+  - read_path = "tmp/server_in" 正确做法是去掉第一个反斜杆
+- 
 
 
 
@@ -58,7 +68,12 @@
 - os.getenv('PATH')
   - 获取当前环境变量
 
+### 系统输入输出-sys.stdin stdout
 
+- sys.stdout.write('hello'+'\n')  等价于 print
+- sys.stdin 等价于 raw_input
+- 参考
+  - https://www.cnblogs.com/turtle-fly/p/3280519.html
 
 ### argparse
 
@@ -67,6 +82,17 @@
   - 官方文档：https://docs.python.org/3/library/argparse.html
 
 
+
+### input()和raw_input()
+
+- raw_input() 将所有输入作为字符串看待，返回字符串类型。而 input() 在对待纯数字输入时具有自己的特性，它返回所输入的数字的类型（ int, float )
+
+### 文件读写
+
+- Python2.7 
+  - 参数不能rw，否则无法写入，弄了我3个小时了。靠
+  - 一定要照着文档的example来写，网上其他的代码到处都是坑，很不严谨！！！！
+  - https://docs.python.org/2/tutorial/inputoutput.html#methods-of-file-objects
 
 
 
