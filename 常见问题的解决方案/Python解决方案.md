@@ -56,7 +56,12 @@
   - read_path = "tmp/server_in" 正确做法是去掉第一个反斜杆
 - 
 
+Python 图片操作
 
+- PIL文档：https://pillow.readthedocs.io/en/4.2.x/reference/Image.html
+- 颜色转化公式：https://blog.csdn.net/icamera0/article/details/50843196
+- image = Image.fromarray(one_pic_arr)
+- 这一步数组转化成图片，容易出问题，有bug。后面再仔细查找
 
 ## 函数说明
 
@@ -94,7 +99,20 @@
   - 一定要照着文档的example来写，网上其他的代码到处都是坑，很不严谨！！！！
   - https://docs.python.org/2/tutorial/inputoutput.html#methods-of-file-objects
 
+- 读写顺序，异常顺序要保持一致
 
+- ```python
+  try:
+      os.mkfifo(write_path)
+      os.mkfifo(java2py_path)
+  except OSError:
+      print 'making fifo is failed'
+      os.remove(write_path)
+      os.remove(java2py_path)
+  ```
+
+- 管道的打开顺序很重要
+  - Examples：https://www.programcreek.com/python/example/3522/os.mkfifo
 
 [TOC]
 
