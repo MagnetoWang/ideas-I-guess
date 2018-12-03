@@ -49,7 +49,16 @@
 
 
 
+### 编写规范
 
+- 头脑要清醒
+- 在引用jar包的时候，要保证jar包的内容不影响目前的项目
+  - 创建文件的例子，因为jar里面也在创建文件，所有导致总是有某名的文件跟着一起创建，影响开发和差错
+- 不要随意在finally里填写想当然的代码
+  - 在文件打开的时候，然后又close文件，这个操作非常愚蠢，因为你不知道其他哪个地方需要继续调用这个文件
+- 在多个项目编程，特别容易弄混编译哪个jar包
+  - 在command 引用jar包总是编译了另一个包，浪费了大量 的无效时间
+  - 配置太多，后面要定个编写流程规范，每一步都应该到位才行
 
 
 
@@ -75,6 +84,18 @@
 - 回车
 - 填写groupID等信息，就行了
 - 注意填写package的时候，写的是包名
+
+### 自定义一个异常类并使用
+
+- myException 继承 Exception
+- 初始化的时候，要super()
+- 定义serialVersionUID 全局唯一
+
+### 从只读的bytebuffer获取字符串
+
+- 借助char[] ，然后转化成string
+- https://stackoverflow.com/questions/23552114/extract-string-from-readonly-java-nio-bytebuffer
+- 这个问题困扰8个小时了
 
 ## Java类的使用
 
