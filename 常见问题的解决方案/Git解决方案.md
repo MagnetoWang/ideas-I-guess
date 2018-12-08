@@ -27,6 +27,12 @@
 - 在当前分支执行 git merge origin/远程的主分支
 - merge之后将会出现，冲突的代码，然后手动删除就行了
 
+### 无法rm文件
+
+- fatal: pathspec 'test-common/integrationtest/testcase/test_setlimit.py' did not match any files
+- 一文件不存在
+- 二，就是文件不在git管理的范围，也就是要先git add 这个文件，然后才能remove
+
 ## 查看修改内容
 
 - git log -p filename
