@@ -9,6 +9,7 @@
 ## 资源
 
 - https://github.com/fffaraz/awesome-cpp
+- cpp大神博客：http://huqunxing.site/
 
 
 
@@ -141,6 +142,15 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
 
 
 
+### 并发
+
+#### 教程
+
+- 共享数据：https://baptiste-wicht.com/posts/2012/03/cp11-concurrency-tutorial-part-2-protect-shared-data.html
+- 
+
+
+
 ## GLog
 
 - 日志的声明：http://www.voidcn.com/article/p-cfnlsnnv-os.html
@@ -192,6 +202,53 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
   - Make this message into a copy of the given message.
 
     The given message must have the same descriptor, but need not necessarily be the same class. By default this is just implemented as "Clear(); MergeFrom(from);".
+
+
+
+## OOP
+
+- 定义：object-oriented programming are data abstraction, inheritance,
+  and dynamic binding. 
+
+### Inheritance
+
+- 本质：Classes related by inheritance form a hierarchy. 
+- 实际：there is a base class at the root of the hierarchy,from which the other classes inherit, directly or indirectly.
+- 这些继承的类也被称作：derived class
+
+### Dynamic Binding
+
+- 
+
+###  Virtual Functions
+
+- 参考资料：
+  - http://blog.jobbole.com/107432/
+  - https://blog.csdn.net/shuzfan/article/details/77165474
+- 我的理解：虚函数更多是帮助我们管理子类调用父类的函数。它是通过动态绑定实现。因为在声明的时候，确认了子类，在后期通过基类统一调用虚函数可以动态调用哪个子类的覆盖函数。在多个子类共同继承同一个父类的时候，方便性非常明显
+- 结论
+  - **虚函数的调用取决于指向或者引用的对象的类型，而不是指针或者引用自身的类型。**
+  - **虚函数使得我们可以创建一个统一的基类指针列表，并且调用不同子类的函数而无需知道子类对象究竟是什么**
+  - **静态函数不可以声明为虚函数，同时也不能被const 和 volatile关键字修饰。**
+- 虚函数实现方式
+  - 虚函数表：vtable
+  - 虚指针：vptr
+  - 参考资料：https://blog.csdn.net/haoel/article/details/1948051/
+
+### 多态
+
+- 参考资料：http://blog.jobbole.com/107432/
+- 派生类重写基类的虚函数实现多态，要求函数名、参数列表、返回值完全相同。(协变除外)
+- 基类中定义了虚函数，在派生类中该函数始终保持虚函数的特性
+- 只有类的成员函数才能定义为虚函数，静态成员函数不能定义为虚函数
+- 如果在类外定义虚函数，只能在声明函数时加virtual关键字，定义时不用加
+- 构造函数不能定义为虚函数，虽然可以将operator=定义为虚函数，但最好不要这么做，使用时容 易混淆
+- 不要在构造函数和析构函数中调用虚函数，在构造函数和析构函数中，对象是不完整的，可能会 出现未定义的行为
+- 最好将基类的析构函数声明为虚函数。(析构函数比较特殊，因为派生类的析构函数跟基类的析构 函数名称不一样，但是构成覆盖，这里编译器做了特殊处理)
+- 虚表是所有类对象实例共用的
+- 多态，虚函数，动态绑定这三者是融合在一起的
+
+
 
 
 [TOC]
