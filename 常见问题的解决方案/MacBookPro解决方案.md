@@ -69,7 +69,12 @@
   - https://blog.csdn.net/example440982/article/details/80220270
   - code settings.xml：用vscode打开文本
 
+## mac常用功能
 
+### 查找文件
+
+- find 文件路径 参数
+- find Documents/ -iname  工程设计
 
 ## 文件夹直通车
 
