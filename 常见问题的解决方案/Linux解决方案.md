@@ -118,6 +118,7 @@
 
   ```
   # ps -ef                 # 查看所有进程
+  # ps -xf				 # 查看个人权限下的进程
   # top                    # 实时显示进程状态
   ```
 
@@ -425,10 +426,9 @@
   - 杀死进程
 - netstat -an | grep 6181 
 
-
-  - 查看端口
+    - 查看端口
   - lsof -i;2181
-  - 查看端口
+      - 查看端口
   - Proto Recv-Q Send-Q Local Address           Foreign Address         State
 - cp sourceDir destDir
   - 复制文件
@@ -595,9 +595,25 @@
 
 - 8个进程编译文件，并且最终可执行文件是名字叫rtidb
 
+### ps命令详细说明
 
-
-
+- stat：状态栏
+  - 状态表：https://nigelzeng.iteye.com/blog/1186913
+  - D    不可中断     Uninterruptible sleep (usually IO)  
+  - R    正在运行，或在队列中的进程  
+  - S    处于休眠状态  
+  - T    停止或被追踪  
+  - Z    僵尸进程  
+  - W    进入内存交换（从内核2.6开始无效）  
+  - X    死掉的进程    
+  - <    高优先级  
+  - N    低优先级  
+  - L    有些页被锁进内存  
+  - s    包含子进程  
+  - \+    位于后台的进程组；  
+  - l    多线程，克隆线程  multi-threaded (using CLONE_THREAD, like NPTL pthreads do) 
+- Tty：设备连接
+  - 连接电脑终端某个设备：https://stackoverflow.com/questions/7113770/what-does-tty-mean-in-the-unix-ps-command
 
 [TOC]
 
