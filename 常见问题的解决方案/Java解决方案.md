@@ -191,6 +191,41 @@
 
 
 
+## 自动化脚本
+
+### Java安装-非root情况
+
+
+
+```
+mkdir java
+cd java
+wget http://pkg.4paradigm.com/jdk/jdk-8u141-linux-x64.tar.gz
+tar -zxvf jdk-8u141-linux-x64.tar.gz
+
+
+echo 'export JAVA_HOME=/home/wangzixian/java/jdk1.8.0_141'>>~/.bash_profile
+echo 'export PATH=$PATH:/home/wangzixian/java/jdk1.8.0_141/bin'>>~/.bash_profile
+
+echo 'export JRE_HOME=home/wangzixian/java/jdk1.8.0_141/jre'>>~/.bash_profile
+echo 'export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib'>>~/.bash_profile
+source ~/.bash_profile
+java -version
+
+vi ~/.bash_profile
+```
+
+### maven安装-非root情况
+
+```
+export MAVEN_HOME=/home/wangzixian/maven/apache-maven-3.5.4
+export PATH=${MAVEN_HOME}/bin:${PATH}
+```
+
+
+
+[TOC]
+
 
 
 [TOC]

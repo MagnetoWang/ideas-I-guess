@@ -615,5 +615,20 @@
 - Tty：设备连接
   - 连接电脑终端某个设备：https://stackoverflow.com/questions/7113770/what-does-tty-mean-in-the-unix-ps-command
 
+
+
+### echo妙用
+
+- 文件后追加一条消息
+
+  - echo 'export JAVA_HOME=/home/wangzixian/java/jdk1.8.0_141/bin/java'>>~/.bash_profile
+
+- 覆盖文件写消息
+
+  - echo 'export JAVA_HOME=/home/wangzixian/java/jdk1.8.0_141/bin/java'>~/.bash_profile
+
+- 参考资料：http://blog.sina.com.cn/s/blog_605f5b4f010154mn.html
+
+
 [TOC]
 
