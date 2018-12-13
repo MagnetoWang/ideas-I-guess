@@ -218,6 +218,9 @@ vi ~/.bash_profile
 ### maven安装-非root情况
 
 ```
+mkdir maven
+cd maven
+
 export MAVEN_HOME=/home/wangzixian/maven/apache-maven-3.5.4
 export PATH=${MAVEN_HOME}/bin:${PATH}
 ```

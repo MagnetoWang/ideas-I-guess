@@ -63,6 +63,11 @@ Python 图片操作
 - image = Image.fromarray(one_pic_arr)
 - 这一步数组转化成图片，容易出问题，有bug。后面再仔细查找
 
+### python常用对象转字符串
+
+- str(对象)
+- json.dumps(dict)
+
 ## 函数说明
 
 ### OS模块
@@ -112,6 +117,7 @@ Python 图片操作
   ```
 
 - 管道的打开顺序很重要
+
   - Examples：https://www.programcreek.com/python/example/3522/os.mkfifo
 
 [TOC]
