@@ -68,6 +68,30 @@ Python 图片操作
 - str(对象)
 - json.dumps(dict)
 
+### list对象的增删改查
+
+- py2
+- 直接复制，直接运行。
+- 执行命令：python xx.py
+
+```python
+list = []
+# 增加
+for i in range(10):
+    list.append(i)
+print list
+# 插入
+list.insert(4, 44)
+# 修改
+list[4] = 44
+print list
+# 删除
+list.pop(4)
+print list
+```
+
+
+
 ## 函数说明
 
 ### OS模块
