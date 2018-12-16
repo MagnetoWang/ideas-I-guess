@@ -12,7 +12,9 @@
 - git reset --hard $HEAD
 - git pull
 
+### 克隆最新一次提交的代码，不要历史提交
 
+- git clone --depth 1 xxx
 
 ### 拉取远程分支
 
