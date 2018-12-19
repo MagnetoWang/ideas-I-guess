@@ -634,12 +634,17 @@
 - 文件后追加一条消息
 
   - echo 'export JAVA_HOME=/home/wangzixian/java/jdk1.8.0_141/bin/java'>>~/.bash_profile
-
 - 覆盖文件写消息
 
   - echo 'export JAVA_HOME=/home/wangzixian/java/jdk1.8.0_141/bin/java'>~/.bash_profile
-
 - 参考资料：http://blog.sina.com.cn/s/blog_605f5b4f010154mn.html
+
+
+
+md5sum
+
+- md5sum filename
+- 用来判断两个文件的md5值是否相同
 
 
 [TOC]
