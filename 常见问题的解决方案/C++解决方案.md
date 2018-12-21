@@ -18,10 +18,22 @@
 ### 规范
 
 - 成员变量：全部小写+下划线分开+尾巴后面加下划线
+  - table_meta_
 - 普通变量：全部小写+下划线分开
+  - table_meta_
 - 函数名称：单词首字母大写-双驼峰
-- 文件名字：全部小写
-- 类名：首字母大写，只有一个大写单词
+  - DropTable
+- 文件名字：全部小写，下划线分开单词
+  - name_server_impl
+- 类名：首字母大写，下划线分开单词
+  - NameServerImpl
+- 域名：namespace 全部小写，不超过三个单词
+  - namespace，protobuf
+
+### 与Java不同之处，更多是一种习惯的不同
+
+- 定义std::map 不用new。可以直接使用
+  - 适应所有STL中容器
 
 
 
@@ -116,14 +128,43 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
 
 ### Map使用
 
-- map需要make_pair多重insert
+- 在多重map中，需要用make_pair进行封装，然后在插入数据
+  - 比如key也是map,value也是map
+  - 那么key 也要make_pair， value也要make_pair
 - Map.find（key)。返回的是迭代器
 - 在迭代器的基础上，iter->second。就可以返回value
-- 一般返回迭代器都会判断一下
+- 一般返回迭代器都会判断一下，是否为end情况
 - key中的类对象，必须实现比较函数，不然编译错误
 - 不要用指针当key！！！
+- 参考文档：http://www.cplusplus.com/reference/map/map/
+- 插入数据
+  - map.insert(std::make_pair(key, value));
+- 更新数据
+  - map[key] = value
+- 删除数据
+  - erase
+  - map.erase(key)
+- 查找数据
+  - find
+  - map.find(key)
+- 迭代
+  - const auto& iter: table_info_
 
-### 参数
+### unordered_map使用
+
+- 哈希map，查找速度更快，常数级别
+- 显然，hash算法不能兼容有序的特点
+- 类似Java中的HashMap
+- 参考文档：
+  - http://www.cplusplus.com/reference/utility/pair/
+  - https://en.cppreference.com/w/cpp/container/unordered_map
+
+### vector使用
+
+- 参考文档：http://www.cplusplus.com/reference/vector/vector/
+- 
+
+### 函数中的参数
 
 - 默认参数和缺省参数：https://blog.csdn.net/CHF_VIP/article/details/8586921
 - 初始化的参数，可以可以赋值也可以不赋值
@@ -153,7 +194,31 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
 - 共享数据：https://baptiste-wicht.com/posts/2012/03/cp11-concurrency-tutorial-part-2-protect-shared-data.html
 - 
 
+### inline
 
+### const成员函数
+
+## 常见问题
+
+### executable is not specified
+
+- clion 编译运行的时候出现
+- 参考链接：https://stackoverflow.com/questions/30086210/when-compiling-in-clion-i-get-the-error-executable-is-not-specified
+- 解决方案
+  - 一个cpp项目需要用cmakelist.txt
+  - 所以应该添加cmakelist.txt,并执行，才能运行整个项目
+
+###  no matching member function for call to 'insert'
+
+- 迭代map中的元素无法用insert
+- 可以把这个问题普遍化，如果遇到无法调用的函数的情况有什么原因呢
+  - 1，确实没有这个函数
+  - 2，函数里面的参数使用错误，导致无法找到配对形式参数的函数
+- 解决方案
+  - map查文档，有insert函数
+  - 但是没有对应的参数，可以insert，key和value
+  - 只有经过make_pari()封装后作为的insert的函数
+  - 后修改，问题解决！
 
 ## GLog
 
@@ -252,7 +317,9 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
 - 虚表是所有类对象实例共用的
 - 多态，虚函数，动态绑定这三者是融合在一起的
 
+## 模版
 
+### template
 
 
 [TOC]
