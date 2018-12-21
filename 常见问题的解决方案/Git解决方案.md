@@ -35,11 +35,16 @@
 - 一文件不存在
 - 二，就是文件不在git管理的范围，也就是要先git add 这个文件，然后才能remove
 
-## 查看修改内容
+### 查看修改内容
 
 - git log -p filename
 
-### 问题
+### 无法提交因为有没有合并到文件
+
+- https://stackoverflow.com/questions/12961752/git-merge-error-commit-is-not-possible-because-you-have-unmerged-files
+- git merge 一下分支
+
+## 问题
 
 - error: RPC failed; curl 18 transfer closed with outstanding read data remaining
   - 因为下载的包太大了。超过1个G

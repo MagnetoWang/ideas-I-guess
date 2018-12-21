@@ -600,6 +600,12 @@
 ### cp
 
 - cp source_name dest_name
+- 复制文件操作
+
+mv
+
+- 修改文件夹名字
+- mv source_name dest_name
 
 
 
