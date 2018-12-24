@@ -147,6 +147,7 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
 - 查找数据
   - find
   - map.find(key)
+  - 返回的是迭代器
 - 迭代
   - const auto& iter: table_info_
 
@@ -156,13 +157,27 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
 - 显然，hash算法不能兼容有序的特点
 - 类似Java中的HashMap
 - 参考文档：
-  - http://www.cplusplus.com/reference/utility/pair/
+  - http://www.cplusplus.com/reference/unordered_map/
   - https://en.cppreference.com/w/cpp/container/unordered_map
+- 基本操作
+- 和map基本一致
 
 ### vector使用
 
 - 参考文档：http://www.cplusplus.com/reference/vector/vector/
-- 
+- 常用函数
+- reserve
+
+### string使用
+
+- 参考文档：http://www.cplusplus.com/reference/string/string/
+- 转换字符串
+  - std::to_string
+  - https://en.cppreference.com/w/cpp/string/basic_string/to_string
+- 字符串转c字符串
+  - c_str
+- 字符串拼接
+  - 可以直接用加号连接
 
 ### 函数中的参数
 
