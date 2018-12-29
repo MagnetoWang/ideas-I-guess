@@ -84,6 +84,15 @@
 
 
 
+### 命令行下执行Java项目整个过程
+
+- 参考链接：https://blog.csdn.net/qbg19881206/article/details/19850857
+- mvn compile
+
+- mvn exec:java -Dexec.mainClass="rtidbperf.RtidbClusterTest"
+
+
+
 ### 命令行下创建完整java项目
 
 - mvn archetype:generate
@@ -189,7 +198,9 @@
 
 - 
 
+#### Couldn't destroy threadgroup org.codehaus.mojo.exec.ExecJavaMojo$IsolatedThreadGroup[name=rtidbperf.RtidbClusterTest,maxpri=10]
 
+- 参考链接：https://stackoverflow.com/questions/13471519/running-daemon-with-exec-maven-plugin-avoiding-illegalthreadstateexception
 
 ## 自动化脚本
 
@@ -225,7 +236,15 @@ export MAVEN_HOME=/home/wangzixian/maven/apache-maven-3.5.4
 export PATH=${MAVEN_HOME}/bin:${PATH}
 ```
 
+## 常用代码片段
 
+### 打印logger
+
+- import org.slf4j.Logger;
+
+  import org.slf4j.LoggerFactory;
+
+- private final static Logger logger = LoggerFactory.getLogger(TabletClientImpl.class);
 
 [TOC]
 
