@@ -34,6 +34,8 @@
 
 - 定义std::map 不用new。可以直接使用
   - 适应所有STL中容器
+- 函数返回参数，不能是指针和引用，必须是实体对象！！
+  - Java似乎用某种方式实现返回对象的指针或者引用
 
 
 
@@ -183,6 +185,10 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
 
 - 默认参数和缺省参数：https://blog.csdn.net/CHF_VIP/article/details/8586921
 - 初始化的参数，可以可以赋值也可以不赋值
+- 参数一般都是默认传值。传值的意思就是，传递参数会复制一个新对象到函数内部。尤其传递一个对象时，会显得十分耗时。而且是函数内部的修改该值的时候，是不会影响实际参数的值。
+- 最好的方式是使用传引用，然后选择性的是否修改里面的值。
+- 传引用的就是传地址的值！而不是对象内部数据的值！
+- 传对象的值到函数里面，会发生构造一次对象，析构一次对象消耗。而且这是没有考虑到对象中可能还含有其他对象的情况，那么消耗将会更加多。
 
 ### Explicit 使用
 
@@ -200,6 +206,22 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
 - 锁相关函数：http://www.cnblogs.com/haippy/p/3346477.html
 - Lock_guard如何释放锁：https://my.oschina.net/yangcol/blog/123433
 
+#### 哪些地方需要考虑线程安全
+
+- 静态变量
+- 类的成员变量
+
+### 性能优化
+
+- insert 对象的时候，其实是复制了一个对象，要想优化，最后insert一个指针或者引用
+
+- 不能insert指针或者引用！！！！！！
+
+- 不能insert指针或者引用！！！！！！
+
+- 不能insert指针或者引用！！！！！！
+
+- 这会在STL中因为赋值操作，导致指针失效！！！
 
 
 ### 并发
@@ -331,6 +353,23 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
 - 最好将基类的析构函数声明为虚函数。(析构函数比较特殊，因为派生类的析构函数跟基类的析构 函数名称不一样，但是构成覆盖，这里编译器做了特殊处理)
 - 虚表是所有类对象实例共用的
 - 多态，虚函数，动态绑定这三者是融合在一起的
+
+
+
+## CMake教程
+
+### 基本操作
+
+```cmake
+cmake_minimum_required(VERSION 3.6)   # CMake version check
+project(simple_example)               # Create project "simple_example"
+set(CMAKE_CXX_STANDARD 11)            # Enable c++11 standard
+
+set(SOURCE_FILES main.cpp)            # Add main.cpp file of project root directory as source file
+add_executable(simple_example ${SOURCE_FILES})       # Add executable target with source files listed in SOURCE_FILES variable
+```
+
+
 
 ## 模版
 
