@@ -300,22 +300,181 @@
 #### 20选择pass-by-reference-to-const 替换 pass-by-value：prefer pass-by-reference-to-const to pass-by-value
 
 - 原因
+  - 传对象值，会发生构造一次对象，析构一次对象消耗。同时不改变实际参数的值
+- 解决
+  - bool funcition (const student & s);
+  - const根据情况是否需要
+- 总结
+  - 尽量用引用替换值传递，前者高效，并且避免切割问题
+  - 这个规则不适用STL的迭代器和函数对象
+- 个人总结
+  - STL一般传递值
 
-25
+#### 21必须返回对象时，别妄想返回reference：Don't try to return a reference when you must return an object
+
+- 原因
+  - Rational result(xx,xx,xx) 这是在栈上面开辟空间，函数结束后会被销毁
+  - 得到的只是没有用的引用
+  - Rational * result = new Rational(xxx) 这是在heap上开辟空间
+  - 返回引用后，根本没办法delete 释放资源。导致资源泄漏
+  - 上面不管什么方式，都构造了新的对象，造成新的消耗
+- 解决
+  - 不声明即可
+- 总结
+  - 绝不要返回指针或reference指向一个local stack对象，或返回reference指向一个heap-allocated 对象，或返回pointer或reference指向
+- 个人总结
+  - local 对象无论怎么生成，最终都会破坏使用这个对象统一性。
+  - 统一性是指，可以自主的创建的对象，同时也可以自主销毁这个对象。
+  - 一旦这个主动权交给了编译器或者无名的力量，那么就是破坏你在你代码面前的权威性
+
+#### 22将成员变量声明为private：Declare data members private
+
+- 原因
+  - 为了统一规范化，成员调用统一函数
+  - 更细节的权限管理
+  - 封装性，以后可以修改函数内部，不影响外部情况
+- 解决
+- 总结
+  - 声明成员变量为private
+  - protect并不比public更具有封装性
+- 个人总结
+  - 声明就是了
+
+#### 23选择non-member,non-friend替换member函数：Prefer non-member non-friend functions to member functions
+
+- 原因
+- 解决
+- 总结
+- 个人总结
+
+#### 24
+
+#### 25
 
 
 
 ### 实现
 
+#### 实现一个类可能出现的问题
+
+- 提前定义变量造成效率拖延
+- 过度使用 casts 强制转型，导致代码难以维护
+- 返回对象内部的数据，可能会破坏封装并留给客户风险
+- 不处理异常导致资源泄漏和数据败坏
+- 过度使用inlining可能导致代码膨胀
+- 过度耦合coupling 则可能导致让人不满意等待编译时间
+
 #### 26尽可能延后变量定义式的出现时间：postpone variable definitions as long as possible
+
+- 原因
+  - 定义对象，至少需要两个代价，构造和析构
+- 解决
+  - 在需要使用对象的时候再开始定义
+  - 高效例子
+    - 传入参数 password
+    - std::string encry(password);
+    - encrypt_function(encry);
+    - return encry;
+    - 这是真正定义变量，应该延后到可以给它设置初值实参为止
+    - 这样避免构造不必要对象，和无意义的default构造行为
+    - 因为定义变量，不赋值，就会启动default的构造函数
+- 总结
+  - 延后定义变量和赋值
+- 个人总结
+  - 注意，这里不是绝对，在一个循环里面，应该考虑在循环外定义好变量
+  - 这里抓住三个核心，构造，析构和赋值
+  - 如果在循环内出现大量构造，析构操作，那么就应该在外面定义变量
+  - 总之，要比较这个三个操作的成本就可以确定在哪个位置定义变量
 
 #### 27尽量少做转型动作：minimize casting
 
-- 
+- 原因
 
-#### 28避免返回handles指向对象内部成分
+  - 不同语言对接时，可能出现转型的需求
 
-#### 29为 异常安全 而努力是值得的
+- 解决
+
+  - 
+
+- 总结
+
+  - C语法
+
+    - (T) expression
+    - T(expression)
+  - C++ 语法
+    - const_cast\<T\> (expression) 
+      - 将对象的常量性转除
+    - dynamic_cast\<T\> (expression) 
+      - 安全向下转型，决定某对象是否归属继承体系中某个类型
+      - 该转型成本非常大
+    - reinterpret_cast\<T\> (expression) 
+      - 执行低级转型，转型结果取决于编译器，不可移植
+      - 使用情况非常少
+    - static_cast\<T\> (expression) 
+      - 强迫隐式转换
+      - 比如
+      - non-const 到 const 相反操作使用 const_cast
+      - int 到 double
+      - pointer-to- base 到 pointer-to-derived
+  - 尽量避免转型，尤其是避免dynamic_casts
+  - 如果转型是必要的，请封装好。用户可以随时调用函数而不需要考虑转型问题
+  - 使用C++转型，不要用旧式
+
+- 个人总结
+
+#### 28避免返回handles指向对象内部成分：Avoid returning "handles" to object internals
+
+- 原因
+  - 返回引用和指针的时候，可能会指向内部的private级别的变量。也就是破坏了封装性
+- 解决
+  - const Point& upper_func( ) const {return data->object; }
+- 总结
+  - 尽量避免返回handles（包括引用，指针，迭代器）指向对象的内部。保证封装性。
+- 个人总结
+  - 这个是看情况而定，有一定开发经验才能决定
+  - 因为有些时候需要返回一个引用，方便调用
+
+#### 29为 异常安全 而努力是值得的：Strive for exception-safe code
+
+- 原因
+  - 一段没有异常安全的代码会发生以下问题
+  - 泄露的资源
+  - 数据败坏，数据无用
+- 解决
+  - 资源泄漏，通过构造和析构函数解决
+  - 异常安全函数三个保证
+    - 基本保证
+    - 强烈保证
+    - 不抛出异常
+- 总结
+  - 异常安全函数，即使发生异常也不会泄露资源或允许任何数据结构败坏。这样的函数区分为三种可能的保证
+    - 基本型
+    - 强烈型
+    - 不抛异常型
+  - 强烈保证往往能够以 copy-and-swap 实现出来，但 强烈保证 并非对所有函数都可实现或具备现实意义
+  - 函数提供的 异常安全保证 通常最高只等于其所调用之各个函数的 异常安全保证 中的最弱者
+- 个人总结
+
+#### 30透彻了解inlining的里里外外：Understand the ins and outs of inlining
+
+- 原因
+- 解决
+- 总结
+- 个人总结
+
+#### 31将文件间的编译依存关系降至最低：Minimize compilation dependencies between files
+
+- 原因
+- 解决
+- 总结
+- 个人总结
+
+### 继承与面向对象设计
+
+### 模版与泛型编程
+
+### 定制new和delete
 
 
 
