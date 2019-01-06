@@ -564,6 +564,32 @@
 ### if语法
 
 - https://blog.csdn.net/yf210yf/article/details/9207147
+- https://blog.csdn.net/ithomer/article/details/5904632
+- 
+
+```
+#!/usr/bin/env bash
+table_number=500
+for ((i=0; i<table_number; i++)); do
+	# touch test_$i.txt
+    table_name=table_$i
+    reminder=`expr $i % 3`
+    echo $reminder
+    if [ $reminder -eq 0 ]; then
+	echo $reminder
+    elif [ $reminder -eq 1 ]; then
+        echo $reminder
+    else
+        echo $reminder
+    fi
+done
+```
+
+
+
+### 运算符
+
+- http://www.runoob.com/linux/linux-shell-basic-operators.html
 
 ### export
 
