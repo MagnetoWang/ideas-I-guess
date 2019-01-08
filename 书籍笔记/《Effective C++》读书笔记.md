@@ -455,20 +455,32 @@
   - 强烈保证往往能够以 copy-and-swap 实现出来，但 强烈保证 并非对所有函数都可实现或具备现实意义
   - 函数提供的 异常安全保证 通常最高只等于其所调用之各个函数的 异常安全保证 中的最弱者
 - 个人总结
+  - 需要后期一定开发经验才能体会，暂时不总结
 
 #### 30透彻了解inlining的里里外外：Understand the ins and outs of inlining
 
 - 原因
 - 解决
 - 总结
+  - 将大多数inlining 限制在小型，被频繁调用的函数身上。这可使日后调试过程和二进制升级更容易，也可使潜在的代码膨胀问题最小化，使程序的速度提升机会最大化
+  - 不要只因为function templates 出现在头文件，就将它们声明为inline
 - 个人总结
+  - 
 
 #### 31将文件间的编译依存关系降至最低：Minimize compilation dependencies between files
 
 - 原因
+  - C++中会对包含的文件进行编译，也就是说如果某个文件重新编译了，那么其他包含该文件的文件都要重新编译
+  - 
 - 解决
+  - pointer to implementation
+  - 
 - 总结
+  - 支持“编译依存性最小化”的一般构想是：依赖于声明式，不要依赖于定义式。
+  - 充分利用handle classes 和 interface classes
+  - 程序库头文件应该以 full and declaration-only forms 的形式存在。这种做法不论是否templates都适用
 - 个人总结
+  - 之前一直不明白，为什么导师让我不要没有用的文件包含进去。原来涉及到编译的问题。
 
 ### 继承与面向对象设计
 
