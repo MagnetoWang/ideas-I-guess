@@ -80,6 +80,78 @@
 
 - 
 
+## pandoc使用过程
+
+### 资料
+
+- https://jdhao.github.io/2017/12/10/pandoc-markdown-with-chinese/
+- 中文字体：https://blog.csdn.net/penghouwen/article/details/50491177
+- pdf模版设置：https://www.jianshu.com/p/7f9a9ff053bb
+
+### 字体找不到
+
+- 是因为名字错误，要找mac内置中文字体
+- fc-list :lang=zh
+- https://jdhao.github.io/2017/12/10/pandoc-markdown-with-chinese/#%E4%BD%BF%E7%94%A8-pandoc-%E4%BB%8E-markdown-%E7%94%9F%E6%88%90-pdf-%E6%96%87%E4%BB%B6
+
+### fontspec error: "font-not-found"
+
+- 找英文字体
+
+###  LaTeX Error: Option clash for package fontspec.
+
+- https://blog.csdn.net/Dylan_Frank/article/details/71713285
+- 滚蛋pandac。浪费我时间的垃圾软件
+
+### 无法找到pdflatex
+
+- 可以考虑重新开个终端运行
+
+### Fatal format file error; I'm stymied
+
+- 未解决
+- 重新安装
+- 也没有解决
+- 换方法
+- 用python md2pdf
+
+### 滚蛋pandac。浪费我时间的垃圾软件
+
+## 两个python版本切换
+
+- https://blog.csdn.net/qq_38789531/article/details/82431933
+
+- 修改两个文件
+
+- vi ~/.bash_profile
+
+- PATH="/Library/Frameworks/Python.framework/Versions/2.7/bin:${PATH}"
+  export PATH
+
+  PATH="/Library/Frameworks/Python.framework/Versions/3.6/bin:${PATH}"
+  export PATH	
+
+- vi ~/.bashrc
+
+  - alias python2='/Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7'
+    alias python3='/Library/Frameworks/Python.framework/Versions/3.6/bin/python3.6'
+    alias python=python2
+
+- source ~/.bash_profile
+
+- source ~/.bashrc
+
+- python -V
+
+
+
+## ValueError: unknown locale: UTF-8 in Python
+
+- ```
+  export LC_ALL=en_US.UTF-8
+  export LANG=en_US.UTF-8
+  ```
+
 
 
 ## 终端
@@ -88,3 +160,6 @@
 - 安装ohmyzsh：https://segmentfault.com/a/1190000014992947
   - sh -c "$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"
   - https://segmentfault.com/a/1190000014992947
+
+[TOC]
+
