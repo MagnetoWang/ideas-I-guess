@@ -44,6 +44,7 @@
 ### 代码规范
 
 - 类名：每个单词首字母大写
+  - ToPdf
 - 方法名：动词+名词，动词小写，名词首字母大写
 - 变量名：名词，首字母小写，多个单词的话，在后面单词每个首字母大写
 - 
@@ -105,6 +106,14 @@
 - myException 继承 Exception
 - 初始化的时候，要super()
 - 定义serialVersionUID 全局唯一
+
+how to throw an exception 或者 如何传递异常
+
+- 原理：强烈建议看 java核心编程第一卷的异常章节，讲的非常详细！
+- 代码实现：https://www.webucator.com/how-to/how-throw-an-exception-java.cfm
+- 过程
+  - throw new Exception()
+  - catch exception
 
 ### 从只读的bytebuffer获取字符串
 
@@ -245,6 +254,12 @@ export PATH=${MAVEN_HOME}/bin:${PATH}
   import org.slf4j.LoggerFactory;
 
 - private final static Logger logger = LoggerFactory.getLogger(TabletClientImpl.class);
+
+
+
+### 线程睡眠
+
+- Thread.sleep(200);
 
 [TOC]
 
