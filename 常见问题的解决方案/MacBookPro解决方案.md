@@ -117,6 +117,23 @@
 
 ### 滚蛋pandac。浪费我时间的垃圾软件
 
+
+
+## mac Operation not permitted 权限问题
+
+- 开启权限：http://osxdaily.com/2018/10/09/fix-operation-not-permitted-terminal-error-macos/
+- 重启电脑，进入恢复模式
+- 然后关闭
+- 再重启
+- https://stackoverflow.com/questions/32659348/operation-not-permitted-when-on-root-el-capitan-rootless-disabled
+- csrutil disable
+- reboot
+- 即可
+
+
+
+### 
+
 ## 两个python版本切换
 
 - https://blog.csdn.net/qq_38789531/article/details/82431933
@@ -142,6 +159,8 @@
 - source ~/.bashrc
 
 - python -V
+
+
 
 
 
