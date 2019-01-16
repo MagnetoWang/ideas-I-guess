@@ -585,12 +585,23 @@ for ((i=0; i<table_number; i++)); do
 done
 ```
 
+### while语法
+
+- example：https://www.cyberciti.biz/faq/shell-script-while-loop-examples/
+- 
+
+
+
 ### for语法
 
 - for element in $file
 - do
 - xxxxxxxxx
 - done
+- 扩展用法
+- 循环1到100
+  - for i in {1..100}
+  - for i in `seq 1 100`
 
 ### 运算符
 
@@ -602,7 +613,13 @@ done
 
 
 
-### ulimit -c unlimited
+### ulimit -c unlimite
+
+
+
+### cd
+
+- cd - 可以返回上一次操作目录，不是上一个目录
 
 
 
@@ -613,6 +630,8 @@ done
 - sed -i '73c DEFINE_int32\(make_snapshot_threshold_offset, 0, \"config the offset to reach the threshold\"\);' flags.cc
 - -i 必须要加，表示原文件要修改。不加的话，不修改原文件，只是临时修改
 - 73c 表示73行要被替换，后面跟替换字符串，注意转义字符
+- sed -n 4,8p file #打印file中的4-8行
+- sed -n 4p file #打印file中的第4行
 
 
 ### nl
@@ -698,12 +717,47 @@ done
 ### wc
 
 - 基本用法：http://www.cnblogs.com/peida/archive/2012/12/18/2822758.html
+- wc -l filename 统计行数
+- wc -c filename 统计字节数
+- wc -w filenmae 统计字数
 
 ### hostname
 
 - hostname -i显示ip
 - hostname -f显示域名
+- hostname -s显示主机名字
 - 参考链接：https://codingstandards.iteye.com/blog/804648
+
+
+
+### crontab
+
+- 参考资料：https://www.cnblogs.com/0201zcr/p/4739207.html
+- demo参考：http://einverne.github.io/post/2017/03/crontab-schedule-task.html
+- 执行脚本出现Permission denied：https://stackoverflow.com/questions/21646551/permission-denied-with-bash-sh-to-run-cron
+
+### date
+
+- 参考资料
+  - https://blog.csdn.net/classhao1/article/details/8182733
+  - https://blog.csdn.net/runming918/article/details/7384828
+- date +%y-%m-%d
+  - 打印年月日
+- 标准格式
+  -  date "+%Y-%m-%d %H:%M:%S" 
+- 日期转换成时间戳
+  - date -d "2019-01-16 17:17:43" +%s
+- 时间戳转换成日期
+  - date -d @1547630387"+%Y-%m-%d %H:%M:%S"
+
+### tail
+
+- 从第5行开始显示文件
+  - tail -n +5 log2014.log
+- 显示后5行
+  - tail -n 5 log2014.log
+- 持续更新文件内容
+  - **tail -f test.log**
 
 ### 命令结果保存在变量中
 
@@ -721,6 +775,21 @@ done
 - 直接拼凑即可
 - var3={var1}{var2}
 
+### 判断空字符串
+
+- 
+
+### 大小比较
+
+- 参考资料：https://blog.csdn.net/jack_zyk/article/details/7325787
+- if [ 1 -gt 2 ]
+- -gt表示大于
+  -lt表示小于
+  -eq表示等于
+  -ne表示不等于
+  -ge表示大于等于
+  -le表示小于等于
+
 ### 发邮件
 
 - echo CONTEXT | mail -s TITLE RECEIVER
@@ -731,8 +800,6 @@ done
 - wc -l filename
 - wc -c filename 统计字节数
 - wc -w filenmae 统计字数
-
- 
 
 ### 定义二维数组
 
@@ -790,6 +857,50 @@ done
 - rows=$(wc -l  $monitor_file | awk '{print $1}')
 
 
+
+### 邮件的位置
+
+- /var/spool/mail
+
+### 选取文件 某一行或指定范围
+
+- sed -n 4,8p file #打印file中的4-8行
+- sed -n 4p file #打印file中的第4行
+
+### 函数使用
+
+- 参考资料
+  - https://blog.csdn.net/zycamym/article/details/45191093
+  - http://www.runoob.com/linux/linux-shell-func.html
+- 只能返回正整数，不能返回字符串
+- 除非用echo间接获取
+
+```
+# 参考例子
+messageControl(){
+    current_date=$(echo `date "+%Y-%m-%d %H:%M:%S"`)
+    log_date=$(echo `sed -n 1p $CONTEXT_FILE`)
+    # echo $current_date
+    # echo $log_date
+    current_date=$(echo `date -d "$current_date" +%s`)
+    log_date=$(echo `date -d "$log_date" +%s`)
+    diff=$(expr $current_date - $log_date)
+    # echo " "
+    echo $diff
+    if [ $diff -gt $MAX_DIFF ]; then
+        return 1
+    else
+        return 2
+    fi
+}
+messageControl
+result=$?
+echo $result
+```
+
+
+
+### 
 
 ## 常用代码
 
@@ -856,6 +967,13 @@ done
 # cd $ROOT_DIR
 # cat -n $LOG_FILE | grep ${ARRAY[0]}
 
+
+# for循环
+for i in {1..20}
+do
+sleep 1
+echo $i
+done
 ```
 
 
