@@ -577,7 +577,7 @@ for ((i=0; i<table_number; i++)); do
     echo $reminder
     if [ $reminder -eq 0 ]; then
 	echo $reminder
-    elif [ $reminder -eq 1 ]; then
+    elif [ $reminder -eq 1 ]; then
         echo $reminder
     else
         echo $reminder
@@ -585,7 +585,12 @@ for ((i=0; i<table_number; i++)); do
 done
 ```
 
+### for语法
 
+- for element in $file
+- do
+- xxxxxxxxx
+- done
 
 ### 运算符
 
@@ -628,7 +633,7 @@ done
 - cp source_name dest_name
 - 复制文件操作
 
-mv
+### mv
 
 - 修改文件夹名字
 - mv source_name dest_name
@@ -673,10 +678,187 @@ mv
 
 
 
-md5sum
+### md5sum
 
 - md5sum filename
 - 用来判断两个文件的md5值是否相同
+
+
+
+### grep
+
+- 根据关键词提取改行数据
+- 如果字符串匹配包含空格，那么一定要用转义符 \：https://blog.csdn.net/qq_30038111/article/details/83447045
+
+### find
+
+- find ./ -iname rtidb_mon.log
+- 只显示结果必须加 -iname
+
+### wc
+
+- 基本用法：http://www.cnblogs.com/peida/archive/2012/12/18/2822758.html
+
+### hostname
+
+- hostname -i显示ip
+- hostname -f显示域名
+- 参考链接：https://codingstandards.iteye.com/blog/804648
+
+### 命令结果保存在变量中
+
+- 参考链接
+  - https://blog.csdn.net/qq_29603999/article/details/78245736
+  - https://blog.csdn.net/zwt0909/article/details/52813388
+- `` 或者 $(xxx)
+- rows=$(wc -l $monitor_file | awk '{print $1}')
+- 但是结果默认是没有换行符，也就是结果会拼凑成一行
+- 要想保证原来的格式需要加双引号：https://blog.csdn.net/CaspianSea/article/details/51228944
+- "${string}"
+
+### 字符串拼接
+
+- 直接拼凑即可
+- var3={var1}{var2}
+
+### 发邮件
+
+- echo CONTEXT | mail -s TITLE RECEIVER
+- 前提是from邮件已经配置完成，才能直接使用
+
+### 统计文件行数
+
+- wc -l filename
+- wc -c filename 统计字节数
+- wc -w filenmae 统计字数
+
+ 
+
+### 定义二维数组
+
+- LOG_FILES=('nameserver.info.log,offline tablet with endpoint,Run OfflineEndpoint,Run RecoverEndpoint,reconnect zk,kFailed,time of op is too long'
+
+  ​           'rtidb_mon.log,mon : kill,mon : exit'
+
+  ​           'rtidb_ns_mon.log,mon : kill,mon : exit'
+
+  ​           'tablet.info.log,reconnect zk')
+
+- 括号里面是一维数组，里面包含的字符串，字符串可以选择分隔符
+
+- 这里我使用逗号作为分割
+
+- 间接使用二维数组吧
+
+
+
+### 自定义for循环切割符号
+
+- SAVEIFS=$IFS
+
+  IFS=$(echo -en ",")
+
+  for element in $file
+
+  do
+
+  xxxxxxx
+
+  done
+
+  IFS=$SAVEIFS
+
+- IFS=$(echo -en ",")  这一块可以修改分隔符。我使用的的是逗号
+
+- 如果要空格的话改成\n\b
+
+- 参考链接
+
+  - https://www.cyberciti.biz/tips/handling-filenames-with-spaces-in-bash.html
+  - https://blog.csdn.net/gg_18826075157/article/details/78077602
+
+### shell数字自增
+
+- https://www.cnblogs.com/iloveyoucc/archive/2012/07/11/2585559.html
+- i=`expr $i + 1`;
+
+
+
+### 打印结果的某一列
+
+- 第一列：awk '{print $1}'
+- rows=$(wc -l  $monitor_file | awk '{print $1}')
+
+
+
+## 常用代码
+
+### shell比较全的案例
+
+```
+ROOT_DIR=`pwd`
+cd logs
+
+RECEIVER='wangzixian@4paradigm.com'
+TITLE='title'
+CONTEXT='context'
+# logs/文件
+# 用逗号作为分隔符，作为关键词的后续添加
+LOG_FILES=('nameserver.info.log,offline tablet with endpoint,Run OfflineEndpoint,Run RecoverEndpoint,reconnect zk,kFailed,time of op is too long'
+        #    'rtidb_mon.log,mon : kill,mon : exit'
+        #    'rtidb_ns_mon.log,mon : kill,mon : exit'
+           'tablet.info.log,reconnect zk'
+           )
+CONTEXT_FILE='context.log'
+rm -rf $CONTEXT_FILE
+touch $CONTEXT_FILE
+
+for file in "${LOG_FILES[@]}"
+do
+    index=0
+    SAVEIFS=$IFS
+    IFS=$(echo -en ",")
+    for element in $file
+        do
+            if [ $index -eq 0 ]; then
+            monitor_file=$element
+            echo $monitor_file
+            index=`expr $index + 1`
+            else
+            # echo $monitor_file
+            cat $monitor_file -n | grep $element
+            # rows=$(wc -l $monitor_file | awk '{print $1}')
+            # echo $rows
+            fi
+        done
+    IFS=$SAVEIFS
+    echo " "
+done
+
+# echo $CONTEXT | mail -s $TITLE $RECEIVER
+# KEYWORD="ERROR"
+# ARRAY=($KEYWORD)
+# echo ${ARRAY[0]}
+# echo ${ARRAY[1]}
+
+# for element in $KEYWORD
+# do
+
+# string=`cat -n $LOG_FILE | grep --color $element`
+# echo "${string}">>$CONTEXT_FILE
+# echo `date +%s`>>$CONTEXT_FILE
+
+# done
+
+# echo $CONTEXT | mail -s $TITLE $RECEIVER
+# mail -s $TITLE $RECEIVER < $CONTEXT_FILE
+# echo "done"
+# cd $ROOT_DIR
+# cat -n $LOG_FILE | grep ${ARRAY[0]}
+
+```
+
+
 
 
 [TOC]
