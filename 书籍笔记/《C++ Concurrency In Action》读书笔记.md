@@ -12,7 +12,6 @@
 - 先看目录，然后选你想看的标题
 - 看到标题后，自己思考一下场景和解决方案
 - 再继续看标题中代码清单，这本书基本上都有代码案例
-- 
 
 ### Introduction concurrency in C++
 
@@ -21,3 +20,13 @@
 ### Sharing data between threads
 
 ### Synchronizing concurrent operations
+
+
+
+
+
+## 本书已读完
+
+- 一气呵成，获益良多
+
+- 现阶段，因为有论文要写，所以笔记将会用零碎的时间进行填充
