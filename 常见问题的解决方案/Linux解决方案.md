@@ -564,7 +564,7 @@
 ### if语法
 
 - https://blog.csdn.net/yf210yf/article/details/9207147
-- https://blog.csdn.net/ithomer/article/details/5904632
+- 常用条件判断：https://blog.csdn.net/ithomer/article/details/5904632
 - 
 
 ```
@@ -628,10 +628,16 @@ done
 - 修改文件内容，结合nl配合在文件的具体位置修改
 - 详细用法：https://www.cnblogs.com/ggjucheng/archive/2013/01/13/2856901.html
 - sed -i '73c DEFINE_int32\(make_snapshot_threshold_offset, 0, \"config the offset to reach the threshold\"\);' flags.cc
-- -i 必须要加，表示原文件要修改。不加的话，不修改原文件，只是临时修改
-- 73c 表示73行要被替换，后面跟替换字符串，注意转义字符
+- sed -i '73c string' filename
+  - -i 必须要加，表示原文件要修改。不加的话，不修改原文件，只是临时修改
+  - 73c 表示73行要被替换，后面跟替换字符串，注意转义字符
 - sed -n 4,8p file #打印file中的4-8行
 - sed -n 4p file #打印file中的第4行
+- 注意！！！
+- 如果要把shell变量写入文件中
+- 必须用双引号！！！
+- 不能用单引号！！！
+  - 参考链接：https://blog.csdn.net/geekcome/article/details/17741393
 
 
 ### nl
@@ -643,14 +649,24 @@ done
 
 - 如果存在不会返回错误。没有-p就会返回
 
+### dirname
+
+-  只是显示返回当前目录
+- dirname /usr/bin/sort 
+- 返回结果：/usr/bin
+- 参考资料：https://blog.csdn.net/xiaofei125145/article/details/50620281
+
 ### cmake ..
 
 - 编译上级目录的makefile
 
 ### cp
 
-- cp source_name dest_name
 - 复制文件操作
+  - cp source_name dest_name
+- 复制目录
+  - cp -r dir_name_source/.  dir_name_dest/ 只复制dir_name_source里面的子目录
+  - cp -r dir_name_source  dir_name_dest 这样会把dir_name_source也复制进去
 
 ### mv
 
@@ -759,6 +775,10 @@ done
 - 持续更新文件内容
   - **tail -f test.log**
 
+### tar
+
+- tar -zxvf ×××.tar.gz
+
 ### 命令结果保存在变量中
 
 - 参考链接
@@ -770,6 +790,14 @@ done
 - 要想保证原来的格式需要加双引号：https://blog.csdn.net/CaspianSea/article/details/51228944
 - "${string}"
 
+### 字符串基本操作
+
+- 参考资料：https://www.cnblogs.com/chengmo/archive/2010/10/02/1841355.html
+- 查找
+- 长度
+- 赋值
+- 删除
+
 ### 字符串拼接
 
 - 直接拼凑即可
@@ -777,7 +805,17 @@ done
 
 ### 判断空字符串
 
-- 
+- 字符串比较：https://blog.csdn.net/yf210yf/article/details/9207147
+
+### 统计字符串里面有多少行
+
+- count=$(echo "$result" | wc -l)
+
+### 循环一行一行的打印字符串
+
+- IFS=$'\n'
+  for line in `echo "$string"`
+- 逐行处理文本：https://www.cnblogs.com/dwdxdy/archive/2012/07/25/2608816.html
 
 ### 大小比较
 
@@ -839,6 +877,8 @@ done
 
 - 如果要空格的话改成\n\b
 
+- 空行：\n
+
 - 参考链接
 
   - https://www.cyberciti.biz/tips/handling-filenames-with-spaces-in-bash.html
@@ -870,10 +910,15 @@ done
 ### 函数使用
 
 - 参考资料
-  - https://blog.csdn.net/zycamym/article/details/45191093
-  - http://www.runoob.com/linux/linux-shell-func.html
-- 只能返回正整数，不能返回字符串
-- 除非用echo间接获取
+  - 函数基本操作http://www.runoob.com/linux/linux-shell-func.html
+  - 返回字符串方法：https://blog.csdn.net/zycamym/article/details/45191093
+  - 参数使用技巧：
+- 函数返回
+  - 只能返回正整数，不能返回字符串
+  - 除非用echo间接获取
+- 函数参数
+  - 函数外部就和vi grep一样直接写入参数
+  - 函数内部调用的时候用$1,2,3,4这样的序号来表示外部传入的参数
 
 ```
 # 参考例子
@@ -896,11 +941,36 @@ messageControl(){
 messageControl
 result=$?
 echo $result
+
+
+#参数例子
+funWithParam(){
+    echo "第一个参数为 $1 !"
+    echo "第二个参数为 $2 !"
+    echo "第十个参数为 $10 !"
+    echo "第十个参数为 ${10} !"
+    echo "第十一个参数为 ${11} !"
+    echo "参数总数有 $# 个!"
+    echo "作为一个字符串输出所有参数 $* !"
+}
+funWithParam 1 2 3 4 5 6 7 8 9 34 73
 ```
 
 
 
-### 
+
+
+## 问题
+
+### [: too many arguments
+
+- 因为传递的字符串含有空格，所以出现这个问题
+- 一开始比较难找到底哪里多了空格
+- 所以后面直接加双引号保证整个字符串传进去
+- 解决方案：https://stackoverflow.com/questions/13781216/meaning-of-too-many-arguments-error-from-if-square-brackets
+- "$VARIABLE"
+
+
 
 ## 常用代码
 
@@ -974,6 +1044,27 @@ do
 sleep 1
 echo $i
 done
+
+# 字符串切割
+string="2018-12-12 16:10:04.017481 I 5777 [src/nameserver/name_server_impl.cc:492] offline tablet with endpoint[]"
+echo ${string:0:19}
+echo $string
+
+
+# 一行一行打印string里面的值
+string="
+2018-12-12 16:10:04.017481 I 5777 [src/nameserver/name_server_impl.cc:492] offline tablet with endpoint[]
+2018-12-12 16:10:04.017481 I 5777 [src/nameserver/name_server_impl.cc:492] offline tablet with endpoint[]"
+
+SAVEIFS=$IFS
+IFS=$'\n'
+for line in `echo "$string"`
+do
+    echo "${line}"
+    echo "next row"
+
+done
+IFS=$SAVEIFS
 ```
 
 
