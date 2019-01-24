@@ -25,10 +25,14 @@
   - DropTable
 - 文件名字：全部小写，下划线分开单词
   - name_server_impl
-- 类名：首字母大写，下划线分开单词
+- 类名：首字母大写
   - NameServerImpl
 - 域名：namespace 全部小写，不超过三个单词
   - namespace，protobuf
+
+### 代码优化-实战获得经验
+
+- 要用的时候再定义变量，不要提前定义好所有的变量
 
 ### 与Java不同之处，更多是一种习惯的不同
 
@@ -190,6 +194,24 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
 - 传引用的就是传地址的值！而不是对象内部数据的值！
 - 传对象的值到函数里面，会发生构造一次对象，析构一次对象消耗。而且这是没有考虑到对象中可能还含有其他对象的情况，那么消耗将会更加多。
 
+### 函数中的参数传递
+
+#### 指针传递
+
+```
+Handle* wh;
+// 使用函数
+function(&wh)
+
+
+// 定义函数
+function(Handle** wh) {
+    xxxxx
+}
+```
+
+
+
 ### Explicit 使用
 
 - 
@@ -257,6 +279,13 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
   - 只有经过make_pari()封装后作为的insert的函数
   - 后修改，问题解决！
 
+### ld returned 1 exit status 
+
+- https://stackoverflow.com/questions/27272525/what-does-collect2-error-ld-returned-1-exit-status-mean
+- ld 这个工具 返回了一个错误
+
+
+
 ## GLog
 
 - 日志的声明：http://www.voidcn.com/article/p-cfnlsnnv-os.html
@@ -272,7 +301,11 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
   - DECLARE_string(endpoint);
   - 掌握这两点即可！
 
+## GTest
 
+- 基本使用：https://www.ibm.com/developerworks/aix/library/au-googletestingframework.html
+- 基本操作
+  - 必须先创建一个Test类，然后继承GTest
 
 ## protobuf
 
@@ -369,7 +402,12 @@ set(SOURCE_FILES main.cpp)            # Add main.cpp file of project root direct
 add_executable(simple_example ${SOURCE_FILES})       # Add executable target with source files listed in SOURCE_FILES variable
 ```
 
+### 语法讲解
 
+#### add_executable
+
+- 文档说明：https://cmake.org/cmake/help/v3.0/command/add_executable.html
+- 中文讲解：https://elloop.github.io/tools/2016-04-10/learning-cmake-2-commands
 
 ## 模版
 
