@@ -14,6 +14,21 @@
 - https://docs.python.org/2/tutorial/inputoutput.html#methods-of-file-objects
 - 所有函数的库文档：https://docs.python.org/2.7/library/stdtypes.html#file-objects
 
+### 代码规范
+
+- 函数名称
+  - 小写字母和下划线分隔
+  - sync_dir
+  - get_env
+- 变量名
+  - 小写字母和下划线分隔
+  - pass_envs
+  - working_dir
+  - node
+- 类名
+  - 大写首字母其余小写
+  - LocalLauncher
+
 ### 单元测试
 
 - unittest模块
