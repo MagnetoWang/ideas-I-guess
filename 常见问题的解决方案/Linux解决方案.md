@@ -565,7 +565,6 @@
 
 - https://blog.csdn.net/yf210yf/article/details/9207147
 - 常用条件判断：https://blog.csdn.net/ithomer/article/details/5904632
-- 
 
 ```
 #!/usr/bin/env bash
@@ -583,14 +582,48 @@ for ((i=0; i<table_number; i++)); do
         echo $reminder
     fi
 done
+
+
+1 字符串判断
+
+str1 = str2　　　　　　当两个串有相同内容、长度时为真 
+str1 != str2　　　　　 当串str1和str2不等时为真 
+-n str1　　　　　　　 当串的长度大于0时为真(串非空) 
+-z str1　　　　　　　 当串的长度为0时为真(空串) 
+str1　　　　　　　　   当串str1为非空时为真
+
+2 数字的判断
+
+int1 -eq int2　　　　两数相等为真 
+int1 -ne int2　　　　两数不等为真 
+int1 -gt int2　　　　int1大于int2为真 
+int1 -ge int2　　　　int1大于等于int2为真 
+int1 -lt int2　　　　int1小于int2为真 
+int1 -le int2　　　　int1小于等于int2为真
+
+3 文件的判断
+
+-r file　　　　　用户可读为真 
+-w file　　　　　用户可写为真 
+-x file　　　　　用户可执行为真 
+-f file　　　　　文件为正规文件为真 
+-d file　　　　　文件为目录为真 
+-c file　　　　　文件为字符特殊文件为真 
+-b file　　　　　文件为块特殊文件为真 
+-s file　　　　　文件大小非0时为真 
+-t file　　　　　当文件描述符(默认为1)指定的设备为终端时为真
+
+3 复杂逻辑判断
+
+-a 　 　　　　　 与 
+-o　　　　　　　 或 
+!　　　　　　　　非
+
 ```
 
 ### while语法
 
 - example：https://www.cyberciti.biz/faq/shell-script-while-loop-examples/
-- 
-
-
 
 ### for语法
 
@@ -673,8 +706,6 @@ done
 - 修改文件夹名字
 - mv source_name dest_name
 
-
-
 ### Make -j8 rtidb
 
 - 8个进程编译文件，并且最终可执行文件是名字叫rtidb
@@ -699,8 +730,6 @@ done
 - Tty：设备连接
   - 连接电脑终端某个设备：https://stackoverflow.com/questions/7113770/what-does-tty-mean-in-the-unix-ps-command
 
-
-
 ### echo妙用
 
 - 文件后追加一条消息
@@ -711,14 +740,10 @@ done
   - echo 'export JAVA_HOME=/home/wangzixian/java/jdk1.8.0_141/bin/java'>~/.bash_profile
 - 参考资料：http://blog.sina.com.cn/s/blog_605f5b4f010154mn.html
 
-
-
 ### md5sum
 
 - md5sum filename
 - 用来判断两个文件的md5值是否相同
-
-
 
 ### grep
 
@@ -743,8 +768,6 @@ done
 - hostname -f显示域名
 - hostname -s显示主机名字
 - 参考链接：https://codingstandards.iteye.com/blog/804648
-
-
 
 ### crontab
 
@@ -778,6 +801,13 @@ done
 ### tar
 
 - tar -zxvf ×××.tar.gz
+
+### 通过端口查看进程pid
+
+- netstat -nap | grep 进程pid
+- 参考资料：http://www.cnblogs.com/MacoLee/p/5664306.html
+
+
 
 ### 命令结果保存在变量中
 
