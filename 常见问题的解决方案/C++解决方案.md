@@ -20,7 +20,7 @@
 - 成员变量：全部小写+下划线分开+尾巴后面加下划线
   - table_meta_
 - 普通变量：全部小写+下划线分开
-  - table_meta_
+  - table_meta
 - 函数名称：单词首字母大写-双驼峰
   - DropTable
 - 文件名字：全部小写，下划线分开单词
@@ -33,6 +33,16 @@
 ### 代码优化-实战获得经验
 
 - 要用的时候再定义变量，不要提前定义好所有的变量
+- 借鉴别人的代码的时候不要直接copy，可以先写下所有的函数名字，然后自己一个个的实现，最后做个比较，看看有没有可以优化的地方
+
+### 快速写代码
+
+#### 定义类
+
+- 确定类名
+- 所有变量放private
+- 用列表初始化写构造函数 
+- const 修饰函数 和 返回值
 
 ### 与Java不同之处，更多是一种习惯的不同
 
@@ -176,7 +186,9 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
 
 ### string使用
 
-- 参考文档：http://www.cplusplus.com/reference/string/string/
+- 参考文档
+  - http://www.cplusplus.com/reference/string/string/
+  - https://en.cppreference.com/w/cpp/string/basic_string
 - 转换字符串
   - std::to_string
   - https://en.cppreference.com/w/cpp/string/basic_string/to_string
@@ -184,6 +196,63 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
   - c_str
 - 字符串拼接
   - 可以直接用加号连接
+
+### typedef用法
+
+- typedef unsigned int uint32_t;
+- 只是定义一个新的好记的名字！
+
+### const用法
+
+- 所有用法集合：http://www.cnblogs.com/yc_sunniwell/archive/2010/07/14/1777416.html
+
+- 常变量：  **const 类型说明符 变量名**
+
+    常引用：  **const 类型说明符 &引用名**
+
+    常对象：  **类名 const 对象名**
+
+    常成员函数：  **类名::fun(形参) const**
+
+    常数组：  **类型说明符 const 数组名[大小]**    
+
+    常指针：  **const 类型说明符\* 指针名 ，类型说明符* const 指针名**
+
+- const的口诀
+
+    - 左内右本：https://www.cnblogs.com/liushui-sky/p/9668413.html
+    - const 出现在* 左边，说明是该指针的内容不允许修改
+    - const 出现在* 右边，说明是该指针本身不允许修改
+
+- 常量指针
+
+  - const int *pi = &i;
+  - *pi = 100; 错
+  - 不能通过常量指针修改指针里面的内容
+  - const int *p=&a //常量指针
+  - *p=9;//操作错误
+  - p=&b;//操作成功
+  - 和指针常量的区别：https://blog.csdn.net/weibo_dm/article/details/80445205
+
+- 指针常量
+
+  -  int* const m2 = new int(20);
+  - int * const p=&a //指针常量
+  - *p=9;//操作成功
+  - p=&b;//操作错误
+
+- 函数后面加个const
+
+  - 该函数不能修改数据成员
+
+- 函数前面加const
+
+  - 返回的对象不能被外部修改
+
+- 类对象前面加const
+
+  - 不能引用非const的成员函数
+  - 参考链接：http://www.cnblogs.com/xing901022/p/3413019.html
 
 ### 函数中的参数
 
@@ -210,11 +279,25 @@ function(Handle** wh) {
 }
 ```
 
+### memcmp函数使用
 
+- memcmp(data_, x.data_, x.size_) == 0 data 与 x 比较 前 x个字符串
 
 ### Explicit 使用
 
-- 
+- 关键字只能用于修饰只有一个参数的类构造函数, 它的作用是表明该构造函数是显示的, 而非隐式的, 跟它相对应的另一个关键字是implicit, 意思是隐藏的,类构造函数默认情况下即声明为implicit(隐式)
+- google规范，只有一个参数的构造函数必须使用explicit修饰：https://www.cnblogs.com/ymy124/p/3632634.html
+- ​    CxString string1(24);     // 这样是OK的  
+- ​    CxString string2 = 10;    // 这样是不行的, 因为explicit关键字取消了隐式转换  
+- ​    CxString string3;         // 这样是不行的, 因为没有默认构造函数  
+- ​    CxString string4("aaaa"); // 这样是OK的  
+- ​    CxString string5 = "bbb"; // 这样也是OK的, 调用的是CxString(const char *p)  
+- ​    CxString string6 = 'c';   // 这样是不行的, 其实调用的是CxString(int size), 且size等于'c'的ascii码, 但explicit关键字取消了隐式转换  
+- ​    string1 = 2;              // 这样也是不行的, 因为取消了隐式转换  
+- ​    string2 = 3;              // 这样也是不行的, 因为取消了隐式转换  
+- ​    string3 = string1;        // 这样也是不行的, 因为取消了隐式转换, 除非类实现操作符"="的重载  
+
+
 
 ### 线程
 
@@ -255,7 +338,53 @@ function(Handle** wh) {
 
 ### inline
 
+- 可以在任意函数前面加inline
+- 它的作用只是在调用该函数的时候，直接张开函数里面的内容，而不是真正的用栈调用
+- 减少函数切换的开销
+
 ### const成员函数
+
+
+
+### static_cast 和 reinterpret_cast
+
+- static_cast文档：https://en.cppreference.com/w/cpp/language/static_cast
+- reinterpret_cast文档：https://en.cppreference.com/w/cpp/language/reinterpret_cast
+- 什么时候用： https://stackoverflow.com/questions/573294/when-to-use-reinterpret-cast
+- 用法注意事项：http://c.biancheng.net/view/410.html
+- static_cast一般用于同类型转换，如浮点数转整数，但是不能指针，或者字符串转整数
+- reinterpret_cast高风险的类型转换，可以什么类型都互相转换，出现问题不负责，程序员自己承担。它是根据比特流的复制，然后重新解读到新类型
+
+### const_cast
+
+- const类型转非const
+- 也就是去const属性
+
+### dynamic_cast
+
+- 不推荐使用
+
+### delete 和 default函数
+
+- c++11
+
+### C++常用库
+
+- boost - C++的准标准库
+- gflags - Google的命令行flag解析库
+- glog - Google的日志库
+- gtest - Google的单元测试库
+- gmock - Google的C++ mock库
+- double-conversion - V8引擎中使用的浮点数和字符串转换库
+- jemalloc - 内存优化组件
+- lz4 - 压缩算法库
+- lzma - 压缩算法库
+- snappy - 压缩算法库
+- zlib1g - 压缩算法库
+- libevent - 高性能异步网络库
+- libssl - SSL加密库
+- libdwarf - DWARF调试信息处理库 (experimental)
+- libunwind - 程序中调用链的检测库 (experimental)
 
 ## 常见问题
 
@@ -390,6 +519,10 @@ function(Handle** wh) {
 
 
 ## CMake教程
+
+### 参考资料
+
+- 非常经典的5个入门例子：https://blog.csdn.net/dbzhang800/article/details/6314073
 
 ### 基本操作
 
