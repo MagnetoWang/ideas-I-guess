@@ -83,7 +83,10 @@
   - 如果涉及到外部包的依赖，一定要添加插件
   - https://blog.csdn.net/change_on/article/details/79379400
 
+### 找maven的settings.xml位置
 
+- 参考资料：https://stackoverflow.com/questions/9988814/how-do-i-find-out-which-settings-xml-file-maven-is-using
+- mvn -X
 
 ### 命令行下执行Java项目整个过程
 
