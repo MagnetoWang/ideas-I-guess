@@ -76,6 +76,18 @@
 - find 文件路径 参数
 - find Documents/ -iname  工程设计
 
+## 安装软件
+
+### 安装md5sum
+
+- brew install md5sha1sum
+- 参考资料：https://raamdev.com/2008/howto-install-md5sum-sha1sum-on-mac-os-x/
+
+### 安装tree
+
+- brew install tree
+- 参考资料：http://macappstore.org/tree/
+
 ## 文件夹直通车
 
 - 
