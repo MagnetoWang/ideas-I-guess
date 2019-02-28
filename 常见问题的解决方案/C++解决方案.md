@@ -1,3 +1,5 @@
+
+
 ## 说明
 
 - c+不同于Java，有非常多的细节需要专门注意，所以需要特意写个方案解决平时遇到的问题
@@ -42,7 +44,27 @@
 - 确定类名
 - 所有变量放private
 - 用列表初始化写构造函数 
-- const 修饰函数 和 返回值
+- 必要的情况：const 修饰函数 和 返回值
+- 遵循用的时候才定义类的原则
+  - private定义的变量一般放在public后面
+  - 偶尔public需要变量，就可以定义到private后面
+
+#### 模板的编写
+
+- 基本介绍：http://www.cnblogs.com/gaojun/archive/2010/09/10/1823354.html
+- 模板详细介绍：https://www.cnblogs.com/wxquare/p/4743180.html
+- 模板形参介绍：http://www.cnblogs.com/gw811/archive/2012/10/25/2738929.html
+
+```
+Template <class或者也可以用typename T>
+返回类型 函数名（形参表）
+{//函数定义体 }
+
+在正常的函数前面加一行 template即可
+<> 里面是模板形式参数，这里面可以有多个class，这函数体里面可以选择调用形参里面的T
+```
+
+
 
 ### 与Java不同之处，更多是一种习惯的不同
 
@@ -189,13 +211,63 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
 - 参考文档
   - http://www.cplusplus.com/reference/string/string/
   - https://en.cppreference.com/w/cpp/string/basic_string
+
 - 转换字符串
   - std::to_string
   - https://en.cppreference.com/w/cpp/string/basic_string/to_string
+
 - 字符串转c字符串
+
   - c_str
+
 - 字符串拼接
+
   - 可以直接用加号连接
+
+- 字符串比较
+
+  - a.compare(b)
+
+  - = 0 
+
+  - < 0 就是 a < b
+
+  - \>  0 就是 a > b
+
+| value | relation between *compared string* and *comparing string*    |
+| ----- | ------------------------------------------------------------ |
+| `0`   | They compare equal                                           |
+| `<0`  | Either the value of the first character that does not match is lower in the *compared string*, or all compared characters match but the *compared string* is shorter. |
+| `>0`  | Either the value of the first character that does not match is greater in the *compared string*, or all compared characters match but the *compared string* is longer. |
+
+### set使用
+
+- 参考文档
+  - http://www.cplusplus.com/reference/set/set/
+- 头文件 #include < set >
+
+### typename使用
+
+- 参考资料：https://www.cnblogs.com/wuchanming/p/3765345.html
+- 第一种用法
+  - 放在模板里面，修饰模板的形式参数
+- 第二种用法
+  - 消除* 的歧义
+  - 有时候需要返回模板类的迭代器，实质返回指针
+  - 但是编译器可能无法识别这是个指针
+  - 这个时候需要在前面加typename
+- 如下例子
+
+```
+   template <typename T> class Y
+   {
+       typename T::iterator *iter;
+       typedef typename T::iterator iterator; //定义了Y::iterator类型名称
+       ...
+   };
+```
+
+
 
 ### typedef用法
 
@@ -254,6 +326,10 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
   - 不能引用非const的成员函数
   - 参考链接：http://www.cnblogs.com/xing901022/p/3413019.html
 
+- const对象只能调用const函数
+
+    - 解释：https://www.cnblogs.com/cplinux/articles/5553716.html
+
 ### 函数中的参数
 
 - 默认参数和缺省参数：https://blog.csdn.net/CHF_VIP/article/details/8586921
@@ -278,6 +354,16 @@ function(Handle** wh) {
     xxxxx
 }
 ```
+
+#### 引用传递
+
+```
+
+```
+
+#### 传递的区别
+
+
 
 ### memcmp函数使用
 
@@ -319,14 +405,12 @@ function(Handle** wh) {
 ### 性能优化
 
 - insert 对象的时候，其实是复制了一个对象，要想优化，最后insert一个指针或者引用
-
 - 不能insert指针或者引用！！！！！！
-
 - 不能insert指针或者引用！！！！！！
-
 - 不能insert指针或者引用！！！！！！
-
 - 这会在STL中因为赋值操作，导致指针失效！！！
+
+
 
 
 ### 并发
@@ -366,7 +450,17 @@ function(Handle** wh) {
 
 ### delete 和 default函数
 
-- c++11
+- c++11 的新特性
+- 主要用来修饰构造函数，赋值函数，析构函数
+- delete表示禁止编译器自动生成这些函数
+- default表示默认使用编译器的函数
+- 用法
+  - Arena() = delete;
+  - void operator=() = default;
+
+### std::random 随机库使用
+
+- 基本使用：http://www.cnblogs.com/egmkang/archive/2012/09/06/2673253.html
 
 ### C++常用库
 
@@ -418,6 +512,7 @@ function(Handle** wh) {
 ## GLog
 
 - 日志的声明：http://www.voidcn.com/article/p-cfnlsnnv-os.html
+- 基本操作：https://blog.csdn.net/a379039233/article/details/46009369
 
 ## Gflags
 
@@ -434,7 +529,31 @@ function(Handle** wh) {
 
 - 基本使用：https://www.ibm.com/developerworks/aix/library/au-googletestingframework.html
 - 基本操作
+  - 引用头文件 "gtest/gtest.h"
   - 必须先创建一个Test类，然后继承GTest
+
+```
+#include "gtest/gtest.h"
+
+
+TEST (SquareRootTest, PositiveNos) { 
+    EXPECT_EQ (18.0, square-root (324.0));
+    EXPECT_EQ (25.4, square-root (645.16));
+    EXPECT_EQ (50.3321, square-root (2533.310224));
+}
+int main(int argc, char **argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}
+
+SquareRootTest 就是新建的Test类
+PositiveNos 测试用例的函数名字
+EXPECT_EQ 类似于assert 和 if 专门用于测试结果是否符合预期
+square-root 这就是我们测试的函数
+
+```
+
+- 高级操作：http://www.cnblogs.com/coderzh/archive/2009/04/06/1426755.html
 
 ## protobuf
 
@@ -523,6 +642,7 @@ function(Handle** wh) {
 ### 参考资料
 
 - 非常经典的5个入门例子：https://blog.csdn.net/dbzhang800/article/details/6314073
+- 基本语法：https://www.jianshu.com/p/8909efe13308
 
 ### 基本操作
 
@@ -541,6 +661,11 @@ add_executable(simple_example ${SOURCE_FILES})       # Add executable target wit
 
 - 文档说明：https://cmake.org/cmake/help/v3.0/command/add_executable.html
 - 中文讲解：https://elloop.github.io/tools/2016-04-10/learning-cmake-2-commands
+
+#### link_directories
+
+- 参考资料：https://www.cnblogs.com/binbinjx/p/5626916.html
+- 专门用于链接lib目录下的动态库
 
 ## 模版
 
