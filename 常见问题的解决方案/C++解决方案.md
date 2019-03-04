@@ -12,6 +12,7 @@
 
 - https://github.com/fffaraz/awesome-cpp
 - cpp大神博客：http://huqunxing.site/
+- 非常棒的笔记：http://www.fredosaurus.com/notes-cpp/index.html
 
 
 
@@ -211,19 +212,14 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
 - 参考文档
   - http://www.cplusplus.com/reference/string/string/
   - https://en.cppreference.com/w/cpp/string/basic_string
-
 - 转换字符串
   - std::to_string
   - https://en.cppreference.com/w/cpp/string/basic_string/to_string
-
 - 字符串转c字符串
-
-  - c_str
-
+  - 成员函数：xxxstring.c_str
 - 字符串拼接
 
   - 可以直接用加号连接
-
 - 字符串比较
 
   - a.compare(b)
@@ -239,6 +235,16 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
 | `0`   | They compare equal                                           |
 | `<0`  | Either the value of the first character that does not match is lower in the *compared string*, or all compared characters match but the *compared string* is shorter. |
 | `>0`  | Either the value of the first character that does not match is greater in the *compared string*, or all compared characters match but the *compared string* is longer. |
+
+### char* 使用
+
+- 拷贝函数
+  - memcpy(void *dest, const void *src, size_t n) 
+  - 从源src所指的内存地址的起始位置开始拷贝n个字节到目标dest所指的内存地址的起始位置中
+  - source和destin都不一定是数组，任意的可读写的空间均可
+- char* test = new char[size];
+
+
 
 ### set使用
 
@@ -363,11 +369,116 @@ function(Handle** wh) {
 
 #### 传递的区别
 
+### File使用
+
+- 参考资料
+  - http://www.cplusplus.com/reference/cstdio/FILE/
+  - https://blog.csdn.net/jiahehao/article/details/1862867
+- 打开和关闭文件
+
+```
+/* FEOF example */
+#include <stdio.h>
+
+int main()
+{
+   FILE * pFile;
+   char buffer [100];
+
+   pFile = fopen ("myfile.txt" , "r");
+   if (pFile == NULL) perror ("Error opening file");
+   else
+   {
+     while ( ! feof (pFile) )
+     {
+       if ( fgets (buffer , 100 , pFile) == NULL ) break;
+       fputs (buffer , stdout);
+     }
+     fclose (pFile);
+   }
+   return 0;
+}
+Edit & Run
+
+```
+
+
+
+
+#### fwrite函数
+
+- 文档：http://www.cplusplus.com/reference/cstdio/fwrite/
+- size_t fwrite ( const void * ptr, size_t size, size_t count, FILE * stream );
+- Write block of data to stream
+- ptr 数组内容
+- stream 输出的文件
+- size 每个元素的大小
+- count 写入多少个元素
+
+#### fflush函数
+
+- 文档：http://www.cplusplus.com/reference/cstdio/fflush/
+- int fflush ( FILE * stream );
+- If the given *stream* was open for writing (or if it was open for updating and the last i/o operation was an output operation) any unwritten data in its output buffer is written to the file.
+- return: A zero value indicates success.
+
+#### sync、fsync与fdatasync区别
+
+- https://blog.csdn.net/cywosp/article/details/8767327
+- sync函数只是将所有修改过的块缓冲区排入写队列，然后就返回，它并不等待实际写磁盘操作结束。通常称为update的系统守护进程会周期性地（一般每隔30秒）调用sync函数。这就保证了定期冲洗内核的块缓冲区
+- fsync函数只对由文件描述符filedes指定的单一文件起作用，并且等待写磁盘操作结束，然后返回。fsync可用于数据库这样的应用程序，这种应用程序需要确保将修改过的块立即写到磁盘上。
+- fdatasync函数类似于fsync，但它只影响文件的数据部分。而除数据外，fsync还会同步更新文件的属性。
+- fdatasync文档：https://linux.die.net/man/2/fdatasync
+
+#### fileno()函数
+
+- http://www.cppblog.com/jerryma/archive/2010/06/14/117888.html
+- 把文件流指针转换成文件描述符
+- int fileno(FILE *stream)
+
+#### ftruncate()函数
+
+- http://www.cppblog.com/jerryma/archive/2010/06/14/117888.html
+- 改变文件大小
+- int ftruncate(int fd, off_t  length)
+
+#### lseek函数
+
+- https://baike.baidu.com/item/lseek
+- off_t lseek(int handle, off_t offset, int fromwhere);
+- [当前文件](https://baike.baidu.com/item/%E5%BD%93%E5%89%8D%E6%96%87%E4%BB%B6)[偏移量](https://baike.baidu.com/item/%E5%81%8F%E7%A7%BB%E9%87%8F)（current file offset）cfo
+- 
 
 
 ### memcmp函数使用
 
 - memcmp(data_, x.data_, x.size_) == 0 data 与 x 比较 前 x个字符串
+
+### memcpy函数使用
+
+- memcpy(void *dest, const void *src, size_t n) 
+- 从源src所指的内存地址的起始位置开始拷贝n个字节到目标dest所指的内存地址的起始位置中
+- source和destin都不一定是数组，任意的可读写的空间均可
+
+### snprintf函数
+
+- http://www.cnblogs.com/armlinux/archive/2010/05/25/2397004.html
+- int snprintf(char *restrict buf, size_t n, const char * restrict  format, ...);
+- 最多从源串中拷贝n－1个字符到目标串中，然后再在后面加一个0。所以如果目标串的大小为n 的话，将不会溢出
+- 函数返回值:若成功则返回欲写入的字符串长度，若出错则返回负值。
+
+### sizeof使用
+
+- char buffer[] = { 'x' , 'y' , 'z' };
+  - sizeof(buffer) = 3
+- int buffer[] = { 1,2,3};
+  - sizeof(buffer) = 3 * 4 = 12
+- 针对数组计算公式
+  - sizeof = type * count
+  - 元素单个大小 * 元素的数量
+- const char* buffer = "abcdef";  或者 "abdc"
+  - sizeof(buffer) = 8 
+  - 只是buffer指针的大小
 
 ### Explicit 使用
 
@@ -462,7 +573,7 @@ function(Handle** wh) {
 
 - 基本使用：http://www.cnblogs.com/egmkang/archive/2012/09/06/2673253.html
 
-### C++常用库
+## C++常用库
 
 - boost - C++的准标准库
 - gflags - Google的命令行flag解析库
@@ -479,6 +590,14 @@ function(Handle** wh) {
 - libssl - SSL加密库
 - libdwarf - DWARF调试信息处理库 (experimental)
 - libunwind - 程序中调用链的检测库 (experimental)
+- unistd.h
+  - 提供对 [POSIX](http://baike.baidu.com/view/209573.htm) 操作系统 [API](http://baike.baidu.com/view/16068.htm) 的访问功能的[头文件](http://baike.baidu.com/view/668911.htm)的名称
+  - 文档：http://pubs.opengroup.org/onlinepubs/7908799/xsh/unistd.h.html
+  - http://www.cnblogs.com/haore147/p/3646243.html
+- errno.h
+  - http://www.runoob.com/cprogramming/c-standard-library-errno-h.html
+  - 定义了整数变量 **errno**，它是通过系统调用设置的，在错误事件中的某些库函数表明了什么发生了错误。该宏扩展为类型为 int 的可更改的左值，因此它可以被一个程序读取和修改。
+  - 在程序启动时，**errno** 设置为零，C 标准库中的特定函数修改它的值为一些非零值以表示某些类型的错误。您也可以在适当的时候修改它的值或重置为零。
 
 ## 常见问题
 
@@ -597,11 +716,113 @@ square-root 这就是我们测试的函数
 - 定义：object-oriented programming are data abstraction, inheritance,
   and dynamic binding. 
 
+### copy constructors
+
+- 参考：http://www.fredosaurus.com/notes-cpp/oop-condestructors/copyconstructors.html
+
+```
+Person q("Mickey"); // constructor is used to build q.
+Person r(p);        // copy constructor is used to build r.
+Person p = q;       // copy constructor is used to initialize in declaration.
+p = q;              // Assignment operator, no constructor or copy constructor.
+```
+
 ### Inheritance
 
 - 本质：Classes related by inheritance form a hierarchy. 
 - 实际：there is a base class at the root of the hierarchy,from which the other classes inherit, directly or indirectly.
 - 这些继承的类也被称作：derived class
+
+#### 基类和派生类的转换问题
+
+- http://c.biancheng.net/cpp/biancheng/view/239.html
+- 派生类可以直接转换到基类，但是转换的过程，派生类独有的数据类型和成员函数基类将无法访问
+- 也就是说只能子类访问基类的公开元素，基类不能访问派生类的特有元素
+
+#### protected访问权限
+
+- https://blog.csdn.net/luoruiyi2008/article/details/7179788
+- Like private members, protected members are inaccessible to users of the class.
+- Like public members, the protected members are accessible to classes derived from this class.
+- In addition, protected has another important property:
+  A derived object may access the protected members of its base class only through a derived object. The derived class has no special access to the protected members of base type objects.
+- 前两点好理解
+- 第三点如何理解呢？
+- 如下面的例子，在父类person中StrName 是 private
+- 这个时候程序编译会出错
+- 因为子类不能直接修改或者调用父类的private变量
+- 但是把private改成 protected就可以了，子类可以调用修改
+
+```
+#include <string>
+#include <iostream>
+using std::string;
+using std::cout;
+using std::endl;
+//define interface
+class Person
+{
+public:
+	Person()//成员列表初始化参数
+	{};
+	virtual ~Person(){};
+	virtual void Eat()=0;//人需要吃东西
+	virtual void Sleep()=0;//人需要睡觉
+	virtual void SetName(const string strName)=0;//人都有名字
+	virtual string GetName()=0;//获取名字
+	virtual void Work()=0;//人可能要有工作
+private:
+	string StrName;
+};
+//实现接口
+//实现接口是通过派生类实现的，每个派生类依据自身特点，可以获取同一接口的不同实现
+//也就是所谓的多态
+class Student:public Person
+{
+public:
+	Student():m_strName("lalalal")
+	{};
+	~Student()
+	{};
+	void Eat();
+	void Sleep();
+	void SetName(const string strName);
+	string GetName();
+	void Work();
+private:
+	string m_strName;
+};
+
+void Student::Sleep()
+{
+	cout<<"student sleep."<<endl;
+}
+void Student::Eat()
+{
+	cout<<"student eat."<<endl;
+}
+void Student::SetName(const string strName)
+{
+	StrName=strName;
+}
+void Student::Work()
+{
+	cout<<"student work."<<endl;
+}
+string Student::GetName()
+{
+	return StrName;
+}
+
+int main() {
+    Person* person = new Student();
+    person->Eat();
+    person->SetName("mingbai");
+    cout<<person->GetName()<<endl;
+}
+```
+
+
 
 ### Dynamic Binding
 
@@ -635,7 +856,35 @@ square-root 这就是我们测试的函数
 - 虚表是所有类对象实例共用的
 - 多态，虚函数，动态绑定这三者是融合在一起的
 
+### virtual关键字使用
 
+- 资料：http://www.cnblogs.com/xd502djj/archive/2010/09/22/1832912.html
+- 定义一个基类和派生类
+- 基类的在部分函数前面加virtual
+- 派生类继承基类后，可以实现virtual函数里面的内容。也就是覆盖的意思
+- final 和 override的作用
+- 在定义函数后面添加final表示后面继承的类不可以覆盖该函数
+- 在定义函数后面添加override是对应的基类，该函数已经覆盖的了基类函数
+
+```
+struct B {
+    virtual void f1(int) const;
+    virtual void f2();
+    void f3();
+}
+struct D : B {
+    void f1(int) const override; 正确
+    void f2(int) override;	错误,m没有f2这样的参数的函数
+    void f3() override; 	错误,f3不是虚函数
+    void f4() override;		错误，B没有f4
+}
+```
+
+- 如何声明纯虚函数
+  - 后面 =0 
+  - virtual 函数类型 函数名 (参数表列) =0;
+  - 纯虚函数没有函数体
+  - 只有函数的名字而不具备函数的功能，不能被调用
 
 ## CMake教程
 
@@ -667,9 +916,74 @@ add_executable(simple_example ${SOURCE_FILES})       # Add executable target wit
 - 参考资料：https://www.cnblogs.com/binbinjx/p/5626916.html
 - 专门用于链接lib目录下的动态库
 
-## 模版
+## Linux下的C++
 
-### template
+### 基本编译运行
+
+- g++ helloworld.cpp -o helloworld
+- ./helloworld
+
+### 复杂文件编译运行
+
+- 需要编写makefile
+
+### 编译中的动态库和静态库
+
+- 参考资料：
+  - https://www.jianshu.com/p/63ea84c9666e
+  - https://segmentfault.com/q/1010000005269977
+- 静态库是指编译连接时，把库文件的代码全部加入到可执行文件中，所以生成的文件较大，但运行时，就不再需要库文件了。即，程序与静态库编译链接后，即使删除静态库文件，程序也可正常执行。
+- 动态库正好相反，在编译链接时，没有把库文件的代码加入到可执行文件中，所以生成的文件较小，但运行时，仍需要加载库文件。即，程序只在执行启动时才加载动态库，如果删除动态库文件，程序将会因为无法读取动态库而产生异常。
+- 静态库.a
+- 动态库.so
+- --enable-static 生成静态库a文件
+- --enable-shared 生成共享库so文件
+
+## Mac下的C++
+
+### endian.h 配置路径
+
+- vscode自动补全路径
+
+```
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Kernel.framework/Versions/A/Headers/machine"
+            ],
+            "defines": [],
+            "macFrameworkPath": [
+                "/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/System/Library/Frameworks"
+            ],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "clang-x64"
+        }
+    ],
+    "version": 4
+}
+```
+
+
+
+## 脚本
+
+### 编译运行单个c++文件
+
+- sh xx.sh filename_without_suffix
+
+```
+cpp_file=$1
+g++ $cpp_file.cpp -o $cpp_file
+./$cpp_file
+rm -rf $cpp_file
+```
+
+
 
 
 [TOC]
