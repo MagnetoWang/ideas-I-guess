@@ -631,7 +631,28 @@ Edit & Run
 ## GLog
 
 - 日志的声明：http://www.voidcn.com/article/p-cfnlsnnv-os.html
-- 基本操作：https://blog.csdn.net/a379039233/article/details/46009369
+- 基本操作：https://www.cppfans.org/1566.html
+- 链接gtest 和 glog 两个库。直接运行下面代码
+
+```
+#include "gtest/gtest.h"
+#include "glog/logging.h"
+
+class GlogTest {};
+
+TEST(GlogTest, InfoLog) {
+    LOG(INFO) << "this is glog logging test " << std::endl;
+}
+
+int main(int argc, char **argv) {
+    google::InitGoogleLogging(argv[0]);
+    google::SetLogDestination(google::INFO,"/Users/magnetowang/Documents/GitHub/IcebergDB/ibdb/log/");  
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
+```
+
+
 
 ## Gflags
 
