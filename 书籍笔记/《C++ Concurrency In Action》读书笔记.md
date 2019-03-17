@@ -23,7 +23,28 @@
 
 
 
+## 问题列表
 
+### 环境
+
+- macbookpro 2017版本
+- 4.sdk/usr/include/c++/4.2.1
+- Apple LLVM version 10.0.0 (clang-1000.10.44.2)
+- Target: x86_64-apple-darwin18.0.0
+- Thread model: posix
+- InstalledDir: /Library/Developer/CommandLineTools/usr/bin
+
+### list5.5
+
+- 这里和书中不一样，代码实际运行不可能等于0
+- 除非注释 while(!y.load(std::memory_order_relaxed));
+
+### list5.7
+
+- 这里和书中不一样，代码实际运行不可能等于0
+- 除非注释下面任意代码
+  - while(!x.load(std::memory_order_acquire));
+  - while(!y.load(std::memory_order_acquire));
 
 ## 本书已读完
 
