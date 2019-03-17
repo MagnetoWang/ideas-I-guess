@@ -230,6 +230,8 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
 - 字符串拼接
 
   - 可以直接用加号连接
+- 选择子字符串
+  - 
 - 字符串比较
 
   - a.compare(b)
@@ -446,6 +448,7 @@ Edit & Run
 
 - https://blog.csdn.net/cyforce/article/details/6159989
 - 返回值：文件顺利打开后，指向该流的文件指针就会被返回。如果文件打开失败则返回NULL，并把错误代码存在errno 中。
+- 参数 a+ 是否需要 要看场景
 
 ```
 　　r 打开只读文件，该文件必须存在。
@@ -487,6 +490,19 @@ Edit & Run
 - stream 输出的文件
 - size 每个元素的大小
 - count 写入多少个元素
+
+#### pread函数
+
+- 文档
+
+- ```
+      int n = 100;
+      char* scratch = (char*)malloc(sizeof(char) * n);
+      uint64_t offset = 10;
+      Status status;
+      ssize_t read_size = ::pread(fd, scratch, n, static_cast<off_t>(offset));
+  ```
+
 
 #### fflush函数
 
@@ -726,7 +742,47 @@ int main()
 
 ## 教你C++怎么找bug
 
+### cout打印法
 
+- 可能出的问题上，打印日志信息，然后后面程序运行查看信息
+
+### 创建类出现段错误
+
+- 一个类里面可能有多个类
+- 那么这个时候要向指定哪里创建类出现问题
+- 就可以单独拿出来创建查看
+
+```
+RandomAccessFileHandle::RandomAccessFileHandle(std::string& filename)
+    :   filename_(filename),
+        offset_(0),
+        current_offset_(0),
+        fd_(0),
+        limiter_(nullptr),
+        random_access_file_(nullptr),
+        filestream_(nullptr) {
+            filestream_ = fopen(filename.c_str(), "r+");
+            assert(filestream_ != nullptr);
+            fd_ = fileno(filestream_);
+            assert(fd_ != -1);
+            limiter_ = new Limiter(FLAGS_limiter_max_required);
+            assert(limiter_ != nullptr);
+            random_access_file_ = ibdb::log::NewRandomAccessFile(filename_, fd_, limiter_);
+            assert(random_access_file_ != nullptr);
+        }
+        
+这里有
+limiter_
+random_access_file_
+两个类，可以单独创建定位问题
+后面查出问题在
+limiter_ = new Limiter(FLAGS_limiter_max_required);
+limiter_不支持赋值语句!!!!
+必须用列表初始化来构造Limiter对象
+```
+
+- 当然也可能是最愚蠢的问题
+- 创建对象没有添加new
 
 ## GLog
 
@@ -796,13 +852,13 @@ int main(int argc, char **argv) {
 ## GTest
 
 - 基本使用：https://www.ibm.com/developerworks/aix/library/au-googletestingframework.html
+- 文档：https://github.com/google/googletest/blob/master/googletest/docs/primer.md
 - 基本操作
   - 引用头文件 "gtest/gtest.h"
   - 必须先创建一个Test类，然后继承GTest
 
 ```
 #include "gtest/gtest.h"
-
 
 TEST (SquareRootTest, PositiveNos) { 
     EXPECT_EQ (18.0, square-root (324.0));
@@ -822,6 +878,15 @@ square-root 这就是我们测试的函数
 ```
 
 - 高级操作：http://www.cnblogs.com/coderzh/archive/2009/04/06/1426755.html
+
+- TEST说明
+
+- ```
+  use the TEST_P macro to define as many test patterns using this fixture as you want. The _P suffix is for "parameterized" or "pattern", whichever you prefer to think.
+  
+  you can use INSTANTIATE_TEST_SUITE_P to instantiate the test suite with any set of parameters you want. googletest defines a number of functions for generating test parameters. They return what we call (surprise!) parameter generators. Here is a summary of them, which are all in the testing namespace
+  ```
+
 
 ## protobuf
 
