@@ -45,7 +45,7 @@
 - 确定类名
 - 所有变量放private
 - 用列表初始化写构造函数 
-- 必要的情况：const 修饰函数 和 返回值
+- 必要的时候需要加：const 修饰函数 和 返回值
 - 遵循用的时候才定义类的原则
   - private定义的变量一般放在public后面
   - 偶尔public需要变量，就可以定义到private后面
@@ -143,7 +143,18 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
   -  friend class iterator
   -  https://stackoverflow.com/questions/6195954/what-is-the-difference-of-friend-iterator-and-friend-class-iterator-which-encoun/6196028
 
+### 枚举的使用 enumerations
 
+- It also lets you define new types but in a fairly restricted fashion
+
+- enum spectrum {red, orange, yellow, green, blue, violet, indigo, ultraviolet};
+
+- It makes spectrum the name of a new type; spectrum is termed an enumeration, 
+
+  much as a struct variable is called a structure. 
+
+- It establishes red, orange, yellow, and so on, as symbolic constants for the integer
+  values 0–7.These constants are called enumerators.
 
 ### Class的正确使用
 
@@ -162,8 +173,6 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
   - 局部类不常用
   - 嵌套类常用，两个独立的类，更多的是作用域的考量
   - 为了更好的使用，外部类在使用嵌套类的时候，最好声明，然后再使用
-
-
 
 ### Map使用
 
@@ -206,6 +215,7 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
 - 参考文档：http://www.cplusplus.com/reference/vector/vector/
 - 常用函数
 - reserve
+  - 提前开辟vector空间，可以减少后面自动增长的开销
 
 ### string使用
 
@@ -272,8 +282,6 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
        ...
    };
 ```
-
-
 
 ### typedef用法
 
@@ -364,10 +372,18 @@ function(Handle** wh) {
 #### 引用传递
 
 ```
+std::string xx("hello");
+function(xx);
 
+// 定义函数
+function(std::string& xx) {
+    xxxxx
+}
 ```
 
 #### 传递的区别
+
+- 引用不需要再定义指针变量，只是给之前的变量换了一个别名
 
 ### File使用
 
@@ -400,6 +416,63 @@ int main()
 }
 Edit & Run
 
+```
+
+#### 文件描述符
+
+- 参考资料：https://blog.csdn.net/lf_2016/article/details/54605651
+
+- ```
+  open:以指定方式打开一个文件，调用成功后返回一个文件描述符。 
+  creat:打开一个文件，如果文件不存在则创建它，成功后返回一个文件描述符。 
+  close:关闭文件，进程对文件加锁全部被释放。 
+  read:从文件描述符对应的文件中读取文件，成功后返回读出的字节数。 
+  write:向文件描述符对应的文件中写入数据，成功后返回写入的字节数。 
+  ftruncate:把文件描述符对应的文件缩短到指定的长度。 
+  lseek：把文件指针设置到指定的位置，相当于库函数中的fseek。 
+  fsync:将已经写入到文件的数据写入到磁盘或其他下层设备中，成功返回0。 
+  fstat:返回文件描述符所对应文件的相关信息，把结果保存在struct stat中，成功返回0。 
+  fchown:修改文件描述符对应的文件的文件所有者和文件所有者组的信息。 
+  fchmod:修改文件描述符对应的文件的权限。 
+  flock：对文件施加建议性锁，成功返回0。 
+  fcntl:技能施加建议性锁也能施加强制性锁，能建立记录锁、读取锁，写入锁，成功返回0 
+  dup:复制文件描述符，返回没有使用的文件描述符中的最小编号。 
+  dup2:由用户指定返回的文件描述符的值，用来重新打开或重定向一个文件描述符。 
+  select:同时从多个文件描述符读取数据或向多个文件描述符写入数据
+  ```
+
+
+#### fopen函数
+
+- https://blog.csdn.net/cyforce/article/details/6159989
+- 返回值：文件顺利打开后，指向该流的文件指针就会被返回。如果文件打开失败则返回NULL，并把错误代码存在errno 中。
+
+```
+　　r 打开只读文件，该文件必须存在。
+
+　　r+ 打开可读写的文件，该文件必须存在。
+
+　　rb+ 读写打开一个二进制文件，只允许读写数据。
+
+　　rt+ 读写打开一个文本文件，允许读和写。
+
+　　w 打开只写文件，若文件存在则文件长度清为0，即该文件内容会消失。若文件不存在则建立该文件。
+
+　　w+ 打开可读写文件，若文件存在则文件长度清为零，即该文件内容会消失。若文件不存在则建立该文件。
+
+　　a 以附加的方式打开只写文件。若文件不存在，则会建立该文件，如果文件存在，写入的数据会被加到文件尾，即文件原先的内容会被保留。（EOF符保留）
+
+　　a+ 以附加方式打开可读写的文件。若文件不存在，则会建立该文件，如果文件存在，写入的数据会被加到文件尾后，即文件原先的内容会被保留。 （原来的EOF符不保留）
+
+　　wb 只写打开或新建一个二进制文件；只允许写数据。
+
+　　wb+ 读写打开或建立一个二进制文件，允许读和写。
+
+　　wt+ 读写打开或着建立一个文本文件；允许读写。
+
+　　at+ 读写打开一个文本文件，允许读或在文本末追加数据。
+
+　　ab+ 读写打开一个二进制文件，允许读或在文件末追加数据。
 ```
 
 
@@ -435,19 +508,20 @@ Edit & Run
 - http://www.cppblog.com/jerryma/archive/2010/06/14/117888.html
 - 把文件流指针转换成文件描述符
 - int fileno(FILE *stream)
+- 
 
 #### ftruncate()函数
 
 - http://www.cppblog.com/jerryma/archive/2010/06/14/117888.html
 - 改变文件大小
 - int ftruncate(int fd, off_t  length)
+- 返回值  ：返回和stream文件流对应的文件描述符。如果失败，返回-1
 
 #### lseek函数
 
 - https://baike.baidu.com/item/lseek
 - off_t lseek(int handle, off_t offset, int fromwhere);
 - [当前文件](https://baike.baidu.com/item/%E5%BD%93%E5%89%8D%E6%96%87%E4%BB%B6)[偏移量](https://baike.baidu.com/item/%E5%81%8F%E7%A7%BB%E9%87%8F)（current file offset）cfo
-- 
 
 
 ### memcmp函数使用
@@ -531,15 +605,11 @@ Edit & Run
 - 共享数据：https://baptiste-wicht.com/posts/2012/03/cp11-concurrency-tutorial-part-2-protect-shared-data.html
 - 
 
-### inline
+### inline使用
 
 - 可以在任意函数前面加inline
 - 它的作用只是在调用该函数的时候，直接张开函数里面的内容，而不是真正的用栈调用
 - 减少函数切换的开销
-
-### const成员函数
-
-
 
 ### static_cast 和 reinterpret_cast
 
@@ -573,6 +643,27 @@ Edit & Run
 
 - 基本使用：http://www.cnblogs.com/egmkang/archive/2012/09/06/2673253.html
 
+## C++常用代码段
+
+### 打印时间
+
+- http://www.cnblogs.com/mfryf/archive/2012/02/13/2349360.html
+
+```
+#include<iostream>
+#include<ctime>
+using namespace std;
+int main()
+{
+    time_t now_time;
+    now_time = time(NULL);
+    cout<<now_time;
+    return 0;
+}
+```
+
+### 
+
 ## C++常用库
 
 - boost - C++的准标准库
@@ -594,10 +685,17 @@ Edit & Run
   - 提供对 [POSIX](http://baike.baidu.com/view/209573.htm) 操作系统 [API](http://baike.baidu.com/view/16068.htm) 的访问功能的[头文件](http://baike.baidu.com/view/668911.htm)的名称
   - 文档：http://pubs.opengroup.org/onlinepubs/7908799/xsh/unistd.h.html
   - http://www.cnblogs.com/haore147/p/3646243.html
-- errno.h
+### errno.h
   - http://www.runoob.com/cprogramming/c-standard-library-errno-h.html
   - 定义了整数变量 **errno**，它是通过系统调用设置的，在错误事件中的某些库函数表明了什么发生了错误。该宏扩展为类型为 int 的可更改的左值，因此它可以被一个程序读取和修改。
   - 在程序启动时，**errno** 设置为零，C 标准库中的特定函数修改它的值为一些非零值以表示某些类型的错误。您也可以在适当的时候修改它的值或重置为零。
+
+### assert.h
+
+- ASSERT_NE
+- ASSERT_EQ
+- ASSERT_TRUE
+- ASSERT_FALSE
 
 ## 常见问题
 
@@ -625,6 +723,8 @@ Edit & Run
 
 - https://stackoverflow.com/questions/27272525/what-does-collect2-error-ld-returned-1-exit-status-mean
 - ld 这个工具 返回了一个错误
+
+## 教你C++怎么找bug
 
 
 
@@ -656,14 +756,42 @@ int main(int argc, char **argv) {
 
 ## Gflags
 
+- 文档：https://gflags.github.io/gflags/#define
+
 - 基本调用：http://dreamrunner.org/blog/2014/03/09/gflags-jian-ming-shi-yong/
+
 - 主要两点
   - 在某个文件定义好所有的全局变量，统一管理
-  - 在其他要使用该文件的代码中，加一条生命即可
+  - 在其他要使用该文件的代码中，加一条声明即可
+  - 头文件
   - 比如
   - DEFINE_string(endpoint, "", "config the ip and port that rtidb serves for");
+    - 变量名，变量值，变量说明
   - DECLARE_string(endpoint);
   - 掌握这两点即可！
+
+- Gflags类型
+
+- ```
+  DEFINE_bool: boolean
+  DEFINE_int32: 32-bit integer
+  DEFINE_int64: 64-bit integer
+  DEFINE_uint64: unsigned 64-bit integer
+  DEFINE_double: double
+  DEFINE_string: C++ string 
+  
+  头文件
+  #include "gflags/gflags.h"
+  
+  使用Gflags
+     if (FLAGS_consider_made_up_languages)
+       FLAGS_languages += ",klingon";   // implied by --consider_made_up_languages
+     if (FLAGS_languages.find("finnish") != string::npos)
+       HandleFinnish();
+       
+  声明Gflags
+  	DECLARE_bool(big_menu);
+  ```
 
 ## GTest
 
@@ -697,7 +825,21 @@ square-root 这就是我们测试的函数
 
 ## protobuf
 
-- 文档：https://developers.google.com/protocol-buffers/docs/reference/cpp/google.protobuf.message
+- 文档
+
+  - https://developers.google.com/protocol-buffers/docs/reference/cpp/google.protobuf.message
+  - https://developers.google.cn/protocol-buffers/docs/reference/cpp-generated
+
+- 编译安装：https://github.com/protocolbuffers/protobuf/tree/master/src
+
+- ```
+  $ git clone https://github.com/protocolbuffers/protobuf.git
+  $ cd protobuf
+  $ ./autogen.sh
+  $ ./configure
+  $ make -j5 或者 make
+  $ make install
+  ```
 
 - 主要操作：
 
@@ -711,6 +853,14 @@ square-root 这就是我们测试的函数
   ```
 
 - 然后proto 格式转换成cpp，java等等。后面直接调用
+
+- ```
+  protoc --proto_path=src --cpp_out=build/gen src/foo.proto src/bar/baz.proto
+  
+  proto_path 根目录
+  cpp_out 是生成之后的文件目录
+  src/foo.proto src/bar/baz.proto 是目标文件的位置，必须在proto_path之内
+  ```
 
 - 关键函数
 
