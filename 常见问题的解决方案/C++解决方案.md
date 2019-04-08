@@ -14,7 +14,9 @@
 - cpp大神博客：http://huqunxing.site/
 - 非常棒的笔记：http://www.fredosaurus.com/notes-cpp/index.html
 
+## 个人感受
 
+- c++的环境依赖，版本配置简直是个神坑，填不完的感觉
 
 ## C++解决方案
 
@@ -33,10 +35,15 @@
 - 域名：namespace 全部小写，不超过三个单词
   - namespace，protobuf
 
-### 代码优化-实战获得经验
+### 代码准则-实战获得经验
 
 - 要用的时候再定义变量，不要提前定义好所有的变量
 - 借鉴别人的代码的时候不要直接copy，可以先写下所有的函数名字，然后自己一个个的实现，最后做个比较，看看有没有可以优化的地方
+- 如果是禁止复制的对象，那么对象在传递的时候必须用指针！！！或者使用引用
+- 如果是禁止复制的对象，定义的时候必须用指针！然后通过初始化赋值指针！
+- 写模板，包含比较器的时候，必须使用struct，因为使用class，里面的函数默认是私有函数，还需要额外加public变量！！！
+- 对于模块的设计，一定要越精简越好，不需要的功能不要加，可以通过其他函数组合成新的功能，也不要加。后续重新封装就好了。这样可以减少bug，同时提高稳定性和可移植性
+- 文件编译顺序，先声明类，再定义类，最后才能使用类！！
 
 ### 快速写代码
 
@@ -65,8 +72,6 @@ Template <class或者也可以用typename T>
 <> 里面是模板形式参数，这里面可以有多个class，这函数体里面可以选择调用形参里面的T
 ```
 
-
-
 ### 与Java不同之处，更多是一种习惯的不同
 
 - 定义std::map 不用new。可以直接使用
@@ -74,23 +79,23 @@ Template <class或者也可以用typename T>
 - 函数返回参数，不能是指针和引用，必须是实体对象！！
   - Java似乎用某种方式实现返回对象的指针或者引用
 
-
-
 ### 指针
 
 - 强弱应用：https://www.jianshu.com/p/4b047fc3b0be
-
 - 多个***，代表什么意思：https://blog.csdn.net/soonfly/article/details/51131141
-
 - 图解多级指针：https://www.cnblogs.com/chenyangyao/p/5222696.html
-
 - 结构体指针：http://c.biancheng.net/cpp/html/94.html
-
 - 类对象指针：https://www.cnblogs.com/flylong0204/p/4731318.html
-
 - make_shared & shared_ptr：https://www.jianshu.com/p/4b047fc3b0be
+- 只有指针或者引用可以达到多态。对象不行
 
+```
+对象指针初始化
+	Test* t1 = new Test();
 
+    Student* s1; 
+    s1 = new Student(); 
+```
 
 ### 语法问题
 
@@ -174,29 +179,77 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
   - 嵌套类常用，两个独立的类，更多的是作用域的考量
   - 为了更好的使用，外部类在使用嵌套类的时候，最好声明，然后再使用
 
+#### 默认的构造函数
+
+#### 默认的赋值函数
+
+- 如果是自己实现的默认构造函数
+
+- 比如levelDB的slice类
+
+- 当slice是指针的是
+
+- slice*  s
+
+- *s = Slice(xx,xx);
+
+- 而不应该是 *s = new Slice(xx,xx);
+
+  ```
+      Slice(const Slice&) = default;
+      Slice& operator=(const Slice&) = default;
+      
+      
+  	Slice* result;
+  	*result = Slice(scratch, message_size);
+  ```
+
+
 ### Map使用
 
+- 参考文档：http://www.cplusplus.com/reference/map/map/
+
 - 在多重map中，需要用make_pair进行封装，然后在插入数据
+
   - 比如key也是map,value也是map
   - 那么key 也要make_pair， value也要make_pair
+
 - Map.find（key)。返回的是迭代器
-- 在迭代器的基础上，iter->second。就可以返回value
-- 一般返回迭代器都会判断一下，是否为end情况
+  - 在迭代器的基础上，iter->second。就可以返回value
+
+  - 一般返回迭代器都会判断一下，是否为end情况
+
+  - ```
+      std::map<char,int> mymap;
+      std::map<char,int>::iterator it;
+      it = mymap.find('b');
+      if (it != mymap.end())
+        mymap.erase (it);
+      ```
+
 - key中的类对象，必须实现比较函数，不然编译错误
-- 不要用指针当key！！！
-- 参考文档：http://www.cplusplus.com/reference/map/map/
+
+  - 不要用指针当key！！！
+
 - 插入数据
+
   - map.insert(std::make_pair(key, value));
+
 - 更新数据
+
   - map[key] = value
+
 - 删除数据
   - erase
   - map.erase(key)
+
 - 查找数据
   - find
   - map.find(key)
   - 返回的是迭代器
+
 - 迭代
+
   - const auto& iter: table_info_
 
 ### unordered_map使用
@@ -255,8 +308,9 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
   - 从源src所指的内存地址的起始位置开始拷贝n个字节到目标dest所指的内存地址的起始位置中
   - source和destin都不一定是数组，任意的可读写的空间均可
 - char* test = new char[size];
-
-
+- 字符串拼接
+  - https://baike.baidu.com/item/strcat
+  - char *strcat(char *dest, const char *src);
 
 ### set使用
 
@@ -346,6 +400,11 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
 
     - 解释：https://www.cnblogs.com/cplinux/articles/5553716.html
 
+### exception使用
+
+- std::exception
+- 资料：<https://blog.csdn.net/fengbingchun/article/details/78303734>
+
 ### 函数中的参数
 
 - 默认参数和缺省参数：https://blog.csdn.net/CHF_VIP/article/details/8586921
@@ -386,6 +445,11 @@ function(std::string& xx) {
 #### 传递的区别
 
 - 引用不需要再定义指针变量，只是给之前的变量换了一个别名
+
+#### 注意问题
+
+- 如果传入指针进入函数里面，要避免指针被函数内部修改！！！最好在指针右边加 const。可以编译中查出问题
+- 如果修改指针的内容，那么也要注意修改是否正确
 
 ### File使用
 
@@ -446,7 +510,9 @@ Edit & Run
 
 #### fopen函数
 
-- https://blog.csdn.net/cyforce/article/details/6159989
+- 参考资料
+  - https://blog.csdn.net/cyforce/article/details/6159989
+  - 读写随机还是顺序：https://blog.csdn.net/jianzhanger/article/details/3637322
 - 返回值：文件顺利打开后，指向该流的文件指针就会被返回。如果文件打开失败则返回NULL，并把错误代码存在errno 中。
 - 参数 a+ 是否需要 要看场景
 
@@ -478,8 +544,13 @@ Edit & Run
 　　ab+ 读写打开一个二进制文件，允许读或在文件末追加数据。
 ```
 
+#### remove函数
 
-
+- 文档资料：http://www.cplusplus.com/reference/cstdio/remove/
+- 删除文件
+- 等于0表示成功
+- 注意
+  - 文件下必须没有文件才能删除成功
 
 #### fwrite函数
 
@@ -493,7 +564,7 @@ Edit & Run
 
 #### pread函数
 
-- 文档
+- 文档：https://linux.die.net/man/2/pread
 
 - ```
       int n = 100;
@@ -539,18 +610,66 @@ Edit & Run
 - off_t lseek(int handle, off_t offset, int fromwhere);
 - [当前文件](https://baike.baidu.com/item/%E5%BD%93%E5%89%8D%E6%96%87%E4%BB%B6)[偏移量](https://baike.baidu.com/item/%E5%81%8F%E7%A7%BB%E9%87%8F)（current file offset）cfo
 
+#### lstat函数
 
-### memcmp函数使用
+- https://baike.baidu.com/item/lstat/2885045
+- 返回文件的状态
+- include \<sys/stat.h\>
+
+#### 按位读写
+
+- 参考资料：https://blog.csdn.net/shixiaoguo90/article/details/24832031
+
+- ```
+  
+  ```
+
+### 流处理
+
+#### ofstream
+
+- 文档资料：http://www.cplusplus.com/doc/tutorial/files/
+
+- 文件写入流对象，Stream class to write on files
+
+- ```
+  #include <iostream>
+  #include <fstream>
+  using namespace std;
+  
+  int main () {
+    ofstream file;
+    file.open ("codebind.txt");
+    file << "Please writr this text to a file.\n this text is written using C++\n";
+    file.close();
+    return 0;
+  }
+  ```
+
+#### ifstream
+
+- Stream class to read from files
+
+#### fstream
+
+- Stream class to both read and write from/to files.
+
+### 字符串函数
+
+- 函数集合：http://www.kuqin.com/clib/string/memccpy.html
+
+#### memcmp函数使用
 
 - memcmp(data_, x.data_, x.size_) == 0 data 与 x 比较 前 x个字符串
 
-### memcpy函数使用
+#### memcpy函数使用
 
+- string.h 不要用cstring 参数有区别
 - memcpy(void *dest, const void *src, size_t n) 
 - 从源src所指的内存地址的起始位置开始拷贝n个字节到目标dest所指的内存地址的起始位置中
 - source和destin都不一定是数组，任意的可读写的空间均可
 
-### snprintf函数
+#### snprintf函数
 
 - http://www.cnblogs.com/armlinux/archive/2010/05/25/2397004.html
 - int snprintf(char *restrict buf, size_t n, const char * restrict  format, ...);
@@ -636,10 +755,89 @@ Edit & Run
 - static_cast一般用于同类型转换，如浮点数转整数，但是不能指针，或者字符串转整数
 - reinterpret_cast高风险的类型转换，可以什么类型都互相转换，出现问题不负责，程序员自己承担。它是根据比特流的复制，然后重新解读到新类型
 
+```
+#include <vector>
+#include <iostream>
+ 
+struct B {
+    int m = 0;
+    void hello() const {
+        std::cout << "Hello world, this is B!\n";
+    }
+};
+struct D : B {
+    void hello() const {
+        std::cout << "Hello world, this is D!\n";
+    }
+};
+ 
+enum class E { ONE = 1, TWO, THREE };
+enum EU { ONE = 1, TWO, THREE };
+ 
+int main()
+{
+    // 1: initializing conversion
+    int n = static_cast<int>(3.14); 
+    std::cout << "n = " << n << '\n';
+    std::vector<int> v = static_cast<std::vector<int>>(10);
+    std::cout << "v.size() = " << v.size() << '\n';
+ 
+    // 2: static downcast
+    D d;
+    B& br = d; // upcast via implicit conversion
+    br.hello();
+    D& another_d = static_cast<D&>(br); // downcast
+    another_d.hello();
+ 
+    // 3: lvalue to xvalue
+    std::vector<int> v2 = static_cast<std::vector<int>&&>(v);
+    std::cout << "after move, v.size() = " << v.size() << '\n';
+ 
+    // 4: discarded-value expression
+    static_cast<void>(v2.size());
+ 
+    // 5. inverse of implicit conversion
+    void* nv = &n;
+    int* ni = static_cast<int*>(nv);
+    std::cout << "*ni = " << *ni << '\n';
+ 
+    // 6. array-to-pointer followed by upcast
+    D a[10];
+    B* dp = static_cast<B*>(a);
+ 
+    // 7. scoped enum to int or float
+    E e = E::ONE;
+    int one = static_cast<int>(e);
+    std::cout << one << '\n';
+ 
+    // 8. int to enum, enum to another enum
+    E e2 = static_cast<E>(one);
+    EU eu = static_cast<EU>(e2);
+ 
+    // 9. pointer to member upcast
+    int D::*pm = &D::m;
+    std::cout << br.*static_cast<int B::*>(pm) << '\n';
+ 
+    // 10. void* to any type
+    void* voidp = &e;
+    std::vector<int>* p = static_cast<std::vector<int>*>(voidp);
+}
+```
+
+
+
 ### const_cast
 
 - const类型转非const
 - 也就是去const属性
+- 通过指针的特点来去除const
+
+```
+const int constant = 21;
+int* modifier = const_cast<int*>(&constant);
+```
+
+
 
 ### dynamic_cast
 
@@ -666,8 +864,8 @@ Edit & Run
 - http://www.cnblogs.com/mfryf/archive/2012/02/13/2349360.html
 
 ```
-#include<iostream>
-#include<ctime>
+#include <iostream>
+#include <ctime>
 using namespace std;
 int main()
 {
@@ -678,7 +876,128 @@ int main()
 }
 ```
 
-### 
+### 打印毫秒级别的时间
+
+- 资料
+  - <https://stackoverflow.com/questions/19555121/how-to-get-current-timestamp-in-milliseconds-since-1970-just-the-way-java-gets>
+- 文档
+  - <https://en.cppreference.com/w/cpp/chrono>
+  - <https://blog.csdn.net/u013390476/article/details/50209603>
+  - <https://www.jianshu.com/p/80de04b41c31>
+- 时间戳转换工具：<https://tool.lu/timestamp/>
+
+```
+static inline uint64_t GetMillisecondTimestamp() {
+    auto now = std::chrono::system_clock::now();
+    uint64_t ts = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+    return ts;
+}
+
+static inline uint64_t GetMicrosecondsTimestamp() {
+    auto now = std::chrono::system_clock::now();
+    uint64_t ts = (uint64_t)std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count();
+    return ts;
+}
+
+static inline uint64_t GetSecondTimestamp() {
+    auto now = std::chrono::system_clock::now();
+    uint64_t ts = (uint64_t)std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
+    return ts;
+}
+```
+
+
+
+### 数字转字节
+
+- 这个超级常用，数字写入文件的时候一定要压缩到规定4字节或者8字节。这样就能按字节大小读出文件
+
+- 如果直接写数字到文件里面，那么就是1个数字符号1个字节。根本没有办法规定大小读取数字！！！
+
+- 这个弄了我一个下午，后面发现levelDB里面
+
+- ```c++
+  inline void EncodeFixed32(char* buf, uint32_t value) {
+      if (kLittleEndian) {
+          memcpy(buf, &value, sizeof(value));
+      } else {
+          buf[0] = value & 0xff;
+          buf[1] = (value >> 8) & 0xff;
+          buf[2] = (value >> 16) & 0xff;
+          buf[3] = (value >> 24) & 0xff;
+      }
+  }
+  
+  inline void EncodeFixed64(char* buf, uint64_t value) {
+      if (kLittleEndian) {
+          memcpy(buf, &value, sizeof(value));
+      } else {
+          buf[0] = value & 0xff;
+          buf[1] = (value >> 8) & 0xff;
+          buf[2] = (value >> 16) & 0xff;
+          buf[3] = (value >> 24) & 0xff;
+          buf[4] = (value >> 32) & 0xff;
+          buf[5] = (value >> 40) & 0xff;
+          buf[6] = (value >> 48) & 0xff;
+          buf[7] = (value >> 56) & 0xff;
+      }
+  }
+  
+  inline uint32_t DecodeFixed32(const char* ptr) {
+      if (kLittleEndian) {
+          // Load the raw bytes
+          uint32_t result;
+          memcpy(&result, ptr, sizeof(result));  // gcc optimizes this to a plain load
+          return result;
+      } else {
+          return ((static_cast<uint32_t>(static_cast<unsigned char>(ptr[0])))
+          | (static_cast<uint32_t>(static_cast<unsigned char>(ptr[1])) << 8)
+          | (static_cast<uint32_t>(static_cast<unsigned char>(ptr[2])) << 16)
+          | (static_cast<uint32_t>(static_cast<unsigned char>(ptr[3])) << 24));
+      }
+  }
+  
+  inline uint64_t DecodeFixed64(const char* ptr) {
+      if (kLittleEndian) {
+          // Load the raw bytes
+          uint64_t result;
+          memcpy(&result, ptr, sizeof(result));  // gcc optimizes this to a plain load
+          return result;
+      } else {
+          uint64_t lo = DecodeFixed32(ptr);
+          uint64_t hi = DecodeFixed32(ptr + 4);
+          return (hi << 32) | lo;
+      }
+  }
+  ```
+
+### 大小端检查
+
+```c++
+typedef signed char           int8_t;
+typedef signed short          int16_t;
+typedef signed int            int32_t;
+typedef signed long long      int64_t;
+typedef unsigned char         uint8_t;
+typedef unsigned short        uint16_t;
+typedef unsigned int          uint32_t;
+typedef unsigned long long    uint64_t;
+namespace ibdb {
+namespace port {
+
+inline const bool IsLittleEndian() {
+    int a = 1;
+    if (*(char*)&a == 1) {
+      return true;
+    } else {
+      return false;
+    }
+}
+
+static const bool kLittleEndian = IsLittleEndian();
+```
+
+
 
 ## C++常用库
 
@@ -712,6 +1031,39 @@ int main()
 - ASSERT_EQ
 - ASSERT_TRUE
 - ASSERT_FALSE
+
+### boost库
+
+#### 字符串转数字
+
+- 文档：<http://www.habadog.com/2011/05/07/boost-lexical_cast-intro/>
+
+```
+#include "iostream"
+#include "boost/lexical_cast.hpp" // 需要包含的头文件
+ 
+using boost::lexical_cast;
+using boost::bad_lexical_cast;
+using namespace std;
+ 
+int main()
+{
+    char* p="32768";
+    int i=0;
+    try
+    {
+        i=lexical_cast<int>(p); // 将字符串转化为整数
+    }
+    catch(bad_lexical_cast&)    // 转换失败会抛出一个异常
+    {
+        i=0;
+    }
+    cout << i << endl;
+    return i;
+}
+```
+
+
 
 ## 常见问题
 
@@ -783,6 +1135,12 @@ limiter_不支持赋值语句!!!!
 
 - 当然也可能是最愚蠢的问题
 - 创建对象没有添加new
+
+### 使用lldb或者gdb来查找segment fault
+
+- 这是最有效的方法查找段错误，也就是内存错误。
+- 因为可以一步一步单步调试，所以很方便
+- 如何使用查询本方案目录栏
 
 ## GLog
 
@@ -879,6 +1237,8 @@ square-root 这就是我们测试的函数
 
 - 高级操作：http://www.cnblogs.com/coderzh/archive/2009/04/06/1426755.html
 
+- 生成xml文档：https://stackoverflow.com/questions/8268584/generate-google-c-unit-test-xml-report
+
 - TEST说明
 
 - ```
@@ -945,7 +1305,34 @@ square-root 这就是我们测试的函数
 
     The given message must have the same descriptor, but need not necessarily be the same class. By default this is just implemented as "Clear(); MergeFrom(from);".
 
+- message类型API
 
+  - 文档：https://developers.google.cn/protocol-buffers/docs/reference/cpp/google.protobuf.message#Message
+  - 
+
+- 序列化和反序列化
+
+  - 在日志和通信压缩里面可以使用
+  - https://developers.google.cn/protocol-buffers/docs/reference/cpp/google.protobuf.message#Message.SerializeToFileDescriptor.details
+
+- cmakelist中可以直接生成proto文件
+
+- ```
+  include(FindProtobuf)
+  protobuf_generate_cpp(PROTO_SRC PROTO_HEADER echo.proto)
+  ```
+
+- 注意
+
+  - protobuf 3 有很多问题，推荐使用2.5左右版本
+  - 找到protobuf ，然后删除
+    - which protoc
+  - 2.5版本在github全部clone下来
+  - git checkout v2.5.0
+  - 注意官网编译脚本有问题
+  - autogen.sh 要注释掉部分没用的语句
+  - 直接生成configutation即可
+  - 后面就是make 一系列操作
 
 ## OOP
 
@@ -1152,6 +1539,28 @@ add_executable(simple_example ${SOURCE_FILES})       # Add executable target wit
 - 参考资料：https://www.cnblogs.com/binbinjx/p/5626916.html
 - 专门用于链接lib目录下的动态库
 
+### configure参数详解
+
+- 参考资料：https://blog.csdn.net/zjt289198457/article/details/6918656
+
+- ```
+  --prefix=PREFIX 
+  把所有文件装在目录   PREFIX下面而不是   /usr/local/pgsql   里．实际的文件会安装到不同的子目录里；甚至没有一个文件会直接   安装到   PREFIX   目录里．
+  这个是最常用的！！！
+  ```
+
+### 添加GDB调试功能
+
+- 先按照好gdb
+
+- 然后在cmake里面写这些配置
+
+- ```
+  set(CMAKE_BUILD_TYPE "Debug")
+  set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
+  set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
+  ```
+
 ## Linux下的C++
 
 ### 基本编译运行
@@ -1202,6 +1611,132 @@ add_executable(simple_example ${SOURCE_FILES})       # Add executable target wit
     ],
     "version": 4
 }
+```
+
+## GDB的使用
+
+- 参考资料
+  - <https://www.cs.cmu.edu/~gilpin/tutorial/>
+  - <https://blog.csdn.net/liigo/article/details/582231>
+
+```
+添加可以gdb调试的文件
+gdb xxx
+
+然后运行
+run 或者 start
+
+
+```
+
+### Unable to find Mach task port for process-id 801: (os/kern) failure (0x5)
+
+- 参考资料：<https://stackoverflow.com/questions/11504377/gdb-fails-with-unable-to-find-mach-task-port-for-process-id-error>
+- 最快的方法
+- sudo gdb xxxx
+- 长久的方法
+  - <http://codelife.me/blog/2014/07/14/install-gdb-on-osx-mavericks/>
+- 安装gdb证书
+
+### During startup program terminated with signal SIG113 ?
+
+- 编译被终止了在mac系统中
+
+### During startup program terminated with signal SIGTRAP
+
+- 
+
+## lldb的使用
+
+- 参考资料
+  - <https://www.jianshu.com/p/087cd19d49ba>
+- 下一步直接进入源码层 s
+- 下一步但是不进入源码层 n
+- 给某个文件设置断点
+  - breakpoint set -f Foo.m -l 10
+  - <https://www.jianshu.com/p/dcc8e647a501>
+- 跳到下一个断点
+  - c
+
+```
+Debugger commands:
+  apropos           -- List debugger commands related to a word or subject.
+  breakpoint        -- Commands for operating on breakpoints (see 'help b' for shorthand.)
+  bugreport         -- Commands for creating domain-specific bug reports.
+  command           -- Commands for managing custom LLDB commands.
+  disassemble       -- Disassemble specified instructions in the current target.  Defaults to the current function for the current thread and stack frame.
+  expression        -- Evaluate an expression on the current thread.  Displays any returned value with LLDB's default formatting.
+  frame             -- Commands for selecting and examing the current thread's stack frames.
+  gdb-remote        -- Connect to a process via remote GDB server.  If no host is specifed, localhost is assumed.
+  gui               -- Switch into the curses based GUI mode.
+  help              -- Show a list of all debugger commands, or give details about a specific command.
+  kdp-remote        -- Connect to a process via remote KDP server.  If no UDP port is specified, port 41139 is assumed.
+  language          -- Commands specific to a source language.
+  log               -- Commands controlling LLDB internal logging.
+  memory            -- Commands for operating on memory in the current target process.
+  platform          -- Commands to manage and create platforms.
+  plugin            -- Commands for managing LLDB plugins.
+  process           -- Commands for interacting with processes on the current platform.
+  quit              -- Quit the LLDB debugger.
+  register          -- Commands to access registers for the current thread and stack frame.
+  script            -- Invoke the script interpreter with provided code and display any results.  Start the interactive interpreter if no code is supplied.
+  settings          -- Commands for managing LLDB settings.
+  source            -- Commands for examining source code described by debug information for the current target process.
+  statistics        -- Print statistics about a debugging session
+  target            -- Commands for operating on debugger targets.
+  thread            -- Commands for operating on one or more threads in the current process.
+  type              -- Commands for operating on the type system.
+  version           -- Show the LLDB debugger version.
+  watchpoint        -- Commands for operating on watchpoints.
+Current command abbreviations (type 'help command alias' for more info):
+  add-dsym  -- Add a debug symbol file to one of the target's current modules by specifying a path to a debug symbols file, or using the options to specify a module to download symbols
+               for.
+  attach    -- Attach to process by ID or name.
+  b         -- Set a breakpoint using one of several shorthand formats.
+  bt        -- Show the current thread's call stack.  Any numeric argument displays at most that many frames.  The argument 'all' displays all threads.
+  c         -- Continue execution of all threads in the current process.
+  call      -- Evaluate an expression on the current thread.  Displays any returned value with LLDB's default formatting.
+  continue  -- Continue execution of all threads in the current process.
+  detach    -- Detach from the current target process.
+  di        -- Disassemble specified instructions in the current target.  Defaults to the current function for the current thread and stack frame.
+  dis       -- Disassemble specified instructions in the current target.  Defaults to the current function for the current thread and stack frame.
+  display   -- Evaluate an expression at every stop (see 'help target stop-hook'.)
+  down      -- Select a newer stack frame.  Defaults to moving one frame, a numeric argument can specify an arbitrary number.
+  env       -- Shorthand for viewing and setting environment variables.
+  exit      -- Quit the LLDB debugger.
+  f         -- Select the current stack frame by index from within the current thread (see 'thread backtrace'.)
+  file      -- Create a target using the argument as the main executable.
+  finish    -- Finish executing the current stack frame and stop after returning.  Defaults to current thread unless specified.
+  image     -- Commands for accessing information for one or more target modules.
+  j         -- Set the program counter to a new address.
+  jump      -- Set the program counter to a new address.
+  kill      -- Terminate the current target process.
+  l         -- List relevant source code using one of several shorthand formats.
+  list      -- List relevant source code using one of several shorthand formats.
+  n         -- Source level single step, stepping over calls.  Defaults to current thread unless specified.
+  next      -- Source level single step, stepping over calls.  Defaults to current thread unless specified.
+  nexti     -- Instruction level single step, stepping over calls.  Defaults to current thread unless specified.
+  ni        -- Instruction level single step, stepping over calls.  Defaults to current thread unless specified.
+  p         -- Evaluate an expression on the current thread.  Displays any returned value with LLDB's default formatting.
+  parray    -- Evaluate an expression on the current thread.  Displays any returned value with LLDB's default formatting.
+  po        -- Evaluate an expression on the current thread.  Displays any returned value with formatting controlled by the type's author.
+  poarray   -- Evaluate an expression on the current thread.  Displays any returned value with LLDB's default formatting.
+  print     -- Evaluate an expression on the current thread.  Displays any returned value with LLDB's default formatting.
+  q         -- Quit the LLDB debugger.
+  r         -- Launch the executable in the debugger.
+  rbreak    -- Sets a breakpoint or set of breakpoints in the executable.
+  repl      -- Evaluate an expression on the current thread.  Displays any returned value with LLDB's default formatting.
+  run       -- Launch the executable in the debugger.
+  s         -- Source level single step, stepping into calls.  Defaults to current thread unless specified.
+  si        -- Instruction level single step, stepping into calls.  Defaults to current thread unless specified.
+  sif       -- Step through the current block, stopping if you step directly into a function whose name matches the TargetFunctionName.
+  step      -- Source level single step, stepping into calls.  Defaults to current thread unless specified.
+  stepi     -- Instruction level single step, stepping into calls.  Defaults to current thread unless specified.
+  t         -- Change the currently selected thread.
+  tbreak    -- Set a one-shot breakpoint using one of several shorthand formats.
+  undisplay -- Stop displaying expression at every stop (specified by stop-hook index.)
+  up        -- Select an older stack frame.  Defaults to moving one frame, a numeric argument can specify an arbitrary number.
+  x         -- Read from the memory of the current target process.
 ```
 
 
