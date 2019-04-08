@@ -76,6 +76,11 @@
 - find 文件路径 参数
 - find Documents/ -iname  工程设计
 
+### 查看mac内部有多少字体
+
+- 直接复制执行下面的命令
+- fc-list :lang=zh file family style
+
 ## 安装软件
 
 ### 安装md5sum
@@ -129,9 +134,9 @@
 
 ### 滚蛋pandac。浪费我时间的垃圾软件
 
+## 常见问题
 
-
-## mac Operation not permitted 权限问题
+### mac Operation not permitted 权限问题
 
 - 开启权限：http://osxdaily.com/2018/10/09/fix-operation-not-permitted-terminal-error-macos/
 - 重启电脑，进入恢复模式
@@ -142,11 +147,15 @@
 - reboot
 - 即可
 
+### 取消brew安装软件时候自动更新的问题
 
+- 打开 ~/.bashrc
+- 添加
+- export HOMEBREW_NO_AUTO_UPDATE=true
 
 ### 
 
-## 两个python版本切换
+### 两个python版本切换
 
 - https://blog.csdn.net/qq_38789531/article/details/82431933
 
@@ -172,18 +181,21 @@
 
 - python -V
 
-
-
-
-
-## ValueError: unknown locale: UTF-8 in Python
+### ValueError: unknown locale: UTF-8 in Python
 
 - ```
   export LC_ALL=en_US.UTF-8
   export LANG=en_US.UTF-8
   ```
 
+### 安装gnu-getopt的问题
 
+- 参考资料：http://macappstore.org/gnu-getopt/
+- ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" < /dev/null 2> /dev/null
+- brew install gnu-getopt
+- echo 'export PATH="/usr/local/opt/gnu-getopt/bin:$PATH"' >> ~/.bashrc
+- source ~/.bashrc
+- path路径一定要写进bashrc才能生效！！！
 
 ## 终端
 
