@@ -535,12 +535,58 @@
 - 参考资料：
   - https://www.jianshu.com/p/63ea84c9666e
   - https://segmentfault.com/q/1010000005269977
--  静态库是指编译连接时，把库文件的代码全部加入到可执行文件中，所以生成的文件较大，但运行时，就不再需要库文件了。即，程序与静态库编译链接后，即使删除静态库文件，程序也可正常执行。
--  动态库正好相反，在编译链接时，没有把库文件的代码加入到可执行文件中，所以生成的文件较小，但运行时，仍需要加载库文件。即，程序只在执行启动时才加载动态库，如果删除动态库文件，程序将会因为无法读取动态库而产生异常。
+- 静态库是指编译连接时，把库文件的代码全部加入到可执行文件中，所以生成的文件较大，但运行时，就不再需要库文件了。即，程序与静态库编译链接后，即使删除静态库文件，程序也可正常执行。
+- 动态库正好相反，在编译链接时，没有把库文件的代码加入到可执行文件中，所以生成的文件较小，但运行时，仍需要加载库文件。即，程序只在执行启动时才加载动态库，如果删除动态库文件，程序将会因为无法读取动态库而产生异常。
 - 静态库.a
 - 动态库.so
 - --enable-static 生成静态库a文件
 - --enable-shared 生成共享库so文件
+
+## Vim
+
+### 基本操作
+
+- 参考资料：https://zhuanlan.zhihu.com/p/60334138
+
+```
+j 向下
+30j 向下移动30行
+k 向上
+h 向左
+l 向右
+0 到行首
+^ 到行首第一个字符，如果前面有空格的话
+$ 到行尾
+gg 快速到文件头
+G 快速到文件尾
+100G 跳转到第100行
+
+yy 复制一行
+10yy 向下复制10行
+yw 复制光标开始的一个单词
+y$ 复制光标到行尾
+yfB 复制光标到第一个大写B中间的内容
+y2fB 复制光标到第二个大写B中间的内容
+
+x 向剪切一个一个字符，如果是在行尾，则为向前剪切
+3x 剪切三个
+xp 非行尾交换两个字符，如从bs变成sb
+
+dd 删除一行
+200dd 删除200行
+dw 删除一个单词 （最喜欢啦）
+df" 删除到出现的第一个双引号
+
+
+p 粘贴复制或剪切的内容
+3p 将复制或剪切的内容粘贴三次
+
+wq 保存当前文件并退出
+wqa 保存所有文件并退出
+q! 不保存，直接退出
+qa! 有多个文件被打开，同时退出
+
+```
 
 
 
@@ -648,13 +694,9 @@ int1 -le int2　　　　int1小于等于int2为真
 
 ### ulimit -c unlimite
 
-
-
 ### cd
 
 - cd - 可以返回上一次操作目录，不是上一个目录
-
-
 
 ### sed
 
@@ -666,12 +708,19 @@ int1 -le int2　　　　int1小于等于int2为真
   - 73c 表示73行要被替换，后面跟替换字符串，注意转义字符
 - sed -n 4,8p file #打印file中的4-8行
 - sed -n 4p file #打印file中的第4行
+
 - 注意！！！
 - 如果要把shell变量写入文件中
 - 必须用双引号！！！
 - 不能用单引号！！！
   - 参考链接：https://blog.csdn.net/geekcome/article/details/17741393
 
+```
+sed -i "44c "--headers \) HDRS_IN=\"$2\"; shift 2 ;;"" config_brpc.sh
+```
+
+- mac 使用这个命令似乎有问题啊！！
+- sed: 1: "config_brpc.sh": command c expects \ followed by text
 
 ### nl
 
@@ -802,12 +851,15 @@ int1 -le int2　　　　int1小于等于int2为真
 
 - tar -zxvf ×××.tar.gz
 
+### which
+
+- http://www.runoob.com/linux/linux-comm-which.html
+- which指令会在环境变量$PATH设置的目录里查找符合条件的文件
+
 ### 通过端口查看进程pid
 
 - netstat -nap | grep 进程pid
 - 参考资料：http://www.cnblogs.com/MacoLee/p/5664306.html
-
-
 
 ### 命令结果保存在变量中
 
@@ -937,6 +989,18 @@ int1 -le int2　　　　int1小于等于int2为真
 - sed -n 4,8p file #打印file中的4-8行
 - sed -n 4p file #打印file中的第4行
 
+### 替换文件的某一行内容
+
+- sed -i '73c string' filename
+
+```
+
+sed -i "44c \"--headers ) HDRS_IN=\"\$2\"; shift 2 ;;\"" config_brpc.sh
+sed -i '45c "--libs ) LIBS_IN="\$2"; shift 2 ;;"' config_brpc.sh
+```
+
+
+
 ### 函数使用
 
 - 参考资料
@@ -949,6 +1013,8 @@ int1 -le int2　　　　int1小于等于int2为真
 - 函数参数
   - 函数外部就和vi grep一样直接写入参数
   - 函数内部调用的时候用$1,2,3,4这样的序号来表示外部传入的参数
+
+
 
 ```
 # 参考例子
@@ -1010,7 +1076,7 @@ funWithParam 1 2 3 4 5 6 7 8 9 34 73
 ROOT_DIR=`pwd`
 cd logs
 
-RECEIVER='wangzixian@4paradigm.com'
+RECEIVER='xxxx.com'
 TITLE='title'
 CONTEXT='context'
 # logs/文件
@@ -1032,14 +1098,14 @@ do
     for element in $file
         do
             if [ $index -eq 0 ]; then
-            monitor_file=$element
-            echo $monitor_file
-            index=`expr $index + 1`
-            else
-            # echo $monitor_file
-            cat $monitor_file -n | grep $element
-            # rows=$(wc -l $monitor_file | awk '{print $1}')
-            # echo $rows
+                monitor_file=$element
+                echo $monitor_file
+                index=`expr $index + 1`
+                else
+                # echo $monitor_file
+                cat $monitor_file -n | grep $element
+                # rows=$(wc -l $monitor_file | awk '{print $1}')
+                # echo $rows
             fi
         done
     IFS=$SAVEIFS
@@ -1061,6 +1127,7 @@ done
 
 # done
 
+# 发邮件shell命令
 # echo $CONTEXT | mail -s $TITLE $RECEIVER
 # mail -s $TITLE $RECEIVER < $CONTEXT_FILE
 # echo "done"
@@ -1095,6 +1162,25 @@ do
 
 done
 IFS=$SAVEIFS
+
+```
+
+### 执行当前目录下的test脚本
+
+```
+输入all 就运行所有test
+输入指定test文件名 就运行指定TEST
+
+if [ $1 = 'all' ]; then
+        rows=$(ls | grep test | awk '{print $1}')
+        echo $rows
+        for test in $rows
+        do
+            ./$test
+        done
+    else
+        ./$1
+fi
 ```
 
 
