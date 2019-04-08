@@ -11,7 +11,6 @@
 ### 个人总结
 
 - 写的每一行代码应该明确它的目的和约束
-- 
 
 [TOC]
 
@@ -319,7 +318,8 @@
   - 返回引用后，根本没办法delete 释放资源。导致资源泄漏
   - 上面不管什么方式，都构造了新的对象，造成新的消耗
 - 解决
-  - 不声明即可
+  - 如果你要在一个局部函数中创建一个对象，那么请直接返回这个对象即可！
+  - 局部函数中对象一定要注意作用域，操作不好会被局部函数销毁
 - 总结
   - 绝不要返回指针或reference指向一个local stack对象，或返回reference指向一个heap-allocated 对象，或返回pointer或reference指向
 - 个人总结
@@ -591,21 +591,33 @@
 
 ### 模版与泛型编程
 
-41
+#### 41
 
-42
+#### 42了解typename的双重意义：Understand the two meanings of typename
 
-43
+- 原因
+  - 使用template会出现歧义
+  - 
+- 解决
+  - 在template需要指定一个嵌套从属类型名称时，那么要类型前放上关键字typename
+- 总结
+  - 声明template参数时，前缀关键字class和typename可互换
+  - 请使用关键字typename标识嵌套从属类型的名称，但不可以在base class lists基类或者member initialization list成员初值列内以它作为base class 修饰符
+  - 
+- 个人总结
+  - 
 
-44
+#### 43
 
-45
+#### 44
 
-46
+#### 45
 
-47
+#### 46
 
-48
+#### 47
+
+#### 48
 
 ### 定制new和delete
 
