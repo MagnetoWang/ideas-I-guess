@@ -36,3 +36,51 @@
 - 下载转换器：https://calibre-ebook.com/download_osx
 - 把
 - sudo ln -s /Applications/calibre.app/Contents/MacOS/ebook-convert /usr/bin
+
+## 画图工具
+
+- 思维导图：https://blog.csdn.net/wangyaninglm/article/details/52887045
+- 流程图：https://blog.csdn.net/aizhaoyu/article/details/44350821
+
+### flow语法
+
+### type
+
+- start 
+  end 
+  operation 
+  subroutine 
+  condition 
+  inputoutput
+
+```flow
+st=>start: Start
+op=>operation: Your Operation
+cond=>condition: Yes or No?
+e=>end
+st->op->cond
+cond(yes)->e
+cond(no)->op
+```
+
+
+
+
+
+st=>start: Get
+check1=>operation: check Key
+check2=>operation: check TS
+check3=>operation: check Value
+cond1=>condition: Have it or not?
+cond2=>condition: Have it or not?
+cond3=>condition: Have it or not?
+none=>operation: return none
+value=>operation: return value
+e=>end: End
+st->chek1->cond1
+cond1(yes)->check2->cond2
+cond2(yes)->check3->cond3
+cond3(yes)->value->e
+cond1(no)->none->e
+cond2(no)->none->e
+cond3(no)->none->e
