@@ -187,19 +187,17 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
 
 - 比如levelDB的slice类
 
-- 当slice是指针的是
+- 当slice是指针的时候
 
 - slice*  s
 
-- *s = Slice(xx,xx);
+- *s = Slice(参数);
 
 - 而不应该是 *s = new Slice(xx,xx);
 
   ```
       Slice(const Slice&) = default;
       Slice& operator=(const Slice&) = default;
-      
-      
   	Slice* result;
   	*result = Slice(scratch, message_size);
   ```
@@ -251,6 +249,12 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
 - 迭代
 
   - const auto& iter: table_info_
+
+- map中是有序的
+
+  - 插入顺序：1000 500 700
+  - 迭代后的顺序是：500 700 1000
+  - 字符串顺序按字典序：aaa，abc，abcd，abcde，bbb，ccc
 
 ### unordered_map使用
 
