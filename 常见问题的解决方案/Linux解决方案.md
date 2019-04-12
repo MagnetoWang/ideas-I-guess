@@ -7,7 +7,7 @@
 - 作为Windows的老用户，不得不说，Linux真难用！
 - 作为计算机专业的我来说，Linux不得不学！
 
-
+f
 
 [TOC]
 
@@ -515,6 +515,14 @@
 - python setup.py install --user
 - 加一个user
 - https://stackoverflow.com/questions/21093002/error-could-not-create-usr-local-lib-python2-7-dist-packages-virtualenv-suppo
+
+### 修改系统编码
+
+```
+vi ~/.bash_profile
+export LANG="en_US.UTF-8"
+source ~/.bash_profile
+```
 
 
 

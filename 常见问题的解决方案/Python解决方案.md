@@ -71,7 +71,7 @@
   - read_path = "tmp/server_in" 正确做法是去掉第一个反斜杆
 - 
 
-Python 图片操作
+### Python 图片操作
 
 - PIL文档：https://pillow.readthedocs.io/en/4.2.x/reference/Image.html
 - 颜色转化公式：https://blog.csdn.net/icamera0/article/details/50843196
@@ -158,6 +158,33 @@ print list
 - 管道的打开顺序很重要
 
   - Examples：https://www.programcreek.com/python/example/3522/os.mkfifo
+
+## Python的奇怪语法
+
+### 逗号
+
+- 参考资料：<http://www.runoob.com/python3/python3-tuple.html>
+- ​        losses = self.loss_detection, self.loss_landmarks, self.loss_visibility, self.loss_pose, self.loss_gender, self.loss
+- losses是元组类型，默认可以不加括号
+
+### 下划线
+
+- 参考资料：<http://www.runoob.com/w3cnote/python-5-underline.html>
+-  self.session.run返回三个值，其中一个值返回给_
+- _：表示临时变量或者没有意义的变量
+
+```
+        _, merged_summary, loss_values = self.session.run([self.train_op, self.merged_summary, losses], feed_dict={
+            self.inputs: inputs,
+            self.detection_gt: outputs.detection,
+            self.landmarks_gt: outputs.landmarks,
+            self.visibility_gt: outputs.visibility,
+            self.pose_gt: outputs.pose,
+            self.gender_gt: outputs.gender,
+        })
+```
+
+
 
 [TOC]
 
