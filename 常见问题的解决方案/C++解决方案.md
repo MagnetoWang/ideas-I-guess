@@ -56,6 +56,7 @@
 - 遵循用的时候才定义类的原则
   - private定义的变量一般放在public后面
   - 偶尔public需要变量，就可以定义到private后面
+- 类里面如果还要定义对象，请设置成指针对象，防止两次对象申明
 
 #### 模板的编写
 
@@ -70,6 +71,9 @@ Template <class或者也可以用typename T>
 
 在正常的函数前面加一行 template即可
 <> 里面是模板形式参数，这里面可以有多个class，这函数体里面可以选择调用形参里面的T
+
+// 实际参考
+
 ```
 
 ### 与Java不同之处，更多是一种习惯的不同
@@ -202,6 +206,28 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
   	*result = Slice(scratch, message_size);
   ```
 
+#### 类里面声明其他类
+
+- 参考资料：<https://blog.csdn.net/jinjgkfadfaf/article/details/52713256>
+- 如果类里面声明其他类，那么会出现声明两次对象的现象
+- 为了解决这个问题统一改成类里面声明其他类的指针
+
+```
+class B {
+private:
+	A *a;
+public:
+	B() {
+		a = new A();
+		cout << "B is constructed!" << endl;
+	}
+	~B() {
+		delete a;
+	}
+
+```
+
+
 
 ### Map使用
 
@@ -255,6 +281,15 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
   - 插入顺序：1000 500 700
   - 迭代后的顺序是：500 700 1000
   - 字符串顺序按字典序：aaa，abc，abcd，abcde，bbb，ccc
+
+- 修改map的value对象
+
+  - class& name = map.at(key)
+  - at返回是个引用
+  - 如果对象后面不加引用，那么map就会复制出一个value对象，然后传出来。这样当你修改value对象里面的内容的时候，就和map中的value没有关系了
+  - 所以是否加引用，要看具体情况。如果要修改map中value对象的内容，那么就要加
+  - std::map<std::string, std::map<uint64_t, uint32_t>>::iterator it = offset_pos_map_.find(current_file);
+  - std::map<uint64_t, uint32_t>& offset_pos = offset_pos_map_.at(current_file)
 
 ### unordered_map使用
 
@@ -436,12 +471,14 @@ function(Handle** wh) {
 
 #### 引用传递
 
+- 所有的引用必须加const限定
+
 ```
 std::string xx("hello");
 function(xx);
 
 // 定义函数
-function(std::string& xx) {
+function(const std::string& xx) {
     xxxxx
 }
 ```
@@ -454,6 +491,24 @@ function(std::string& xx) {
 
 - 如果传入指针进入函数里面，要避免指针被函数内部修改！！！最好在指针右边加 const。可以编译中查出问题
 - 如果修改指针的内容，那么也要注意修改是否正确
+
+### 函数指针
+
+#### 场景
+
+- 来模板中调用统一函数接口，函数名相同，但是函数的参数全部都一样。比如服务端的各种类型的请求函数
+
+#### 资料
+
+- 使用方法：<https://www.cprogramming.com/tutorial/function-pointers.html
+
+#### 使用
+
+```
+
+```
+
+
 
 ### File使用
 
@@ -672,6 +727,7 @@ Edit & Run
 - memcpy(void *dest, const void *src, size_t n) 
 - 从源src所指的内存地址的起始位置开始拷贝n个字节到目标dest所指的内存地址的起始位置中
 - source和destin都不一定是数组，任意的可读写的空间均可
+- 最好在指针字符串末尾添加 \0 ，防止字节流尾部出现无关字符
 
 #### snprintf函数
 
@@ -707,8 +763,6 @@ Edit & Run
 - ​    string2 = 3;              // 这样也是不行的, 因为取消了隐式转换  
 - ​    string3 = string1;        // 这样也是不行的, 因为取消了隐式转换, 除非类实现操作符"="的重载  
 
-
-
 ### 线程
 
 #### 线程池
@@ -733,8 +787,6 @@ Edit & Run
 - 不能insert指针或者引用！！！！！！
 - 不能insert指针或者引用！！！！！！
 - 这会在STL中因为赋值操作，导致指针失效！！！
-
-
 
 
 ### 并发
@@ -828,8 +880,6 @@ int main()
 }
 ```
 
-
-
 ### const_cast
 
 - const类型转非const
@@ -840,8 +890,6 @@ int main()
 const int constant = 21;
 int* modifier = const_cast<int*>(&constant);
 ```
-
-
 
 ### dynamic_cast
 
@@ -1258,6 +1306,7 @@ square-root 这就是我们测试的函数
 
   - https://developers.google.com/protocol-buffers/docs/reference/cpp/google.protobuf.message
   - https://developers.google.cn/protocol-buffers/docs/reference/cpp-generated
+  - 高级操作：<https://www.ibm.com/developerworks/cn/linux/l-cn-gpb/index.html>
 
 - 编译安装：https://github.com/protocolbuffers/protobuf/tree/master/src
 
@@ -1312,7 +1361,6 @@ square-root 这就是我们测试的函数
 - message类型API
 
   - 文档：https://developers.google.cn/protocol-buffers/docs/reference/cpp/google.protobuf.message#Message
-  - 
 
 - 序列化和反序列化
 
@@ -1326,6 +1374,100 @@ square-root 这就是我们测试的函数
   protobuf_generate_cpp(PROTO_SRC PROTO_HEADER echo.proto)
   ```
 
+- 导入其他proto文件
+
+  - 参考资料：<https://www.jianshu.com/p/506d6db06676
+
+  - 非常重要的功能
+
+  - 因为不可能所有proto都只在一个文件声明，而不能互相导入
+
+  - 这样扩展性很差
+
+  - ```
+    import "myproject/other_protos.proto";
+    ```
+
+- 定义rpc服务
+
+  - 参考资料
+
+    - <https://blog.csdn.net/liujiayu2/article/details/77837450>
+    - <https://blog.csdn.net/nk_test/article/details/72682780>
+    - <https://developers.google.cn/protocol-buffers/docs/proto#services>
+
+  - service结构
+
+  - ```
+    service SearchService {
+      rpc Search (SearchRequest) returns (SearchResponse);
+    }
+    ```
+
+  - service使用
+
+  - 需要自己实现channel 和 controller两个类
+
+  - ```
+    class EchoServiceImpl : public EchoService {
+        public:
+        EchoServiceImpl() {}
+        virtual void Foo(::google::protobuf::RpcController* controller,
+                           const ::FooRequest* request,
+                           ::FooResponse* response,
+                           ::google::protobuf::Closure* done) {
+            std::string str = request->text();
+    
+            std::string tmp = str;
+            for (int i = 1; i < request->times(); i++)
+                str += (" " + tmp);
+            response->set_text(str);
+            response->set_result(true);
+            if (done)
+                done->Run();
+        }   
+    };
+    int main(int argc, char *argv[]) {
+        EchoServiceImpl *impl = new EchoServiceImpl();
+        RpcServer rpc_server;
+        rpc_server.RegisterService(impl);
+        rpc_server.Start();
+        return 0;
+    }
+    
+    // google official example
+    using google::protobuf;
+    
+    protobuf::RpcChannel* channel;
+    protobuf::RpcController* controller;
+    SearchService* service;
+    SearchRequest request;
+    SearchResponse response;
+    
+    void DoSearch() {
+      // You provide classes MyRpcChannel and MyRpcController, which implement
+      // the abstract interfaces protobuf::RpcChannel and protobuf::RpcController.
+      channel = new MyRpcChannel("somehost.example.com:1234");
+      controller = new MyRpcController;
+    
+      // The protocol compiler generates the SearchService class based on the
+      // definition given above.
+      service = new SearchService::Stub(channel);
+    
+      // Set up the request.
+      request.set_query("protocol buffers");
+    
+      // Execute the RPC.
+      service->Search(controller, request, response, protobuf::NewCallback(&Done));
+    }
+    
+    void Done() {
+      delete service;
+      delete channel;
+      delete controller;
+    }
+    ```
+
 - 注意
 
   - protobuf 3 有很多问题，推荐使用2.5左右版本
@@ -1337,6 +1479,245 @@ square-root 这就是我们测试的函数
   - autogen.sh 要注释掉部分没用的语句
   - 直接生成configutation即可
   - 后面就是make 一系列操作
+
+- proto模板
+
+```
+
+syntax="proto2";
+package ibdb.storage;
+
+option cc_generic_services = true;
+// option java_generic_services = true;
+// option java_package = "com.ibdb.storage";
+// option java_outer_classname = "Storage";
+
+message LogEntry {
+    required uint64 offset = 1;
+    required uint32 message_size = 2;
+    required string message = 3;
+}
+
+message Field {
+    required string name = 1;
+    required string type = 2;
+    required bool is_key = 3;
+}
+```
+
+
+
+## BRPC
+
+### 文档
+
+- memory_management
+- consistent_hashing.md
+- load_balancing.md
+- lalb.md
+- json2pb.md
+- iobuf.md
+- io.md
+- http_service.md
+- http_client.md
+- circuit_breaker.md
+- client.md
+- case_ubrpc.md
+- bvar.md
+- execution_queue.md
+- error_code.md
+- builtin_service.md
+- bthread.md
+- bthread_or_not.md
+- bthread_id.md
+- baidu_std.md
+- avalanche.md
+- auto_concurrency_limiter.md
+- server.md
+- threading_overview.md
+- streaming_rpc.md
+
+### 概念
+
+- brpc::Channel
+  - 连接服务器的类，主要参数是服务器地址
+- brpc::ChannelOptions
+  - 设置rpc的管道相关参数
+  - protocol
+  - connection_type
+  - timeout_ms
+  - max_retry
+- brpc::Controller
+  - brpc::Controller* cntl = static_cast<brpc::Controller*>(cntl_base);
+- brpc::Stub
+- brpc::ClosureGuard done_guard(done);
+  - This object helps you to call done->Run() in RAII style
+
+### 函数
+
+- usleep
+
+### 用法
+
+#### 客户端
+
+```
+#include <gflags/gflags.h>
+#include <butil/logging.h>
+#include <butil/time.h>
+#include <brpc/channel.h>
+#include "echo.pb.h"
+
+
+int main(int argc, char* argv[]) {
+    // Parse gflags. We recommend you to use gflags as well.
+    GFLAGS_NS::ParseCommandLineFlags(&argc, &argv, true);
+    
+    // A Channel represents a communication line to a Server. Notice that 
+    // Channel is thread-safe and can be shared by all threads in your program.
+    brpc::Channel channel;
+    
+    // Initialize the channel, NULL means using default options.
+    brpc::ChannelOptions options;
+    options.protocol = FLAGS_protocol;
+    options.connection_type = FLAGS_connection_type;
+    options.timeout_ms = FLAGS_timeout_ms/*milliseconds*/;
+    options.max_retry = FLAGS_max_retry;
+    if (channel.Init(FLAGS_server.c_str(), FLAGS_load_balancer.c_str(), &options) != 0) {
+        LOG(ERROR) << "Fail to initialize channel";
+        return -1;
+    }
+
+    // Normally, you should not call a Channel directly, but instead construct
+    // a stub Service wrapping it. stub can be shared by all threads as well.
+    example::EchoService_Stub stub(&channel);
+
+    // Send a request and wait for the response every 1 second.
+    int log_id = 0;
+    while (!brpc::IsAskedToQuit()) {
+        // We will receive response synchronously, safe to put variables
+        // on stack.
+        example::EchoRequest request;
+        example::EchoResponse response;
+        brpc::Controller cntl;
+
+        request.set_message("hello world");
+
+        cntl.set_log_id(log_id ++);  // set by user
+        // Set attachment which is wired to network directly instead of 
+        // being serialized into protobuf messages.
+        cntl.request_attachment().append(FLAGS_attachment);
+
+        // Because `done'(last parameter) is NULL, this function waits until
+        // the response comes back or error occurs(including timedout).
+        stub.Echo(&cntl, &request, &response, NULL);
+        if (!cntl.Failed()) {
+            LOG(INFO) << "Received response from " << cntl.remote_side()
+                << " to " << cntl.local_side()
+                << ": " << response.message() << " (attached="
+                << cntl.response_attachment() << ")"
+                << " latency=" << cntl.latency_us() << "us";
+        } else {
+            LOG(WARNING) << cntl.ErrorText();
+        }
+        usleep(FLAGS_interval_ms * 1000L);
+    }
+
+    LOG(INFO) << "EchoClient is going to quit";
+    return 0;
+}
+
+```
+
+#### 服务端
+
+```
+// A server to receive EchoRequest and send back EchoResponse.
+
+#include <gflags/gflags.h>
+#include <butil/logging.h>
+#include <brpc/server.h>
+#include "echo.pb.h"
+
+// Your implementation of example::EchoService
+// Notice that implementing brpc::Describable grants the ability to put
+// additional information in /status.
+namespace example {
+class EchoServiceImpl : public EchoService {
+public:
+    EchoServiceImpl() {};
+    virtual ~EchoServiceImpl() {};
+    virtual void Echo(google::protobuf::RpcController* cntl_base,
+                      const EchoRequest* request,
+                      EchoResponse* response,
+                      google::protobuf::Closure* done) {
+        // This object helps you to call done->Run() in RAII style. If you need
+        // to process the request asynchronously, pass done_guard.release().
+        brpc::ClosureGuard done_guard(done);
+
+        brpc::Controller* cntl =
+            static_cast<brpc::Controller*>(cntl_base);
+
+        // The purpose of following logs is to help you to understand
+        // how clients interact with servers more intuitively. You should 
+        // remove these logs in performance-sensitive servers.
+        LOG(INFO) << "Received request[log_id=" << cntl->log_id() 
+                  << "] from " << cntl->remote_side() 
+                  << " to " << cntl->local_side()
+                  << ": " << request->message()
+                  << " (attached=" << cntl->request_attachment() << ")";
+
+        // Fill response.
+        response->set_message(request->message());
+
+        // You can compress the response by setting Controller, but be aware
+        // that compression may be costly, evaluate before turning on.
+        // cntl->set_response_compress_type(brpc::COMPRESS_TYPE_GZIP);
+
+        if (FLAGS_echo_attachment) {
+            // Set attachment which is wired to network directly instead of
+            // being serialized into protobuf messages.
+            cntl->response_attachment().append(cntl->request_attachment());
+        }
+    }
+};
+}  // namespace example
+
+int main(int argc, char* argv[]) {
+    // Parse gflags. We recommend you to use gflags as well.
+    GFLAGS_NS::ParseCommandLineFlags(&argc, &argv, true);
+
+    // Generally you only need one Server.
+    brpc::Server server;
+
+    // Instance of your service.
+    example::EchoServiceImpl echo_service_impl;
+
+    // Add the service into server. Notice the second parameter, because the
+    // service is put on stack, we don't want server to delete it, otherwise
+    // use brpc::SERVER_OWNS_SERVICE.
+    if (server.AddService(&echo_service_impl, 
+                          brpc::SERVER_DOESNT_OWN_SERVICE) != 0) {
+        LOG(ERROR) << "Fail to add service";
+        return -1;
+    }
+
+    // Start the server.
+    brpc::ServerOptions options;
+    options.idle_timeout_sec = FLAGS_idle_timeout_s;
+    if (server.Start(FLAGS_port, &options) != 0) {
+        LOG(ERROR) << "Fail to start EchoServer";
+        return -1;
+    }
+
+    // Wait until Ctrl-C is pressed, then Stop() and Join() the server.
+    server.RunUntilAskedToQuit();
+    return 0;
+}
+
+```
+
+#### 
 
 ## OOP
 
@@ -1359,6 +1740,20 @@ p = q;              // Assignment operator, no constructor or copy constructor.
 - 本质：Classes related by inheritance form a hierarchy. 
 - 实际：there is a base class at the root of the hierarchy,from which the other classes inherit, directly or indirectly.
 - 这些继承的类也被称作：derived class
+
+#### 代码
+
+- 支持多继承
+- 默认是private继承权限
+
+```
+class SingingWaiter : public Waiter, public Singer {...};
+```
+
+#### 多继承
+
+- 容易出现歧义
+- 建议少用
 
 #### 基类和派生类的转换问题
 
@@ -1661,6 +2056,10 @@ run 或者 start
   - <https://www.jianshu.com/p/dcc8e647a501>
 - 跳到下一个断点
   - c
+- 打印变量内容
+  - print 变量名 打印基本数据类型的内容
+  - po 变量名 打印对象内容
+  - <http://see.sl088.com/wiki/LLDB_%E6%89%93%E5%8D%B0%E5%8F%98%E9%87%8F>
 
 ```
 Debugger commands:
