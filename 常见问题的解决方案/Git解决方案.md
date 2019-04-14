@@ -21,8 +21,6 @@
 - git pull
 - git checkout  xxx
 
-
-
 ### 解决冲突问题
 
 - 出现confilct
@@ -43,6 +41,14 @@
 
 - https://stackoverflow.com/questions/12961752/git-merge-error-commit-is-not-possible-because-you-have-unmerged-files
 - git merge 一下分支
+
+### 解决github下载速度太慢的问题
+
+- 一是翻墙用外网
+- 二是我经常用的方法
+  - fork你要下载的仓库
+  - 然后导入码云仓库中
+  - 码云在国内的服务器，让你下载有飞一般的感觉
 
 ## 问题
 
@@ -84,3 +90,11 @@
 - 解决方案
   - 添加你要push的分支名
   - git push origin branch_name
+
+### GitHub Desktop was unable to store the account token in the keychain. Please check you have unlocked access to the 'login' keychain.
+
+- <https://github.com/desktop/desktop/issues/4614>
+- 打开钥匙串应用
+- 先锁住钥匙串再解锁
+- 然后重新登录就解决了
+
