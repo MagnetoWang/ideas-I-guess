@@ -17,6 +17,7 @@
 ## 个人感受
 
 - c++的环境依赖，版本配置简直是个神坑，填不完的感觉
+- 看文档的时候，学习英语四六级快速阅读的技巧。找关键词
 
 ## C++解决方案
 
@@ -101,6 +102,25 @@ Template <class或者也可以用typename T>
     s1 = new Student(); 
 ```
 
+### 智能指针
+
+- 参考资料：<https://www.cnblogs.com/wxquare/p/4759020.html>
+
+```
+// 共享指针        
+        std::shared_ptr<int> ptra = std::make_shared<int>(a);
+        std::shared_ptr<int> ptra2(ptra); //copy
+        
+// unique_ptr
+        std::unique_ptr<int> uptr(new int(10));  //绑定动态对象
+        //std::unique_ptr<int> uptr2 = uptr;  //不能賦值
+        //std::unique_ptr<int> uptr2(uptr);  //不能拷貝
+        std::unique_ptr<int> uptr2 = std::move(uptr); //轉換所有權
+        uptr2.release(); //释放所有权
+```
+
+
+
 ### 语法问题
 
 - FileReceiver(const FileReceiver&) = delete;
@@ -164,6 +184,26 @@ pos_endpoints.insert(std::make_pair(std::make_pair(idx, kv.second->table_partiti
 
 - It establishes red, orange, yellow, and so on, as symbolic constants for the integer
   values 0–7.These constants are called enumerators.
+
+```
+// example
+enum spectrum {red, orange, yellow, green, blue, violet, indigo, ultraviolet};
+spectrum band; // band a variable of type spectrum
+band = blue; // valid, blue is an enumerator
+band = 2000; // invalid, 2000 not an enumerator
+band = orange; // valid
+++band; // not valid, ++ discussed in Chapter 5
+band = orange + red; // // not valid, but a little tricky
+
+命名规定
+enum UrlTableErrors { 
+	OK = 0,
+    ERROR_OUT_OF_MEMORY,
+	ERROR_MALFORMED_INPUT,
+   };
+```
+
+
 
 ### Class的正确使用
 
@@ -322,8 +362,55 @@ public:
 - 字符串拼接
 
   - 可以直接用加号连接
+- 字符串赋值
+  - <http://www.cplusplus.com/reference/string/string/assign/>
+  - str.assign(source_str)
+
+```
+
+string& assign (const string& str, size_t subpos, size_t sublen);
+  std::string str;
+  std::string base="The quick brown fox jumps over a lazy dog.";
+  str.assign(base);
+  std::cout << str << '\n';
+  // result
+  The quick brown fox jumps over a lazy dog.
+
+```
+
+- 找字符串字符的最后一个位置
+  - <http://www.cplusplus.com/reference/string/string/find_first_of/>
+  - std::string::find_last_of
+  - std::string::npos
+
+```
+#include <iostream>       // std::cout
+#include <string>         // std::string
+#include <cstddef>         // std::size_t
+
+void SplitFilename (const std::string& str)
+{
+  std::cout << "Splitting: " << str << '\n';
+  std::size_t found = str.find_last_of("/\\");
+  std::cout << " path: " << str.substr(0,found) << '\n';
+  std::cout << " file: " << str.substr(found+1) << '\n';
+}
+
+int main ()
+{
+  std::string str1 ("/usr/bin/man");
+  std::string str2 ("c:\\windows\\winhelp.exe");
+
+  SplitFilename (str1);
+  SplitFilename (str2);
+
+  return 0;
+}
+```
+
 - 选择子字符串
-  - 
+  - xx.substr(0,3);
+  - 左闭右开
 - 字符串比较
 
   - a.compare(b)
@@ -380,8 +467,25 @@ public:
 
 ### typedef用法
 
-- typedef unsigned int uint32_t;
-- 只是定义一个新的好记的名字！
+- 基本用法
+  - typedef unsigned int uint32_t;
+  - 只是定义一个新的好记的名字！或者叫别名Aliases
+- 高级用法：
+  - <http://www.cnblogs.com/shenlian/archive/2011/05/21/2053149.html>
+  - <http://www.cnblogs.com/csyisong/archive/2009/01/09/1372363.html>
+
+```
+定义函数指针，从zookeeper看到的
+typedef void (*watcher_fn)(zhandle_t *zh, int type, int state, const char *path,void *watcherCtx);
+
+watcher_fn 可以直接用定义函数，因为它是个函数，后面的括号是它的签名zhandle,int,int等等， void是它返回值类型
+
+和int,double直接用
+watcher_fn fn;
+fn(x,x,xx,xxx);
+```
+
+
 
 ### const用法
 
@@ -449,9 +553,9 @@ public:
 - 默认参数和缺省参数：https://blog.csdn.net/CHF_VIP/article/details/8586921
 - 初始化的参数，可以可以赋值也可以不赋值
 - 参数一般都是默认传值。传值的意思就是，传递参数会复制一个新对象到函数内部。尤其传递一个对象时，会显得十分耗时。而且是函数内部的修改该值的时候，是不会影响实际参数的值。
-- 最好的方式是使用传引用，然后选择性的是否修改里面的值。
 - 传引用的就是传地址的值！而不是对象内部数据的值！
 - 传对象的值到函数里面，会发生构造一次对象，析构一次对象消耗。而且这是没有考虑到对象中可能还含有其他对象的情况，那么消耗将会更加多。
+- 规范：输入参数在前，输出结果在后
 
 ### 函数中的参数传递
 
@@ -909,6 +1013,34 @@ int* modifier = const_cast<int*>(&constant);
 
 - 基本使用：http://www.cnblogs.com/egmkang/archive/2012/09/06/2673253.html
 
+### std::sort
+
+- <https://zh.cppreference.com/w/cpp/algorithm/sort>
+
+```
+#include <algorithm>
+   std::array<int, 10> s = {5, 7, 4, 2, 8, 6, 1, 9, 0, 3}; 
+   
+   // 传入迭代器，位置随意，一般都是头和尾巴。在传入比较器，或者使用默认排序规则也行
+    std::sort(s.begin(), s.end(), std::greater<int>());
+
+    // 用 lambda 表达式排序
+    std::sort(s.begin(), s.end(), [](int a, int b) {
+    return b < a;   
+    });
+
+    // 用自定义函数对象排序
+    struct {
+        bool operator()(int a, int b) const
+        {   
+            return a < b;
+        }   
+    } customLess;
+    std::sort(s.begin(), s.end(), customLess);
+```
+
+
+
 ## C++常用代码段
 
 ### 打印时间
@@ -1084,6 +1216,42 @@ static const bool kLittleEndian = IsLittleEndian();
 - ASSERT_TRUE
 - ASSERT_FALSE
 
+### unist.h
+
+#### usleep函数-进程延时
+
+- 参考资料：<https://baike.baidu.com/item/usleep%E5%87%BD%E6%95%B0>
+
+### limits.h
+
+- 文档：<http://www.cplusplus.com/reference/climits/>
+
+```
+
+name	expresses	value*
+CHAR_BIT	Number of bits in a char object (byte)	8 or greater*
+SCHAR_MIN	Minimum value for an object of type signed char	-127 (-27+1) or less*
+SCHAR_MAX	Maximum value for an object of type signed char	127 (27-1) or greater*
+UCHAR_MAX	Maximum value for an object of type unsigned char	255 (28-1) or greater*
+CHAR_MIN	Minimum value for an object of type char	either SCHAR_MIN or 0
+CHAR_MAX	Maximum value for an object of type char	either SCHAR_MAX or UCHAR_MAX
+MB_LEN_MAX	Maximum number of bytes in a multibyte character, for any locale	1 or greater*
+SHRT_MIN	Minimum value for an object of type short int	-32767 (-215+1) or less*
+SHRT_MAX	Maximum value for an object of type short int	32767 (215-1) or greater*
+USHRT_MAX	Maximum value for an object of type unsigned short int	65535 (216-1) or greater*
+INT_MIN	Minimum value for an object of type int	-32767 (-215+1) or less*
+INT_MAX	Maximum value for an object of type int	32767 (215-1) or greater*
+UINT_MAX	Maximum value for an object of type unsigned int	65535 (216-1) or greater*
+LONG_MIN	Minimum value for an object of type long int	-2147483647 (-231+1) or less*
+LONG_MAX	Maximum value for an object of type long int	2147483647 (231-1) or greater*
+ULONG_MAX	Maximum value for an object of type unsigned long int	4294967295 (232-1) or greater*
+LLONG_MIN	Minimum value for an object of type long long int	-9223372036854775807 (-263+1) or less*
+LLONG_MAX	Maximum value for an object of type long long int	9223372036854775807 (263-1) or greater*
+ULLONG_MAX	Maximum value for an object of type unsigned long long int	18446744073709551615 (264-1) or greater*
+```
+
+
+
 ### boost库
 
 #### 字符串转数字
@@ -1115,7 +1283,100 @@ int main()
 }
 ```
 
+#### boost::function
 
+- 参考资料
+  - 简单例子：<http://www.cnblogs.com/sld666666/archive/2010/12/16/1907591.html>
+  - 结合模板的高级例子
+    - https://stackoverflow.com/questions/3040893/passing-template-into-boost-function
+    - https://stackoverflow.com/questions/33096012/using-boostfunction-with-templates
+- 一个函数的包装器(function wrapper)，用来定义函数对象。代替函数指针
+- 简单用法
+
+```
+#include "boost/function.hpp"
+// 推荐下面的写法，其他写法不是所有编译器支持
+boost::function<float(int x, int y)>function_name
+
+// function_name 可以当做int,double一样随意定义，赋值的时候，把函数地址赋值即可
+int real_sum(int x, int y) 
+{ 
+	return x + y;
+};
+function_name sum;
+// sum is a function name, real_sum is a real function which realize the sum of two integer
+sum = &real_sum;
+sum(1,2);
+
+
+```
+
+- 高级用法
+
+```
+模板加boost::function
+
+```
+
+#### 字符串操作
+
+- 参考资料
+  - 入门介绍：<https://www.cnblogs.com/racaljk/p/7822301.html>
+  - 官方教程：<https://theboostcpplibraries.com/boost.stringalgorithms>
+- 用法
+
+```
+
+```
+
+
+
+### mutex.h
+
+#### mutex
+
+- 加互斥元是为了多线程访问一个函数或者变量时，可以保证只有一个线程可以访问，而其他线程只能等待
+
+```
+先定义互斥元
+std::mutex mu_;
+
+用的时候加普通锁，在当前的大括号范围内的所有变量都会被加锁保护
+std::lock_guard<std::mutex> lock(mu_);
+加独占锁
+std::unique_lock<std::mutex> lock(mu_);
+```
+
+
+
+#### condition_variable
+
+- 参考资料
+  - <https://en.wikipedia.org/wiki/Monitor_%28synchronization%29>
+  - <https://www.cnblogs.com/haippy/p/3252041.html>
+- 条件变量
+  - Threads attempting an operation may need to wait until some condition P holds true
+  - 有时候线程需要等待某个条件允许后才能继续运行
+  - 这个时候就需要条件变量来控制线程的调度情况
+
+```
+定义条件变量
+std::condition_variable cv_;
+
+因为需要等待某个条件允许，所以有个等待函数
+cv_.wait_for(lock, std::chrono::milliseconds(timestamp));
+
+条件允许后，需要通知其他等待的线程可以执行了
+cv_.notify_one();// 随机唤醒一个线程
+或者
+cv.notify_all(); // 唤醒所有线程.
+```
+
+- 场景
+  - 一般用于回调函数
+  - 函数需要等待回调函数执行的结果来确定是否继续运行
+  - 根据结果然后唤醒线程
+  - 当然也不能无限等待，需要在wait函数里面添加等待时间
 
 ## 常见问题
 
@@ -1470,7 +1731,7 @@ square-root 这就是我们测试的函数
 
 - 注意
 
-  - protobuf 3 有很多问题，推荐使用2.5左右版本
+  - protobuf 3 有很多问题，推荐使用2.5左右版本。主要是为了兼容使用Brpc
   - 找到protobuf ，然后删除
     - which protoc
   - 2.5版本在github全部clone下来
@@ -1717,7 +1978,289 @@ int main(int argc, char* argv[]) {
 
 ```
 
-#### 
+### 测试rpc功能
+
+- 参考资料
+  - 中文说明：<http://www.cnblogs.com/welkinwalker/archive/2011/11/29/2267225.html>
+  - 使用说明：<https://github.com/google/googletest/blob/master/googlemock/docs/ForDummies.md
+
+#### 手动测试
+
+- 编写客户端
+- 编写服务端
+- 然后查看消息传送的内容
+- 非常传统，低效率
+
+#### gmock
+
+- 使用gtest里面的gmock
+
+```
+
+```
+
+## ZooKeeper
+
+### 入门
+
+- 参考资料
+  - 官方文档：<https://zookeeper.apache.org/doc/r3.1.2/zookeeperProgrammers.html#sc_zkDataModel_znodes>
+  - zk配置文件说明：<https://zookeeper.apache.org/doc/r3.1.2/zookeeperStarted.html
+  - 命令行文档（超级棒）：<http://www.corejavaguru.com/bigdata/zookeeper/cli>
+  - zk内部实现原理文档：<https://zookeeper.apache.org/doc/r3.1.2/zookeeperInternals.html>
+  - zk实现生产者和消费者队列和进程的屏障类：<https://zookeeper.apache.org/doc/r3.1.2/zookeeperTutorial.html>
+  - c++example：<https://github.com/tgockel/zookeeper-cpp>
+  - zooCAPI使用：<http://www.cnblogs.com/haippy/archive/2013/02/21/2920426.html>
+  - ACL控制权：<http://ifeve.com/zookeeper-access-control-using-acls/>
+  - 书籍推荐
+    - 从paxos到zookeeper分布式一致性原理与实践
+    - ZooKeeper官方指南
+- 问题
+  - 集群模式和单机模式
+    - 集群就是要配好多台机器的ip和端口。那么每台机器都要有zk程序才行
+    - 单机只需要配置本机ip和端口即可
+- 使用
+
+```bash
+zk的编程学习分三步，建议配合参考资料更详细的说明一起来入门zk
+第一步，配置zk服务
+第二步，启动zk服务
+第三步，开始编程
+
+
+前提:在zk目录下
+第一步，配置zk服务
+# 进入conf目录下
+cd conf
+cp zoo_sample.cfg zoo.cfg
+
+# zoo.cfg服务器配置说明
+# the first port is for synchronizing data and communication
+# the second port is for leader election
+server.1=127.0.0.1:2888:3888
+server.2=127.0.0.1:2788:3788
+server.3=127.0.0.1:2688:3688
+
+# 单机版
+# ip不变，端口一定要不一样
+# 集群版
+# ip一定要不一样，端口无所谓
+
+# zoo.cfg 里面有DataDir目录，在这个目录下创建myid，myid里面写上id数字就行了
+
+第二步，启动zk服务
+# 进入bin目录下，启动服务脚本
+cd bin
+sh zkServer.sh start
+# 验证服务
+telnet 127.0.0.1 2181
+
+第三步，开始编程
+# 有三种方式，一种是编程语言，另一种是命令行对zk操作
+# 先介绍命令行方式
+sh zkCli.sh
+# 输出所有命令行语法
+help
+create /zk_test my_data
+get /zk_test
+# get的结果说明
+my_data :This line of text is the data that we stored in the znode.
+cZxid = 0x8 :The zxid (ZooKeeper Transaction Id) of the change that caused this znode to be created.
+ctime = Mon Nov 30 18:41:06 IST 2015 :The time when this znode was created.
+mZxid = 0x8 :The zxid of the change that last modified this znode.
+mtime = Mon Nov 30 18:41:06 IST 2015 :The time when this znode was last modified.
+pZxid = 0x8 :The zxid of the change that last modified children of this znode.
+cversion = 0 :The number of changes to the children of this znode.
+dataVersion = 0 :The number of changes to the data of this znode.
+aclVersion = 0 :The number of changes to the ACL of this znode.
+ephemeralOwner = 0x0: The session id of the owner of this znode if the znode is an ephemeral node. If it is not an ephemeral node, it will be zero.
+dataLength = 7 :The length of the data field of this znode.
+numChildren = 0 :The number of children of this znode.
+# 设置watch
+# Watches show a notification when the specified znode’s data get changed
+get /zk_test 1
+
+# 编程语言方式
+Java非常简单引入jar包，然后直接调接口就行了
+直接看C语言编程怎么引入，这里专门放下面一栏
+```
+
+### C++ API使用
+
+- 强烈建议先在命令行下体验zk的功能，然后再来编程封装适合自己业务的功能
+- 参考资料
+  - zk 状态说明：<http://www.cnblogs.com/haippy/archive/2013/02/21/2920241.html>
+  - 接口设计参考：<http://www.throwable.club/2018/12/16/zookeeper-curator-usage/#Curator%E7%9A%84%E5%9F%BA%E6%9C%ACApi>
+- 注意
+  - zk命令行中不提供递归创建节点，同时也不提供创建无数据的节点
+
+```
+#include "zookeeper.h"
+zhandle_t *zh;
+
+```
+
+- zookeeper状态码
+
+```c++
+/** zookeeper return constants **/
+
+enum ZOO_ERRORS {
+  ZOK = 0, /*!< Everything is OK */
+
+  /** System and server-side errors.
+   * This is never thrown by the server, it shouldn't be used other than
+   * to indicate a range. Specifically error codes greater than this
+   * value, but lesser than {@link #ZAPIERROR}, are system errors. */
+  ZSYSTEMERROR = -1,
+  ZRUNTIMEINCONSISTENCY = -2, /*!< A runtime inconsistency was found */
+  ZDATAINCONSISTENCY = -3, /*!< A data inconsistency was found */
+  ZCONNECTIONLOSS = -4, /*!< Connection to the server has been lost */
+  ZMARSHALLINGERROR = -5, /*!< Error while marshalling or unmarshalling data */
+  ZUNIMPLEMENTED = -6, /*!< Operation is unimplemented */
+  ZOPERATIONTIMEOUT = -7, /*!< Operation timeout */
+  ZBADARGUMENTS = -8, /*!< Invalid arguments */
+  ZINVALIDSTATE = -9, /*!< Invliad zhandle state */
+
+  /** API errors.
+   * This is never thrown by the server, it shouldn't be used other than
+   * to indicate a range. Specifically error codes greater than this
+   * value are API errors (while values less than this indicate a 
+   * {@link #ZSYSTEMERROR}).
+   */
+  ZAPIERROR = -100,
+  ZNONODE = -101, /*!< Node does not exist */
+  ZNOAUTH = -102, /*!< Not authenticated */
+  ZBADVERSION = -103, /*!< Version conflict */
+  ZNOCHILDRENFOREPHEMERALS = -108, /*!< Ephemeral nodes may not have children */
+  ZNODEEXISTS = -110, /*!< The node already exists */
+  ZNOTEMPTY = -111, /*!< The node has children */
+  ZSESSIONEXPIRED = -112, /*!< The session has been expired by the server */
+  ZINVALIDCALLBACK = -113, /*!< Invalid callback specified */
+  ZINVALIDACL = -114, /*!< Invalid ACL specified */
+  ZAUTHFAILED = -115, /*!< Client authentication failed */
+  ZCLOSING = -116, /*!< ZooKeeper is closing */
+  ZNOTHING = -117, /*!< (not error) no server responses to process */
+  ZSESSIONMOVED = -118 /*!<session moved to another server, so operation is ignored */ 
+};
+
+/**
+*  @name Debug levels
+*/
+typedef enum {ZOO_LOG_LEVEL_ERROR=1,ZOO_LOG_LEVEL_WARN=2,ZOO_LOG_LEVEL_INFO=3,ZOO_LOG_LEVEL_DEBUG=4} ZooLogLevel;
+
+/**
+ * @name ACL Consts
+ */
+extern ZOOAPI const int ZOO_PERM_READ;
+extern ZOOAPI const int ZOO_PERM_WRITE;
+extern ZOOAPI const int ZOO_PERM_CREATE;
+extern ZOOAPI const int ZOO_PERM_DELETE;
+extern ZOOAPI const int ZOO_PERM_ADMIN;
+extern ZOOAPI const int ZOO_PERM_ALL;
+
+/** This Id represents anyone. */
+extern ZOOAPI struct Id ZOO_ANYONE_ID_UNSAFE;
+/** This Id is only usable to set ACLs. It will get substituted with the
+ * Id's the client authenticated with.
+ */
+extern ZOOAPI struct Id ZOO_AUTH_IDS;
+
+/** This is a completely open ACL*/
+extern ZOOAPI struct ACL_vector ZOO_OPEN_ACL_UNSAFE;
+/** This ACL gives the world the ability to read. */
+extern ZOOAPI struct ACL_vector ZOO_READ_ACL_UNSAFE;
+/** This ACL gives the creators authentication id's all permissions. */
+extern ZOOAPI struct ACL_vector ZOO_CREATOR_ALL_ACL;
+
+/**
+ * @name Interest Consts
+ * These constants are used to express interest in an event and to
+ * indicate to zookeeper which events have occurred. They can
+ * be ORed together to express multiple interests. These flags are
+ * used in the interest and event parameters of 
+ * \ref zookeeper_interest and \ref zookeeper_process.
+ */
+// @{
+extern ZOOAPI const int ZOOKEEPER_WRITE;
+extern ZOOAPI const int ZOOKEEPER_READ;
+// @}
+
+/**
+ * @name Create Flags
+ * 
+ * These flags are used by zoo_create to affect node create. They may
+ * be ORed together to combine effects.
+ */
+// @{
+extern ZOOAPI const int ZOO_EPHEMERAL;
+extern ZOOAPI const int ZOO_SEQUENCE;
+// @}
+
+/**
+ * @name State Consts
+ * These constants represent the states of a zookeeper connection. They are
+ * possible parameters of the watcher callback.
+ */
+// @{
+extern ZOOAPI const int ZOO_EXPIRED_SESSION_STATE;
+extern ZOOAPI const int ZOO_AUTH_FAILED_STATE;
+extern ZOOAPI const int ZOO_CONNECTING_STATE;
+extern ZOOAPI const int ZOO_ASSOCIATING_STATE;
+extern ZOOAPI const int ZOO_CONNECTED_STATE;
+// @}
+
+/**
+ * @name Watch Types
+ * These constants indicate the event that caused the watch event. They are
+ * possible values of the first parameter of the watcher callback.
+ */
+// @{
+/**
+ * \brief a node has been created.
+ * 
+ * This is only generated by watches on non-existent nodes. These watches
+ * are set using \ref zoo_exists.
+ */
+extern ZOOAPI const int ZOO_CREATED_EVENT;
+/**
+ * \brief a node has been deleted.
+ * 
+ * This is only generated by watches on nodes. These watches
+ * are set using \ref zoo_exists and \ref zoo_get.
+ */
+extern ZOOAPI const int ZOO_DELETED_EVENT;
+/**
+ * \brief a node has changed.
+ * 
+ * This is only generated by watches on nodes. These watches
+ * are set using \ref zoo_exists and \ref zoo_get.
+ */
+extern ZOOAPI const int ZOO_CHANGED_EVENT;
+/**
+ * \brief a change as occurred in the list of children.
+ * 
+ * This is only generated by watches on the child list of a node. These watches
+ * are set using \ref zoo_get_children or \ref zoo_get_children2.
+ */
+extern ZOOAPI const int ZOO_CHILD_EVENT;
+/**
+ * \brief a session has been lost.
+ * 
+ * This is generated when a client loses contact or reconnects with a server.
+ */
+extern ZOOAPI const int ZOO_SESSION_EVENT;
+
+/**
+ * \brief a watch has been removed.
+ * 
+ * This is generated when the server for some reason, probably a resource
+ * constraint, will no longer watch a node for a client.
+ */
+extern ZOOAPI const int ZOO_NOTWATCHING_EVENT;
+```
+
+
 
 ## OOP
 
@@ -1728,7 +2271,7 @@ int main(int argc, char* argv[]) {
 
 - 参考：http://www.fredosaurus.com/notes-cpp/oop-condestructors/copyconstructors.html
 
-```
+```c++
 Person q("Mickey"); // constructor is used to build q.
 Person r(p);        // copy constructor is used to build r.
 Person p = q;       // copy constructor is used to initialize in declaration.
@@ -1756,6 +2299,8 @@ class SingingWaiter : public Waiter, public Singer {...};
 - 建议少用
 
 #### 基类和派生类的转换问题
+
+三种
 
 - http://c.biancheng.net/cpp/biancheng/view/239.html
 - 派生类可以直接转换到基类，但是转换的过程，派生类独有的数据类型和成员函数基类将无法访问
@@ -1959,6 +2504,16 @@ add_executable(simple_example ${SOURCE_FILES})       # Add executable target wit
   set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
   set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
   ```
+
+### 震惊30天的cmake用法
+
+- 这是一个悲伤的故事
+
+```
+
+```
+
+
 
 ## Linux下的C++
 
