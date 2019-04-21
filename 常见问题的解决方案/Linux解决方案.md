@@ -7,8 +7,6 @@
 - 作为Windows的老用户，不得不说，Linux真难用！
 - 作为计算机专业的我来说，Linux不得不学！
 
-f
-
 [TOC]
 
 
@@ -151,7 +149,6 @@ f
 ## Linux目录说明
 
 - https://www.jianshu.com/p/fe8da5d08e16
-- 
 
 ## 排查线上问题
 
@@ -169,7 +166,6 @@ f
 ### 排除工具
 
 - https://my.oschina.net/leejun2005/blog/1524687
-- 
 
 ### 排查步骤
 
@@ -184,23 +180,16 @@ f
 - **JDK性能监控** 
 - **分析源代码** 
 
-
-
 ## Java虚拟机排查问题
 
 ### 命令快速使用
 
 - 打印进程使用虚拟机的每一代情况：jmap -J-d64 -heap pid
-- 
-
-
 
 ### 排查工具
 
 - jps -m 
   - 快速定位当前服务器运行的java进程，并给出路径
-
-
 
 ### 排查指标
 
@@ -212,8 +201,6 @@ f
 - gc log
 - jstat等命令的输出 
 
-
-
 # 美团文档内容-非常值得反复多看！
 
 ### 怎么调？
@@ -221,8 +208,6 @@ f
 - 如果发现高峰期CPU使用率与Load值偏大，这个时候可以观察一些JVM的thread count以及gc count（可能主要是young gc count），如果这两个值都比以往偏大（也可以和一个历史经验值作对比），基本上可以定位是young gc频率过高导致，这个时候可以通过适当增大young区大小或者占比的方式来解决。
 - 如果发现关键接口响应时间很慢，可以结合gc time以及gc log中的stop the world的时间，看一下整个应用的stop the world的时间是不是比较多。如果是，可能需要减少总的gc time，具体可以从减小gc的次数和减小单次gc的时间这两个维度来考虑，一般来说，这两个因素是一对互斥因素，我们需要根据实际的监控数据来调整相应的参数（比如新生代与老生代比值、eden与survivor比值、MTT值、触发cms回收的old区比率阈值等）来达到一个最优值。
 - 如果发生full gc或者old cms gc非常频繁，通常这种情况会诱发STW的时间相应加长，从而也会导致接口响应时间变慢。这种情况，大概率是出现了“内存泄露”，Java里的内存泄露指的是一些应该释放的对象没有被释放掉（还有引用拉着它）。那么这些对象是如何产生的呢？为啥不会释放呢？对应的代码是不是出问题了？问题的关键是搞明白这个，找到相应的代码，然后对症下药。所以问题的关键是转化成寻找这些对象。怎么找？综合使用**jmap和MAT**，基本就能定位到具体的代码。
-
-
 
 ### 多线程与分布式
 
@@ -382,18 +367,12 @@ f
 
 除了上面介绍的之外，优化还涉及前端、分布式文件系统、CDN、全文索引、空间索引等几方面。限于篇幅，我们留到未来再做介绍。
 
-
-
-
-
 # Linux基础
 
 ## 基本概念
 
 - POSIX：https://en.wikipedia.org/wiki/POSIX
   - The Portable Operating System Interface (POSIX)
-
-
 
 ## 基本操作
 
@@ -450,10 +429,6 @@ f
 - 创建文件
 
   - touch filename
-
-
-
-
 
 ## 基本功能
 
@@ -518,13 +493,11 @@ f
 
 ### 修改系统编码
 
-```
+```bash
 vi ~/.bash_profile
 export LANG="en_US.UTF-8"
 source ~/.bash_profile
 ```
-
-
 
 
 ## Linux下的C++
@@ -595,8 +568,6 @@ q! 不保存，直接退出
 qa! 有多个文件被打开，同时退出
 
 ```
-
-
 
 # Linux下的Shell
 
@@ -767,7 +738,7 @@ sed -i "44c "--headers \) HDRS_IN=\"$2\"; shift 2 ;;"" config_brpc.sh
 
 - 8个进程编译文件，并且最终可执行文件是名字叫rtidb
 
-### ps命令详细说明
+### ps命令详细说明以及目录说明
 
 - stat：状态栏
   - 状态表：https://nigelzeng.iteye.com/blog/1186913
@@ -786,6 +757,13 @@ sed -i "44c "--headers \) HDRS_IN=\"$2\"; shift 2 ;;"" config_brpc.sh
   - l    多线程，克隆线程  multi-threaded (using CLONE_THREAD, like NPTL pthreads do) 
 - Tty：设备连接
   - 连接电脑终端某个设备：https://stackoverflow.com/questions/7113770/what-does-tty-mean-in-the-unix-ps-command
+
+```
+目录
+UID   PID  PPID   C STIME   TTY           TIME CMD
+```
+
+
 
 ### echo妙用
 
@@ -866,7 +844,9 @@ sed -i "44c "--headers \) HDRS_IN=\"$2\"; shift 2 ;;"" config_brpc.sh
 
 ### 通过端口查看进程pid
 
-- netstat -nap | grep 进程pid
+- netstat -an | grep port
+- netstat -anp | grep port
+- 一般p的参数有权限限制
 - 参考资料：http://www.cnblogs.com/MacoLee/p/5664306.html
 
 ### 命令结果保存在变量中
@@ -979,14 +959,10 @@ sed -i "44c "--headers \) HDRS_IN=\"$2\"; shift 2 ;;"" config_brpc.sh
 - https://www.cnblogs.com/iloveyoucc/archive/2012/07/11/2585559.html
 - i=`expr $i + 1`;
 
-
-
 ### 打印结果的某一列
 
 - 第一列：awk '{print $1}'
 - rows=$(wc -l  $monitor_file | awk '{print $1}')
-
-
 
 ### 邮件的位置
 
@@ -1007,8 +983,6 @@ sed -i "44c \"--headers ) HDRS_IN=\"\$2\"; shift 2 ;;\"" config_brpc.sh
 sed -i '45c "--libs ) LIBS_IN="\$2"; shift 2 ;;"' config_brpc.sh
 ```
 
-
-
 ### 函数使用
 
 - 参考资料
@@ -1021,8 +995,6 @@ sed -i '45c "--libs ) LIBS_IN="\$2"; shift 2 ;;"' config_brpc.sh
 - 函数参数
   - 函数外部就和vi grep一样直接写入参数
   - 函数内部调用的时候用$1,2,3,4这样的序号来表示外部传入的参数
-
-
 
 ```
 # 参考例子
@@ -1060,9 +1032,16 @@ funWithParam(){
 funWithParam 1 2 3 4 5 6 7 8 9 34 73
 ```
 
+### 查找某个进程的pid并杀死它
 
+```
+ps -xf | grep xxx_name
+kill -9 
+```
 
+### 结束当前进程而不是停止当前进程
 
+- ctrl + c
 
 ## 问题
 
@@ -1073,8 +1052,6 @@ funWithParam 1 2 3 4 5 6 7 8 9 34 73
 - 所以后面直接加双引号保证整个字符串传进去
 - 解决方案：https://stackoverflow.com/questions/13781216/meaning-of-too-many-arguments-error-from-if-square-brackets
 - "$VARIABLE"
-
-
 
 ## 常用代码
 
