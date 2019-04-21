@@ -19,6 +19,19 @@
 - 插件：fileheader
 - 输入命令fileheader即可
 
+### c++自动补全
+
+- 参考资料：<https://blog.csdn.net/cbc000/article/details/80670413>
+- 添加插件
+
+```
+/.vscode/c_cpp_properties.json
+在includePath
+添加你的库头文件地址也可以增强补全功能
+```
+
+
+
 ### 快捷键总结
 
 - 参考资料：https://www.jianshu.com/p/feff1c7e9989
