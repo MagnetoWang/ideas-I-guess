@@ -869,6 +869,15 @@ Edit & Run
 
 ### 线程
 
+#### 概念
+
+- 函数对象：<https://baike.baidu.com/item/%E5%87%BD%E6%95%B0%E5%AF%B9%E8%B1%A1>
+- 函数绑定：boost::bind
+
+#### 线程队列
+
+- brpc有实现的线程队列
+
 #### 线程池
 
 - 简单实现：https://www.cnblogs.com/lzpong/p/6397997.html
@@ -1283,6 +1292,19 @@ int main()
 }
 ```
 
+#### 字符串操作
+
+- 参考资料
+  - 入门介绍：<https://www.cnblogs.com/racaljk/p/7822301.html>
+  - 官方教程：<https://theboostcpplibraries.com/boost.stringalgorithms>
+- 用法
+
+```
+
+```
+
+
+
 #### boost::function
 
 - 参考资料
@@ -1318,14 +1340,47 @@ sum(1,2);
 
 ```
 
-#### 字符串操作
+#### boost::bind
 
 - 参考资料
-  - 入门介绍：<https://www.cnblogs.com/racaljk/p/7822301.html>
-  - 官方教程：<https://theboostcpplibraries.com/boost.stringalgorithms>
-- 用法
+  - 简单使用：<https://theboostcpplibraries.com/boost.bind>
+  - 进阶教程：<https://www.boost.org/doc/libs/1_65_1/libs/bind/doc/html/bind.html#bind.purpose.using_bind_with_functions_and_fu>
+  - 中文介绍：<https://www.cnblogs.com/blueoverflow/p/4740093.html>
+  - 中文使用：<https://blog.csdn.net/adcxf/article/details/3970116>
+- 作为类中的回调函数
+  - <https://blog.csdn.net/stelalala/article/details/36882159>
+- 绑定函数的代码
 
 ```
+最简单用法
+ void fun(int x, int y) {
+  cout << x << ", " << y << endl;
+ }
+ 第一种写法
+ boost::bind(&fun, 3, 4)( );  //无参数. 输出 3, 4
+ 第二种写法
+ boost::bind(&fun, _1, _2)(3, 4);    // 3将代替_1占位符, 4将代替_2占位符.输出 3, 4
+ 第三种写法
+ boost::bind(&fun, _2, _1)(3, 4);   // 3将代替_1占位符, 4将代替_2占位符.输出 4, 3
+ 第四种写法
+ boost::bind(&fun, _1, _1)(3);  // 输出 3, 3
+
+#include <boost/bind.hpp>
+#include <vector>
+#include <algorithm>
+#include <iostream>
+
+void print(std::ostream *os, int i)
+{
+  *os << i << '\n';
+}
+
+int main()
+{
+  std::vector<int> v{1, 3, 2};
+  std::for_each(v.begin(), v.end(), boost::bind(print, &std::cout, _1));
+}
+
 
 ```
 
@@ -1377,6 +1432,12 @@ cv.notify_all(); // 唤醒所有线程.
   - 函数需要等待回调函数执行的结果来确定是否继续运行
   - 根据结果然后唤醒线程
   - 当然也不能无限等待，需要在wait函数里面添加等待时间
+
+### thread
+
+#### std::this_thread::sleep_for
+
+- std::this_thread::sleep_for(std::chrono::microseconds(limit_time - time_used));
 
 ## 常见问题
 
