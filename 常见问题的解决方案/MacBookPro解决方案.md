@@ -151,9 +151,7 @@
 
 - 打开 ~/.bashrc
 - 添加
-- export HOMEBREW_NO_AUTO_UPDATE=true
-
-### 
+- export HOMEBREW_NO_AUTO_UPDATE=true 
 
 ### 两个python版本切换
 
@@ -196,6 +194,12 @@
 - echo 'export PATH="/usr/local/opt/gnu-getopt/bin:$PATH"' >> ~/.bashrc
 - source ~/.bashrc
 - path路径一定要写进bashrc才能生效！！！
+
+### 打开ppt的时候总是会弹出以前的自动保存的ppt内容
+
+- 参考资料：<https://answers.microsoft.com/zh-hans/msoffice/forum/msoffice_powerpoint-mso_mac-mso_mac2016/%E6%AF%8F%E6%AC%A1%E5%90%AF%E5%8A%A8ppt%E6%97%B6/24aa4a9a-013a-49de-8ffe-455fbe5f38b2>
+- 进入目录 ~/Library/Containers/com.microsoft.Powerpoint/Data/Library/Preferences/AutoRecover
+- 删除里面的文件，就可以了
 
 ## 终端
 
