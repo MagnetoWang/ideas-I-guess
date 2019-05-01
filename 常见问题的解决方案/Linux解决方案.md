@@ -76,7 +76,7 @@
   # lspci -tv              # 列出所有PCI设备
   # lsusb -tv              # 列出所有USB设备
   # lsmod                  # 列出加载的内核模块
-  # env                    # 查看环境变量
+  # lspci -tv                    # 查看环境变量
   ```
 
   **资源**
@@ -925,7 +925,9 @@ UID   PID  PPID   C STIME   TTY           TIME CMD
 
 - 间接使用二维数组吧
 
+### 查看文件的第几行到第几行的内容
 
+- sed -n '2363,2373p' src/cmd/rtidb.cc
 
 ### 自定义for循环切割符号
 
@@ -978,12 +980,15 @@ UID   PID  PPID   C STIME   TTY           TIME CMD
 - sed -i '73c string' filename
 
 ```
-
+sed -i '12c dataDir=ut_zookeeper' conf/zoo.cfg  写入dataDir=ut_zookeeper，没有双引号的
+sed -i '12c "dataDir=ut_zookeeper"' conf/zoo.cfg 写入"dataDir=ut_zookeeper"，包含了双引号
+下面是复杂的
 sed -i "44c \"--headers ) HDRS_IN=\"\$2\"; shift 2 ;;\"" config_brpc.sh
+
 sed -i '45c "--libs ) LIBS_IN="\$2"; shift 2 ;;"' config_brpc.sh
 ```
 
-### 函数使用
+### shell函数使用
 
 - 参考资料
   - 函数基本操作http://www.runoob.com/linux/linux-shell-func.html
@@ -1042,6 +1047,16 @@ kill -9
 ### 结束当前进程而不是停止当前进程
 
 - ctrl + c
+
+### 下载网络压缩包
+
+```
+curl -I url
+或者
+wget url
+```
+
+
 
 ## 问题
 
@@ -1148,6 +1163,17 @@ do
 done
 IFS=$SAVEIFS
 
+传入shell脚本外部的参数并打印 $1就是表示第一个参数
+echo $1
+
+用脚本测试一个程序运行时间
+start_time=`date --date='0 days ago' "+%Y-%m-%d %H:%M:%S"`
+
+to do sth
+
+finish_time=`date --date='0 days ago' "+%Y-%m-%d %H:%M:%S"`
+duration=$(($(($(date +%s -d "$finish_time")-$(date +%s -d "$start_time")))))
+echo "this shell script execution duration: $duration"
 ```
 
 ### 执行当前目录下的test脚本
