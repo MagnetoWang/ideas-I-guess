@@ -1041,7 +1041,7 @@ funWithParam 1 2 3 4 5 6 7 8 9 34 73
 
 ```
 ps -xf | grep xxx_name
-kill -9 
+kill -9 xx
 ```
 
 ### 结束当前进程而不是停止当前进程
@@ -1054,6 +1054,33 @@ kill -9
 curl -I url
 或者
 wget url
+```
+
+
+
+### 解压和压缩
+
+```
+https://jingyan.baidu.com/article/6d704a13f9981a28da51ca70.html
+解压
+tar -zxvf xxx.tar.gz
+tar -zxvf xxx.tar
+unzip xx.zip
+压缩
+tar czvf xxx.tar xxx
+```
+
+### 环境变量和export的用法
+
+- 参考资料：<https://www.runoob.com/linux/linux-comm-export.html>
+
+```
+可以在.bash_profile
+用export声明变量和变量的值
+
+在linux中
+export -p 列举所有环境变量
+export -n xxx 删除某个环境变量值
 ```
 
 
