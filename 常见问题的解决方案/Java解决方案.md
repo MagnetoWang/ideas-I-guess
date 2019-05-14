@@ -72,18 +72,41 @@
 ### maven
 
 - 发布jar包，跳过测试单元
-  -  mvn clean install -Dmaven.test.skip=true
+  - mvn clean install -Dmaven.test.skip=true
 - 执行jar包
   - 有main入口，需要在pom里面指定，有时候可能会影响项目的整体性
   - java -jar myjar.jar
   - 没有main入口
-  - java -cp myjar.jar com.example.MainClass(src中有main的入口类)
-  - java -cp target/rtidb-client-1.3.8-SNAPSHOT.jar com._4paradigm.rtidb.utils.Command
+  - java -cp xxx.jar xxx.xxx.MainClass(src中有main的入口类)
 - jar的可执行
   - 如果涉及到外部包的依赖，一定要添加插件
   - https://blog.csdn.net/change_on/article/details/79379400
 
-### 找maven的settings.xml位置
+#### 发布含main入口的jar包
+
+```
+在pom里面添加插件并制定jar包入口
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>./lib/</classpathPrefix>
+                            <!--<classpathPrefix>/RELATION/appuser/test_tools/lib/</classpathPrefix>-->
+                            <!--<classpathPrefix>/home/work/tools/lib/</classpathPrefix>-->
+                            <mainClass>com._4paradigm.predictor.demo.JprofilerTest</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            
+在pom.xml目录下执行
+mvn clean install -Dmaven.test.skip=true
+```
+
+#### 找maven的settings.xml位置
 
 - 参考资料：https://stackoverflow.com/questions/9988814/how-do-i-find-out-which-settings-xml-file-maven-is-using
 - mvn -X
@@ -92,17 +115,62 @@
 
 - 参考链接：https://blog.csdn.net/qbg19881206/article/details/19850857
 - mvn compile
-
 - mvn exec:java -Dexec.mainClass="rtidbperf.RtidbClusterTest"
+
+```
+执行代码传递参数
+mvn exec:java -Dexec.mainClass="com.vineetmanohar.module.Main" -Dexec.args="arg0 arg1 arg2"
+
+指定classpath运行依赖
+mvn exec:java -Dexec.mainClass="com.vineetmanohar.module.Main" -Dexec.classpathScope=runtime
+
+获取exec其他说明帮助
+mvn exec:help -Ddetail=true -Dgoal=java
+
+结合jprofiler使用
+mvn exec:java -Dexec.mainClass="com._4paradigm.predictor.demo.JprofilerTest" -agentpath:/home/wangzixian/task/jprofiler/bin/linux-x64/libjprofilerti.so=port=8849
+
+
+Java执行jar包
+java -cp xxx.jar xxx.Main
+```
 
 
 
 ### 命令行下创建完整java项目
 
+- 参考链接：<https://www.cnblogs.com/yjmyzz/p/3495762.html>
+- 四个步骤
 - mvn archetype:generate
-- 回车
-- 填写groupID等信息，就行了
+- 按回车，跳过Choose a number or apply filter这个
+- 填写groupID等信息，就行了，可以填com.magnetowang
 - 注意填写package的时候，写的是包名
+- 选择*package*， jar或者war
+
+```
+<groupId>com.maven.JavaGraphics</groupId>
+ <artifactId>ComputerGraphics</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+  <name>ComputerGraphics</name>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  
+解释
+groupId 定义了项目属于哪个组，举个例子，如果你的公司是mycom，有一个项目为myapp，那么groupId就应该是com.mycom.myapp. 
+
+artifacted 定义了当前maven项目在组中唯一的ID,比如，myapp-util,myapp-domain,myapp-web等。 
+
+version 指定了myapp项目的当前版本，SNAPSHOT意为快照，说明该项目还处于开发中，是不稳定的版本。 
+
+name 声明了一个对于用户更为友好的项目名称，不是必须的，推荐为每个pom声明name，以方便信息交流。 
+```
+
+
 
 ### 自定义一个异常类并使用
 
@@ -198,6 +266,106 @@ how to throw an exception 或者 如何传递异常
 - .build()方法之后，一般直接生成好了对象。不能再进行set相关函数配置
 - 如果要动态配置build，就需要Builder对象，然后set配置。set相关内容后，才能build最终对象出来
 
+### ThreadLocal
+
+- 参考资料：<http://www.cnblogs.com/lintong/p/4373876.html>
+
+```
+在static中创建好共享变量
+```
+
+
+
+## Redis
+
+### 资料
+
+- 命令行端练习：<http://try.redis.io/>
+- 快速入门：<https://redis.io/topics/quickstart>
+- 代码入门：<https://www.runoob.com/redis/redis-java.html>
+- 官方文档：<https://redis.io/>
+- info命令配置中文说明：<http://redisdoc.com/client_and_server/info.html>
+- redis-cli使用：<https://www.cnblogs.com/kongzhongqijing/p/6867960.html>
+
+### 服务端
+
+```
+启动服务器最大连接
+redis-server --maxclients 100000
+
+SET server:name "fido"
+```
+
+
+
+### 客户端
+
+```
+查看内存
+info memory
+
+查看数据量
+dbsize
+
+//删除当前数据库中的所有Key
+flushdb
+
+//删除所有数据库中的key
+flushall
+
+//下面的命令指定数据序号为0，即默认数据库
+redis-cli -n 0 keys "*" | xargs redis-cli -n 0 del
+
+如果要指定 Redis 数据库访问密码，使用下面的命令
+redis-cli -a password keys "*" | xargs redis-cli -a password del
+```
+
+### 问题
+
+#### redis无法连接远程服务器
+
+```
+参考资料
+https://www.cnblogs.com/y-l-h/p/7930085.html
+
+修改配置文件
+1、修改redis服务器的配置文件  
+
+注释以下绑定的主机地址  
+# bind 127.0.0.1  
+  
+2、修改redis服务器的参数配置  
+  
+修改redis的守护进程为no ，不启用  
+daemonize no
+
+修改redis的保护模式为no，不启用  
+protected-mode no
+```
+
+
+
+## JMeter
+
+### 资料
+
+- 中文文档：<http://www.testclass.net/jmeter/jmeter-doc-01/>
+- 入门教程：https://www.jianshu.com/p/0e4daecc8122
+- 入门教程：<http://www.cnblogs.com/zhangchaoyang/articles/2530731.html>
+- 官网：<https://jmeter.apache.org/>
+- 高阶教程： <https://www.jianshu.com/p/0e4daecc8122>
+- java编程使用JMeter示例： <https://www.jianshu.com/p/a88e5cb1d6cb>
+- Java请求：<https://www.cnblogs.com/yangxia-test/p/4019541.html>
+- jmeter系列文章：<https://www.cnblogs.com/yangxia-test/category/431240.html>
+
+### Demo
+
+```
+
+```
+
+
+
 ## 问题
 
 ### 命令端
@@ -217,8 +385,6 @@ how to throw an exception 或者 如何传递异常
 ## 自动化脚本
 
 ### Java安装-非root情况
-
-
 
 ```
 mkdir java
@@ -252,11 +418,20 @@ export PATH=${MAVEN_HOME}/bin:${PATH}
 
 ### 打印logger
 
-- import org.slf4j.Logger;
+```
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-  import org.slf4j.LoggerFactory;
+private final static Logger logger = LoggerFactory.getLogger(TabletClientImpl.class);
 
-- private final static Logger logger = LoggerFactory.getLogger(TabletClientImpl.class);
+maven包
+<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+<dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-api</artifactId>
+    <version>1.7.25</version>
+</dependency>
+```
 
 
 
