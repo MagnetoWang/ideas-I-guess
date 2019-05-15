@@ -1,5 +1,3 @@
-
-
 ## 说明
 
 - c+不同于Java，有非常多的细节需要专门注意，所以需要特意写个方案解决平时遇到的问题
@@ -346,8 +344,15 @@ public:
 
 - 参考文档：http://www.cplusplus.com/reference/vector/vector/
 - 常用函数
-- reserve
-  - 提前开辟vector空间，可以减少后面自动增长的开销
+
+```
+reserve(number) 提前开辟vector空间，可以减少后面自动增长的开销
+clear() 清除所有的元素
+push_back(element) 往最后一个位置插入元素
+erase(index) 删除第index个位置的元素
+```
+
+
 
 ### string使用
 
@@ -1046,6 +1051,50 @@ int* modifier = const_cast<int*>(&constant);
         }   
     } customLess;
     std::sort(s.begin(), s.end(), customLess);
+```
+
+### std::stoull
+
+- 文档：<http://www.cplusplus.com/reference/string/stoull/>
+- 解释字符串到数字
+
+```
+// stoull example
+#include <iostream>   // std::cout
+#include <string>     // std::string, std::stoull
+
+int main ()
+{
+  std::string str = "8246821 0xffff 020 -1";
+
+  std::string::size_type sz = 0;   // alias of size_t
+
+  while (!str.empty()) {
+    unsigned long long ull = std::stoull (str,&sz,0);
+    std::cout << str.substr(0,sz) << " interpreted as " << ull << '\n';
+    str = str.substr(sz);
+  }
+
+  return 0;
+}
+
+8246821 interpreted as 8246821
+ 0xffff interpreted as 65535
+ 020 interpreted as 16
+ -1 interpreted as 18446744073709551615
+```
+
+### std::accumulate
+
+```
+#include <numeric> 
+求和函数
+
+std::vector<uint64_t> level;
+uint64_t sum = accumulate(level.begin() , level.end() , 0);
+
+求均值
+double average = (double)sum/(double)level.size();
 ```
 
 
@@ -2059,6 +2108,11 @@ int main(int argc, char* argv[]) {
 ```
 
 ```
+
+### brpc进阶
+
+- 模块协议设计：https://www.cnblogs.com/xudong-bupt/p/9496887.html
+- 
 
 ## ZooKeeper
 
