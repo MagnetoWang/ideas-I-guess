@@ -98,3 +98,18 @@
 - 先锁住钥匙串再解锁
 - 然后重新登录就解决了
 
+### key_load_public: invalid format
+
+- 重新创建秘钥和公钥
+- 正常来讲，应该出现xxx和xxx.pub两个文件
+
+### ssh_add 出现 Could not open a connection to your authentication agent
+
+- 参考资料：<https://blog.csdn.net/roserose0002/article/details/40078577>
+
+```
+先执行
+eval `ssh-agent`
+ssh-add ~/.ssh/rsa
+```
+
