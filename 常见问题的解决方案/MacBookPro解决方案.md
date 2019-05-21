@@ -81,6 +81,14 @@
 - 直接复制执行下面的命令
 - fc-list :lang=zh file family style
 
+### 在命令行下打开文本
+
+- open -t ~/.bash_profile
+
+### 在命令行下打印当前环境变量路径
+
+- echo $PATH
+
 ## 安装软件
 
 ### 安装md5sum
