@@ -1709,6 +1709,10 @@ square-root 这就是我们测试的函数
   proto_path 根目录
   cpp_out 是生成之后的文件目录
   src/foo.proto src/bar/baz.proto 是目标文件的位置，必须在proto_path之内
+  
+  转Java
+  protoc -I=/Users/magnetowang/Documents/GitHub/Backup-For-Mac/workplace/config --java_out=/Users/magnetowang/Documents/GitHub/Backup-For-Mac/workplace/config/proto /Users/magnetowang/Documents/GitHub/Backup-For-Mac/workplace/config/tablet.proto 
+  protoc -I=/Users/magnetowang/Documents/GitHub/Backup-For-Mac/workplace/config --java_out=/Users/magnetowang/Documents/GitHub/Backup-For-Mac/workplace/config/proto /Users/magnetowang/Documents/GitHub/Backup-For-Mac/workplace/config/name_server.proto
   ```
 
 - 关键函数
