@@ -824,6 +824,16 @@ UID   PID  PPID   C STIME   TTY           TIME CMD
 - 时间戳转换成日期
   - date -d @1547630387"+%Y-%m-%d %H:%M:%S"
 
+```
+打印时间戳
+date +%s
+
+shell复制时间戳
+xx=`date +%s`
+```
+
+
+
 ### tail
 
 - 从第5行开始显示文件
@@ -846,7 +856,7 @@ UID   PID  PPID   C STIME   TTY           TIME CMD
 
 - netstat -an | grep port
 - netstat -anp | grep port
-- 一般p的参数有权限限制
+- 一般p的参数有权限限制，有了p那么才会显示pid数字
 - 参考资料：http://www.cnblogs.com/MacoLee/p/5664306.html
 
 ### 命令结果保存在变量中
@@ -1044,6 +1054,16 @@ ps -xf | grep xxx_name
 kill -9 xx
 ```
 
+### 查找某个进程的执行路径
+
+```
+cd /proc/pid号
+// 就会显示文件夹目录
+ls -ail
+```
+
+
+
 ### 结束当前进程而不是停止当前进程
 
 - ctrl + c
@@ -1094,6 +1114,15 @@ export -n xxx 删除某个环境变量值
 - 所以后面直接加双引号保证整个字符串传进去
 - 解决方案：https://stackoverflow.com/questions/13781216/meaning-of-too-many-arguments-error-from-if-square-brackets
 - "$VARIABLE"
+
+### 用ssh登录服务器
+
+```
+ssh-keygen -t rsa
+
+```
+
+
 
 ## 常用代码
 
