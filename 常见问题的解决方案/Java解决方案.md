@@ -82,6 +82,22 @@
   - 如果涉及到外部包的依赖，一定要添加插件
   - https://blog.csdn.net/change_on/article/details/79379400
 
+#### maven命令总结
+
+- 参考资料：<http://www.mojohaus.org/exec-maven-plugin/>
+
+```
+mvn clean install -Dmaven.test.skip=true
+
+打包跳过测试
+mvn package -Dmaven.test.skip=true
+
+发布跳过测试
+mvn deploy -Dmaven.test.skip=true
+```
+
+
+
 #### 发布含main入口的jar包
 
 ```
@@ -212,6 +228,31 @@ how to throw an exception 或者 如何传递异常
   - 只在写的时候执行延时懒惰策略
   - 读的时候不加锁
 
+### Gradle
+
+#### 参考链接
+
+- 安装页面：<https://gradle.org/install/>
+
+#### 安装编译运行
+
+```
+mac平台
+brew install gradle
+
+编译
+chmod +x gradlew
+./gradlew
+```
+
+## Java语法
+
+### 函数参数传递的一些问题
+
+```
+对象传入
+```
+
 
 
 ## Java类的使用
@@ -276,6 +317,10 @@ how to throw an exception 或者 如何传递异常
 
 
 
+### Lamda表达式
+
+- 
+
 ## Redis
 
 ### 资料
@@ -286,6 +331,12 @@ how to throw an exception 或者 如何传递异常
 - 官方文档：<https://redis.io/>
 - info命令配置中文说明：<http://redisdoc.com/client_and_server/info.html>
 - redis-cli使用：<https://www.cnblogs.com/kongzhongqijing/p/6867960.html>
+- redie faq：<https://redis.io/topics/faq>
+
+### 特点
+
+- 单线程内存操作
+- 异步写入数据
 
 ### 服务端
 
@@ -357,10 +408,14 @@ protected-mode no
 - java编程使用JMeter示例： <https://www.jianshu.com/p/a88e5cb1d6cb>
 - Java请求：<https://www.cnblogs.com/yangxia-test/p/4019541.html>
 - jmeter系列文章：<https://www.cnblogs.com/yangxia-test/category/431240.html>
+- 多场景并发测试：<https://blog.csdn.net/laofashi2015/article/details/78552663>
+- 在jmeter情况下，修改jvm参数：<http://jmeter.apache.org/usermanual/get-started.html>
 
 ### Demo
 
 ```
+修改jvm参数
+JVM_ARGS="-Xms1024m -Xmx1024m" jmeter -t test.jmx [etc.]
 
 ```
 
@@ -381,6 +436,11 @@ protected-mode no
 #### Couldn't destroy threadgroup org.codehaus.mojo.exec.ExecJavaMojo$IsolatedThreadGroup[name=rtidbperf.RtidbClusterTest,maxpri=10]
 
 - 参考链接：https://stackoverflow.com/questions/13471519/running-daemon-with-exec-maven-plugin-avoiding-illegalthreadstateexception
+
+### NoClassDefFoundError和ClassNotFoundException区别
+
+- <https://www.cnblogs.com/xyhz0310/p/6803950.html>
+- 前者属于编译时期加载类出现的错误，后者属于运行时期加载类出现的错误
 
 ## 自动化脚本
 
@@ -413,6 +473,18 @@ cd maven
 export MAVEN_HOME=/home/wangzixian/maven/apache-maven-3.5.4
 export PATH=${MAVEN_HOME}/bin:${PATH}
 ```
+
+## 技巧
+
+### 如何编写可灵活的配置类
+
+- 参考brpc客户端Optiona
+
+```
+this.loadBalanceType = LoadBalanceType.ROUND_ROBIN.getId();
+```
+
+
 
 ## 常用代码片段
 
