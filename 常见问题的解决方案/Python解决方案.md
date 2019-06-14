@@ -105,6 +105,29 @@ list.pop(4)
 print list
 ```
 
+### dict字典
+
+```
+dict = {}
+
+# 如果有xxx，那么就是更新，如果没有xxx，那么就是新增一个键值
+dict["xxx"] = xxxxxx
+```
+
+
+
+### set集合
+
+```
+empty_set = set()
+
+empty_set.add(xxx)
+empty_set.remove(xxx)
+
+如果元素不存在,不报错
+empty_set.discard(xxx)
+```
+
 
 
 ## 函数说明
@@ -182,6 +205,54 @@ print list
             self.pose_gt: outputs.pose,
             self.gender_gt: outputs.gender,
         })
+```
+
+### 切片
+
+- 参加资料：<https://blog.csdn.net/xpresslink/article/details/77727507>
+
+```
+
+```
+
+### 列表生成法
+
+```
+
+test = [[0 for i in range(m)] for j in range(n)]
+
+```
+
+### 生成二维数组
+
+- 参考资料：<https://www.cnblogs.com/PyLearn/archive/2017/11/06/7795552.html>
+
+```
+列表生成法
+test = [[0 for i in range(m)] for j in range(n)]
+
+模块numpy创建
+import numpy as np
+test = np.zeros((m, n), dtype=np.int)
+
+生成随机二维数组
+test = np.random.random((3,5))
+
+切割数组验证
+print(test)
+test[:,1:]
+```
+
+
+
+## Python的陷阱
+
+### 新建一个变量
+
+- 参考资料：<https://www.cnblogs.com/ifantastic/p/3811145.html>
+
+```
+
 ```
 
 
