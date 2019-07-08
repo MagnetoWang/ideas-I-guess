@@ -127,6 +127,20 @@ mvn clean install -Dmaven.test.skip=true
 - 参考资料：https://stackoverflow.com/questions/9988814/how-do-i-find-out-which-settings-xml-file-maven-is-using
 - mvn -X
 
+#### maven执行指定具体的测试用例
+
+```
+java 测试框架
+修改java-ut 中的代码，Dtest可以更改成具体的类
+
+
+mvn clean test -Dtest=xxx包名.*Test,package_xxx.test_xxx
+
+*Test 执行后缀为Test
+```
+
+
+
 ### 命令行下执行Java项目整个过程
 
 - 参考链接：https://blog.csdn.net/qbg19881206/article/details/19850857
@@ -253,7 +267,14 @@ chmod +x gradlew
 对象传入
 ```
 
+### var的使用
 
+- <https://segmentfault.com/a/1190000017083955>
+
+### Objects.equals的使用
+
+- 资料：<https://www.jianshu.com/p/31ce2ce3eef1>
+- 判断两个对象的引用是否相等
 
 ## Java类的使用
 
@@ -319,7 +340,7 @@ chmod +x gradlew
 
 ### Lamda表达式
 
-- 
+- <https://blog.csdn.net/renfufei/article/details/24600507>
 
 ## Redis
 
@@ -510,6 +531,49 @@ maven包
 ### 线程睡眠
 
 - Thread.sleep(200);
+
+
+
+# 新的章节
+
+## Yaml语法
+
+### 参考资料
+
+- 类似与xml的文件：<https://www.ibm.com/developerworks/cn/xml/x-cn-yamlintro/index.html>
+- 官网：<http://www.yaml.org/>
+- Java版本：<http://jyaml.sourceforge.net/tutorial.html>
+
+### 总结
+
+```
+语法
+Structure通过空格来展示。Sequence里的项用"-"来代表，Map里的键值对用":"分隔.
+
+比如
+name: John Smith
+age: 37
+spouse:
+    name: Jane Smith
+    age: 25
+children:
+    -   name: Jimmy Smith
+        age: 15
+    -   name: Jenny Smith
+        age 12
+```
+
+
+
+## Google Guava Collections
+
+### 参考资料
+
+- 使用介绍：<https://www.ibm.com/developerworks/cn/java/j-lo-googlecollection/index.html>
+
+
+
+
 
 [TOC]
 
