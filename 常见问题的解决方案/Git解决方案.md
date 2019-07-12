@@ -16,6 +16,26 @@
 
 - git clone --depth 1 xxx
 
+### 下载某个项目的某个分支
+
+```
+git clone -b netty-4.0.33.Final --single-branch git@github.com:netty/netty.git
+```
+
+### 撤销当前所有修改内容
+
+```
+git checkout .
+```
+
+### 回滚指定位置
+
+```
+git reset --hard commitID
+```
+
+
+
 ### 拉取远程分支
 
 - git pull
@@ -67,6 +87,17 @@
 - ssh-add 密钥文件名字：无后缀名pub
 - 代表本机git也添加了该密钥
 - 都添加以后双方就有权限访问了
+```
+ssh-keygen -o -f ~/.ssh/id_rsa
+然后复制公钥即可
+```
+
+
+
+### ssh权限不够问题
+
+- 最好把秘钥名字改成id_rsa
+
 ### Cannot update paths and switch to branch at the same time
   - 命令行写错别字
 ### git push
