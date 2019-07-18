@@ -34,12 +34,29 @@ git checkout .
 git reset --hard commitID
 ```
 
-
-
 ### 拉取远程分支
 
 - git pull
 - git checkout  xxx
+
+### 分支与分支之间的合并
+
+```
+在idea直接merge，非常方便，还会显示冲突直接选择
+
+在命令行下
+比如现在你有分支a
+你要合并分支b
+
+最好先更新分支b的内容，然后直接合并！
+git checkout b
+git pull
+
+git checkout a
+git merge b
+```
+
+
 
 ### 解决冲突问题
 
