@@ -8,8 +8,6 @@
 
 ## Java解决方案
 
-
-
 ### 异常
 
 #### 异常介绍
@@ -35,21 +33,12 @@
   - http://www.blogjava.net/xylz/archive/2011/07/12/354206.html	
   - 此异常是用来描述任务执行时间超过了期望等待时间，也许是一直没有获取到锁，也许是还没有执行完成。
 
-
-
-
-
-
-
 ### 代码规范
 
 - 类名：每个单词首字母大写
   - ToPdf
 - 方法名：动词+名词，动词小写，名词首字母大写
 - 变量名：名词，首字母小写，多个单词的话，在后面单词每个首字母大写
-- 
-
-
 
 ### 编写规范
 
@@ -66,8 +55,6 @@
 - 数据类的定义
   - 不要重复定义两个功能相同的类，后面调用真的很麻烦麻烦
   - schema.ColumnDesc
-
-
 
 ### maven
 
@@ -342,6 +329,35 @@ chmod +x gradlew
 
 - <https://blog.csdn.net/renfufei/article/details/24600507>
 
+### HashMap
+
+- map.entry的使用：<https://www.cnblogs.com/guanjie20/p/3769772.html>
+
+```
+map可以直接返回key集合，也可以直接返回pair<k, v>集合用于遍历。map.entry就是返回键值对
+
+ Iterator<Map.Entry<String, List<String>>> entrys = multiString.entrySet().iterator();
+ 返回一个迭代器，可以用于遍历
+ 
+```
+
+- 匿名内部类的使用方法：<https://www.cnblogs.com/xdouby/p/5890083.html>
+
+```
+Map<String, Object> map = new HashMap<String, Object>() {
+    　　{
+        　　put("name", "June");  
+       　　 put("age", 12);  
+    　　}
+　　};
+　　
+　　这种方式可以初始化hashmap
+　　
+　　外层的一组“{}”表示的是一个匿名类，内层的一对“{}”表示的是实例初始化块，然后这边还有一点需要明白，实例初始化块的代码在编译器编译过后，是放在类的构造函数里面的，并且是在原构造函数代码的前面。
+```
+
+
+
 ## Redis
 
 ### 资料
@@ -572,6 +588,12 @@ children:
 - 使用介绍：<https://www.ibm.com/developerworks/cn/java/j-lo-googlecollection/index.html>
 
 
+
+## Testng
+
+### 参考资料
+
+- 官网：<http://testng.org/doc/index.html>
 
 
 
