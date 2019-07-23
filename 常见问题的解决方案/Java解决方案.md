@@ -56,7 +56,7 @@
   - 不要重复定义两个功能相同的类，后面调用真的很麻烦麻烦
   - schema.ColumnDesc
 
-### maven
+### 命令行下的maven
 
 - 发布jar包，跳过测试单元
   - mvn clean install -Dmaven.test.skip=true
@@ -81,6 +81,9 @@ mvn package -Dmaven.test.skip=true
 
 发布跳过测试
 mvn deploy -Dmaven.test.skip=true
+
+Java集成测试
+mvn clean -U compile test
 ```
 
 
@@ -128,7 +131,9 @@ mvn clean test -Dtest=xxx包名.*Test,package_xxx.test_xxx
 
 
 
-### 命令行下执行Java项目整个过程
+### 命令行下的Java
+
+#### 命令行下执行Java项目整个过程
 
 - 参考链接：https://blog.csdn.net/qbg19881206/article/details/19850857
 - mvn compile
@@ -154,7 +159,7 @@ java -cp xxx.jar xxx.Main
 
 
 
-### 命令行下创建完整java项目
+#### 命令行下创建完整java项目
 
 - 参考链接：<https://www.cnblogs.com/yjmyzz/p/3495762.html>
 - 四个步骤
