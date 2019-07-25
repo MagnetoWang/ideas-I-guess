@@ -84,6 +84,9 @@ mvn deploy -Dmaven.test.skip=true
 
 Java集成测试
 mvn clean -U compile test
+
+指定某个包的全部测试
+mvn clean test  -Dtest=包名.*
 ```
 
 
@@ -359,6 +362,24 @@ Map<String, Object> map = new HashMap<String, Object>() {
 　　这种方式可以初始化hashmap
 　　
 　　外层的一组“{}”表示的是一个匿名类，内层的一对“{}”表示的是实例初始化块，然后这边还有一点需要明白，实例初始化块的代码在编译器编译过后，是放在类的构造函数里面的，并且是在原构造函数代码的前面。
+```
+
+### List
+
+```
+list包含数组形式和链表形式，因为Java把方法封装成一样的
+
+增加
+add
+
+修改数据
+set(index, data)
+
+查询
+get
+
+删除
+remove
 ```
 
 
