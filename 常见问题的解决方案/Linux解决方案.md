@@ -699,7 +699,8 @@ sed -i "44c "--headers \) HDRS_IN=\"$2\"; shift 2 ;;"" config_brpc.sh
 ```
 
 - mac 使用这个命令似乎有问题啊！！
-- sed: 1: "config_brpc.sh": command c expects \ followed by text
+  - sed: 1: "config_brpc.sh": command c expects \ followed by text
+  - 目前不好解决
 
 ### nl
 
@@ -919,6 +920,14 @@ xx=`date +%s`
 - wc -c filename 统计字节数
 - wc -w filenmae 统计字数
 
+### 统计当前目录下多少文件
+
+```
+ls -lR  | grep "^-" | wc -l
+```
+
+
+
 ### 定义二维数组
 
 - LOG_FILES=('nameserver.info.log,offline tablet with endpoint,Run OfflineEndpoint,Run RecoverEndpoint,reconnect zk,kFailed,time of op is too long'
@@ -1101,6 +1110,12 @@ tar czvf xxx.tar xxx
 在linux中
 export -p 列举所有环境变量
 export -n xxx 删除某个环境变量值
+```
+
+### 查看服务器的ip地址
+
+```
+ifconig -a
 ```
 
 
