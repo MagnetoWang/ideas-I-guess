@@ -16,6 +16,7 @@
 
 - c++的环境依赖，版本配置简直是个神坑，填不完的感觉
 - 看文档的时候，学习英语四六级快速阅读的技巧。找关键词
+- 学习c++应该采取非线性思维，类似于给你一堆零碎的图片，而你要做的是贴图
 
 ## C++解决方案
 
@@ -2817,6 +2818,13 @@ Current command abbreviations (type 'help command alias' for more info):
 ```
 
 
+
+## Flex && Bison
+
+### 资料
+
+- bison官网：<https://www.gnu.org/software/bison/>
+- flex下载：<http://gnuwin32.sourceforge.net/packages/flex.htm>
 
 ## 脚本
 
