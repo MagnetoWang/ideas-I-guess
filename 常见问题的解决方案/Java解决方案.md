@@ -77,10 +77,10 @@
 mvn clean install -Dmaven.test.skip=true
 
 打包跳过测试
-mvn package -Dmaven.test.skip=true
+mvn clean package -Dmaven.test.skip=true
 
 发布跳过测试
-mvn deploy -Dmaven.test.skip=true
+mvn clean deploy -Dmaven.test.skip=true
 
 Java集成测试
 mvn clean -U compile test
@@ -133,6 +133,22 @@ java 测试框架
 mvn clean test -Dtest=xxx包名.*Test,package_xxx.test_xxx
 
 *Test 执行后缀为Test
+```
+
+#### maven依赖下的jar包冲突
+
+```
+资料：https://blog.csdn.net/andyzhaojianhui/article/details/51446413
+
+推荐两个方法，
+1，把要声明的jar包放到最前面
+2，用exclued标签来剔除不应该依赖的jar包
+```
+
+### 解决全局时区问题
+
+```
+mvn clean -U -Duser.timezone=Asia/Shanghai compile test
 ```
 
 
@@ -309,6 +325,12 @@ public @interface MyTarget {
 }
 
 
+```
+
+### List< ? >
+
+```
+资料：https://www.cnblogs.com/aipan/p/7511999.html
 ```
 
 
@@ -547,6 +569,14 @@ JVM_ARGS="-Xms1024m -Xmx1024m" jmeter -t test.jmx [etc.]
 - <https://www.cnblogs.com/xyhz0310/p/6803950.html>
 - 前者属于编译时期加载类出现的错误，后者属于运行时期加载类出现的错误
 
+### Error: Could not find or load main class
+
+```
+
+```
+
+
+
 ## 自动化脚本
 
 ### Java安装-非root情况
@@ -614,7 +644,17 @@ maven包
 
 ### 线程睡眠
 
-- Thread.sleep(200);
+```
+Thread.sleep(200);
+```
+
+
+
+### 资源加载
+
+```
+
+```
 
 
 
@@ -662,6 +702,26 @@ children:
 ### 参考资料
 
 - 官网：<http://testng.org/doc/index.html>
+
+## **javapoet**
+
+### 资料
+
+- 源码：<https://github.com/square/javapoet>
+
+## IDEA使用
+
+### 自动生成注释模板
+
+- <https://blog.csdn.net/xiaoliulang0324/article/details/79030752>
+
+```
+/**
+ * @Author YourName
+ * @Description TODO
+ * @Date ${DATE} ${TIME}
+ **/
+```
 
 
 
