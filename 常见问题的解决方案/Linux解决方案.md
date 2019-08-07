@@ -70,7 +70,7 @@
 
   ```
   # uname -a               # 查看内核/操作系统/CPU信息
-  # head -n 1 /etc/issue   # 查看操作系统版本
+  # cat /proc/version  	 # 查看操作系统版本
   # cat /proc/cpuinfo      # 查看CPU信息
   # hostname               # 查看计算机名
   # lspci -tv              # 列出所有PCI设备
@@ -1153,14 +1153,15 @@ CONTEXT='context'
 # logs/文件
 # 用逗号作为分隔符，作为关键词的后续添加
 LOG_FILES=('nameserver.info.log,offline tablet with endpoint,Run OfflineEndpoint,Run RecoverEndpoint,reconnect zk,kFailed,time of op is too long'
-        #    'rtidb_mon.log,mon : kill,mon : exit'
-        #    'rtidb_ns_mon.log,mon : kill,mon : exit'
+        #    'db_mon.log,mon : kill,mon : exit'
+        #    'db_ns_mon.log,mon : kill,mon : exit'
            'tablet.info.log,reconnect zk'
            )
 CONTEXT_FILE='context.log'
 rm -rf $CONTEXT_FILE
 touch $CONTEXT_FILE
 
+双重循环
 for file in "${LOG_FILES[@]}"
 do
     index=0
@@ -1214,15 +1215,15 @@ echo $i
 done
 
 # 字符串切割
-string="2018-12-12 16:10:04.017481 I 5777 [src/nameserver/name_server_impl.cc:492] offline tablet with endpoint[]"
+string="2018-12-12 16:10:04.017481 I 5777 [impl.cc:492] offline tablet with"
 echo ${string:0:19}
 echo $string
 
 
 # 一行一行打印string里面的值
 string="
-2018-12-12 16:10:04.017481 I 5777 [src/nameserver/name_server_impl.cc:492] offline tablet with endpoint[]
-2018-12-12 16:10:04.017481 I 5777 [src/nameserver/name_server_impl.cc:492] offline tablet with endpoint[]"
+2018-12-12 16:10:04.017481 I 5777 [impl.cc:492] offline tablet with
+2018-12-12 16:10:04.017481 I 5777 [impl.cc:492] offline tablet with"
 
 SAVEIFS=$IFS
 IFS=$'\n'
@@ -1263,6 +1264,48 @@ if [ $1 = 'all' ]; then
     else
         ./$1
 fi
+```
+
+### 镜像环境的搭建
+
+```
+ROOT_DIR=`pwd`
+
+DEPS_SOURCE=`pwd`/thirdsrc
+DEPS_PREFIX=`pwd`/thirdparty
+DEPS_CONFIG="--prefix=${DEPS_PREFIX} --disable-shared --with-pic"
+
+mkdir -p $DEPS_SOURCE
+mkdir -p $DEPS_PREFIX
+mkdir -p $DEPS_PREFIX/lib $DEPS_PREFIX/include
+
+```
+
+```
+说明
+比如安装bison的路径选择
+If you need to have bison first in your PATH run:
+  echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' >> ~/.bash_profile
+
+For compilers to find bison you may need to set:
+  export LDFLAGS="-L/usr/local/opt/bison/lib"
+```
+
+```
+安装包集合
+
+bison
+
+
+flex
+```
+
+
+
+## docker
+
+```
+
 ```
 
 
