@@ -2579,6 +2579,7 @@ struct D : B {
 
 - 非常经典的5个入门例子：https://blog.csdn.net/dbzhang800/article/details/6314073
 - 基本语法：https://www.jianshu.com/p/8909efe13308
+- demo说明：<https://www.cnblogs.com/cv-pr/p/6206921.html>
 
 ### 基本操作
 
@@ -2603,7 +2604,7 @@ add_executable(simple_example ${SOURCE_FILES})       # Add executable target wit
 - 参考资料：https://www.cnblogs.com/binbinjx/p/5626916.html
 - 专门用于链接lib目录下的动态库
 
-### configure参数详解
+#### configure参数详解
 
 - 参考资料：https://blog.csdn.net/zjt289198457/article/details/6918656
 
@@ -2613,7 +2614,7 @@ add_executable(simple_example ${SOURCE_FILES})       # Add executable target wit
   这个是最常用的！！！
   ```
 
-### 添加GDB调试功能
+#### 添加GDB调试功能
 
 - 先按照好gdb
 
@@ -2625,12 +2626,24 @@ add_executable(simple_example ${SOURCE_FILES})       # Add executable target wit
   set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
   ```
 
+### 命令行
+
+```
+编译文件
+mkdir -p build && cd build && cmake .. && make
+cd build
+cmake ..
+make
+```
+
+
+
 ### 震惊30天的cmake用法
 
 - 这是一个悲伤的故事
 
 ```
-
+cmake编译不断报warning，影响查看error的日志信息
 ```
 
 
@@ -2657,6 +2670,16 @@ add_executable(simple_example ${SOURCE_FILES})       # Add executable target wit
 - 动态库.so
 - --enable-static 生成静态库a文件
 - --enable-shared 生成共享库so文件
+
+### 多个文件互相调用函数
+
+```
+使用extern 声明外部文件的函数
+
+使用头文件方式，引入外部函数
+```
+
+
 
 ## Mac下的C++
 
@@ -2825,6 +2848,79 @@ Current command abbreviations (type 'help command alias' for more info):
 
 - bison官网：<https://www.gnu.org/software/bison/>
 - flex下载：<http://gnuwin32.sourceforge.net/packages/flex.htm>
+
+### 安装
+
+```
+mac下
+brew install flex bison
+返回结果，可以参考到linux下
+because some formulae require a newer version of bison.
+
+If you need to have bison first in your PATH run:
+  echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' >> ~/.bash_profile
+
+For compilers to find bison you may need to set:
+  export LDFLAGS="-L/usr/local/opt/bison/lib"
+  
+/usr/local/Cellar/bison/3.3.2: 77 files, 2.5MB
+
+
+linux下
+apt-get install flex
+apt-get install bison
+不要用源码编译！！！！
+```
+
+### flex疑难点
+
+#### 命令
+
+```
+生成.cc源码 flex -+ xxx.l
+生成.c源码 flex xxx.l
+
+
+生成执行文件 cc lex.yy.c -ll
+
+运行执行文件 ./a.out 
+
+```
+
+
+
+#### option
+
+```
+ %option作用： https://www.cnblogs.com/lit10050528/p/4389137.html
+ flex 提供一个机制用来在扫描器的说明中，而不是在flex 命令中控制选项。在扫描器的说明文件（flex 的输入文件）的第一段中使用%option 指令就可以实现。你可以用单个%option 指令指定多个选项，也可以使用多个%option指令
+ 
+ option 相当于一行命令的参数，这些参数可以限制或者扩展当前lexer文件的功能，比如大小写敏感，空行读取问题等等
+ 
+ %option nodefault -s选项作用：使不匹配的输入回显到输出设备的rule失去作用
+```
+
+#### 建立符号表
+
+```
+通俗来说，符号表就是相当于关键词表，拿C++语言，if,then，while就是关键词
+
+
+```
+
+
+
+## LLVM
+
+### 资料
+
+- 推荐书籍：<https://www.zhihu.com/question/28513400/answer/41143148>
+- 官网入门索引：<http://llvm.org/docs/tutorial/index.html>
+- llvm作者介绍llvm：<http://www.aosabook.org/en/llvm.html>
+- 使用llvm的api：<https://pauladamsmith.com/blog/2015/01/how-to-get-started-with-llvm-c-api.html>
+- 课件：<http://www.cs.cmu.edu/afs/cs.cmu.edu/academic/class/15745-s14/public/lectures/>
+
+
 
 ## 脚本
 
