@@ -653,6 +653,16 @@ Thread.sleep(200);
 ### 资源加载
 
 ```
+private static Properties properties = new Properties();
+String path = System.getProperty("user.dir") + xxxx
+properties.load(new BufferedInputStream(new FileInputStream(new File(path))));
+
+path 是当前项目的目录路径
+properties 加载路径的文件资源
+文件格式统一：变量名=xxxxx
+
+获取资源
+properties.getProperty("变量名");
 
 ```
 
