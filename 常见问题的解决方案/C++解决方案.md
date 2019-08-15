@@ -563,6 +563,49 @@ fn(x,x,xx,xxx);
 - 传对象的值到函数里面，会发生构造一次对象，析构一次对象消耗。而且这是没有考虑到对象中可能还含有其他对象的情况，那么消耗将会更加多。
 - 规范：输入参数在前，输出结果在后
 
+### ifndef用法
+
+```
+防止头文件重复编译
+
+#ifndef LLVM_IR_IRBUILDER_H
+#define LLVM_IR_IRBUILDER_H
+
+#endif // LLVM_IR_IRBUILDER_H
+
+
+注意即使你用了，仍然可能会报重复定义
+multiple definition of `LogError(char const*)'
+
+因为#ifndef只能保证重复包含时，只包含一次。但在不同的C文件是分别进行编译的，所以另一个C语言里的#define对另一个C文件不起作用。也就是说正确的作法应该这样：
+
+1）在头文件里只声明不定义
+2）把定义定义在C文件里
+
+注意
+如果非要在头文件定义函数，建议添加static
+```
+
+### 定义和声明
+
+```
+定义只能有一次，而声明可以用多次
+
+定义就是完整把一个变量或者函数具体形式，写出来
+比如
+static int64_t Discrete(int value) {
+    std::cout << "int Discrete (" << value << ")" << std::endl;
+    std::string value_name = std::to_string(value);
+    return hash64(value_name);
+}
+
+而声明只需要写出变量名字或者函数
+比如
+static int64_t Discrete(int value) ;
+```
+
+
+
 ### 函数中的参数传递
 
 #### 指针传递
@@ -1603,6 +1646,17 @@ limiter_不支持赋值语句!!!!
 - 因为可以一步一步单步调试，所以很方便
 - 如何使用查询本方案目录栏
 
+### 快速定位segment fault
+
+```
+两个print的方法
+std::cout<< "ok 169" << std::endl;
+std::cout<< "ok 122" << std::endl;
+一头一尾，不断往中间靠拢，来定位哪一行的bug
+```
+
+
+
 ## GLog
 
 - 日志的声明：http://www.voidcn.com/article/p-cfnlsnnv-os.html
@@ -1720,12 +1774,12 @@ square-root 这就是我们测试的函数
 - 编译安装：https://github.com/protocolbuffers/protobuf/tree/master/src
 
 - ```
-  $ git clone https://github.com/protocolbuffers/protobuf.git
-  $ cd protobuf
-  $ ./autogen.sh
-  $ ./configure
-  $ make -j5 或者 make
-  $ make install
+  git clone https://github.com/protocolbuffers/protobuf.git
+  cd protobuf
+  ./autogen.sh
+  ./configure
+  make -j5 或者 make
+  make install
   ```
 
 - 主要操作：
@@ -2618,7 +2672,7 @@ struct D : B {
 - 基本语法：https://www.jianshu.com/p/8909efe13308
 - demo说明：<https://www.cnblogs.com/cv-pr/p/6206921.html>
 
-### 基本操作
+### 基本语法
 
 ```cmake
 cmake_minimum_required(VERSION 3.6)   # CMake version check
@@ -2685,6 +2739,9 @@ mkdir -p build && cd build && cmake .. && make && cd ..
 cd build
 cmake ..
 make
+
+指定gcc编译版本
+cmake -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ ..
 ```
 
 ### 问题
@@ -2712,6 +2769,15 @@ link_directories(${CMAKE_CURRENT_SOURCE_DIR}/TestPlugin)
 查重是否用link_directories，include_directories导入库
 
 路径，路径，路径！路径名字一定要正确不能出错
+```
+
+#### cmake指定gcc编译版本
+
+```
+https://stackoverflow.com/questions/24380456/how-can-i-make-cmake-use-gcc-instead-of-clang-on-mac-os-x
+
+命令
+cmake -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ ..
 ```
 
 
@@ -2916,6 +2982,17 @@ Current command abbreviations (type 'help command alias' for more info):
   undisplay -- Stop displaying expression at every stop (specified by stop-hook index.)
   up        -- Select an older stack frame.  Defaults to moving one frame, a numeric argument can specify an arbitrary number.
   x         -- Read from the memory of the current target process.
+```
+
+### 调试文件的过程
+
+```
+lldb xxxx.file
+r // 执行程序，之后会开始跑程序，有些程序需要输入数据，才会开始启动
+breakpoint set -f node_test.cpp -l 17
+
+s 进入源码层
+n 下一行代码，不进入源码层
 ```
 
 
