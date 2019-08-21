@@ -1,6 +1,6 @@
 ## 说明
 
-- c+不同于Java，有非常多的细节需要专门注意，所以需要特意写个方案解决平时遇到的问题
+- c++不同于Java，有非常多的细节需要专门注意，所以需要特意写个方案解决平时遇到的问题
 
 ## 目录
 
@@ -34,6 +34,8 @@
   - NameServerImpl
 - 域名：namespace 全部小写，不超过三个单词
   - namespace，protobuf
+- 良好的编程习惯
+  - 头文件只声明函数和类，源文件负责定义实现具体的类和函数，这样防止重复定义函数的问题，以及同一个变量，因为多个文件调用一个头文件的变量出现分别定义这个变量
 
 ### 代码准则-实战获得经验
 
@@ -280,6 +282,8 @@ public:
 - Map.find（key)。返回的是迭代器
   - 在迭代器的基础上，iter->second。就可以返回value
 
+  - iter->first 就是返回key
+
   - 一般返回迭代器都会判断一下，是否为end情况
 
   - ```
@@ -330,6 +334,16 @@ public:
   - std::map<std::string, std::map<uint64_t, uint32_t>>::iterator it = offset_pos_map_.find(current_file);
   - std::map<uint64_t, uint32_t>& offset_pos = offset_pos_map_.at(current_file)
 
+```
+遍历map
+    for (auto e : map) {
+        std::cout << e.first << e.second << std::endl;
+    }
+
+```
+
+
+
 ### unordered_map使用
 
 - 哈希map，查找速度更快，常数级别
@@ -351,6 +365,29 @@ reserve(number) 提前开辟vector空间，可以减少后面自动增长的开�
 clear() 清除所有的元素
 push_back(element) 往最后一个位置插入元素
 erase(index) 删除第index个位置的元素
+
+
+```
+
+```
+两个vector合并
+
+https://blog.csdn.net/cau_eric/article/details/26011627
+
+vector<string>vec1,vec2,vec3;
+		//... vec1,vec2赋值
+		vec3.insert(vec3.end(),vec1.begin(),vec1.end());
+		vec3.insert(vec3.end(),vec2.begin(),vec2.end());
+
+```
+
+```
+vector指针的使用
+
+std::vector<llvm::Value*>* args
+
+new 和 取地址符 在函数传递的区别
+
 ```
 
 
@@ -655,9 +692,15 @@ function(const std::string& xx) {
 
 - 使用方法：<https://www.cprogramming.com/tutorial/function-pointers.html
 
-#### 使用
+#### 高级用法
 
 ```
+获取函数地址，然后调用：https://blog.csdn.net/Kwansy/article/details/79328003
+void func(void);//有一个函数
+int address = (int)func;//用整数保存其地址
+((void(*)())address)();//通过地址调用func
+
+
 
 ```
 
@@ -2683,7 +2726,7 @@ set(SOURCE_FILES main.cpp)            # Add main.cpp file of project root direct
 add_executable(simple_example ${SOURCE_FILES})       # Add executable target with source files listed in SOURCE_FILES variable
 ```
 
-### 语法讲解
+### 功能讲解
 
 #### add_executable
 
@@ -2717,6 +2760,22 @@ MESSAGE(xxxx)
 MESSAGE(${CMAKE_CURRENT_SOURCE_DIR})
 ```
 
+#### 关闭gcc警告
+
+```
+https://blog.csdn.net/qq_14821541/article/details/54314490
+add_definitions('-g')
+add_definitions('-w')
+# add_definitions('-Wall')
+add_definitions('-std=c++11')
+add_definitions(-Wunused-function)
+
+
+add_definitions('-w') 这是关闭警告
+add_definitions('-Wall') 这是打开警告
+add_definitions('-W') 只显示编译器认为的警告，不全
+```
+
 
 
 #### 添加GDB调试功能
@@ -2729,7 +2788,19 @@ MESSAGE(${CMAKE_CURRENT_SOURCE_DIR})
   set(CMAKE_BUILD_TYPE "Debug")
   set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
   set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
+  
+  https://bytefreaks.net/programming-2/cc-how-do-you-set-gdb-debug-flag-g-with-cmake
   ```
+
+#### 添加编译编译的参数
+
+```
+add_definitions('-w')
+
+add_definitions('xxxxx')
+```
+
+
 
 ### 命令行
 
@@ -2742,6 +2813,12 @@ make
 
 指定gcc编译版本
 cmake -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ ..
+
+debug参数
+cmake -DCMAKE_BUILD_TYPE=Debug <path>
+https://stackoverflow.com/questions/10005982/how-do-you-set-gdb-debug-flag-with-cmake
+
+
 ```
 
 ### 问题
@@ -2821,6 +2898,44 @@ cmake编译不断报warning，影响查看error的日志信息
 使用extern 声明外部文件的函数
 
 使用头文件方式，引入外部函数
+```
+
+### 多个文件互相调用同一个头文件的变量问题
+
+```
+a.h
+std::vector<Value*> row
+
+b.cpp
+c.cpp
+d.cpp
+```
+
+### 生成core文件，然后调试
+
+```
+快速上手：https://blog.csdn.net/u011806486/article/details/81409992
+调试详细文章：https://blog.csdn.net/hello2mao/article/details/79258471
+
+查看core文件大小，默认为0
+ulimit -a
+
+core file size 为无限
+ulimit -c unlimited
+
+不产生core文件,注意，改回0以后，就无法再改成unlimited
+ulimit -c 0
+
+调试
+gdb 可执行程序 core
+
+
+进阶 进入gdb界面以后
+直接打印问题代码堆栈
+bt
+
+动态编译的程序是不能直接gdb，需要在cmakelist中添加定义
+add_definitions(-D_DEBUG)
 ```
 
 
