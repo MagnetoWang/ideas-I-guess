@@ -87,6 +87,14 @@ git merge b
   - 然后导入码云仓库中
   - 码云在国内的服务器，让你下载有飞一般的感觉
 
+### git diff 和 status高亮
+
+```
+git config --global color.ui true
+```
+
+
+
 ## 问题
 
 ### error: RPC failed; curl 18 transfer closed with outstanding read data remaining
