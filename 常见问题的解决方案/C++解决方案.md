@@ -2742,10 +2742,26 @@ add_executable(simple_example ${SOURCE_FILES})       # Add executable target wit
 
 - 参考资料：https://blog.csdn.net/zjt289198457/article/details/6918656
 
+- gcc安装：<https://blog.csdn.net/LLL347/article/details/83060502>
+
 - ```
   --prefix=PREFIX 
   把所有文件装在目录   PREFIX下面而不是   /usr/local/pgsql   里．实际的文件会安装到不同的子目录里；甚至没有一个文件会直接   安装到   PREFIX   目录里．
   这个是最常用的！！！
+  
+  安装gcc的配置
+  /usr/local/src/gcc-5.4.0/configure  \
+  --prefix=/usr/local/gcc-5.4.0  \
+  --enable-threads=posix  \
+  --disable-multilib  \
+  --enable-languages=c,c++
+  # --prefix=/usr/local/gcc-5.4.0  指定安装路径
+  # --enable-languages=c,c++       支持的编程语言
+  # --enable-threads=posix         使用POSIX/Unix98作为线程支持库
+  # --disable-multilib             取消多目标库编译(在64位系统中是取消32位库编译)
+   ———————————————— 
+  版权声明：本文为CSDN博主「时光重返七十年」的原创文章，遵循CC 4.0 by-sa版权协议，转载请附上原文出处链接及本声明。
+  原文链接：https://blog.csdn.net/LLL347/article/details/83060502
   ```
 
 #### MESSAGE
@@ -2936,6 +2952,14 @@ bt
 
 动态编译的程序是不能直接gdb，需要在cmakelist中添加定义
 add_definitions(-D_DEBUG)
+```
+
+### 安装GCC 5.4.0版本
+
+```
+https://www.jianshu.com/p/0caef3ce8e06
+
+./configure --prefix=/home/wangzixian/ferrari/feql-jit/compatible-with-linux-1/pico/gcc/build --enable-threads=posix --disable-multilib --enable-languages=c,c++
 ```
 
 
