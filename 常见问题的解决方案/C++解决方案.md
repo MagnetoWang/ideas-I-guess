@@ -2728,6 +2728,18 @@ add_executable(simple_example ${SOURCE_FILES})       # Add executable target wit
 
 ### 功能讲解
 
+#### 安装指定路径
+
+- <https://www.cnblogs.com/zhonghuasong/p/7588192.html>
+
+```
+./configure --prefix=安装路径
+make -j20
+make install DESTDIR=安装路径
+```
+
+
+
 #### add_executable
 
 - 文档说明：https://cmake.org/cmake/help/v3.0/command/add_executable.html
@@ -2737,6 +2749,23 @@ add_executable(simple_example ${SOURCE_FILES})       # Add executable target wit
 
 - 参考资料：https://www.cnblogs.com/binbinjx/p/5626916.html
 - 专门用于链接lib目录下的动态库
+
+#### find_package
+
+```
+https://www.jianshu.com/p/46e9b8a6cb6a
+
+用法
+find_package(LLVM REQUIRED CONFIG)
+
+加入有多个llvm版本该找哪一个呢
+https://zhuanlan.zhihu.com/p/50829542
+
+```
+
+
+
+
 
 #### configure参数详解
 
@@ -2763,6 +2792,8 @@ add_executable(simple_example ${SOURCE_FILES})       # Add executable target wit
   版权声明：本文为CSDN博主「时光重返七十年」的原创文章，遵循CC 4.0 by-sa版权协议，转载请附上原文出处链接及本声明。
   原文链接：https://blog.csdn.net/LLL347/article/details/83060502
   ```
+
+
 
 #### MESSAGE
 
