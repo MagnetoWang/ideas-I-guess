@@ -2,6 +2,7 @@
 
 - 快速进入vim的编辑环境，让vim的编辑无感于vscode
 - 全身心投入代码的编辑，而不是一系列繁琐的配置中
+- 因为历史原因学习vim，而不是因为好用才学习vim
 
 [TOC]
 
@@ -13,6 +14,7 @@
 - 目录树：<https://blog.csdn.net/lyhdream/article/details/22490531>
 - 状态栏：<https://blog.csdn.net/XIAOZHOUWNX/article/details/8274988>
 - 语法高亮：<https://www.cnblogs.com/Lucky-qin2013/p/6171090.html>
+- 打造IDE：<http://yuez.me/jiang-ni-de-vim-da-zao-cheng-qing-qiao-qiang-da-de-ide/>
 
 ## 全局配置
 
@@ -54,6 +56,30 @@
 ```
 :u
 ```
+
+## 跳到指定行
+
+```
+:n
+n可以是任意数字
+```
+
+## 目录树
+
+```
+设置f5启动
+
+通过hjkl来移动光标
+o打开关闭文件或目录，如果想打开文件，必须光标移动到文件名
+t在标签页中打开
+s和i可以水平或纵向分割窗口打开文件
+p到上层目录
+P到根目录
+K到同目录第一个节点
+P到同目录最后一个节点
+```
+
+
 
 ## 状态栏语法
 
