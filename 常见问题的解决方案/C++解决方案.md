@@ -591,6 +591,25 @@ fn(x,x,xx,xxx);
 - std::exception
 - 资料：<https://blog.csdn.net/fengbingchun/article/details/78303734>
 
+### using使用
+
+```
+https://blog.csdn.net/shift_wwx/article/details/78742459
+
+命名空间
+using namespace android;
+
+引用基类
+using T5Base::test1
+
+可以起到别名的作用
+很方便的就知道是创建了一个函数和指针
+using FP = void (*) (int, const std::string&);
+using arrow_schema_ptr = std::shared_ptr<arrow::Schema>;
+```
+
+
+
 ### 函数中的参数
 
 - 默认参数和缺省参数：https://blog.csdn.net/CHF_VIP/article/details/8586921
@@ -623,7 +642,7 @@ multiple definition of `LogError(char const*)'
 如果非要在头文件定义函数，建议添加static
 ```
 
-### 定义和声明
+### C++的定义和声明
 
 ```
 定义只能有一次，而声明可以用多次
@@ -641,68 +660,6 @@ static int64_t Discrete(int value) {
 static int64_t Discrete(int value) ;
 ```
 
-
-
-### 函数中的参数传递
-
-#### 指针传递
-
-```
-Handle* wh;
-// 使用函数
-function(&wh)
-
-
-// 定义函数
-function(Handle** wh) {
-    xxxxx
-}
-```
-
-#### 引用传递
-
-- 所有的引用必须加const限定
-
-```
-std::string xx("hello");
-function(xx);
-
-// 定义函数
-function(const std::string& xx) {
-    xxxxx
-}
-```
-
-#### 传递的区别
-
-- 引用不需要再定义指针变量，只是给之前的变量换了一个别名
-
-#### 注意问题
-
-- 如果传入指针进入函数里面，要避免指针被函数内部修改！！！最好在指针右边加 const。可以编译中查出问题
-- 如果修改指针的内容，那么也要注意修改是否正确
-
-### 函数指针
-
-#### 场景
-
-- 来模板中调用统一函数接口，函数名相同，但是函数的参数全部都一样。比如服务端的各种类型的请求函数
-
-#### 资料
-
-- 使用方法：<https://www.cprogramming.com/tutorial/function-pointers.html
-
-#### 高级用法
-
-```
-获取函数地址，然后调用：https://blog.csdn.net/Kwansy/article/details/79328003
-void func(void);//有一个函数
-int address = (int)func;//用整数保存其地址
-((void(*)())address)();//通过地址调用func
-
-
-
-```
 
 
 
@@ -1220,6 +1177,104 @@ The contents of the vector are "Hello", "Hello"
 ```
 
 ```
+
+
+
+## C++的指针
+
+```
+(ConstantInt*)arg_0->getValue().getRawData()
+这样不是强转，gcc5.4.0会认为是*arg_0 获取指针对象
+```
+
+
+
+## C++的函数
+
+### 函数中的参数传递
+
+#### 指针传递
+
+```
+Handle* wh;
+// 使用函数
+function(&wh)
+
+
+// 定义函数
+function(Handle** wh) {
+    xxxxx
+}
+```
+
+#### 引用传递
+
+- 所有的引用必须加const限定
+
+```
+std::string xx("hello");
+function(xx);
+
+// 定义函数
+function(const std::string& xx) {
+    xxxxx
+}
+```
+
+#### 传递的区别
+
+- 引用不需要再定义指针变量，只是给之前的变量换了一个别名
+
+#### 注意问题
+
+- 如果传入指针进入函数里面，要避免指针被函数内部修改！！！最好在指针右边加 const。可以编译中查出问题
+- 如果修改指针的内容，那么也要注意修改是否正确
+
+### 函数指针
+
+#### 场景
+
+- 来模板中调用统一函数接口，函数名相同，但是函数的参数全部都一样。比如服务端的各种类型的请求函数
+
+#### 资料
+
+- 使用方法：<https://www.cprogramming.com/tutorial/function-pointers.html
+
+#### 高级用法
+
+```
+获取函数地址，然后调用：https://blog.csdn.net/Kwansy/article/details/79328003
+void func(void);//有一个函数
+int address = (int)func;//用整数保存其地址
+((void(*)())address)();//通过地址调用func
+
+
+定义一个有参数变量的函数
+((void(*)(int,int,int,int,int))main_func)(  raw_data.at(0),
+                                                    raw_data.at(1),
+                                                    raw_data.at(2),
+                                                    raw_data.at(3),
+                                                    raw_data.at(4));
+```
+
+### 函数的局部变量问题
+
+```
+函数内创建的局部变量，再函数结束后，局部变量会失效
+除非是return的变量，return的变量不会失效
+
+如何保存局部变量
+一
+	用vector保存变量，vector会把值复制一遍，这样局部变量的值就在外部了。
+	注意：vector不适合保存对象的指针，对象指针保存以后，局部变量的值仍然可以被释放，只有指针的地址是不能访问局部变量
+	
+二
+	外部创建的变量，放到局部函数中，局部变量可以赋值给外部变量
+	
+总结：大体思路，就是让局部变量的作用域范围更大
+```
+
+
 
 
 
@@ -2513,6 +2568,14 @@ extern ZOOAPI const int ZOO_SESSION_EVENT;
  */
 extern ZOOAPI const int ZOO_NOTWATCHING_EVENT;
 ```
+
+
+
+## Apache arrow
+
+### 资料
+
+- 介绍：<https://www.cnblogs.com/smartloli/p/6367719.html>
 
 
 
