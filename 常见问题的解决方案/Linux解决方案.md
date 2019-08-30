@@ -846,12 +846,41 @@ xx=`date +%s`
 
 ### tar
 
-- tar -zxvf ×××.tar.gz
+- <https://www.jb51.net/LINUXjishu/43356.html>
+
+```
+解压llvm压缩包
+tar -xvf llvm-8.0.0.src.tar.xz
+
+解压tar结尾的压缩包
+tar -xf all.tar
+
+解压gz结尾的压缩包
+tar -zxvf ×××.tar.gz
+
+将所有.jpg的文件打成一个名为all.tar的包。-c是表示产生新的包 ，-f指定包的文件名
+tar -cf all.tar *.jpg
+
+
+将所有.gif的文件增加到all.tar的包里面去。-r是表示增加文件的意思。
+tar -rf all.tar *.gif
+```
+
+
 
 ### which
 
 - http://www.runoob.com/linux/linux-comm-which.html
 - which指令会在环境变量$PATH设置的目录里查找符合条件的文件
+
+
+
+### patch
+
+- <https://www.runoob.com/linux/linux-comm-patch.html>
+- 命令用于修补文件
+
+
 
 ### 通过端口查看进程pid
 
