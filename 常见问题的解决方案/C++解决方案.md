@@ -397,6 +397,7 @@ new 和 取地址符 在函数传递的区别
 - 参考文档
   - http://www.cplusplus.com/reference/string/string/
   - https://en.cppreference.com/w/cpp/string/basic_string
+  - 字符串更多功能可以看boost
 - 转换字符串
   - std::to_string
   - https://en.cppreference.com/w/cpp/string/basic_string/to_string
@@ -469,6 +470,12 @@ int main ()
 | `0`   | They compare equal                                           |
 | `<0`  | Either the value of the first character that does not match is lower in the *compared string*, or all compared characters match but the *compared string* is shorter. |
 | `>0`  | Either the value of the first character that does not match is greater in the *compared string*, or all compared characters match but the *compared string* is longer. |
+
+```
+
+```
+
+
 
 ### char* 使用
 
@@ -1534,7 +1541,13 @@ int main()
 - 用法
 
 ```
+#include<boost/algorithm/string.hpp>
 
+分割与合并字符串
+	std::string s("test stringa-test stringb-test stringc");
+    std::vector<std::string> sv;
+    boost::split(sv,s,boost::is_any_of("-"),boost::token_compress_on);
+    //Now,sv={"test stringa","test stringb","test stringc"};
 ```
 
 
