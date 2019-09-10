@@ -1,3 +1,5 @@
+
+
 ## 说明
 
 - c++不同于Java，有非常多的细节需要专门注意，所以需要特意写个方案解决平时遇到的问题
@@ -471,8 +473,26 @@ int main ()
 | `<0`  | Either the value of the first character that does not match is lower in the *compared string*, or all compared characters match but the *compared string* is shorter. |
 | `>0`  | Either the value of the first character that does not match is greater in the *compared string*, or all compared characters match but the *compared string* is longer. |
 
-```
+#### 高级用法
 
+```
+字符串切割
+https://www.cnblogs.com/dfcao/p/cpp-FAQ-split.html
+void SplitString(const std::string& s, std::vector<std::string>& v, const std::string& c)
+{
+  std::string::size_type pos1, pos2;
+  pos2 = s.find(c);
+  pos1 = 0;
+  while(std::string::npos != pos2)
+  {
+    v.push_back(s.substr(pos1, pos2-pos1));
+ 
+    pos1 = pos2 + c.size();
+    pos2 = s.find(c, pos1);
+  }
+  if(pos1 != s.length())
+    v.push_back(s.substr(pos1));
+}
 ```
 
 
@@ -3145,6 +3165,14 @@ add_definitions(-D_DEBUG)
 
 ```
 https://www.jianshu.com/p/0caef3ce8e06
+
+wget https://mirrors.ustc.edu.cn/gnu/gcc/gcc-5.4.0/gcc-5.4.0.tar.gz
+tar -zxvf gcc-5.4.0.tar.gz
+cd gcc-5.4.0
+./contrib/download_prerequisites
+mkdir build
+./configure --prefix=/home/wangzixian/software/gcc-5.4.0/build --enable-languages=c,c++ --disable-multilib --enable-host-shared
+make -j12 && make install
 
 ./configure --prefix=/home/wangzixian/ferrari/feql-jit/compatible-with-linux-1/pico/gcc/build --enable-threads=posix --disable-multilib --enable-languages=c,c++
 ```
