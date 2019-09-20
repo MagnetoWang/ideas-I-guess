@@ -627,6 +627,12 @@ qa! 有多个文件被打开，同时退出
 python -m SimpleHTTPServer 1234
 ```
 
+### namespace隔离容器 
+
+```
+https://www.cnblogs.com/sammyliu/p/5878973.html
+```
+
 
 
 # Linux下的Shell
@@ -891,6 +897,35 @@ date +%s
 
 shell复制时间戳
 xx=`date +%s`
+```
+
+### tee
+
+- <https://linux.cn/article-9435-1.html>
+
+```
+输出的信息也同时能写入文件
+ping google.com | tee output.txt
+
+确保 tee 命令追加信息到文件中
+[command] | tee -a [file]
+
+让 tee 写入多个文件
+[command] | tee [file1] [file2] [file3]
+
+让 tee 命令的输出内容直接作为另一个命令的输入内容
+ls file* | tee output.txt | wc -l
+
+使用 tee 命令提升文件写入权限
+:w !sudo tee %
+```
+
+### time
+
+```
+统计命令执行性能
+
+time [command]
 ```
 
 
@@ -1232,6 +1267,13 @@ sys	0m4.383s
 ```
 time sh run.sh > log 2>&1 &
 tail -200f log
+
+time 可以有也可以不要，因为它是用统计脚本运行的时间
+
+
+更好的方法tee命令，可以查看更详细的tee说明哦
+sh run.sh | tee log
+同时也可以在输入流显示出来
 ```
 
 
