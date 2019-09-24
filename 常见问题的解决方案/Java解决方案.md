@@ -78,6 +78,7 @@ mvn clean install -Dmaven.test.skip=true
 
 打包跳过测试
 mvn clean package -Dmaven.test.skip=true
+jar包最终应该在target的目录下
 
 发布跳过测试
 mvn clean deploy -Dmaven.test.skip=true
@@ -331,6 +332,17 @@ public @interface MyTarget {
 
 ```
 资料：https://www.cnblogs.com/aipan/p/7511999.html
+```
+
+
+
+### TypeVariable
+
+```
+类型变量，描述类型，表示泛指任意或相关一类类型，也可以说狭义上的泛型（泛指某一类类型），一般用大写字母作为变量，比如K、V、E等
+
+https://blog.csdn.net/yaomingyang/article/details/81201817
+https://blog.csdn.net/a327369238/article/details/52673338
 ```
 
 
@@ -718,6 +730,8 @@ children:
 ### 资料
 
 - 源码：<https://github.com/square/javapoet>
+- 入门使用：<https://juejin.im/entry/58fefebf8d6d810058a610de>
+- example：<https://www.programcreek.com/java-api-examples/?api=com.squareup.javapoet.CodeBlock>
 
 ## IDEA使用
 
@@ -731,6 +745,73 @@ children:
  * @Description TODO
  * @Date ${DATE} ${TIME}
  **/
+```
+
+
+
+## Jprofiler
+
+### 资料
+
+- jprofiler部署：https://www.cnblogs.com/bumengru/p/7879854.html
+
+```
+http://resources.ej-technologies.com/jprofiler/help/doc/index.html?spm=5176.100239.blogcont276.32.pMeguT
+
+
+
+/home/wangzixian/task/jprofiler11.0/bin/linux-x64/libjprofilerti.so
+
+/home/wangzixian/task/bin/linux-x64/libjprofilerti.so
+
+
+https://sre.ink/jprofiler-on-linux/
+
+jprofiler -agentpath:linux-x64/libjprofilerti.so=port=8849,nowait
+
+-agentpath:/home/wangzixian/task/jprofiler11.0\bin\windows-x64\jprofilerti.dll=port=8849 
+
+-agentpath:/home/wangzixian/task/jprofiler/bin/linux-x64/libjprofilerti.so=port=8849
+
+export LD_LIBRARY_PATH=/home/wangzixian/task/jprofiler/bin/linux-x64
+
+export INSTALL4J_JAVA_HOME=/home/wangzixian/java/jdk1.8.0_141/jre
+
+mvn exec:java -Dexec.mainClass="com._4paradigm.predictor.demo.JprofilerTest" -agentpath:/home/wangzixian/task/jprofiler/bin/linux-x64/libjprofilerti.so=port=8849
+
+java -cp stress-0.0.1-SNAPSHOT.jar com._4paradigm.predictor.demo.JprofilerTest
+
+java -agentpath:/home/wangzixian/task/jprofiler/bin/linux-x64/libjprofilerti.so=port=8849
+
+java -jar /home/wangzixian/task/performance-redis-1/qastress/target/stress-0.0.1-SNAPSHOT.jar
+
+
+java -cp /home/wangzixian/task/performance-redis-1/qastress/target/stress-0.0.1-SNAPSHOT.jar com._4paradigm.predictor.demo.JprofilerTest -agentpath:/home/wangzixian/task/jprofiler/bin/linux-x64/libjprofilerti.so=port=8849
+
+
+java -agentpath:/home/wangzixian/task/jprofiler/bin/linux-x64/libjprofilerti.so=port=8849 -jar target/stress-0.0.1-SNAPSHOT.jar
+
+添加jvm环境变量
+https://segmentfault.com/a/1190000008545160
+
+export JAVA_TOOL_OPTIONS="-agentpath:/home/wangzixian/task/jprofiler/bin/linux-x64/libjprofilerti.so=port=8849"
+
+
+mvn exec:java -Dexec.mainClass="com._4paradigm.ferrari.performance.OnlinePredictorClient"
+```
+
+### 问题
+
+#### another application is listening on port
+
+```
+
+```
+
+#### Could not bind socket
+
+```
+
 ```
 
 
