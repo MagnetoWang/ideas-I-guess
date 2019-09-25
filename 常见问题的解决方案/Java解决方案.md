@@ -347,6 +347,54 @@ https://blog.csdn.net/a327369238/article/details/52673338
 
 
 
+### 泛型
+
+```
+http://www.runoob.com/java/java-generics.html
+
+        class DataPair<K, V> {
+            private K key;
+            private V value;
+            DataPair() {
+
+            }
+            DataPair(K k, V v) {
+                key = k;
+                value = v;
+            }
+            public K key() {
+                return key;
+            }
+            public V value() {
+                return value;
+            }
+        }
+        
+  优先队列中加入pair并制定比较器
+  lamda写法
+  Comparator<DataPair<Long, Integer>> comparator1 = (o1, o2) -> (int)(o2.key() - o1.key());
+  
+  原始写法
+          Comparator<DataPair<Long, Integer>> comparator1 = new Comparator<DataPair<Long, Integer>>() {
+            @Override
+            public int compare(DataPair<Long, Integer> o1, DataPair<Long, Integer> o2) {
+                return (int)(o2.key() - o1.key());
+            }
+        };
+```
+
+
+
+### Comparable
+
+```
+Comparator 和 Comparable 不同！！！
+```
+
+
+
+
+
 ## Java类的使用
 
 ### Future
@@ -456,6 +504,21 @@ get
 
 删除
 remove
+```
+
+### Queue
+
+```
+https://www.jianshu.com/p/c577796e537a
+
+添加元素
+add offer 
+
+获取并删除元素
+poll
+
+
+推荐isEmpty来循环判断队列比较合适
 ```
 
 
