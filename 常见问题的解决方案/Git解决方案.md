@@ -16,10 +16,14 @@
 
 - git clone --depth 1 xxx
 
-### 下载某个项目的某个分支
+### 下载某个项目的某个分支或者某个版本
 
 ```
 git clone -b netty-4.0.33.Final --single-branch git@github.com:netty/netty.git
+
+git clone -b gcc-5_4_0-release --single-branch https://github.com/gcc-mirror/gcc.git
+
+git clone -b  apache-arrow-0.14.0 --single-branch https://github.com/apache/arrow.git
 ```
 
 ### 撤销当前所有修改内容
@@ -54,6 +58,12 @@ git pull
 
 git checkout a
 git merge b
+```
+
+### 更新依赖
+
+```
+git submodule update --init --recursive
 ```
 
 
@@ -167,5 +177,15 @@ ssh-keygen -o -f ~/.ssh/id_rsa
 先执行
 eval `ssh-agent`
 ssh-add ~/.ssh/rsa
+```
+
+### Please move or remove them before you merge.
+
+```
+https://blog.csdn.net/chinacmt/article/details/52221733
+git clean  -d  -fx ""
+d  -----删除未被添加到git的路径中的文件
+f  -----强制运行
+x  -----删除忽略文件已经对git来说不识别的文件
 ```
 
