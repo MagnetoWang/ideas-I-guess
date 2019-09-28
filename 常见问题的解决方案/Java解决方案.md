@@ -393,6 +393,26 @@ Comparator 和 Comparable 不同！！！
 
 
 
+### Interface 接口
+
+```
+https://www.runoob.com/java/java-interfaces.html
+接口无法被实例化
+普通类必须实现接口的所有方法
+抽象类不用实现所有方法
+
+接口可以多继承接口
+```
+
+
+
+### 抽象类
+
+```
+https://www.runoob.com/java/java-abstraction.html
+
+```
+
 
 
 ## Java类的使用
@@ -860,8 +880,33 @@ https://segmentfault.com/a/1190000008545160
 export JAVA_TOOL_OPTIONS="-agentpath:/home/wangzixian/task/jprofiler/bin/linux-x64/libjprofilerti.so=port=8849"
 
 
-mvn exec:java -Dexec.mainClass="com._4paradigm.ferrari.performance.OnlinePredictorClient"
+mvn exec:java -Dexec.mainClass="com.OnlinePredictorClient"
 ```
+
+
+
+### 部署
+
+```
+本地和服务器
+本地安装可视化的jprofiler
+服务器直接安装免费的jprofiler
+
+本地不需要任何配置
+服务器需要配置环境变量
+
+对接的时候
+注意配置好端口，服务器端口必须空闲没有其他程序占用
+服务器端一定要配置好export JAVA_TOOL_OPTIONS="-agentpath:/home/wangzixian/task/jprofiler/bin/linux-x64/libjprofilerti.so=port=5004" 动态程序和端口
+
+使用
+先启动服务器端的程序，它会等待客户端连接
+
+启动本地的客户端，打开会话输入服务器地址，用户名等等
+最主要是端口必须保持一致
+```
+
+
 
 ### 问题
 
