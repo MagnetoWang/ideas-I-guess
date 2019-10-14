@@ -1743,14 +1743,42 @@ mvn exec:java -Dexec.mainClass="com.OnlinePredictorClient"
 
 
 
-### Flink
+## Flink
 
-#### 资料
+### 资料
 
 - 开发者资料：<https://ververica.cn/developers-resources/>
 - api概念：<https://ci.apache.org/projects/flink/flink-docs-master/zh/dev/api_concepts.html>
 - 编程模型：<https://ci.apache.org/projects/flink/flink-docs-master/concepts/programming-model.html>
 - lamda表达式在flink中的表现：<https://ci.apache.org/projects/flink/flink-docs-master/zh/dev/java_lambdas.html>
+- flink管理内容：<https://my.oschina.net/u/2359207/blog/3086501>
+- Apache Flink 类型和序列化机制简介：<https://cloud.tencent.com/developer/article/1240444>
+- flink三张状态存储：<https://www.cnblogs.com/029zz010buct/p/9403283.html>
+- 状态管理：<https://blog.csdn.net/xorxos/article/details/80877266>
+- 官方文档状态管理详细说明：<https://ci.apache.org/projects/flink/flink-docs-release-1.9/dev/stream/state/state.html>
+
+### 状态设计
+
+```
+状态类型
+operator or keyed state
+StateDescriptor 状态描述符，状态的名字
+
+可存储状态的形式
+ValueState<T> getState(ValueStateDescriptor<T>)
+ReducingState<T> getReducingState(ReducingStateDescriptor<T>)
+ListState<T> getListState(ListStateDescriptor<T>)
+AggregatingState<IN, OUT> getAggregatingState(AggregatingStateDescriptor<IN, ACC, OUT>)
+FoldingState<T, ACC> getFoldingState(FoldingStateDescriptor<T, ACC>)
+MapState<UK, UV> getMapState(MapStateDescriptor<UK, UV>)
+
+可以进化的状态
+Data schema of the state type has evolved, i.e. adding or removing a field from a POJO that is used as state.
+Generally speaking, after a change to the data schema, the serialization format of the serializer will need to be upgraded.
+Configuration of the serializer has changed.
+
+
+```
 
 
 
