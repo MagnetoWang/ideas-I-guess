@@ -1900,216 +1900,6 @@ square-root 这就是我们测试的函数
   ```
 
 
-## protobuf
-
-- 文档
-
-  - https://developers.google.com/protocol-buffers/docs/reference/cpp/google.protobuf.message
-  - https://developers.google.cn/protocol-buffers/docs/reference/cpp-generated
-  - 高级操作：<https://www.ibm.com/developerworks/cn/linux/l-cn-gpb/index.html>
-
-- 编译安装：https://github.com/protocolbuffers/protobuf/tree/master/src
-
-- ```
-  git clone https://github.com/protocolbuffers/protobuf.git
-  cd protobuf
-  ./autogen.sh
-  ./configure
-  make -j5 或者 make
-  make install
-  ```
-
-- 主要操作：
-
-- 定义好相关message信息
-
-- ```
-  message Foo {
-    optional string text = 1;
-    repeated int32 numbers = 2;
-  }
-  ```
-
-- 然后proto 格式转换成cpp，java等等。后面直接调用
-
-- ```
-  protoc --proto_path=src --cpp_out=build/gen src/foo.proto src/bar/baz.proto
-  
-  proto_path 根目录
-  cpp_out 是生成之后的文件目录
-  src/foo.proto src/bar/baz.proto 是目标文件的位置，必须在proto_path之内
-  
-  转Java
-  protoc -I=/Users/magnetowang/Documents/GitHub/Backup-For-Mac/workplace/config --java_out=/Users/magnetowang/Documents/GitHub/Backup-For-Mac/workplace/config/proto /Users/magnetowang/Documents/GitHub/Backup-For-Mac/workplace/config/tablet.proto 
-  protoc -I=/Users/magnetowang/Documents/GitHub/Backup-For-Mac/workplace/config --java_out=/Users/magnetowang/Documents/GitHub/Backup-For-Mac/workplace/config/proto /Users/magnetowang/Documents/GitHub/Backup-For-Mac/workplace/config/name_server.proto
-  ```
-
-- 关键函数
-
-  - Name()：获取内容值
-
-  - setName()：设置内容值
-
-  - MegerFrom
-
-  - Merge the fields from the given message into this message.
-
-    Singular fields will be overwritten, if specified in from, except for embedded messages which will be merged. Repeated fields will be concatenated. The given message must be of the same type as this message (i.e. the exact same class).
-
-  - CopyFrom
-
-  - Make this message into a copy of the given message.
-
-    The given message must have the same descriptor, but need not necessarily be the same class. By default this is just implemented as "Clear(); MergeFrom(from);".
-
-- message类型API
-
-  - 文档：https://developers.google.cn/protocol-buffers/docs/reference/cpp/google.protobuf.message#Message
-
-- 序列化和反序列化
-
-  - 在日志和通信压缩里面可以使用
-  - https://developers.google.cn/protocol-buffers/docs/reference/cpp/google.protobuf.message#Message.SerializeToFileDescriptor.details
-
-- cmakelist中可以直接生成proto文件
-
-- ```
-  include(FindProtobuf)
-  protobuf_generate_cpp(PROTO_SRC PROTO_HEADER echo.proto)
-  ```
-
-- 导入其他proto文件
-
-  - 参考资料：<https://www.jianshu.com/p/506d6db06676
-
-  - 非常重要的功能
-
-  - 因为不可能所有proto都只在一个文件声明，而不能互相导入
-
-  - 这样扩展性很差
-
-  - ```
-    import "myproject/other_protos.proto";
-    ```
-
-- 定义rpc服务
-
-  - 参考资料
-
-    - <https://blog.csdn.net/liujiayu2/article/details/77837450>
-    - <https://blog.csdn.net/nk_test/article/details/72682780>
-    - <https://developers.google.cn/protocol-buffers/docs/proto#services>
-
-  - service结构
-
-  - ```
-    service SearchService {
-      rpc Search (SearchRequest) returns (SearchResponse);
-    }
-    ```
-
-  - service使用
-
-  - 需要自己实现channel 和 controller两个类
-
-  - ```
-    class EchoServiceImpl : public EchoService {
-        public:
-        EchoServiceImpl() {}
-        virtual void Foo(::google::protobuf::RpcController* controller,
-                           const ::FooRequest* request,
-                           ::FooResponse* response,
-                           ::google::protobuf::Closure* done) {
-            std::string str = request->text();
-    
-            std::string tmp = str;
-            for (int i = 1; i < request->times(); i++)
-                str += (" " + tmp);
-            response->set_text(str);
-            response->set_result(true);
-            if (done)
-                done->Run();
-        }   
-    };
-    int main(int argc, char *argv[]) {
-        EchoServiceImpl *impl = new EchoServiceImpl();
-        RpcServer rpc_server;
-        rpc_server.RegisterService(impl);
-        rpc_server.Start();
-        return 0;
-    }
-    
-    // google official example
-    using google::protobuf;
-    
-    protobuf::RpcChannel* channel;
-    protobuf::RpcController* controller;
-    SearchService* service;
-    SearchRequest request;
-    SearchResponse response;
-    
-    void DoSearch() {
-      // You provide classes MyRpcChannel and MyRpcController, which implement
-      // the abstract interfaces protobuf::RpcChannel and protobuf::RpcController.
-      channel = new MyRpcChannel("somehost.example.com:1234");
-      controller = new MyRpcController;
-    
-      // The protocol compiler generates the SearchService class based on the
-      // definition given above.
-      service = new SearchService::Stub(channel);
-    
-      // Set up the request.
-      request.set_query("protocol buffers");
-    
-      // Execute the RPC.
-      service->Search(controller, request, response, protobuf::NewCallback(&Done));
-    }
-    
-    void Done() {
-      delete service;
-      delete channel;
-      delete controller;
-    }
-    ```
-
-- 注意
-
-  - protobuf 3 有很多问题，推荐使用2.5左右版本。主要是为了兼容使用Brpc
-  - 找到protobuf ，然后删除
-    - which protoc
-  - 2.5版本在github全部clone下来
-  - git checkout v2.5.0
-  - 注意官网编译脚本有问题
-  - autogen.sh 要注释掉部分没用的语句
-  - 直接生成configutation即可
-  - 后面就是make 一系列操作
-
-- proto模板
-
-```
-
-syntax="proto2";
-package ibdb.storage;
-
-option cc_generic_services = true;
-// option java_generic_services = true;
-// option java_package = "com.ibdb.storage";
-// option java_outer_classname = "Storage";
-
-message LogEntry {
-    required uint64 offset = 1;
-    required uint32 message_size = 2;
-    required string message = 3;
-}
-
-message Field {
-    required string name = 1;
-    required string type = 2;
-    required bool is_key = 3;
-}
-```
-
-
 
 ## BRPC
 
@@ -2899,7 +2689,11 @@ hadoop -touchz pathname
 https://blog.csdn.net/sunshingheavy/article/details/53227581
 ```
 
+## RocksDB
 
+### 资料
+
+- 中文网：<https://rocksdb.org.cn/doc/Implement-Queue-Service-Using-RocksDB.html>
 
 ## OOP
 
@@ -3364,6 +3158,19 @@ g++ $cpp_file.cpp -o $cpp_file
 ./$cpp_file
 rm -rf $cpp_file
 ```
+
+
+
+
+
+# 新项目
+
+## RocksDB
+
+### 资料
+
+- 全面介绍：<http://alexstocks.github.io/html/rocksdb.html>
+
 
 
 
