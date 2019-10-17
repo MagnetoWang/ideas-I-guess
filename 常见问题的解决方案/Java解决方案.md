@@ -1861,7 +1861,45 @@ Configuration of the serializer has changed.
 
 ```
 
-- 
+## Avro
+
+### 资料
+
+- java语言使用入门：<https://avro.apache.org/docs/current/gettingstartedjava.html>
+- 数据结构介绍：<https://docs.oracle.com/database/nosql-12.1.3.0/GettingStartedGuide/avroschemas.html#avro-complexdatatypes>
+
+### 创建Schema
+
+```
+Schema schema = Schema.createMap(Schema.create(Schema.Type.BOOLEAN)); 
+```
+
+### 添加数据
+
+```
+avro建议是一次性put数据，递归方式put数据，会将序列化难度加大
+比如
+多层嵌套Map结构，可以只存储最外围的map，内部的map不再做解析
+同样list结构也是，准备好list的数据，作为一个对象直接放到avro中
+```
+
+### 数据实体序列化
+
+```
+
+```
+
+### 重要demo
+
+```
+demo都在项目的ut中
+序列化的演示，TestSeekableByteArrayInput
+
+```
+
+### 注意
+
+- map结构的key默认是string，所以只需要定义value的type
 
 [TOC]
 
