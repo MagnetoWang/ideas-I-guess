@@ -145,6 +145,13 @@ mvn clean test -Dtest=xxx包名.*Test,package_xxx.test_xxx
 推荐两个方法，
 1，把要声明的jar包放到最前面
 2，用exclued标签来剔除不应该依赖的jar包
+
+<exclusions>
+          <exclusion>
+              <artifactId>log4j-over-slf4j</artifactId>
+              <groupId>org.slf4j</groupId>
+          </exclusion>
+          </exclusions>
 ```
 
 ### 解决全局时区问题
@@ -437,6 +444,60 @@ https://www.runoob.com/java/java-abstraction.html
 
 ```
 
+### switch
+
+```
+public class Test {
+   public static void main(String args[]){
+      //char grade = args[0].charAt(0);
+      char grade = 'C';
+ 
+      switch(grade)
+      {
+         case 'A' :
+            System.out.println("优秀"); 
+            break;
+         case 'B' :
+         case 'C' :
+            System.out.println("良好");
+            break;
+         case 'D' :
+            System.out.println("及格");
+            break;
+         case 'F' :
+            System.out.println("你需要再努力努力");
+            break;
+         default :
+            System.out.println("未知等级");
+      }
+      System.out.println("你的等级是 " + grade);
+   }
+}
+public class Test {
+   public static void main(String args[]){
+      int i = 5;
+      switch(i){
+         case 0:
+            System.out.println("0");
+         case 1:
+            System.out.println("1");
+         case 2:
+            System.out.println("2");
+         default:
+            System.out.println("default");
+      }
+   }
+}
+```
+
+### 序列化和反序列化
+
+```
+https://www.runoob.com/java/java-serialization.html
+```
+
+
+
 
 
 ## Java类的使用
@@ -548,6 +609,12 @@ get
 
 删除
 remove
+
+indexOf(Object obj)方法的实现机制是从序列(List)的第0个元素开始依次循环，并且调用每个元素的equals()方法和参数对象进行比较，如果某一个元素的equals()方法返回值为true，那么就把当前元素的索引位置作为结果返回。假如序列中有多个重复的元素，只返回这个重复的元素第一次出现时所在的索引位置的值。
+
+lastIndexOf(Object obj)方法，与indexOf()方法相反，它返回的是某个元素最后一次出现的索引位置的值，也就是它会从序列的队尾向队头进行遍历。
+
+以上两个方法的参数对象如果在序列中都没有出现的话，那么这两个方法都会返回-1。
 ```
 
 ### Queue
@@ -697,7 +764,21 @@ JVM_ARGS="-Xms1024m -Xmx1024m" jmeter -t test.jmx [etc.]
 ### Error: Could not find or load main class
 
 ```
+clean 或者重新下载代码编译
+```
 
+### Detected both log4j-over-slf4j.jar AND bound slf4j-log4j12.jar on the class path
+
+```
+同时引用相同的包over-slf4j，要删除其中一个
+
+exclude标签
+<exclusions>
+          <exclusion>
+              <artifactId>log4j-over-slf4j</artifactId>
+              <groupId>org.slf4j</groupId>
+          </exclusion>
+          </exclusions>
 ```
 
 
@@ -1780,7 +1861,7 @@ Configuration of the serializer has changed.
 
 ```
 
-
+- 
 
 [TOC]
 
