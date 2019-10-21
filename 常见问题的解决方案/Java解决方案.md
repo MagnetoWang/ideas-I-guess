@@ -8,6 +8,10 @@
 
 ## Java解决方案
 
+### 资料
+
+- Java泛型高级用法：<http://angelikalanger.com/GenericsFAQ/JavaGenericsFAQ.html>
+
 ### 异常
 
 #### 异常介绍
@@ -357,6 +361,8 @@ public @interface MyTarget {
 
 ```
 资料：https://www.cnblogs.com/aipan/p/7511999.html
+
+可以看看泛型
 ```
 
 
@@ -406,6 +412,81 @@ http://www.runoob.com/java/java-generics.html
                 return (int)(o2.key() - o1.key());
             }
         };
+        
+        
+集成的限定通配符：https://zhuanlan.zhihu.com/p/36859885
+<? extends T>、<? super T>、<?>。其中前两者被称为限定通配符，<?>被称为非限定通配符。
+
+<? extends T> 上界通配符
+上界通配符顾名思义，<? extends T>表示的是类型的上界（包含自身），因此通配的参数化类型可能是T或T的子类。正因为无法确定具体的类型是什么，add方法受限（可以添加null，因为null表示任何类型），但可以从列表中获取元素后赋值给父类型。如上图中的第一个例子，第三个add()操作会受限，原因在于List<Animal>和List<Cat>是List<? extends Animal>的子类型。
+
+<? super T> 下界通配符
+下界通配符<? super T>表示的是参数化类型是T的超类型（包含自身），层层至上，直至Object，编译器无从判断get()返回的对象的类型是什么，因此get()方法受限。但是可以进行add()方法，add()方法可以添加T类型和T类型的子类型，如第二个例子中首先添加了一个Cat类型对象，然后添加了两个Cat子类类型的对象，这种方法是可行的，但是如果添加一个Animal类型的对象，显然将继承的关系弄反了，是不可行的。
+
+<?> 无界通配符
+在理解了上界通配符和下界通配符之后，其实也自然而然的理解了无界通配符。无界通配符用<?>表示，?代表了任何的一种类型，能代表任何一种类型的只有null（Object本身也算是一种类型，但却不能代表任何一种类型，所以List<Object>和List<null>的含义是不同的，前者类型是Object，也就是继承树的最上层，而后者的类型完全是未知的）。
+```
+
+### 反射
+
+```
+如何将字符串描述的类型，转化真正的类型
+比如 字符串 “123” 转化成 Integer 123
+其中Integer在模板中是未知的
+https://blog.csdn.net/salerzhang/article/details/49637605
+
+class MyType<T> {
+ // 自定义泛型类
+}
+ 
+ 
+public <X> MyType<X> getMyTypeInstance(Class<X> clazz) {
+ return new MyType<X>();
+}
+ 
+public void test() {
+ MyType<Integer> type = getMyTypeInstance(Integer.class);
+}
+
+反射创建对象
+https://blog.csdn.net/lccone/article/details/7789666
+
+反射和泛型模板创建对象
+https://blog.csdn.net/tgbus18990140382/article/details/80622524
+
+泛型可以避免类型转换
+https://www.jianshu.com/p/7cc6921c3be4
+比如
+public class ObjectFactory {
+    public static Object getInstance(String name){
+        try {
+            //创建指定类对应的Class对象
+            Class cls = Class.forName(name);
+            //返回使用该Class对象创建的实例
+            return cls.newInstance();
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+}
+会有object的转换
+Date date = (Date) ObjectFactory.getInstance("java.util.Date");
+String string = (String) ObjectFactory.getInstance("java.util.Date");
+但是
+public class ObjectFactory {
+    public static <T> T getInstance(Class<T> cls) {
+        try {
+            // 返回使用该Class对象创建的实例
+            return cls.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+}
+返回的类型都由输入决定！！！！
+String instance = ObjectFactory.getInstance(String.class);
 ```
 
 
@@ -435,7 +516,15 @@ https://www.runoob.com/java/java-interfaces.html
 
 ```
 https://www.runoob.com/java/java-abstraction.html
+在面向对象的概念中，所有的对象都是通过类来描绘的，但是反过来，并不是所有的类都是用来描绘对象的，如果一个类中没有包含足够的信息来描绘一个具体的对象，这样的类就是抽象类。
 
+抽象类除了不能实例化对象之外，类的其它功能依然存在，成员变量、成员方法和构造方法的访问方式和普通类一样。
+
+由于抽象类不能实例化对象，所以抽象类必须被继承，才能被使用。也是因为这个原因，通常在设计阶段决定要不要设计抽象类。
+
+父类包含了子类集合的常见的方法，但是由于父类本身是抽象的，所以不能使用这些方法。
+
+在Java中抽象类表示的是一种继承关系，一个类只能继承一个抽象类，而一个类却可以实现多个接口。
 ```
 
 ### getContextClassLoader
@@ -494,9 +583,58 @@ public class Test {
 
 ```
 https://www.runoob.com/java/java-serialization.html
+常规阶段的序列化是在对应的类实现序列化接口，调用对应的outputstream和inputstream即可实现
+
+对于商业级别的序列化，Java内置无论是性能还是序列化后的文件大小都远远不达标
+所以这里需要了解avro，protobuf和flatbuffer等等序列化框架，最后选出适合业务需求的序列化
+
+序列化还要考虑schema是否需要代码生成
 ```
 
+### 继承的用法
 
+```
+用法一
+父类特有的数据结构和public数据方法
+子类可以直接调用方法
+比如
+父类有String类型，setString,getString
+子类可以调用setString,getString，实现父类的String的修改。子类无法直接访问String，但是可以通过方法访问
+
+用法二
+
+```
+
+### 异常
+
+```
+语法：https://www.runoob.com/java/java-exceptions.html
+图解：https://blog.csdn.net/hguisu/article/details/6155636
+
+有两种方式操作异常
+一个是捕捉异常，另一个扔出异常
+扔出异常
+public void deposit(double amount) throws RemoteException
+  {
+    // Method implementation
+    throw new RemoteException();
+  }
+  
+捕捉异常
+public static void main(String args[]){
+    int a[] = new int[2];
+    try{
+       System.out.println("Access element three :" + a[3]);
+    }catch(ArrayIndexOutOfBoundsException e){
+       System.out.println("Exception thrown  :" + e);
+    }
+    finally{
+       a[0] = 6;
+       System.out.println("First element value: " +a[0]);
+       System.out.println("The finally statement is executed");
+    }
+  }
+```
 
 
 
@@ -576,6 +714,8 @@ map可以直接返回key集合，也可以直接返回pair<k, v>集合用于遍�
  Iterator<Map.Entry<String, List<String>>> entrys = multiString.entrySet().iterator();
  返回一个迭代器，可以用于遍历
  
+ hashmap结构的key，存储double
+https://stackoverflow.com/questions/1074781/double-in-hashmap
 ```
 
 - 匿名内部类的使用方法：<https://www.cnblogs.com/xdouby/p/5890083.html>
@@ -779,6 +919,44 @@ exclude标签
               <groupId>org.slf4j</groupId>
           </exclusion>
           </exclusions>
+```
+
+### an enum switch case label must be the unqualified name of an enumeration constant
+
+```
+https://stackoverflow.com/questions/10161408/java-using-switch-statement-with-enum-under-subclass
+
+//Main Class
+public class SomeClass {
+
+    //Sub-Class
+    public static class AnotherClass {
+        public enum MyEnum {
+            VALUE_A, VALUE_B
+        }    
+        public MyEnum myEnum;
+    }
+
+    public void someMethod() { 
+        MyEnum enumExample //...
+
+        switch (enumExample) {
+            case AnotherClass.MyEnum.VALUE_A: { <-- error on this line
+                //..
+                break;
+            }
+        }
+    }
+}
+
+在switch语法报错
+只需要放入值，不需要前面名字限定
+switch (enumExample) {
+    case VALUE_A: {
+        //..
+        break;
+    }
+}
 ```
 
 
@@ -1837,6 +2015,7 @@ mvn exec:java -Dexec.mainClass="com.OnlinePredictorClient"
 - flink三张状态存储：<https://www.cnblogs.com/029zz010buct/p/9403283.html>
 - 状态管理：<https://blog.csdn.net/xorxos/article/details/80877266>
 - 官方文档状态管理详细说明：<https://ci.apache.org/projects/flink/flink-docs-release-1.9/dev/stream/state/state.html>
+- flink状态翻译：<https://www.jianshu.com/p/e9a330399b30>
 
 ### 状态设计
 
