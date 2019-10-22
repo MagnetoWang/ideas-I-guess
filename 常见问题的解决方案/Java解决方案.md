@@ -249,6 +249,63 @@ how to throw an exception 或者 如何传递异常
 - https://stackoverflow.com/questions/23552114/extract-string-from-readonly-java-nio-bytebuffer
 - 这个问题困扰8个小时了
 
+### slf4j注解
+
+```
+https://blog.csdn.net/HeatDeath/article/details/79833880
+
+<!--可以引入日志 @Slf4j注解-->
+<dependency>
+    <groupId>org.projectlombok</groupId>
+    <artifactId>lombok</artifactId>
+</dependency>
+
+@Slf4j
+用log变量即可
+但是idea需要额外的插件lombok才行
+
+所以我觉得还是用传统方法好些
+
+打印的日志可以修改格式
+https://ln0491.github.io/2017/01/03/%E6%97%A5%E5%BF%97%E7%BB%84%E4%BB%B6slf4j%E4%BB%8B%E7%BB%8D%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AF%A6%E8%A7%A3/
+
+log4j2.xml的配置
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Don't forget to set system property
+-DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
+     to make all loggers asynchronous. -->
+
+<Configuration status="INFO">
+    <Appenders>
+
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
+            <!--<PatternLayout pattern="%d %p [%t]\t%m%n" />-->
+            <!--<PatternLayout pattern="%d [%-6p] %C{1}.%M – %m%n" />-->
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="info" includeLocation="false">
+            <AppenderRef ref="Console" />
+        </Root>
+    </Loggers>
+</Configuration>
+
+log4j.properties
+# Root logger option
+log4j.rootLogger=INFO, stdout
+
+# Direct log messages to stdout
+log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.Target=System.out
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m
+
+```
+
+
+
 ### Copy-On-Write的并发写入原理
 
 - 参考文章：https://coolshell.cn/articles/11175.html
@@ -381,6 +438,8 @@ https://blog.csdn.net/a327369238/article/details/52673338
 ### 泛型
 
 ```
+只有泛型类、泛型接口、泛型方法，没有泛型变量
+概念介绍：https://blog.csdn.net/s10461/article/details/53941091
 http://www.runoob.com/java/java-generics.html
 
         class DataPair<K, V> {
@@ -589,7 +648,95 @@ https://www.runoob.com/java/java-serialization.html
 所以这里需要了解avro，protobuf和flatbuffer等等序列化框架，最后选出适合业务需求的序列化
 
 序列化还要考虑schema是否需要代码生成
+
+序列化到字节流：https://blog.csdn.net/zhengzhaoyang122/article/details/81673947
+
+序列化到文件如下
+定义对象
+public class Employee implements java.io.Serializable
+{
+   public String name;
+   public String address;
+   public transient int SSN;
+   public int number;
+   public void mailCheck()
+   {
+      System.out.println("Mailing a check to " + name
+                           + " " + address);
+   }
+}
+
+序列化
+import java.io.*;
+ 
+public class SerializeDemo
+{
+   public static void main(String [] args)
+   {
+      Employee e = new Employee();
+      e.name = "Reyan Ali";
+      e.address = "Phokka Kuan, Ambehta Peer";
+      e.SSN = 11122333;
+      e.number = 101;
+      try
+      {
+         FileOutputStream fileOut =
+         new FileOutputStream("/tmp/employee.ser");
+         ObjectOutputStream out = new ObjectOutputStream(fileOut);
+         out.writeObject(e);
+         out.close();
+         fileOut.close();
+         System.out.printf("Serialized data is saved in /tmp/employee.ser");
+      }catch(IOException i)
+      {
+          i.printStackTrace();
+      }
+   }
+}
+
+反序列化
+import java.io.*;
+ 
+public class DeserializeDemo
+{
+   public static void main(String [] args)
+   {
+      Employee e = null;
+      try
+      {
+         FileInputStream fileIn = new FileInputStream("/tmp/employee.ser");
+         ObjectInputStream in = new ObjectInputStream(fileIn);
+         e = (Employee) in.readObject();
+         in.close();
+         fileIn.close();
+      }catch(IOException i)
+      {
+         i.printStackTrace();
+         return;
+      }catch(ClassNotFoundException c)
+      {
+         System.out.println("Employee class not found");
+         c.printStackTrace();
+         return;
+      }
+      System.out.println("Deserialized Employee...");
+      System.out.println("Name: " + e.name);
+      System.out.println("Address: " + e.address);
+      System.out.println("SSN: " + e.SSN);
+      System.out.println("Number: " + e.number);
+    }
+}
 ```
+
+### transient
+
+```
+https://www.cnblogs.com/lanxuezaipiao/p/3369962.html
+
+ 当一个类实现序列化接口后，可以用transient选择不序列化的字段
+```
+
+
 
 ### 继承的用法
 
@@ -712,8 +859,11 @@ public static void main(String args[]){
 map可以直接返回key集合，也可以直接返回pair<k, v>集合用于遍历。map.entry就是返回键值对
 
  Iterator<Map.Entry<String, List<String>>> entrys = multiString.entrySet().iterator();
- 返回一个迭代器，可以用于遍历
- 
+ 返回一个迭代器，可以用于遍历，使用方法如下
+         for (entrys.hasNext()) {
+            Map.Entry<String, List<String>> en = entrys.next();
+        }
+        
  hashmap结构的key，存储double
 https://stackoverflow.com/questions/1074781/double-in-hashmap
 ```
@@ -906,6 +1056,19 @@ JVM_ARGS="-Xms1024m -Xmx1024m" jmeter -t test.jmx [etc.]
 ```
 clean 或者重新下载代码编译
 ```
+
+### Cannot find class in classpath
+
+```
+clean clean clean
+rm -rf xx
+rm -rf xx
+rm -rf xx
+
+只能重新编译！！！
+```
+
+
 
 ### Detected both log4j-over-slf4j.jar AND bound slf4j-log4j12.jar on the class path
 
