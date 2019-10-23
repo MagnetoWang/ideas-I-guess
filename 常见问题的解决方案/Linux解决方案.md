@@ -422,6 +422,16 @@ https://blog.csdn.net/xg123321123/article/details/78117162
 - POSIX：https://en.wikipedia.org/wiki/POSIX
   - The Portable Operating System Interface (POSIX)
 
+### glibc
+
+```
+https://www.gnu.org/software/libc/
+https://github.com/bminor/glibc
+
+The GNU C Library project provides the core libraries for the GNU system and GNU/Linux systems, as well as many other systems that use Linux as the kernel. These libraries provide critical APIs including ISO C11, POSIX.1-2008, BSD, OS-specific APIs and more. These APIs include such foundational facilities as open, read, write, malloc, printf, getaddrinfo, dlopen, pthread_create, crypt, login, exit and more.
+
+```
+
 ## 基本操作
 
 - vim
@@ -625,6 +635,8 @@ qa! 有多个文件被打开，同时退出
 
 ```
 python -m SimpleHTTPServer 1234
+
+在网页上 ip:1234 就可以访问服务器
 ```
 
 ### namespace隔离容器 
@@ -638,6 +650,15 @@ https://www.cnblogs.com/sammyliu/p/5878973.html
 # Linux下的Shell
 
 ## 基础
+
+### 待了解命令
+
+```
+popd pushd fg bg
+ldd --version
+```
+
+
 
 ### /dev/null 含义
 
