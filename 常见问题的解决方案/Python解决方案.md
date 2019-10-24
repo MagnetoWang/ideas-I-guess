@@ -8,6 +8,51 @@
 
 ## Python解决方案
 
+### 常识
+
+#### pip命令
+
+```
+pip install --upgrade pip
+```
+
+#### conda命令
+
+```
+conda config --show channels
+
+conda不能下载第三方库，只能安装pip的官方库
+```
+
+#### pycharm
+
+```
+三种安装额外包，conda，pip和手动
+pycharm可以给每个项目开新的库环境，根据这一特点，用户非常方便管理不同项目所依赖的包
+```
+
+#### 安装python
+
+```
+wget https://www.python.org/ftp/python/3.7.5/Python-3.7.5.tar.xz
+tar -xvf Python-3.7.5.tar.xz
+cd Python-3.7.5
+mkdir build
+./configure --prefix=/home/wangzixian/python/Python-3.7.5/build
+make -j12 && make install
+
+export PATH=xxxx/python/Python-3.7.5/build/bin:$PATH
+确定python解释器是否安装成功
+which python3
+
+
+注意
+If you want a release build with all stable optimizations active (PGO, etc),
+please run ./configure --enable-optimizations
+```
+
+
+
 ### 文档
 
 - python必须跟官方的来写，因为2和3语法很令人恼火
@@ -130,7 +175,7 @@ empty_set.discard(xxx)
 
 
 
-## 函数说明
+## 语法
 
 ### OS模块
 
@@ -181,6 +226,19 @@ empty_set.discard(xxx)
 - 管道的打开顺序很重要
 
   - Examples：https://www.programcreek.com/python/example/3522/os.mkfifo
+
+### class 类
+
+```
+def __init__(self, texts, batch_size=16):
+	xxxx
+	
+类似于Java的构造函数
+self默认为this
+texts, batch_size=16是传入参数
+```
+
+
 
 ## Python的奇怪语法
 
