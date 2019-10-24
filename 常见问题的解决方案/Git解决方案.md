@@ -43,6 +43,19 @@ git reset --hard commitID
 - git pull
 - git checkout  xxx
 
+### 本地分支推到远程分支
+
+```
+git pull
+git checkout -b xxx
+一般来说这是在本地新建一个分支，远程并没有这个分支
+
+希望把xxx推到远程某个分支名上
+ git push --set-upstream origin xxx
+```
+
+
+
 ### 分支与分支之间的合并
 
 ```
@@ -96,6 +109,33 @@ git submodule update --init --recursive
   - fork你要下载的仓库
   - 然后导入码云仓库中
   - 码云在国内的服务器，让你下载有飞一般的感觉
+
+### 下载大数据集文件
+
+```
+背景
+在深度学习训练的时候，会有代码和数据集两类文件
+代码可以托管在git服务器，并且随时同步
+而数据集因为本身体积较大，不方便随时同步，因此可以给数据集打个标签，记录数据存放某个服务器的地址即可，需要的时候才下载，不需要的时候只传输地址
+这就需要lfs插件来上传数据集和下载数据集，因为lfs会负责整理大数据集一系列变动，不需要人工过多干预
+
+https://git-lfs.github.com/
+lfs = large files storage
+
+mac安装
+brew install git-lfs
+
+linux安装
+wget https://github.com/git-lfs/git-lfs/archive/v2.9.0.tar.gz
+tar -zxvf v2.9.0
+cd git-lfs-2.9.0/
+
+
+git lfs pull 就会把所有的数据集文件下载下来
+数据集文件之前push的时候会打好hash和地址
+```
+
+
 
 ### git diff 和 status高亮
 
@@ -187,5 +227,12 @@ git clean  -d  -fx ""
 d  -----删除未被添加到git的路径中的文件
 f  -----强制运行
 x  -----删除忽略文件已经对git来说不识别的文件
+```
+
+### Clone succeeded, but checkout failed
+
+```
+项目中还包含数据集文件，数据集文件非常大！！！
+所以不能下载下下来
 ```
 
