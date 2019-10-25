@@ -29,6 +29,12 @@ conda不能下载第三方库，只能安装pip的官方库
 ```
 三种安装额外包，conda，pip和手动
 pycharm可以给每个项目开新的库环境，根据这一特点，用户非常方便管理不同项目所依赖的包
+
+远程开发服务器代码
+需求：代码和数据集都在服务器中，本地端只保留代码。运行在服务端
+方便调试，所有计算资源都托管在服务器上
+
+
 ```
 
 #### 安装python
@@ -49,6 +55,17 @@ which python3
 注意
 If you want a release build with all stable optimizations active (PGO, etc),
 please run ./configure --enable-optimizations
+```
+
+#### 安装conda
+
+```
+linux下
+wget 
+sh Anaconda3-5.3.0-Linux-x86_64.sh
+在内部需要指定安装路径
+最后配置好路径即可
+source ~/python/anaconda3/etc/profile.d/conda.sh
 ```
 
 
@@ -311,6 +328,23 @@ test[:,1:]
 
 ```
 
+```
+
+### module 'tensorflow' has no attribute 'placeholder'
+
+```
+https://stackoverflow.com/questions/37383812/tensorflow-module-object-has-no-attribute-placeholder
+
+
+
+It happened to me too. I had tensorflow and it was working pretty well, but when I install tensorflow-gpu along side the previous tensorflow this error arose then I did these 3 steps and it started working with no problem:
+
+    I removed tensorflow-gpu, tensorflow, tensorflow-base packages from Anaconda. Using. conda remove tensorflow-gpu tensorflow tensorflow-base
+    re-installed tensorflow. Using conda install tensorflow
+
+
+使用conda方式重新安装tensorflow
+conda install tensorflow
 ```
 
 
