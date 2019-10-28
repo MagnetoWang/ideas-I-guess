@@ -781,6 +781,10 @@ public static void main(String args[]){
        System.out.println("The finally statement is executed");
     }
   }
+  
+ 
+RuntimeException 和 Exception 完全不一样！！！！
+RuntimeException 不需要throw 直接终止程序！
 ```
 
 
@@ -1328,7 +1332,7 @@ public final class HelloWorld {
   public static void main(String[] args) {
     System.out.println("Hello, JavaPoet!");
   }
-}1234567
+}
 ```
 
 上面的代码就是使用javapoet用下面的代码进行生成的：
@@ -1349,7 +1353,7 @@ TypeSpec helloWorld = TypeSpec.classBuilder("HelloWorld")
 JavaFile javaFile = JavaFile.builder("com.example.helloworld", helloWorld)
     .build();
 
-javaFile.writeTo(System.out);12345678910111213141516
+javaFile.writeTo(System.out);
 ```
 
 通过`MethodSpec`类来创建一个”main”方法，并配置了修饰符、返回值类型、参数以及代码语句。然后把这个main方法添加到 `HelloWorld` 类中，最后添加到 `HelloWorld.java`文件中。
@@ -2266,6 +2270,31 @@ demo都在项目的ut中
   Java and Go code supports object-reuse. C# has efficient struct based accessors.
 
 - **Cross platform code with no dependencies** - C++ code will work with any recent gcc/clang and VS2010. Comes with build files for the tests & samples (Android .mk files, and cmake for all other platforms).
+
+
+
+## DL4J
+
+### 资料
+
+- 代码导航：https://deeplearning4j.org/docs/latest/deeplearning4j-examples-tour
+- 开始深度学习：https://deeplearning4j.org/docs/latest/deeplearning4j-beginners
+- 配置dl4j到项目：https://deeplearning4j.org/docs/latest/deeplearning4j-quickstart
+- 中文文档：https://deeplearning4j.org/cn/gettingstarted
+
+### 安装
+
+```
+deeplearning4j-core, which contains the neural network implementations
+nd4j-native-platform, the CPU version of the ND4J library that powers DL4J
+datavec-api - Datavec is our library vectorizing and loading data
+
+
+
+
+```
+
+
 
 [TOC]
 
