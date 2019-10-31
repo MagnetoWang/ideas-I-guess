@@ -2971,6 +2971,15 @@ make -j12 && make install
 ./configure --prefix=/home/wangzixian/ferrari/feql-jit/compatible-with-linux-1/pico/gcc/build --enable-threads=posix --disable-multilib --enable-languages=c,c++
 ```
 
+### 安装bazel
+
+```
+wget https://github.com/bazelbuild/bazel/releases/download/0.29.0/bazel-0.29.0-installer-darwin-x86_64.sh
+sh bazel-0.29.0-installer-darwin-x86_64.sh --prefix=/xxx/xxx/third_party
+
+添加bin的环境路径
+```
+
 
 
 ## Mac下的C++
@@ -3172,6 +3181,72 @@ rm -rf $cpp_file
 - 全面介绍：<http://alexstocks.github.io/html/rocksdb.html>
 
 
+
+## TensorFlow
+
+### 资料
+
+- Java接口：https://tensorflow.google.cn/install/lang_java
+- 模型提供服务：https://www.tensorflow.org/tfx/tutorials/serving/rest_simple
+- 安装Java版本：https://www.tensorflow.org/install/lang_java
+- 源码：https://github.com/tensorflow/tensorflow
+
+### 安装
+
+```
+https://www.tensorflow.org/install
+
+pip install tensorflow
+或者
+conda install tensorflow
+
+docker方式
+docker pull tensorflow/tensorflow                  # Download latest image
+docker run -it -p 8888:8888 tensorflow/tensorflow  # Start a Jupyter notebook server 
+
+源码方式
+https://www.tensorflow.org/install/source
+必须安装bazel
+bazel的版本必须和tensorflow一致
+好吧！bazel恶心！
+
+```
+
+### 模型保存和加载
+
+```
+python版本：https://www.tensorflow.org/tutorials/keras/save_and_load
+
+
+
+
+
+
+Java版本：https://www.tensorflow.org/api_docs/java/reference/org/tensorflow/Graph.html#importGraphDef(byte[])
+keras和tf的模型交互：https://www.jianshu.com/p/0016a34c82c8
+
+有pb模型后Java的调用
+public void predict() throws Exception {
+        try (Graph graph = new Graph()) {
+            graph.importGraphDef(Files.readAllBytes(Paths.get(
+                    "path/to/model.pb"
+            )));
+            try (Session sess = new Session(graph)) {
+                // 自己构造一个输入
+                float[][] input = {{56, 632, 675, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
+                try (Tensor x = Tensor.create(input);
+                    // input是输入的name，output是输出的name
+                    Tensor y = sess.runner().feed("input", x).fetch("output").run().get(0)) {
+                    float[][] result = new float[1][y.shape[1]];
+                    y.copyTo(result);
+                    System.out.println(Arrays.toString(y.shape()));
+                    System.out.println(Arrays.toString(result[0]));
+                }
+            }
+        }
+    }
+
+```
 
 
 
