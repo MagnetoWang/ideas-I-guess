@@ -2281,6 +2281,9 @@ demo都在项目的ut中
 - 开始深度学习：https://deeplearning4j.org/docs/latest/deeplearning4j-beginners
 - 配置dl4j到项目：https://deeplearning4j.org/docs/latest/deeplearning4j-quickstart
 - 中文文档：https://deeplearning4j.org/cn/gettingstarted
+- 支持keras的能力范围：https://deeplearning4j.org/docs/latest/keras-import-supported-features
+- keras模型导入：https://deeplearning4j.org/docs/latest/keras-import-model-import
+- 每个版本的新功能和注意点：https://deeplearning4j.org/release-notes#onezerozerobeta5
 
 ### 安装
 
@@ -2289,9 +2292,47 @@ deeplearning4j-core, which contains the neural network implementations
 nd4j-native-platform, the CPU version of the ND4J library that powers DL4J
 datavec-api - Datavec is our library vectorizing and loading data
 
+依赖包如下
+
+
+```
+
+### 不支持神经网络层
+
+```
+GRU
+CRF
+```
 
 
 
+### 问题
+
+#### dyld: lazy symbol binding failed: Symbol not found: ___emutls_get_address
+
+```
+原项目本身特别的大
+问题非常难定位
+后面是抽出需要用的dl4j包，新建一个自己的项目，发现可以正常运行
+所以就避开这个不知道怎么冒出来的棘手问题
+```
+
+#### Exception in thread "main" java.lang.ClassCastException: java.util.LinkedHashMap cannot be cast to java.util.List
+
+```
+https://github.com/eclipse/deeplearning4j/issues/6527
+
+keras版本问题
+I reproduce the exception compiling with Keras 2.2.3 and importing with 1.0.0-beta2.
+It seems that the keras field for "config" (retrieve here modelConfig.get(config.getModelFieldConfig())) has changed from list of object in version 2.0.X to object representing map.
+
+Keras 2.0.9 :
+{ "backend": "tensorflow", "keras_version": "2.0.9", "class_name": "Sequential", "config": [ { "class_name": "Dense", "config": { "kernel_initializer": { "class_name": "VarianceScaling", "config": { "distribution": "uniform", "scale": 1.0, "seed": null, "mode": "fan_avg" }
+
+Keras 2.2.3 :
+{ "backend": "tensorflow", "keras_version": "2.2.3", "class_name": "Sequential", "config": { "name": "sequential_1", "layers": [ { "class_name": "Dense", "config": { "name": "dense_1", "trainable": true, "batch_input_shape": [ null, 100 ],
+
+2.0.9和2.2.3内部结构修改了
 ```
 
 
