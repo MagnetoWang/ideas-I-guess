@@ -3190,6 +3190,10 @@ rm -rf $cpp_file
 - 模型提供服务：https://www.tensorflow.org/tfx/tutorials/serving/rest_simple
 - 安装Java版本：https://www.tensorflow.org/install/lang_java
 - 源码：https://github.com/tensorflow/tensorflow
+- 2.0版本的example：https://github.com/aymericdamien/TensorFlow-Examples/tree/master/tensorflow_v2
+- google的example的c++版本：https://itnext.io/creating-a-tensorflow-dnn-in-c-part-1-54ce69bbd586
+- 安装bazel：https://github.com/bazelbuild/bazel/releases
+- bazel编译cpp：https://docs.bazel.build/versions/master/tutorial/cpp.html
 
 ### 安装
 
@@ -3210,6 +3214,17 @@ https://www.tensorflow.org/install/source
 bazel的版本必须和tensorflow一致
 好吧！bazel恶心！
 
+
+编译c++版本
+https://www.codercto.com/a/31648.html
+https://www.cnblogs.com/buyizhiyou/p/10405634.html
+https://stackoverflow.com/questions/33620794/how-to-build-and-use-google-tensorflow-c-api
+
+bazel build //tensorflow:libtensorflow_cc.so
+
+bazel build :libtensorflow.so
+
+cmake -DCMAKE_C_COMPILER=/xxx/gcc-5.4.0/build/bin/gcc -DCMAKE_CXX_COMPILER=/xxx/gcc-5.4.0/build/bin/g++ ..
 ```
 
 ### 模型保存和加载
@@ -3247,6 +3262,54 @@ public void predict() throws Exception {
     }
 
 ```
+
+### 源码
+
+#### GraphDef
+
+```
+proto3的message
+tensorflow.framework下的proto里
+
+```
+
+### 编译问题
+
+```
+CMakeFiles/tensorflow_test.dir/main.cc.o: In function `main':
+main.cc:(.text+0x93): undefined reference to `tensorflow::ReadBinaryProto(tensorflow::Env*, std::string const&, google::protobuf::MessageLite*)'
+main.cc:(.text+0xd1): undefined reference to `tensorflow::Status::ToString() const'
+main.cc:(.text+0x115): undefined reference to `tensorflow::Status::ToString() const'
+
+
+
+ 1092  make -j8
+ 1093  ls
+ 1094  ls -a
+ 1095  cat .bazelrc
+ 1096  bazel build
+ 1097  bazel build //tensorflow:libtensorflow_cc.so
+ 1098  pwd
+ 1099  git status
+ 1100  export https_proxy=http://172.27.155.199:10809;export http_proxy=http://172.27.155.199:10809;export all_proxy=socks5://172.27.155.199:10808
+ 1101  bazel build //tensorflow:libtensorflow_cc.so
+ 1102   source /opt/rh/rh-git29/enable
+ 1103  bazel build //tensorflow:libtensorflow_cc.so
+ 1104  git --version
+ 1105  curl -v www.google.com
+ 1106  bazel build //tensorflow:libtensorflow_cc.so
+ 1107  pip install future
+ 1108  pip install hashlib
+ 1109  ./configure
+ 1110  bazel build //tensorflow:libtensorflow_cc.so
+ 1111  ls
+ 1112  cd bazel-te
+ 1113  cd bazel-tensorflow-2.0.0/
+ 1114  ls
+ 1115  cd tensorflow/
+```
+
+
 
 
 
