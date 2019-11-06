@@ -876,7 +876,12 @@ UID   PID  PPID   C STIME   TTY           TIME CMD
 ### find
 
 - find ./ -iname rtidb_mon.log
-- 只显示结果必须加 -iname
+  - 只显示结果必须加 -iname
+  - 这是从当前开始查询
+- find /. -iname 营销*
+  - 从根目录开始查询
+- find ../ -iname 营销*
+  - 从上一个目录开始查询
 
 ### wc
 
@@ -1295,6 +1300,15 @@ time 可以有也可以不要，因为它是用统计脚本运行的时间
 更好的方法tee命令，可以查看更详细的tee说明哦
 sh run.sh | tee log
 同时也可以在输入流显示出来
+```
+
+## 常识
+
+### redhat
+
+```
+redhat 就是 centos
+用yum安装软件
 ```
 
 
