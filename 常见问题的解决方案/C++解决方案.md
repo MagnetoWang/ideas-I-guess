@@ -120,6 +120,10 @@ Template <class或者也可以用typename T>
         //std::unique_ptr<int> uptr2(uptr);  //不能拷貝
         std::unique_ptr<int> uptr2 = std::move(uptr); //轉換所有權
         uptr2.release(); //释放所有权
+        
+构造tensorflow的session
+    tensorflow::SessionOptions options;
+    std::unique_ptr<tensorflow::Session> session(tensorflow::NewSession(options));
 ```
 
 
@@ -316,7 +320,8 @@ public:
   - find
   - map.find(key)
   - 返回的是迭代器
-
+- 需要->first 或者 ->second来获取key和value
+  
 - 迭代
 
   - const auto& iter: table_info_
@@ -368,6 +373,8 @@ clear() 清除所有的元素
 push_back(element) 往最后一个位置插入元素
 erase(index) 删除第index个位置的元素
 
+取对象
+xxx[i] 即可
 
 ```
 
@@ -478,6 +485,8 @@ int main ()
 ```
 字符串切割
 https://www.cnblogs.com/dfcao/p/cpp-FAQ-split.html
+
+// s是源字符串，v是切割后的结果，c是切割符号
 void SplitString(const std::string& s, std::vector<std::string>& v, const std::string& c)
 {
   std::string::size_type pos1, pos2;
@@ -493,6 +502,15 @@ void SplitString(const std::string& s, std::vector<std::string>& v, const std::s
   if(pos1 != s.length())
     v.push_back(s.substr(pos1));
 }
+
+字符串遍历
+一个一个字母遍历，只需要用数组形式即可
+https://blog.csdn.net/stpeace/article/details/50406627
+s[i]
+
+汉字字符串遍历
+上面仅限于英文遍历，不适用汉字！！！
+
 ```
 
 
@@ -800,6 +818,10 @@ Edit & Run
 - stream 输出的文件
 - size 每个元素的大小
 - count 写入多少个元素
+
+
+
+
 
 #### pread函数
 
@@ -1199,6 +1221,14 @@ The contents of the vector are "Hello", "Hello"
 
 ```
 
+### std::copy_n
+
+```
+
+```
+
+
+
 ### union
 
 ```
@@ -1257,6 +1287,31 @@ function(const std::string& xx) {
 #### 传递的区别
 
 - 引用不需要再定义指针变量，只是给之前的变量换了一个别名
+
+#### 传递的例子
+
+```
+vector指针传递
+function(std::vector<Tensor>* out_tensors)
+std::vector<Tensor> resized_tensors;
+function(&resized_tensors)
+
+引用传递
+void func1(vector<int> &q){
+ 
+...
+ 
+}
+int main(){
+vector<int> q;
+q.push_back(2);
+q.push_back(3);
+q.push_back(1);
+func1(q);
+}
+```
+
+
 
 #### 注意问题
 
@@ -3190,10 +3245,15 @@ rm -rf $cpp_file
 - 模型提供服务：https://www.tensorflow.org/tfx/tutorials/serving/rest_simple
 - 安装Java版本：https://www.tensorflow.org/install/lang_java
 - 源码：https://github.com/tensorflow/tensorflow
-- 2.0版本的example：https://github.com/aymericdamien/TensorFlow-Examples/tree/master/tensorflow_v2
+- 2.0版本python的example：https://github.com/aymericdamien/TensorFlow-Examples/tree/master/tensorflow_v2
 - google的example的c++版本：https://itnext.io/creating-a-tensorflow-dnn-in-c-part-1-54ce69bbd586
 - 安装bazel：https://github.com/bazelbuild/bazel/releases
 - bazel编译cpp：https://docs.bazel.build/versions/master/tutorial/cpp.html
+- 创建自己的op：https://www.tensorflow.org/guide/create_op
+- c++版本label_image：https://github.com/tensorflow/tensorflow/tree/master/tensorflow/examples/label_image
+- c++讲解图片识别：https://itnext.io/creating-a-tensorflow-dnn-in-c-part-1-54ce69bbd586
+- c++读取文本转tensor：https://juejin.im/post/5bc0b628e51d450e95104107
+- c++加载模型：https://www.jianshu.com/p/42589012c6f1
 
 ### 安装
 
@@ -3272,6 +3332,26 @@ proto3的message
 tensorflow.framework下的proto里
 
 ```
+
+#### scope
+
+```
+https://www.tensorflow.org/api_docs/cc/class/tensorflow/scope
+一个模型要在scope里面跑，确保模型与模型之间不会干扰
+#include <tensorflow/cc/framework/scope.h>
+
+using namespace ops;
+Scope root = Scope::NewRootScope();
+auto c1 = Const(root, { {1, 1} });
+auto m = MatMul(root, c1, { {41}, {1} });
+GraphDef gdef;
+Status s = root.ToGraphDef(&gdef);
+if (!s.ok()) { ... }
+
+
+```
+
+
 
 ### 编译问题
 
