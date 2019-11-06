@@ -819,7 +819,59 @@ Edit & Run
 - size 每个元素的大小
 - count 写入多少个元素
 
+#### close函数
 
+```
+http://c.biancheng.net/cpp/html/229.html
+
+#include <unistd.h>
+int close(int fd);
+函数说明：当使用完文件后若已不再需要则可使用 close()关闭该文件, 二close()会让数据写回磁盘, 并释放该文件所占用的资源. 参数fd 为先前由open()或creat()所返回的文件描述词.
+
+返回值：若文件顺利关闭则返回0, 发生错误时返回-1.
+```
+
+#### getline函数
+
+```
+http://www.cplusplus.com/reference/istream/istream/getline/
+http://c.biancheng.net/cpp/biancheng/view/2232.html
+
+一行一行的读取文件
+
+// istream::getline example
+#include <iostream>     // std::cin, std::cout
+
+int main () {
+  char name[256], title[256];
+
+  std::cout << "Please, enter your name: ";
+  std::cin.getline (name,256);
+
+  std::cout << "Please, enter your favourite movie: ";
+  std::cin.getline (title,256);
+
+  std::cout << name << "'s favourite movie is " << title;
+
+  return 0;
+}
+
+
+    #include <iostream>
+    using namespace std;
+    int main( )
+    {
+       char ch[20];
+       cout<<"enter a sentence:"<<endl;
+       cin>>ch;
+       cout<<"The string read with cin is:"<<ch<<endl;
+       cin.getline(ch,20,'/');  //读个字符或遇'/'结束
+       cout<<"The second part is:"<<ch<<endl;
+       cin.getline(ch,20);  //读个字符或遇'/n'结束
+       cout<<"The third part is:"<<ch<<endl;
+       return 0;
+    }
+```
 
 
 
