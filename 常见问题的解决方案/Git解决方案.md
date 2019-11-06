@@ -129,10 +129,19 @@ linux安装
 wget https://github.com/git-lfs/git-lfs/archive/v2.9.0.tar.gz
 tar -zxvf v2.9.0
 cd git-lfs-2.9.0/
+发现是go语言，放弃
+系统是redhat
+sudo yum install git-lfs即可
+git lfs install
 
 
 git lfs pull 就会把所有的数据集文件下载下来
 数据集文件之前push的时候会打好hash和地址
+
+大数据集文件标记文件的内容
+version https://git-lfs.github.com/spec/v1
+oid sha256:xxxxxxxxxxxxxxxxxxxxxxxxxx
+size 5484424
 ```
 
 
