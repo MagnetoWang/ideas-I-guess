@@ -128,6 +128,8 @@ Template <class或者也可以用typename T>
 
 
 
+
+
 ### 语法问题
 
 - FileReceiver(const FileReceiver&) = delete;
@@ -273,6 +275,8 @@ public:
 	}
 
 ```
+
+#
 
 
 
@@ -503,6 +507,7 @@ void SplitString(const std::string& s, std::vector<std::string>& v, const std::s
     v.push_back(s.substr(pos1));
 }
 
+
 字符串遍历
 一个一个字母遍历，只需要用数组形式即可
 https://blog.csdn.net/stpeace/article/details/50406627
@@ -511,6 +516,48 @@ s[i]
 汉字字符串遍历
 上面仅限于英文遍历，不适用汉字！！！
 
+
+轻量级utf8编解码
+https://stackoverflow.com/questions/6140223/c-boost-encode-decode-utf-8?lq=1
+
+
+```
+
+### wstring
+
+- 文档：http://www.cplusplus.com/reference/string/wstring/
+- 简单用法：https://codeday.me/bug/20180108/115942.html
+
+```
+定义wstring
+std::wstring st = L"SomeText"; // Notice the "L"
+
+打印wstring
+std::wcout << st; 
+
+wstring word为单位的字符串
+http://www.cplusplus.com/reference/string/wstring/
+
+wstring和string转化
+https://blog.csdn.net/hongxingabc/article/details/82846396
+
+int,double等类型转换wstring
+http://www.cplusplus.com/reference/string/to_wstring/
+std::
+wstring to_wstring (int val);
+wstring to_wstring (long val);
+wstring to_wstring (long long val);
+wstring to_wstring (unsigned val);
+wstring to_wstring (unsigned long val);
+wstring to_wstring (unsigned long long val);
+wstring to_wstring (float val);
+wstring to_wstring (double val);
+wstring to_wstring (long double val);
+
+string 和 wstring 对比
+https://stackoverflow.com/questions/402283/stdwstring-vs-stdstring
+
+实用耳鼻咽喉头颈外科学（第2版） 
 ```
 
 
@@ -525,6 +572,12 @@ s[i]
 - 字符串拼接
   - https://baike.baidu.com/item/strcat
   - char *strcat(char *dest, const char *src);
+
+```
+
+```
+
+
 
 ### set使用
 
@@ -1556,6 +1609,73 @@ inline const bool IsLittleEndian() {
 }
 
 static const bool kLittleEndian = IsLittleEndian();
+```
+
+### 字符串切割
+
+```
+inline void Split(const string& src, vector<string>& res, const string& pattern, size_t maxsplit = string::npos) {
+  res.clear();
+  size_t Start = 0;
+  size_t end = 0;
+  string sub;
+  while(Start < src.size()) {
+    end = src.find_first_of(pattern, Start);
+    if(string::npos == end || res.size() >= maxsplit) {
+      sub = src.substr(Start);
+      res.push_back(sub);
+      return;
+    }
+    sub = src.substr(Start, end - Start);
+    res.push_back(sub);
+    Start = end + 1;
+  }
+  return;
+}
+```
+
+### 字母大小写
+
+```
+inline string& Upper(string& str) {
+  transform(str.begin(), str.end(), str.begin(), (int (*)(int))toupper);
+  return str;
+}
+
+inline string& Lower(string& str) {
+  transform(str.begin(), str.end(), str.begin(), (int (*)(int))tolower);
+  return str;
+}
+```
+
+### 字符串拼接
+
+```
+template<class T>
+void Join(T begin, T end, string& res, const string& connector) {
+  if(begin == end) {
+    return;
+  }
+  stringstream ss;
+  ss<<*begin;
+  begin++;
+  while(begin != end) {
+    ss << connector << *begin;
+    begin ++;
+  }
+  res = ss.str();
+}
+```
+
+
+
+## C++工具集
+
+```
+结巴分词：https://github.com/yanyiwu/cppjieba
+limonp：https://github.com/yanyiwu/limonp
+	字符串工具，线程，文件锁，md5等等
+	字符串包含不同格式编解码，字符串切割
 ```
 
 
@@ -3131,6 +3251,7 @@ gdb xxx
 然后运行
 run 或者 start
 
+设置断点
 
 ```
 
@@ -3306,6 +3427,7 @@ rm -rf $cpp_file
 - c++讲解图片识别：https://itnext.io/creating-a-tensorflow-dnn-in-c-part-1-54ce69bbd586
 - c++读取文本转tensor：https://juejin.im/post/5bc0b628e51d450e95104107
 - c++加载模型：https://www.jianshu.com/p/42589012c6f1
+- keras模型转tf的pb模型：https://github.com/amir-abdi/keras_to_tensorflow
 
 ### 安装
 
