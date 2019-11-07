@@ -127,7 +127,38 @@ Template <class或者也可以用typename T>
 ```
 
 
+### 内存问题
 
+```
+c++的内存问题就好像无色无味的毒c++的内存问题就好像无色无味的毒的气
+它在你的身边，但是你无法感受到，直到你的身体出现状况
+
+构造函数的陷阱
+std::string text = "2018年北京天安门";
+StringUtil string_util(text);
+
+StringUtil(std::string data) 
+        : data_(data.c_str()) {}
+data_是char*, 这个时候打印data_，会没有任何结果
+而修改成 StringUtil(std::string& data) 
+则可以打印出结果！
+
+构造函数第二个陷阱
+std::string text = "2018年北京天安门";
+StringUtil string_util(text);
+text = "xxxxxxxxxxxxxxxx";
+
+StringUtil(std::string& data) 
+        : data_(data.c_str()) {}
+这个时候打印StringUtil里面的data，会打印xxxxxxxxxx
+从这里可以发现，这个构造函数传递的是string的char*  地址，而并没有传递值
+外部可以随意修改这部分内容！
+
+
+为了保证StringUtil，可以正常打印，我们需要传递值！
+正确做法
+应该在类里面自己new一个新的string！
+```
 
 
 ### 语法问题
