@@ -276,7 +276,39 @@ public:
 
 ```
 
-#
+#### 打印数据类型
+
+```
+https://www.cnblogs.com/klobohyz/archive/2012/04/25/2470010.html
+
+#include <typeinfo>
+using namespace std;
+
+int main()
+{
+
+   int iobj; 
+ 
+   cout << typeid( iobj ).name() << endl;  //  打印: int 
+   cout << typeid( 8.16 ).name() << endl; // 打印: double
+   
+   return 0;
+}
+
+#include <type_info> 
+
+using namespace std;
+ 
+int main()
+{
+   employee *pe = new manager; 
+   employee& re = *pe; 
+ 
+   if ( typeid( pe ) == typeid( employee* ) )  // true 
+     // do something 
+   return 0;
+}
+```
 
 
 
