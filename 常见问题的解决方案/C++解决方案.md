@@ -108,11 +108,15 @@ Template <class或者也可以用typename T>
 ### 智能指针
 
 - 参考资料：<https://www.cnblogs.com/wxquare/p/4759020.html>
+- 文档：https://en.cppreference.com/w/cpp/memory/unique_ptr
 
 ```
 // 共享指针        
         std::shared_ptr<int> ptra = std::make_shared<int>(a);
         std::shared_ptr<int> ptra2(ptra); //copy
+        
+        std::shared_ptr<class> table_info = 
+                    std::make_shared<class>();
         
 // unique_ptr
         std::unique_ptr<int> uptr(new int(10));  //绑定动态对象
@@ -121,10 +125,63 @@ Template <class或者也可以用typename T>
         std::unique_ptr<int> uptr2 = std::move(uptr); //轉換所有權
         uptr2.release(); //释放所有权
         
+        // 指针间接赋值
+        std::unique_ptr<tensorflow::Session>  session_;
+        std::unique_ptr<tensorflow::Session> session(tensorflow::NewSession(tensorflow::SessionOptions()));
+    session_ = std::move(session);
+        
 构造tensorflow的session
     tensorflow::SessionOptions options;
     std::unique_ptr<tensorflow::Session> session(tensorflow::NewSession(options));
+    
+智能指针不能直接复制！！！
+必须用move
+ptest2 = std::move(ptest)
+    
+unique_ptr 是一个独享所有权的智能指针，它提供了严格意义上的所有权，包括：
+
+1、拥有它指向的对象
+
+2、无法进行复制构造，无法进行复制赋值操作。即无法使两个unique_ptr指向同一个对象。但是可以进行移动构造和移动赋值操作
+
+3、保存指向某个对象的指针，当它本身被删除释放的时候，会使用给定的删除器释放它指向的对象
+
+unique_ptr 可以实现如下功能：
+
+1、为动态申请的内存提供异常安全
+
+2、讲动态申请的内存所有权传递给某函数
+
+3、从某个函数返回动态申请内存的所有权
+
+4、在容器中保存指针
+
+5、auto_ptr 应该具有的功能
+
+
+
+shared_ptr unique_ptr 区别非常大
+shared_ptr可以正常赋值等
+unique_ptr 要求非常大，很难用
+
+ 智能指针与指针的转换
+ https://www.cnblogs.com/fushi/p/7768906.html
+std::shared_ptr<tensorflow::GraphDef> graph_def = std::make_shared<tensorflow::GraphDef>();
+tensorflow::GraphDef* gg = graph_def.get();
+get的以后原来的智能指针失效了！
 ```
+
+#### 注意
+
+```
+c++没有空对象的说法，只有空指针
+返回一个对象，就只能返回一个对象，不能返回指针
+所以最好的方式，万物指针操作！可以内存不那么容易泄露，对象存活时间有保障
+
+指针出了作用域也是会失效的！
+如果想在函数内部的指针在外面也有效，需要用一个外面的函数专门创建这个对象，可以保证指针有效的
+```
+
 
 
 ### 内存问题
@@ -265,6 +322,18 @@ enum UrlTableErrors {
 
 #### 默认的构造函数
 
+```
+资料：https://blog.csdn.net/wenqian1991/article/details/29178649
+
+// assignment function
+    Slice(const Slice&) = default;
+    Slice& operator=(const Slice&) = default;
+    
+如果没有上面两行，就会默认删除这些函数，这些对象无法再vector和map中操作
+```
+
+
+
 #### 默认的赋值函数
 
 - 如果是自己实现的默认构造函数
@@ -341,6 +410,43 @@ int main()
 }
 ```
 
+#### 内部类
+
+```
+类里面定义新的类
+
+#include<iostream> 
+
+using namespace std; 
+
+/* start of Enclosing class declaration */
+class Enclosing {	 
+private: 
+	int x; 
+	
+/* start of Nested class declaration */
+class Nested { 
+	int y; 
+	void NestedFun(Enclosing *e) { 
+		cout<<e->x; // works fine: nested class can access 
+					// private members of Enclosing class 
+	}	 
+}; // declaration Nested class ends here 
+}; // declaration Enclosing class ends here 
+
+int main() 
+{	 
+
+} 
+
+```
+
+#### 注意
+
+```
+对象是否需要复制，赋值。如果不需要改成指针形式传递
+```
+
 
 
 ### Map使用
@@ -391,7 +497,7 @@ int main()
   
 - 迭代
 
-  - const auto& iter: table_info_
+  - const auto& iter: map
 
 - map中是有序的
 
@@ -414,6 +520,20 @@ int main()
         std::cout << e.first << e.second << std::endl;
     }
 
+```
+
+#### 高级用法
+
+```
+初始化列表
+https://blog.csdn.net/wangshubo1989/article/details/50001185
+std::map<int, string> int_to_string = {
+{1, "what"},
+{2, "a"},
+{3, "fuck"},
+{4, "day"},
+....
+};
 ```
 
 
@@ -466,6 +586,16 @@ new 和 取地址符 在函数传递的区别
 
 ```
 
+#### 高级用法
+
+```
+初始化
+std::vector<std::pair<std::string, Tensor>> input = {
+        {"Input", tensor},
+    };
+std::vector v = { 1, 2, 3, 4 };
+```
+
 
 
 ### string使用
@@ -482,6 +612,7 @@ new 和 取地址符 在函数传递的区别
 - 字符串拼接
 
   - 可以直接用加号连接
+
 - 字符串赋值
   - <http://www.cplusplus.com/reference/string/string/assign/>
   - str.assign(source_str)
@@ -583,6 +714,11 @@ s[i]
 轻量级utf8编解码
 https://stackoverflow.com/questions/6140223/c-boost-encode-decode-utf-8?lq=1
 
+
+字符串是否包含另一个字符串
+find_last_of
+find
+find_first_of
 
 ```
 
@@ -946,6 +1082,15 @@ int close(int fd);
 
 返回值：若文件顺利关闭则返回0, 发生错误时返回-1.
 ```
+
+#### ifstream
+
+```
+文件流形式读数据
+http://www.cplusplus.com/reference/fstream/ifstream/
+```
+
+
 
 #### getline函数
 
@@ -1739,6 +1884,8 @@ void Join(T begin, T end, string& res, const string& connector) {
 limonp：https://github.com/yanyiwu/limonp
 	字符串工具，线程，文件锁，md5等等
 	字符串包含不同格式编解码，字符串切割
+rapidJson：https://rapidjson.org/
+c++json性能比较：https://github.com/miloyip/nativejson-benchmark
 ```
 
 
@@ -2148,6 +2295,31 @@ int main(int argc, char **argv) {
   声明Gflags
   	DECLARE_bool(big_menu);
   ```
+
+### 安装
+
+```
+git clone https://github.com/gflags/gflags.git
+
+cd gflags
+mkdir build && cd build
+cmake .. && make
+cp -r include/. xxxx
+cp -r lib/. xxxx
+```
+
+### 使用
+
+```
+随意定义一个文件
+#include <gflags/gflags.h>
+
+   DEFINE_bool(big_menu, true, "Include 'advanced' options in the menu listing");
+   DEFINE_string(languages, "english,french,german",
+                 "comma-separated list of languages to offer in the 'lang' menu");
+```
+
+
 
 ## GTest
 
@@ -3588,11 +3760,78 @@ if (!s.ok()) { ... }
 
 ```
 
-
-
-### 编译问题
+#### Session
 
 ```
+#include "tensorflow/core/public/session.h"
+
+ /// \brief Create the graph to be used for the session.
+  ///
+  /// Returns an error if this session has already been created with a
+  /// graph. To re-use the session with a different graph, the caller
+  /// must Close() the session first.
+  virtual Status Create(const GraphDef& graph) = 0;
+  
+    /// \brief Closes this session.
+  ///
+  /// Closing a session releases the resources used by this session
+  /// on the TensorFlow runtime (specified during session creation by
+  /// the `SessionOptions::target` field).
+  virtual Status Close() = 0;
+  
+  
+```
+
+#### Error
+
+```
+#include "tensorflow/core/lib/core/errors.h"
+
+
+DECLARE_ERROR(Cancelled, CANCELLED)
+DECLARE_ERROR(InvalidArgument, INVALID_ARGUMENT)
+DECLARE_ERROR(NotFound, NOT_FOUND)
+DECLARE_ERROR(AlreadyExists, ALREADY_EXISTS)
+DECLARE_ERROR(ResourceExhausted, RESOURCE_EXHAUSTED)
+DECLARE_ERROR(Unavailable, UNAVAILABLE)
+DECLARE_ERROR(FailedPrecondition, FAILED_PRECONDITION)
+DECLARE_ERROR(OutOfRange, OUT_OF_RANGE)
+DECLARE_ERROR(Unimplemented, UNIMPLEMENTED)
+DECLARE_ERROR(Internal, INTERNAL)
+DECLARE_ERROR(Aborted, ABORTED)
+DECLARE_ERROR(DeadlineExceeded, DEADLINE_EXCEEDED)
+DECLARE_ERROR(DataLoss, DATA_LOSS)
+DECLARE_ERROR(Unknown, UNKNOWN)
+DECLARE_ERROR(PermissionDenied, PERMISSION_DENIED)
+DECLARE_ERROR(Unauthenticated, UNAUTHENTICATED)
+```
+
+#### Logging
+
+```
+#include "tensorflow/core/platform/logging.h"
+
+
+```
+
+#### ops
+
+```
+#include "tensorflow/core/framework/op.h"
+```
+
+
+
+### 问题
+
+#### 编译问题
+
+```
+需要保证网络科学上网
+需要显示指出gcc5.4.0
+5.0以下版本有编译问题，string字符串链接出错
+环境尽量保证是urs/bin，而不是其他路径
+
 CMakeFiles/tensorflow_test.dir/main.cc.o: In function `main':
 main.cc:(.text+0x93): undefined reference to `tensorflow::ReadBinaryProto(tensorflow::Env*, std::string const&, google::protobuf::MessageLite*)'
 main.cc:(.text+0xd1): undefined reference to `tensorflow::Status::ToString() const'
@@ -3626,7 +3865,14 @@ main.cc:(.text+0x115): undefined reference to `tensorflow::Status::ToString() co
  1115  cd tensorflow/
 ```
 
+#### session不存在tf2.0版本
 
+```
+https://stackoverflow.com/questions/55142951/tensorflow-2-0-attributeerror-module-tensorflow-has-no-attribute-session
+
+需要修改接口
+2.0提供一个方案，可以切换1.x的接口，保证原来代码的兼容性
+```
 
 
 
