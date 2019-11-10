@@ -84,3 +84,33 @@ ctrl + shift + alt + ↑/↓/←/→
 和上边一样的功能，鼠标改键盘操作了
 ```
 
+### 显示空格
+
+```
+https://blog.csdn.net/bmzk123/article/details/86501706
+renderControlCharacters
+renderWhitespace
+```
+
+### 空格高亮
+
+```
+Rainbow 插件
+```
+
+### 注释管理
+
+```
+koroFileHeader
+
+```
+
+### remote-ssh消耗大量性能问题
+
+```
+原因是私钥和公钥
+我在本地生成的私钥和公钥，传给服务器私钥，结果性能大量消耗
+
+但是如果是服务器生成的私钥和公钥，传给本地公钥。这个问题就被解决了
+```
+
