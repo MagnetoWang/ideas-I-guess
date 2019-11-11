@@ -161,8 +161,9 @@ unique_ptr 可以实现如下功能：
 
 
 shared_ptr unique_ptr 区别非常大
-shared_ptr可以正常赋值等
-unique_ptr 要求非常大，很难用
+shared_ptr可以正常赋值等     std::shared_ptr<ModelManager> model = std::make_shared<ModelManager>(config);
+
+unique_ptr 要求非常大，很难用  std::unique_ptr<ModelManager> model(new ModelManager(config));
 
  智能指针与指针的转换
  https://www.cnblogs.com/fushi/p/7768906.html
@@ -216,6 +217,41 @@ StringUtil(std::string& data)
 正确做法
 应该在类里面自己new一个新的string！
 ```
+
+### 异常
+
+```
+https://www.runoob.com/cplusplus/cpp-exceptions-handling.html
+
+捕捉异常
+
+try
+{
+   // 保护代码
+}catch( ExceptionName e1 )
+{
+   // catch 块
+}catch( ExceptionName e2 )
+{
+   // catch 块
+}catch( ExceptionName eN )
+{
+   // catch 块
+}
+
+抛出异常
+
+double division(int a, int b)
+{
+   if( b == 0 )
+   {
+      throw "Division by zero condition!";
+   }
+   return (a/b);
+}
+
+```
+
 
 
 ### 语法问题
@@ -516,7 +552,7 @@ int main()
 
 ```
 遍历map
-    for (auto e : map) {
+    for (auto& e : map) {
         std::cout << e.first << e.second << std::endl;
     }
 
@@ -716,9 +752,12 @@ https://stackoverflow.com/questions/6140223/c-boost-encode-decode-utf-8?lq=1
 
 
 字符串是否包含另一个字符串
-find_last_of
+find_last_of 
 find
 find_first_of
+if判断 dict_path.find("stopWord") != std::string::npos
+
+find_last_of这个函数有bug，一直没有返回过npos，不要用！
 
 ```
 
@@ -783,6 +822,18 @@ https://stackoverflow.com/questions/402283/stdwstring-vs-stdstring
 - 参考文档
   - http://www.cplusplus.com/reference/set/set/
 - 头文件 #include < set >
+
+```
+insert
+
+find
+
+erase
+
+
+```
+
+
 
 ### typename使用
 
@@ -1086,8 +1137,7 @@ int close(int fd);
 #### ifstream
 
 ```
-文件流形式读数据
-http://www.cplusplus.com/reference/fstream/ifstream/
+
 ```
 
 
@@ -1224,9 +1274,38 @@ int main () {
 
 - Stream class to read from files
 
+```
+文件流形式读数据
+http://www.cplusplus.com/reference/fstream/ifstream/
+/ print the content of a text file.
+#include <iostream>     // std::cout
+#include <fstream>      // std::ifstream
+
+int main () {
+  std::ifstream ifs;
+
+  ifs.open ("test.txt", std::ifstream::in);
+
+  char c = ifs.get();
+
+  while (ifs.good()) {
+    std::cout << c;
+    c = ifs.get();
+  }
+
+  ifs.close();
+
+  return 0;
+}
+```
+
+
+
 #### fstream
 
 - Stream class to both read and write from/to files.
+
+
 
 ### 字符串函数
 
@@ -1545,6 +1624,32 @@ The contents of the vector are "Hello", "Hello"
 ### union
 
 ```
+
+```
+
+### decltype
+
+```
+
+```
+
+### 注释
+
+```
+比较好的写法可以参考
+#include <array> // array
+#include <cassert> // assert
+#include <cstddef> // size_t
+#include <cstdio> //FILE *
+#include <cstring> // strlen
+#include <istream> // istream
+#include <iterator> // begin, end, iterator_traits, random_access_iterator_tag, distance, next
+#include <memory> // shared_ptr, make_shared, addressof
+#include <numeric> // accumulate
+#include <string> // string, char_traits
+#include <type_traits> // enable_if, is_base_of, is_pointer, is_integral, remove_pointer
+#include <utility> // pair, declval
+
 
 ```
 
@@ -3872,6 +3977,32 @@ https://stackoverflow.com/questions/55142951/tensorflow-2-0-attributeerror-modul
 
 需要修改接口
 2.0提供一个方案，可以切换1.x的接口，保证原来代码的兼容性
+```
+
+## Json-C++
+
+### 资料
+
+- nlohman库：https://github.com/nlohmann/json
+
+### 文件读取json对象
+
+```
+https://blog.csdn.net/kuyu05/article/details/88561319
+using json = nlohmann::json;
+
+std::ifstream read("broker.json");
+	json in = json::parse(read);
+	cout << in.dump(4) << endl;
+```
+
+### json对象函数传入
+
+```
+using Json = nlohmann::json;
+
+Json::iterator
+Json
 ```
 
 
