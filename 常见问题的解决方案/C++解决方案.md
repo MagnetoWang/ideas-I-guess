@@ -119,6 +119,7 @@ Template <class或者也可以用typename T>
                     std::make_shared<class>();
         
 // unique_ptr
+https://www.cnblogs.com/diysoul/p/5930388.html
         std::unique_ptr<int> uptr(new int(10));  //绑定动态对象
         //std::unique_ptr<int> uptr2 = uptr;  //不能賦值
         //std::unique_ptr<int> uptr2(uptr);  //不能拷貝
@@ -3923,6 +3924,22 @@ DECLARE_ERROR(Unauthenticated, UNAUTHENTICATED)
 
 ```
 #include "tensorflow/core/framework/op.h"
+```
+
+### 代码
+
+#### 打印pb模型节点
+
+```
+import tensorflow.compat.v1 as tf
+sess = tf.Session()
+with tf.gfile.FastGFile('/Users/magnetowang/dev/data/BiRNNtagMiniCNN.pb', 'rb') as f:
+    graph_def = tf.GraphDef()
+    graph_def.ParseFromString(f.read())
+    sess.graph.as_default()
+    tf.import_graph_def(graph_def, name='') # 导入计算图
+    for i, n in enumerate(graph_def.node):
+        print("Name of the node - %s" % n.name)
 ```
 
 
