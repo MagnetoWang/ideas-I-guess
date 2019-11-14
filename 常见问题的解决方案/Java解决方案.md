@@ -158,6 +158,14 @@ mvn clean test -Dtest=xxx包名.*Test,package_xxx.test_xxx
           </exclusions>
 ```
 
+#### maven红线太多了
+
+```
+find ~/.m2  -name "*.lastUpdated" -exec grep -q "Could not transfer" {} \; -print -exec rm {} \;
+```
+
+
+
 ### 解决全局时区问题
 
 ```
@@ -190,6 +198,12 @@ mvn exec:java -Dexec.mainClass="com._4paradigm.predictor.demo.JprofilerTest" -ag
 
 Java执行jar包
 java -cp xxx.jar xxx.Main
+```
+
+#### 查看jdk路径
+
+```
+java -verbose
 ```
 
 
@@ -342,6 +356,42 @@ brew install gradle
 chmod +x gradlew
 ./gradlew
 ```
+
+
+
+### JNI-Java调用本地库
+
+```
+入门jni-推荐：https://developer.ibm.com/tutorials/j-jni/
+c++调用Java：https://developer.ibm.com/tutorials/j-jni/#c-and-c-implementations-compared
+调用c++方法：https://www.cnblogs.com/jaejaking/p/6840530.html
+jni调用c++类：https://blog.csdn.net/xiaohan2909/article/details/50152997
+
+工具包：https://github.com/scijava/native-lib-loader
+
+jni数据类型：https://docs.oracle.com/javase/7/docs/technotes/guides/jni/spec/types.html
+
+jni传递map结构：
+	https://blog.csdn.net/u014449046/article/details/79188013
+	http://www.voidcn.com/article/p-dvjdodew-bqv.html
+
+
+在src/main/java下
+javah -classpath . com.xxx.xxx.xxx.类名
+
+jni生成头文件：https://www.cnblogs.com/virgosnail/p/10711165.html
+
+jni.h：https://github.com/LeeKamentsky/python-javabridge/issues/28
+需要添加jdk的include
+jni_md.h：https://coderanch.com/t/450630/java/jni-md-file-directory-Error
+在jdk的include里面还有一个linux的include，在进去看就有这个文件
+
+加载动态库path修改：https://examples.javacodegeeks.com/java-basics/java-library-path-what-is-it-and-how-to-use/
+
+linux下 在LD_library_path 下添加路径即可
+```
+
+CUDA并行程序设计：GPU编程指南(CUDA社区技术总监撰写，英伟达官方认证工程师翻译) 
 
 ## Java语法
 
@@ -787,6 +837,12 @@ RuntimeException 和 Exception 完全不一样！！！！
 RuntimeException 不需要throw 直接终止程序！
 ```
 
+### 正则表达式
+
+```
+https://www.runoob.com/java/java-regular-expressions.html
+```
+
 
 
 ## Java类的使用
@@ -864,7 +920,7 @@ map可以直接返回key集合，也可以直接返回pair<k, v>集合用于遍�
 
  Iterator<Map.Entry<String, List<String>>> entrys = multiString.entrySet().iterator();
  返回一个迭代器，可以用于遍历，使用方法如下
-         for (entrys.hasNext()) {
+         while (entrys.hasNext()) {
             Map.Entry<String, List<String>> en = entrys.next();
         }
         
@@ -929,6 +985,51 @@ poll
 ### Class
 
 ```
+
+```
+
+### String
+
+```
+
+```
+
+### Enum
+
+```
+简单用法：https://www.jianshu.com/p/46dbd930f6a2
+文档：https://www.runoob.com/java/method-enum1.html
+枚举，数字，字符串可互相转化：https://www.cnblogs.com/myJavaCareerLife-yewei/p/8109661.html
+详尽用法：https://docs.oracle.com/javase/tutorial/java/javaOO/enum.html
+
+enum QuestionType {
+    SINGLECHOICE(2), 
+    MULTIPLECHOICE(3), 
+    MATRIXSINGLECHOICE(4)
+}
+enum Direction {
+  East, South, West, North
+}
+
+public class Main {
+  public static void main(String args[]) {
+    Direction dir = Direction.South;
+    switch (dir) {
+    case South:
+      System.out.println("south");
+      break;
+    case East:
+      System.out.println("East");
+      break;
+    case West:
+      System.out.println("West");
+      break;
+    case North:
+      System.out.println("North.");
+      break;
+    }
+  }
+}
 
 ```
 
@@ -1412,7 +1513,7 @@ private MethodSpec computeRange(String name, int from, int to, String op) {
       .endControlFlow()
       .addStatement("return result")
       .build();
-}12345678910
+}
 ```
 
 调用`computeRange("multiply10to20", 10, 20, "*")`就生成如下代码:
