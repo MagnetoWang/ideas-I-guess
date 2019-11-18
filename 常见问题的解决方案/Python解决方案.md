@@ -174,6 +174,10 @@ dict = {}
 
 # 如果有xxx，那么就是更新，如果没有xxx，那么就是新增一个键值
 dict["xxx"] = xxxxxx
+
+循环遍历字典
+ for key, value in dict.items():
+        print("pos_name_.insert(\"", key, "\", \" ", value, "\");")
 ```
 
 
@@ -188,6 +192,16 @@ empty_set.remove(xxx)
 
 如果元素不存在,不报错
 empty_set.discard(xxx)
+```
+
+### print
+
+```
+https://www.w3schools.com/python/ref_func_print.asp
+print(object(s), separator=separator, end=end, file=file, flush=flush) 
+
+打印多个变量的时候，python会默认打印空格隔开，如果不想有空格隔开，可以加seq指定分隔符
+print('pos_name_.insert(std::make_pair(\"', key, "\", \"", value, "\"));", sep="")
 ```
 
 
@@ -244,6 +258,17 @@ empty_set.discard(xxx)
 
   - Examples：https://www.programcreek.com/python/example/3522/os.mkfifo
 
+```
+python3
+
+https://www.jianshu.com/p/85f1d3c0dce0
+# -*- coding: utf-8 -*-
+with open('path\filename', 'w') as file_obj:
+    file_obj.write('I love Python.')
+```
+
+
+
 ### class 类
 
 ```
@@ -253,6 +278,20 @@ def __init__(self, texts, batch_size=16):
 类似于Java的构造函数
 self默认为this
 texts, batch_size=16是传入参数
+```
+
+### __ getitem __ 等类型函数
+
+```
+当实例对象通过[] 运算符取值时，会调用它的方法__getitem__
+https://zhuanlan.zhihu.com/p/27661382
+
+
+https://blog.csdn.net/xhw88398569/article/details/48690577
+__len__ 当使用len(A)该对象时调用该方法，当没有该方法是会报错，且返回数据不为整数也会报错
+__reversed__():当使用reversed函数翻转对象时调用
+__contains__():当使用in，not in 对象的时候 调用(not in 是在in完成后再取反,实际上还是in操作)
+
 ```
 
 
@@ -316,6 +355,13 @@ test = np.random.random((3,5))
 切割数组验证
 print(test)
 test[:,1:]
+```
+
+### 两个斜杆
+
+```
+https://blog.csdn.net/HappyRocking/article/details/79806499
+双斜杠（//）表示地板除，即先做除法（/），然后向下取整（floor）。至少有一方是float型时，结果为float型；两个数都是int型时，结果为int型。
 ```
 
 
