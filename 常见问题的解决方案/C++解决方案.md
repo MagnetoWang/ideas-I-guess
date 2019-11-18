@@ -1306,6 +1306,13 @@ int main () {
 
 - Stream class to both read and write from/to files.
 
+#### 文件流终止
+
+```
+https://www.bbsmax.com/A/RnJWpVay5q/
+fin.eof() 可以判断结尾结束
+```
+
 
 
 ### 字符串函数
@@ -1815,6 +1822,8 @@ int main()
 - 时间戳转换工具：<https://tool.lu/timestamp/>
 
 ```
+#include <chrono> // for timestamp
+
 static inline uint64_t GetMillisecondTimestamp() {
     auto now = std::chrono::system_clock::now();
     uint64_t ts = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
@@ -1981,6 +1990,14 @@ void Join(T begin, T end, string& res, const string& connector) {
 }
 ```
 
+### 数据类型的最大最小值
+
+```
+http://www.cplusplus.com/reference/climits/
+
+
+```
+
 
 
 ## C++工具集
@@ -1992,6 +2009,8 @@ limonp：https://github.com/yanyiwu/limonp
 	字符串包含不同格式编解码，字符串切割
 rapidJson：https://rapidjson.org/
 c++json性能比较：https://github.com/miloyip/nativejson-benchmark
+glib全新的底层分配内存：https://developer.gnome.org/glib/stable/glib-Memory-Allocation.html
+valgrind内存泄露工具：http://valgrind.org/downloads/current.html#current
 ```
 
 
@@ -3925,6 +3944,14 @@ DECLARE_ERROR(Unauthenticated, UNAUTHENTICATED)
 ```
 #include "tensorflow/core/framework/op.h"
 ```
+
+#### argmax
+
+```
+
+```
+
+
 
 ### 代码
 
