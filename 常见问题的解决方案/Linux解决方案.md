@@ -82,11 +82,12 @@
   # lsusb -tv              # 列出所有USB设备
   # lsmod                  # 列出加载的内核模块
   # lspci -tv                    # 查看环境变量
+  ```
 ```
   
 **资源**
   
-  ```
+```
   # free -m                # 查看内存使用量和交换区使用量
   # df -h                  # 查看各分区使用情况
   # du -sh <目录名>        # 查看指定目录的大小
@@ -98,7 +99,7 @@
   
 **磁盘和分区**
   
-  ```
+```
   # mount | column -t      # 查看挂接的分区状态
   # fdisk -l               # 查看所有分区
   # swapon -s              # 查看所有交换分区
@@ -108,7 +109,7 @@
   
 **网络**
   
-  ```
+```
   # ifconfig               # 查看所有网络接口的属性
   # iptables -L            # 查看防火墙设置
   # route -n               # 查看路由表
@@ -119,7 +120,7 @@
   
 **进程**
   
-  ```
+```
   # ps -ef                 # 查看所有进程
   # ps -xf				 # 查看个人权限下的进程
   # top                    # 实时显示进程状态
@@ -127,7 +128,7 @@
   
 **用户**
   
-  ```
+```
   # w                      # 查看活动用户
   # id <用户名>            # 查看指定用户信息
   # last                   # 查看用户登录日志
@@ -138,14 +139,14 @@
   
 **服务**
   
-  ```
+```
   # chkconfig --list       # 列出所有系统服务
   # chkconfig --list | grep on    # 列出所有启动的系统服务
 ```
   
 **程序**
   
-  ```
+```
   # rpm -qa                # 查看所有安装的软件包
   ```
 
@@ -155,7 +156,7 @@
 
 - https://www.jianshu.com/p/fe8da5d08e16
 
-```
+  ```
 简单说,/lib64是内核级的,/usr/lib64是系统级的,/usr/local/lib64是用户级的.
 
 /lib/ — 包含许多被 /bin/ 和 /sbin/ 中的程序使用的库文件。目录 /usr/lib/ 中含有更多用于用户程序的库文件。/lib目录下放置的是/bin和/sbin目录下程序所需的库文件。/lib目录下的文件的名称遵循下面的格式： 
@@ -520,7 +521,7 @@ The GNU C Library project provides the core libraries for the GNU system and GNU
     
     export MAVEN_HOME=/home/wangzixian/maven/apache-maven-3.5.4
     export PATH=${MAVEN_HOME}/bin:${PATH}
-    ```
+```
 
   - mvn -X 可以查看settings.xml路径位置
 
@@ -1301,6 +1302,56 @@ ifconig -a
 ldd 执行程序名字
 ```
 
+### 程序的前台后台切换
+
+```
+https://www.cnblogs.com/wangbin/archive/2009/05/07/1451502.html
+Linux 技巧：bg和fg让程序在前台后台之间切换
+
+让程序在前台后台之间切换。 Linux 提供了 fg 和 bg 命令，让你轻松调度正在运行的任务。
+假设你发现前台运行的一个程序需要很长的时间，但是需要干其他的事情，你就可以用 Ctrl-Z ，挂起这个程序，然后可以看到系统提示：
+[1]+ Stopped /root/bin/rsync.sh
+然后我们可以把程序调度到后台执行：（bg 后面的数字为作业号）
+#bg 1
+[1]+ /root/bin/rsync.sh &
+
+用 jobs 命令查看正在运行的任务：
+#jobs
+[1]+ Running /root/bin/rsync.sh &
+
+
+如果想把它调回到前台运行，可以用
+#fg 1
+/root/bin/rsync.sh
+这样，你在控制台上就只能等待这个任务完成了。
+aliyun活动 https://www.aliyun.com/acts/limit-buy?userCode=re2o7acl
+```
+
+### 如何让程序在后台执行
+
+```
+tmux
+可以让里面执行的命令一直在后台运行，不会中断
+
+已经在前台的情况下
+也可以ctrl + z 先停止进程
+jobs 查看停止的进程号
+bg 进程号 即可继续执行程序
+```
+
+### 用pid方式，让进城停止，继续运行
+
+```
+https://www.cnblogs.com/mfryf/archive/2012/09/24/2700042.html
+
+16079 就是进程号
+
+kill -STOP 16079
+kill -CONT 16079
+```
+
+
+
 ### 快速性能测试
 
 ```
@@ -1346,6 +1397,37 @@ cal -y
 ```
 redhat 就是 centos
 用yum安装软件
+```
+
+### Linux的配置-bashrc 与 bash_profiler
+
+```
+https://stackoverflow.com/questions/415403/whats-the-difference-between-bashrc-bash-profile-and-environment
+执行man bash可以看到每个bash文件的意义和作用
+
+That's simple. It's explained in man bash:
+
+/bin/bash
+       The bash executable
+/etc/profile
+       The systemwide initialization file, executed for login shells
+~/.bash_profile
+       The personal initialization file, executed for login shells
+~/.bashrc
+       The individual per-interactive-shell startup file
+~/.bash_logout
+       The individual login shell cleanup file, executed when a login shell exits
+~/.inputrc
+       Individual readline initialization file
+  
+https://blog.csdn.net/xyqzki/article/details/41832875
+简单来说
+bashrc: 为每一个运行bash shell的用户执行此文件.当bash shell被打开时,该文件被读取（即每次新开一个终端，都会执行bashrc）
+ ~/.bash_profile: 每个用户都可使用该文件输入专用于自己使用的shell信息,当用户登录时,该文件仅仅执行一次。默认情况下,设置一些环境变量,执行用户的.bashrc文件。
+ 
+ 如果希望某个配置，长期有效，一开终端就能配置好，就选择bashrc
+ 
+ 注意，无论是什么配置，都要考虑到环境干净性！
 ```
 
 
