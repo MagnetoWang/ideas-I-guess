@@ -357,29 +357,40 @@ chmod +x gradlew
 ./gradlew
 ```
 
+### 文件读写
+
+```
+简单例子：https://blog.csdn.net/jiangxinyu/article/details/7885518
+一行一行的读
+BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("ming.txt")));
+String data = null;
+while((data = br.readLine())!=null)
+{
+System.out.println(data);
+}
+```
+
 
 
 ### JNI-Java调用本地库
 
 ```
+jni数据类型：https://docs.oracle.com/javase/7/docs/technotes/guides/jni/spec/types.html
 入门jni-推荐：https://developer.ibm.com/tutorials/j-jni/
 c++调用Java：https://developer.ibm.com/tutorials/j-jni/#c-and-c-implementations-compared
 调用c++方法：https://www.cnblogs.com/jaejaking/p/6840530.html
 jni调用c++类：https://blog.csdn.net/xiaohan2909/article/details/50152997
-
 工具包：https://github.com/scijava/native-lib-loader
-
-jni数据类型：https://docs.oracle.com/javase/7/docs/technotes/guides/jni/spec/types.html
-
 jni传递map结构：
 	https://blog.csdn.net/u014449046/article/details/79188013
 	http://www.voidcn.com/article/p-dvjdodew-bqv.html
-
 
 在src/main/java下
 javah -classpath . com.xxx.xxx.xxx.类名
 
 jni生成头文件：https://www.cnblogs.com/virgosnail/p/10711165.html
+jni的所有接口方法-相当于函数字典：https://docs.oracle.com/javase/7/docs/technotes/guides/jni/spec/functions.html
+
 
 jni.h：https://github.com/LeeKamentsky/python-javabridge/issues/28
 需要添加jdk的include
@@ -389,9 +400,101 @@ jni_md.h：https://coderanch.com/t/450630/java/jni-md-file-directory-Error
 加载动态库path修改：https://examples.javacodegeeks.com/java-basics/java-library-path-what-is-it-and-how-to-use/
 
 linux下 在LD_library_path 下添加路径即可
+
+typedef union jvalue { 
+    jboolean z; 
+    jbyte    b; 
+    jchar    c; 
+    jshort   s; 
+    jint     i; 
+    jlong    j; 
+    jfloat   f; 
+    jdouble  d; 
+    jobject  l; 
+} jvalue; 
+
+*
+ * Class:     xxxx
+ * Method:    nativeGetHandler
+ * Signature: ([Ljava/lang/String;)J
+ */
+JNIEXPORT jlong JNICALL xxxx
+  (JNIEnv *, jobject, jobjectArray);
+  
+java的签名只有jobjectArray，字符串数组，那么前面两个的作用是什么呢？
+The parameter lists of all these functions have a pointer to a JNIEnv and a jobject, in addition to normal parameters in the Java declaration. The pointer to JNIEnv is in fact a pointer to a table of function pointers. As we’ll see in Step 4, these functions provide the various faculties to manipulate Java data in C and C++.
+The jobject parameter refers to the current object. Thus, if the C or C++ code needs to refer back to the Java side, this jobject acts as a reference, or pointer, back to the calling Java object. The function name itself is made by the “Java_” prefix, followed by the fully qualified class name, followed by an underscore and the method name.
+
+注意c++和c在调用指针的时候，语法上有区别，这里只介绍c++使用方法
+1. #include "Sample1.h"
+ 2. #include <string.h>
+ 3.
+ 4.JNIEXPORT jint JNICALL Java_Sample1_intMethod
+ 5.  (JNIEnv *env, jobject obj, jint num) {
+ 6.   return num * num;
+ 7. }
+ 8.
+ 9. JNIEXPORT jboolean JNICALL Java_Sample1_booleanMethod
+10.   (JNIEnv *env, jobject obj, jboolean boolean) {
+11.   return !boolean;
+12. }
+13.
+14. JNIEXPORT jstring JNICALL Java_Sample1_stringMethod
+15.   (JNIEnv *env, jobject obj, jstring string) {
+16.     const char *str = env->GetStringUTFChars(string, 0);
+17.     char cap[128];
+18.     strcpy(cap, str);
+19.     env->ReleaseStringUTFChars(string, str);
+20.     return env->NewStringUTF(strupr(cap));
+21. }
+22.
+23. JNIEXPORT jint JNICALL Java_Sample1_intArrayMethod
+24.   (JNIEnv *env, jobject obj, jintArray array) {
+25.     int i, sum = 0;
+26.     jsize len = env->GetArrayLength(array);
+27.     jint *body = env->GetIntArrayElements(array, 0);
+28.     for (i=0; i<len; i++)
+29.     {    sum += body[i];
+30.     }
+31.     env->ReleaseIntArrayElements(array, body, 0);
+32.     return sum;
+33. }
+34.
+35. void main(){}
+
+如果一定要用c语法方法，可改成下面的语法
+jsize len = (*env)->GetArrayLength(env,array);
+
+
+c++的数组转Java数组
+https://www.jianshu.com/p/9ad1a7868e11
+函数参考
+jclass FindClass(JNIEnv *env, const char *name);
+
+jobjectArray NewObjectArray(JNIEnv *env, jsize length,
+jclass elementClass, jobject initialElement);
+
+void SetObjectArrayElement(JNIEnv *env, jobjectArray array,
+jsize index, jobject value);
+
+jstring NewString(JNIEnv *env, const jchar *unicodeChars,
+jsize len);
+
+jstring NewStringUTF(JNIEnv *env, const char *bytes);
+
+The name argument is a fully-qualified class name or an array type signature . For example, the fully-qualified class name for the java.lang.String class is:
+
+                   "java/lang/String"
+
+The array type signature of the array class java.lang.Object[] is:
+
+                   "[Ljava/lang/Object;"
+
+
+
 ```
 
-CUDA并行程序设计：GPU编程指南(CUDA社区技术总监撰写，英伟达官方认证工程师翻译) 
+
 
 ## Java语法
 
