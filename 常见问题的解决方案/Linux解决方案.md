@@ -35,11 +35,11 @@
 
   - 显示文件末尾5行内容 ：tail -n 5 log2014.log 
 
-  - ```
+```
     tail file （显示文件file的最后10行）
     tail +20 file （显示文件file的内容，从第20行至文件末尾）
     tail -c 10 file （显示文件file的最后10个字符）
-    ```
+```
 
 - vim ：编辑文件，注意不要打开超大文件。非常吃内存
 
@@ -59,9 +59,9 @@
 
   - 按Q键：退出rnore命令。
 
-  - ```
+```
     more -c -10 file
-    ```
+```
 
 - less：http://man.linuxde.net/less
 
@@ -72,7 +72,7 @@
 
 - **系统**
 
-  ```
+```
   # uname -a               # 查看内核/操作系统/CPU信息
   # cat /proc/version  	 # 查看操作系统版本
   # cat /proc/cpuinfo      # 查看CPU信息
@@ -82,11 +82,11 @@
   # lsusb -tv              # 列出所有USB设备
   # lsmod                  # 列出加载的内核模块
   # lspci -tv                    # 查看环境变量
-  ```
 ```
-  
+
+
 **资源**
-  
+
 ```
   # free -m                # 查看内存使用量和交换区使用量
   # df -h                  # 查看各分区使用情况
@@ -96,9 +96,9 @@
   # uptime                 # 查看系统运行时间、用户数、负载
   # cat /proc/loadavg      # 查看系统负载
 ```
-  
+
 **磁盘和分区**
-  
+
 ```
   # mount | column -t      # 查看挂接的分区状态
   # fdisk -l               # 查看所有分区
@@ -106,9 +106,9 @@
   # hdparm -i /dev/hda     # 查看磁盘参数(仅适用于IDE设备)
   # dmesg | grep IDE       # 查看启动时IDE设备检测状况
 ```
-  
+
 **网络**
-  
+
 ```
   # ifconfig               # 查看所有网络接口的属性
   # iptables -L            # 查看防火墙设置
@@ -117,17 +117,17 @@
   # netstat -antp          # 查看所有已经建立的连接
   # netstat -s             # 查看网络统计信息
 ```
-  
+
 **进程**
-  
+
 ```
   # ps -ef                 # 查看所有进程
   # ps -xf				 # 查看个人权限下的进程
   # top                    # 实时显示进程状态
 ```
-  
+
 **用户**
-  
+
 ```
   # w                      # 查看活动用户
   # id <用户名>            # 查看指定用户信息
@@ -136,19 +136,19 @@
   # cut -d: -f1 /etc/group    # 查看系统所有组
   # crontab -l             # 查看当前用户的计划任务
 ```
-  
+
 **服务**
-  
+
 ```
   # chkconfig --list       # 列出所有系统服务
   # chkconfig --list | grep on    # 列出所有启动的系统服务
 ```
-  
+
 **程序**
-  
+
 ```
   # rpm -qa                # 查看所有安装的软件包
-  ```
+```
 
 
 
@@ -157,7 +157,8 @@
 - https://www.jianshu.com/p/fe8da5d08e16
 
   ```
-简单说,/lib64是内核级的,/usr/lib64是系统级的,/usr/local/lib64是用户级的.
+  简单说,/lib64是内核级的,/usr/lib64是系统级的,/usr/local/lib64是用户级的.
+  ```
 
 /lib/ — 包含许多被 /bin/ 和 /sbin/ 中的程序使用的库文件。目录 /usr/lib/ 中含有更多用于用户程序的库文件。/lib目录下放置的是/bin和/sbin目录下程序所需的库文件。/lib目录下的文件的名称遵循下面的格式： 
 libc.so.* 
@@ -875,6 +876,13 @@ UID   PID  PPID   C STIME   TTY           TIME CMD
 - 根据关键词提取改行数据
 - 如果字符串匹配包含空格，那么一定要用转义符 \：https://blog.csdn.net/qq_30038111/article/details/83447045
 
+```
+https://blog.csdn.net/stepbystepto/article/details/52951849
+grep -v *.sh 筛选掉不包含.sh的文件
+```
+
+
+
 ### find
 
 - find ./ -iname rtidb_mon.log
@@ -1294,7 +1302,15 @@ LC_ALL=en_US.UTF-8
 ifconig -a
 ```
 
- 
+### 添加域名映射
+
+```
+vi /etc/host
+
+xxx.xxx.xxx.xxx  域名名字
+```
+
+###  
 
 ### 查看执行程序是否依赖动态库
 
