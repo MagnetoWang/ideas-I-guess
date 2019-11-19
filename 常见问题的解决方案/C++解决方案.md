@@ -217,6 +217,11 @@ StringUtil(std::string& data)
 为了保证StringUtil，可以正常打印，我们需要传递值！
 正确做法
 应该在类里面自己new一个新的string！
+
+
+内存泄露
+是指你在程序new一个内存空间，但是一直没有释放，一直也不使用。这就造成内存空间浪费
+也可以说是内存泄露
 ```
 
 ### 异常
@@ -3774,6 +3779,8 @@ rm -rf $cpp_file
 
 ### 资料
 
+- 编译c++静态库：https://blog.csdn.net/carbon06/article/details/82632781
+- 编译c++动态库：https://blog.csdn.net/carbon06/article/details/82588150
 - Java接口：https://tensorflow.google.cn/install/lang_java
 - 模型提供服务：https://www.tensorflow.org/tfx/tutorials/serving/rest_simple
 - 安装Java版本：https://www.tensorflow.org/install/lang_java
@@ -3811,11 +3818,17 @@ bazel的版本必须和tensorflow一致
 
 编译c++版本
 https://www.codercto.com/a/31648.html
+找不到标准库头文件的问题，要显示指出gcc的路径
 https://www.cnblogs.com/buyizhiyou/p/10405634.html
 https://stackoverflow.com/questions/33620794/how-to-build-and-use-google-tensorflow-c-api
 
+编译c++的库
 bazel build //tensorflow:libtensorflow_cc.so
+bazel build //tensorflow:libtensorflow_cc.a
 
+
+
+编译c的库
 bazel build :libtensorflow.so
 
 cmake -DCMAKE_C_COMPILER=/xxx/gcc-5.4.0/build/bin/gcc -DCMAKE_CXX_COMPILER=/xxx/gcc-5.4.0/build/bin/g++ ..
@@ -4022,6 +4035,18 @@ https://stackoverflow.com/questions/55142951/tensorflow-2-0-attributeerror-modul
 需要修改接口
 2.0提供一个方案，可以切换1.x的接口，保证原来代码的兼容性
 ```
+
+####  codecvt
+
+```
+https://stackoverflow.com/questions/15615136/is-codecvt-not-a-std-header
+
+ #include <codecvt>
+gcc 4.x不支持这个头文件
+gcc 5.0以后才支持
+```
+
+
 
 ## Json-C++
 
