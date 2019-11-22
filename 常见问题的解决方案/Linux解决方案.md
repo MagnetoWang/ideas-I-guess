@@ -1149,6 +1149,18 @@ ls -lR  | grep "^-" | wc -l
 
 - /var/spool/mail
 
+## 文件
+
+### 修改文件权限
+
+```
+chmod 数字 文件名 
+
+chmod 777 xxx //  满权限
+```
+
+
+
 ### 选取文件 某一行或指定范围
 
 - sed -n 4,8p file #打印file中的4-8行
@@ -1166,6 +1178,16 @@ sed -i "44c \"--headers ) HDRS_IN=\"\$2\"; shift 2 ;;\"" config_brpc.sh
 
 sed -i '45c "--libs ) LIBS_IN="\$2"; shift 2 ;;"' config_brpc.sh
 ```
+
+### 往文件结尾写入字符串
+
+```
+echo "xxx.27.128.37\ xx-xx" > /etc/hosts
+
+特殊字符要加斜杆
+```
+
+
 
 ### shell函数使用
 
