@@ -1468,6 +1468,16 @@ bashrc: 为每一个运行bash shell的用户执行此文件.当bash shell被打
  注意，无论是什么配置，都要考虑到环境干净性！
 ```
 
+### gcc的历史版本
+
+```
+gcc version >=5: gcc uses the new C++ ABI since version 
+
+gcc4 that uses the older ABI.
+
+If you compile your library with gcc>=5, add -D_GLIBCXX_USE_CXX11_ABI=0 to the command line to make the library compatible with the older abi.
+```
+
 
 
 ## 问题
