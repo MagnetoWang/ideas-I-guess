@@ -3795,6 +3795,10 @@ rm -rf $cpp_file
 - c++读取文本转tensor：https://juejin.im/post/5bc0b628e51d450e95104107
 - c++加载模型：https://www.jianshu.com/p/42589012c6f1
 - keras模型转tf的pb模型：https://github.com/amir-abdi/keras_to_tensorflow
+- 静态库打包到动态库：https://blog.csdn.net/derek_yi/article/details/39250561
+- cmake打包静态库所有符号到动态库：https://blog.csdn.net/coroutines/article/details/21102003
+- gcc的静态库不用打包进去：https://stackoverflow.com/questions/8716857/making-dynamic-library-from-static-ones-using-gcc-shared-m64-wl-whole-arch
+- 如何贡献自己的代码到tf：https://www.cnblogs.com/deep-learning-stacks/p/10424914.html
 
 ### 安装
 
@@ -3964,6 +3968,22 @@ DECLARE_ERROR(Unauthenticated, UNAUTHENTICATED)
 
 ```
 
+#### macros
+
+```
+/tensorflow/core/platform/maxros.h
+tf内部的各种宏定义
+
+https://blog.csdn.net/weixin_43800762/article/details/88401781
+
+禁止赋值和构造函数
+// A macro to disallow the copy constructor and operator= functions
+// This is usually placed in the private: declarations for a class.
+#define TF_DISALLOW_COPY_AND_ASSIGN(TypeName) \
+  TypeName(const TypeName&) = delete;         \
+  void operator=(const TypeName&) = delete
+```
+
 
 
 ### 代码
@@ -3980,6 +4000,26 @@ with tf.gfile.FastGFile('/Users/magnetowang/dev/data/BiRNNtagMiniCNN.pb', 'rb') 
     tf.import_graph_def(graph_def, name='') # 导入计算图
     for i, n in enumerate(graph_def.node):
         print("Name of the node - %s" % n.name)
+```
+
+#### 获取tf头文件和库
+
+```
+$ python
+>>> import tensorflow as tf
+>>> tf.sysconfig.get_include()
+'/usr/local/lib/python2.7/site-packages/tensorflow/include'
+>>> tf.sysconfig.get_lib()
+'/usr/local/lib/python2.7/site-packages/tensorflow'
+
+```
+
+### 功能
+
+#### 算子注册
+
+```
+http://vernlium.github.io/2019/07/01/Tensorflow%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90%E2%80%94%E2%80%94%E7%AE%97%E5%AD%90%E6%B3%A8%E5%86%8C/
 ```
 
 
