@@ -1494,7 +1494,20 @@ If you compile your library with gcc>=5, add -D_GLIBCXX_USE_CXX11_ABI=0 to the c
 
 ```
 ssh-keygen -t rsa
+s生成公钥和秘钥，公钥是可以随意发布的，秘钥只能你一个人持有
+```
 
+### tar解压报错常见原因
+
+```
+https://blog.csdn.net/canglan211/article/details/84530216
+账号权限不足造成的，使用sudo执行则解决
+压缩包损坏
+磁盘空间不足，可以df /home -h查看/home是否已满
+
+空间不够用，该删除一些文件
+du -sh /    // 统计根目录的系统空间大小
+du -sh 目录名  // 统计某个目录空间大小
 ```
 
 
