@@ -96,6 +96,32 @@ mvn clean test  -Dtest=包名.*
 
 显示依赖包的树
 mvn dependency:tree
+
+执行main函数
+https://www.cnblogs.com/EasonJim/p/6830104.html
+mvn exec:java -Dexec.mainClass=xxx
+
+执行有参数的main函数
+mvn exec:java -Dexec.mainClass="com.jsoft.test.MainClass" -Dexec.args="arg0 arg1 arg2"
+
+
+```
+
+#### 安装maven
+
+```
+wget mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/3.6.2/binaries/apache-maven-3.6.2-bin.zip
+wget mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/3.6.2/source/apache-maven-3.6.2-src.tar.gz
+
+unzip apache-maven-3.6.2-bin.zip
+
+在bashrc 和 bash_profiler添加配置
+# maven路径
+export MAVEN_HOME=~/maven/apache-maven-3.6.2
+export PATH=${MAVEN_HOME}/bin:${PATH}
+
+
+配置仓库源，可以拉取jar包速度更快
 ```
 
 
@@ -166,15 +192,37 @@ find ~/.m2  -name "*.lastUpdated" -exec grep -q "Could not transfer" {} \; -prin
 
 
 
-### 解决全局时区问题
+#### 解决全局时区问题
 
 ```
 mvn clean -U -Duser.timezone=Asia/Shanghai compile test
 ```
 
+#### maven的jar包作用域
+
+```
+ <dependxxx
+            <groupId>com.xxxx</groupId>
+            <artifactId>xxx</artifactId>
+            <version>${xxx.version}</version>
+            <!--<scope>test</scope>-->
+        </dependency>
+        
+scope 会让jar包只在test目录下有效，main中无法引用。这样方便测试
+
+ 
+```
+
 
 
 ### 命令行下的Java
+
+```
+安装jdk
+
+```
+
+
 
 #### 命令行下执行Java项目整个过程
 
@@ -197,7 +245,9 @@ mvn exec:java -Dexec.mainClass="com._4paradigm.predictor.demo.JprofilerTest" -ag
 
 
 Java执行jar包
-java -cp xxx.jar xxx.Main
+java -Dfile.encoding=UTF-8 -cp xxx.jar xxx.Main
+
+
 ```
 
 #### 查看jdk路径
@@ -390,7 +440,7 @@ javah -classpath . com.xxx.xxx.xxx.类名
 
 jni生成头文件：https://www.cnblogs.com/virgosnail/p/10711165.html
 jni的所有接口方法-相当于函数字典：https://docs.oracle.com/javase/7/docs/technotes/guides/jni/spec/functions.html
-
+jni一维数组基本数据类型操作：https://blog.csdn.net/xiewenhao12/article/details/79098895
 
 jni.h：https://github.com/LeeKamentsky/python-javabridge/issues/28
 需要添加jdk的include
@@ -1013,6 +1063,28 @@ https://www.runoob.com/java/java-regular-expressions.html
 ### Lamda表达式
 
 - <https://blog.csdn.net/renfufei/article/details/24600507>
+
+```
+    // 1. 不需要参数,返回值为 5
+    () -> 5
+     
+    // 2. 接收一个参数(数字类型),返回其2倍的值
+    x -> 2 * x
+     
+    // 3. 接受2个参数(数字),并返回他们的差值
+    (x, y) -> x – y
+     
+    // 4. 接收2个int型整数,返回他们的和
+    (int x, int y) -> x + y
+     
+    // 5. 接受一个 string 对象,并在控制台打印,不返回任何值(看起来像是返回void)
+    (String s) -> System.out.print(s)
+    
+复杂写法
+players.forEach((player) -> System.out.print(player + "; "));
+```
+
+
 
 ### HashMap
 
@@ -2474,6 +2546,22 @@ demo都在项目的ut中
   Java and Go code supports object-reuse. C# has efficient struct based accessors.
 
 - **Cross platform code with no dependencies** - C++ code will work with any recent gcc/clang and VS2010. Comes with build files for the tests & samples (Android .mk files, and cmake for all other platforms).
+
+## 项目集
+
+### jar包资源工具库
+
+```
+可以参考开源项目native-lib-loader
+基本读写：https://www.mkyong.com/java/java-read-a-file-from-resources-folder/
+
+```
+
+### java网络资源下载器
+
+```
+
+```
 
 
 
