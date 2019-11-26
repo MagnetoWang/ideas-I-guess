@@ -3613,11 +3613,28 @@ sh bazel-0.29.0-installer-darwin-x86_64.sh --prefix=/xxx/xxx/third_party
 添加可以gdb调试的文件
 gdb xxx
 
-然后运行
+然后运行 也可以重新执行
 run 或者 start
 
-设置断点
 
+设置断点
+b <行号>
+b <函数名称>
+b *<函数名称>
+b *<代码地址>
+
+跳下一个断点
+c continue
+
+删除断点
+d [断点的编号]
+
+函数判断
+s: 执行一行源程序代码，如果此行代码中有函数调用，则进入该函数；
+n: 执行一行源程序代码，此行代码中的函数调用也一并执行。 
+
+打印变量
+p <变量名称>
 ```
 
 ### Unable to find Mach task port for process-id 801: (os/kern) failure (0x5)
