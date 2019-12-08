@@ -104,7 +104,8 @@ mvn exec:java -Dexec.mainClass=xxx
 执行有参数的main函数
 mvn exec:java -Dexec.mainClass="com.jsoft.test.MainClass" -Dexec.args="arg0 arg1 arg2"
 
-
+指定测试某个类的单独方法
+mvn clean test -Dtest=xxx.xxxTest#方法名
 ```
 
 #### 安装maven
@@ -2489,6 +2490,7 @@ Configuration of the serializer has changed.
 
 - java语言使用入门：<https://avro.apache.org/docs/current/gettingstartedjava.html>
 - 数据结构介绍：<https://docs.oracle.com/database/nosql-12.1.3.0/GettingStartedGuide/avroschemas.html#avro-complexdatatypes>
+- 文档说明：https://avro.apache.org/docs/current/spec.html#preamble
 
 ### 创建Schema
 
