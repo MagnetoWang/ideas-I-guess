@@ -765,6 +765,24 @@ if判断 dict_path.find("stopWord") != std::string::npos
 
 find_last_of这个函数有bug，一直没有返回过npos，不要用！
 
+字符串和数字的转换
+https://www.jianshu.com/p/60e05c02ea9e
+stod()//字符串转double
+stof()//字符串转float
+stoi()//字符串转int
+stol()//字符串转long
+stold()//字符串转double
+stoll()//字符串转long long
+stoul()//字符串转unsigned long
+stoull()//字符串转unsinged long long
+//注意！没有unsigned double和unsigned float！！！
+//没有 (unsigned+浮点数) 这种类型！！！
+//下面用stoi举例，其它类似
+
+//次函数的参数可以传任何数字类型
+//int, unsigned int, long, unsigned long, long long, unsigned long long
+//float, double
+string to_string(待转换数字)
 ```
 
 ### wstring
