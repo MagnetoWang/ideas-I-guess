@@ -995,6 +995,17 @@ tar -cf all.tar *.jpg
 
 将所有.gif的文件增加到all.tar的包里面去。-r是表示增加文件的意思。
 tar -rf all.tar *.gif
+
+压缩一个tar备份文件，此时压缩文件的扩展名为.tar.gz
+tar 只是整理文件在一个压缩包，并没有真正的压缩
+gzip -r log.tar
+
+https://man.linuxde.net/gzip
+递归压缩文件夹的文件
+gzip -rv test6
+
+递归地解压目录
+gzip -dr test6
 ```
 
 
@@ -1332,8 +1343,6 @@ vi /etc/host
 xxx.xxx.xxx.xxx  域名名字
 ```
 
-###  
-
 ### 查看执行程序是否依赖动态库
 
 ```
@@ -1508,6 +1517,14 @@ https://blog.csdn.net/canglan211/article/details/84530216
 空间不够用，该删除一些文件
 du -sh /    // 统计根目录的系统空间大小
 du -sh 目录名  // 统计某个目录空间大小
+```
+
+###  WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+
+```
+https://stackoverflow.com/questions/19943766/hadoop-unable-to-load-native-hadoop-library-for-your-platform-warning
+
+
 ```
 
 
