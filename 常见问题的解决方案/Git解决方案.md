@@ -73,10 +73,19 @@ git checkout a
 git merge b
 ```
 
-### 更新依赖
+### 更新依赖submodule
 
 ```
 git submodule update --init --recursive
+```
+
+### 撤销push远端的代码
+
+```
+git reset --hard <版本号>
+git push origin <分支名> --force
+
+https://blog.csdn.net/xs20691718/article/details/51901161
 ```
 
 
@@ -150,6 +159,12 @@ size 5484424
 
 ```
 git config --global color.ui true
+```
+
+### 撤销某个文件的修改
+
+```
+git checkout 文件名
 ```
 
 
