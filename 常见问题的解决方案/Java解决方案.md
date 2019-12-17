@@ -1141,6 +1141,14 @@ indexOf(Object obj)方法的实现机制是从序列(List)的第0个元素开始
 lastIndexOf(Object obj)方法，与indexOf()方法相反，它返回的是某个元素最后一次出现的索引位置的值，也就是它会从序列的队尾向队头进行遍历。
 
 以上两个方法的参数对象如果在序列中都没有出现的话，那么这两个方法都会返回-1。
+
+
+高级用法
+List<String> names = new ArrayList<String>() {{
+                            add("key"),
+                            
+                        }
+                    };
 ```
 
 ### Queue
@@ -2498,6 +2506,14 @@ Configuration of the serializer has changed.
 Schema schema = Schema.createMap(Schema.create(Schema.Type.BOOLEAN)); 
 ```
 
+### schema的赋值
+
+```
+
+```
+
+
+
 ### 添加数据
 
 ```
@@ -2520,6 +2536,34 @@ demo都在项目的ut中
 序列化的演示，TestSeekableByteArrayInput
 
 ```
+
+### 对null序列化
+
+```
+java中的校验，只有union可以支持默认的null，其他类型不支持
+
+/**
+   * Validates that a particular value for a given field is valid according to the
+   * following algorithm: 1. If the value is not null, or the field type is null,
+   * or the field type is a union which accepts nulls, returns. 2. Else, if the
+   * field has a default value, returns. 3. Otherwise throws AvroRuntimeException.
+   * 
+   * @param field the field to validate.
+   * @param value the value to validate.
+   * @throws NullPointerException if value is null and the given field does not
+   *                              accept null values.
+   */
+  protected void validate(Field field, Object value) {
+    if (isValidValue(field, value)) {
+    } else if (field.defaultVal() != null) {
+    } else {
+      throw new AvroRuntimeException("Field " + field + " does not accept null values");
+    }
+  }
+
+```
+
+
 
 ### 注意
 
