@@ -757,7 +757,37 @@ int1 -le int2　　　　int1小于等于int2为真
 
 ### export
 
+```
+
+```
+
+
+
 ### unset
+
+```
+unset 某个环境变量的名字 
+置位空字符串这个环境变量
+```
+
+### alias
+
+```
+https://wangchujiang.com/linux-command/c/alias.html
+# 显示全部已定义的别名
+alias
+alias -p
+
+# 显示已定义的别名（假设当前环境存在以下别名）
+alias ls
+alias ls grep
+
+# 定义或修改别名的值
+alias ls='ls --color=auto'
+alias ls='ls --color=never' grep='grep --color=never'
+
+
+```
 
 
 
@@ -1435,6 +1465,14 @@ cal
 cal -y
 ```
 
+### 安装gcc
+
+```
+yum install gcc
+yum install gcc-c++ libstdc++-devel
+
+```
+
 
 
 ## 常识
@@ -1487,6 +1525,23 @@ gcc4 that uses the older ABI.
 If you compile your library with gcc>=5, add -D_GLIBCXX_USE_CXX11_ABI=0 to the command line to make the library compatible with the older abi.
 ```
 
+### 多个shell执行顺序
+
+```
+直接在主shell脚本中执行一个子shell脚本，主shell是不会等待子shell结果，如果需要串行执行，可以用wait命令
+https://linuxhint.com/wait_command_linux/
+sh xxx | wait
+
+```
+
+### 后台模式
+
+```
+所有命令 后面可以加个  & 说明是放在后台执行
+ls -l &
+xxx &
+```
+
 
 
 ## 问题
@@ -1524,6 +1579,12 @@ du -sh 目录名  // 统计某个目录空间大小
 ```
 https://stackoverflow.com/questions/19943766/hadoop-unable-to-load-native-hadoop-library-for-your-platform-warning
 
+
+```
+
+### execvp: /bin/bash: Argument list too long
+
+```
 
 ```
 
