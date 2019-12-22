@@ -77,6 +77,9 @@ p到上层目录
 P到根目录
 K到同目录第一个节点
 P到同目录最后一个节点
+
+安装目录树
+
 ```
 
 
@@ -116,7 +119,29 @@ set laststatus=2
 原文链接：https://blog.csdn.net/icbm/article/details/73028623
 ```
 
+## 注释的颜色更改为绿色
 
+```
+https://www.cnblogs.com/the-tops/p/5845481.html
+
+用vim打开它   vim /etc/vimrc   然后按大写  G 到最后一行，插入 hi comment ctermfg=6 然后wq保存离开
+
+0 黑色  ---默认VIM的背景就是黑色，所有如果你选择0，那么就看不到注释了
+
+1  红色
+
+2 墨绿
+
+3 黄色
+
+4 难看刺眼的颜色，即默认的颜色
+
+5 类似粉色的，我不知道这种颜色叫什么
+
+6 淡蓝色
+
+7  白色 ---不要选择7，输入不刺眼，但是和其他的太一样了，不好分清楚到底哪个注释了，那个没注释
+```
 
 
 
@@ -186,6 +211,8 @@ filetype indent on
 "允许使用插件
 filetype plugin on
 filetype plugin indent on
+
+
 ```
 
 
