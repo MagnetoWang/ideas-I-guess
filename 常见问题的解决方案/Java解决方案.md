@@ -1059,6 +1059,70 @@ https://www.runoob.com/java/java-regular-expressions.html
 在static中创建好共享变量
 ```
 
+### synchronized
+
+```
+https://www.geeksforgeeks.org/synchronized-in-java/
+https://docs.oracle.com/javase/tutorial/essential/concurrency/syncmeth.html
+https://www.runoob.com/java/java-multithreading.html
+
+// Only one thread can execute at a time. 
+// sync_object is a reference to an object
+// whose lock associates with the monitor. 
+// The code is said to be synchronized on
+// the monitor object
+synchronized(sync_object)
+{
+   // Access shared variables and other
+   // shared resources
+}
+
+
+class RunnableDemo implements Runnable {
+   private Thread t;
+   private String threadName;
+   
+   RunnableDemo( String name) {
+      threadName = name;
+      System.out.println("Creating " +  threadName );
+   }
+   
+   public void run() {
+      System.out.println("Running " +  threadName );
+      try {
+         for(int i = 4; i > 0; i--) {
+            System.out.println("Thread: " + threadName + ", " + i);
+            // 让线程睡眠一会
+            Thread.sleep(50);
+         }
+      }catch (InterruptedException e) {
+         System.out.println("Thread " +  threadName + " interrupted.");
+      }
+      System.out.println("Thread " +  threadName + " exiting.");
+   }
+   
+   public void start () {
+      System.out.println("Starting " +  threadName );
+      if (t == null) {
+         t = new Thread (this, threadName);
+         t.start ();
+      }
+   }
+}
+ 
+public class TestThread {
+ 
+   public static void main(String args[]) {
+      RunnableDemo R1 = new RunnableDemo( "Thread-1");
+      R1.start();
+      
+      RunnableDemo R2 = new RunnableDemo( "Thread-2");
+      R2.start();
+   }   
+}
+
+```
+
 
 
 ### Lamda表达式
@@ -1216,6 +1280,15 @@ public class Main {
 }
 
 ```
+
+## JDK8
+
+### getOrDefault
+
+```
+
+```
+
 
 
 
