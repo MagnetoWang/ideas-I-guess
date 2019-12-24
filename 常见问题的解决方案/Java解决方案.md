@@ -932,6 +932,15 @@ public class DeserializeDemo
 }
 ```
 
+### 编解码
+
+```
+Java中字符串编码默认是跟着系统走，utf-8是常见编码
+
+```
+
+
+
 ### transient
 
 ```
@@ -1037,6 +1046,12 @@ https://www.runoob.com/java/java-regular-expressions.html
 - buffer.clear(); 清楚数据，实际只是变更索引值，回到第一个位置，之后重写数据
 - bytebuffer to byte ： buffer.get(new byte[6])   String value = new String(byte);
 - Byte to bytebuffer :    ByteBuffer.wrap(byteArray);  buffer.put(byteArray)
+
+```
+bytebuffer 和 string互转
+
+
+```
 
 
 
@@ -2585,7 +2600,18 @@ Schema schema = Schema.createMap(Schema.create(Schema.Type.BOOLEAN));
 
 ```
 
+### 创建map
 
+```
+https://www.programcreek.com/java-api-examples/?class=org.apache.avro.Schema&method=createMap
+
+```
+
+
+
+### 创建array
+
+### 创建bytes
 
 ### 添加数据
 
@@ -2634,6 +2660,19 @@ java中的校验，只有union可以支持默认的null，其他类型不支持
     }
   }
 
+如果想要支持null的话，可以在avro的外层逻辑解决
+比如设置两个schema，一个存储只有null的结果的schema，另一个存储没有null的schema。有null的schema，用自定义的默认值即可。两个schema的命名，可以是有区别的
+```
+
+### 序列化
+
+```
+avro序列化本质是OutputStream
+通过这个封装一层schema解析
+
+写字节流核心代码
+由ByteBuffer对象开始写
+this.writeFixed(bytes.array(), bytes.arrayOffset() + pos, len);
 ```
 
 
