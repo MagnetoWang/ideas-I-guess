@@ -1050,6 +1050,11 @@ https://www.runoob.com/java/java-regular-expressions.html
 ```
 bytebuffer 和 string互转
 
+编码形式的互转
+String str = "string";
+str.getBytes(StandardCharsets.UTF_8);
+
+16进制形式的互转
 
 ```
 
@@ -2708,6 +2713,54 @@ Hex.encodeHexString(bytes.array());
             <artifactId>commons-codec</artifactId>
             <version>1.9</version>
         </dependency>
+```
+
+### avro反序列后map字段
+
+```
+这里面有大问题！！！
+下面是我debug的信息
+deMap 是avro反序列后的结果
+本质是string, bytebuffer的结构
+但是无法通过row_0查询到结果！！！！！！！！！！！！！！！！！！！！！！！！！
+原因是它的key，hash值竟然是0！！！！！！！！！！
+avro is so bad
+
+又一次细看，发现，应该传个utf8内部的结构体
+String newKey = "row_" + i;
+            Utf8 uKey = new Utf8(newKey);
+            if (map.get(uKey) == null) {
+                throw new RuntimeException("wrong row for window status");
+            }
+avro is so bad again
+
+logger = {Log4jLogger@3571} 
+this = {WindowStatus@3556} 
+utf8 = {Utf8@3570} "row_0"
+ bytes = {byte[5]@3623} 
+ length = 5
+ string = "row_0"
+  value = {char[5]@3626} 
+  hash = 108705547
+deMap = {HashMap@3567}  size = 1
+ 0 = {HashMap$Node@3617} "row_0" -> "java.nio.HeapByteBuffer[pos=0 lim=28 cap=28]"
+  key = {Utf8@3618} "row_0"
+   bytes = {byte[5]@3624} 
+   length = 5
+   string = "row_0"
+    value = {char[5]@3625} 
+     0 = 'r' 114
+     1 = 'o' 111
+     2 = 'w' 119
+     3 = '_' 95
+     4 = '0' 48
+    hash = 0
+  value = {HeapByteBuffer@3619} "java.nio.HeapByteBuffer[pos=0 lim=28 cap=28]"
+key = "row_0"
+ value = {char[5]@3626} 
+ hash = 108705547
+logger = {Log4jLogger@3571} 
+
 ```
 
 
