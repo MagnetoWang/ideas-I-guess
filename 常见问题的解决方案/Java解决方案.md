@@ -1499,6 +1499,12 @@ switch (enumExample) {
 }
 ```
 
+### idea报Cannot find class in classpath
+
+```
+重启重启，重下代码，全部重来
+```
+
 
 
 ## 自动化脚本
@@ -2673,6 +2679,35 @@ avro序列化本质是OutputStream
 写字节流核心代码
 由ByteBuffer对象开始写
 this.writeFixed(bytes.array(), bytes.arrayOffset() + pos, len);
+
+avro字节码的bytebuffer不能直接转换字符串，需要转16进制，确保字节数组不丢失数据
+
+在构造map结构的，avro反序列是返回hashmap结果，而不是有序map，这是个问题
+public class GenericDatumReader<D> implements DatumReader<D> 
+ org.apache.avro.generic
+    protected Object newMap(Object old, int size) {
+        if (old instanceof Map) {
+            ((Map)old).clear();
+            return old;
+        } else {
+            return new HashMap(size);
+        }
+    }
+
+```
+
+### bytebuffer转字符串
+
+```
+avro序列化的bytebuffer 是特殊的字节流，前两位是自己的标志位。所以不能简单的用utf-8转字符串
+需要一些特殊处理，网络上的方案都不好用，因为字节数组转字符串出现信息丢失情况
+但是java不能像c++那样直接地址拷贝，所以可以先转成16进制字符串
+Hex.encodeHexString(bytes.array());
+<dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.9</version>
+        </dependency>
 ```
 
 
