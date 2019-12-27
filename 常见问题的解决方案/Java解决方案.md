@@ -1554,6 +1554,25 @@ export PATH=${MAVEN_HOME}/bin:${PATH}
 this.loadBalanceType = LoadBalanceType.ROUND_ROBIN.getId();
 ```
 
+### 字节流创建字符串，无hashcode
+
+```
+    // construct string with no hashcode
+    protected Object newInstanceFromString(Class c, String s) {
+        try {
+            Constructor ctor = stringCtorCache.get(c);
+            if (ctor == null) {
+                ctor = c.getDeclaredConstructor(String.class);
+                ctor.setAccessible(true);
+                stringCtorCache.put(c, ctor);
+            }
+            return ctor.newInstance(s);
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
+            throw new AvroRuntimeException(e);
+        }
+    }
+```
+
 
 
 ## 常用代码片段
@@ -1599,6 +1618,14 @@ properties 加载路径的文件资源
 获取资源
 properties.getProperty("变量名");
 
+```
+
+### gson
+
+```
+        Hashmap valueMap
+        Gson gson = new Gson();
+        String value = gson.toJson(valueMap);
 ```
 
 
