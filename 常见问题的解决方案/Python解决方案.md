@@ -204,6 +204,37 @@ print(object(s), separator=separator, end=end, file=file, flush=flush)
 print('pos_name_.insert(std::make_pair(\"', key, "\", \"", value, "\"));", sep="")
 ```
 
+## 命令行下的python
+
+### 执行
+
+```
+cd src
+export PYTHONPATH=`pwd`:$PYTHONPATH
+python3 -m unittest test/*_test.py
+
+pythonpath是维护一个python项目的重要路径！
+```
+
+### 调试
+
+```
+python3 -m pdb xxx
+
+断点的方法和gdb基本一致，可以查看c++解决方案
+```
+
+## pycharm下的python
+
+### 设置自己的项目
+
+```
+导入自己项目的时候，pycharm无法识别自己的模块，需要手动添加识别路径
+https://blog.csdn.net/weixin_40807247/article/details/82781032
+
+右键make_directory as-->sources path将当前工作的文件夹加入source_path就可以了。
+```
+
 
 
 ## 语法
