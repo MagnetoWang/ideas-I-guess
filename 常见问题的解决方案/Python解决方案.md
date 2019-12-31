@@ -145,6 +145,14 @@ source ~/python/anaconda3/etc/profile.d/conda.sh
 - str(对象)
 - json.dumps(dict)
 
+### 字符串转数字
+
+```
+int(str)
+```
+
+
+
 ### list对象的增删改查
 
 - py2
@@ -165,6 +173,9 @@ print list
 # 删除
 list.pop(4)
 print list
+
+遍历list
+
 ```
 
 ### dict字典
@@ -323,6 +334,25 @@ __len__ 当使用len(A)该对象时调用该方法，当没有该方法是会报
 __reversed__():当使用reversed函数翻转对象时调用
 __contains__():当使用in，not in 对象的时候 调用(not in 是在in完成后再取反,实际上还是in操作)
 
+```
+
+### 打印当前路径
+
+```
+print(__file__)
+```
+
+### 读取json文件
+
+```
+f = open("../../onebox/config.json", encoding='utf-8')
+code = """multi_last_value(sample,product.sku_id,10)"""
+config_obj = json.load(f)
+        
+读取json字符串        
+config_obj = json.loads(json_str)        
+        
+        
 ```
 
 
