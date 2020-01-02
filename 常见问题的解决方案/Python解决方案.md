@@ -153,7 +153,7 @@ int(str)
 
 
 
-### list对象的增删改查
+### list对象的基本操作
 
 - py2
 - 直接复制，直接运行。
@@ -175,7 +175,15 @@ list.pop(4)
 print list
 
 遍历list
+for s in list_xxxx:
+  实现xxxxxxxx
+  
 
+将列表每个元素拼接起来
+code = []
+"\n".join(code)
+
+len(list) 返回list的size
 ```
 
 ### dict字典
@@ -452,6 +460,12 @@ It happened to me too. I had tensorflow and it was working pretty well, but when
 
 使用conda方式重新安装tensorflow
 conda install tensorflow
+```
+
+### cannot unpack non-iterable NoneType object
+
+```
+没有return的时候，是默认返回none
 ```
 
 
