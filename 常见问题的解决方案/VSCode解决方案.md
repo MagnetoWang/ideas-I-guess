@@ -1,5 +1,28 @@
 ## VSCode解决方案
 
+### 使用入门
+
+```
+视频入门更快：https://www.bilibili.com/video/av32808486?from=search&seid=11649437142912112135 
+
+命令行中启动vscode
+在vscode设置里面，启动命令，输入shell，出现安装code
+这样只需要命令行输入 code . 就可以启动vscode
+
+创建项目独立的环境
+python -m venv env
+or
+python3 -m venv env
+
+保存安装包列表
+pip freeze > requirements.txt
+
+查询文件的结构
+command + p
+```
+
+
+
 ### 颜色配置
 
 - 更改json配置，找到对应中文名：https://www.cnblogs.com/garvenc/p/vscode_customize_color_theme.html
