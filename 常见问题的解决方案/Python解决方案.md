@@ -363,6 +363,25 @@ config_obj = json.loads(json_str)
         
 ```
 
+### isinstance
+
+```
+https://www.runoob.com/python/python-func-isinstance.html
+isinstance(object, classinfo)
+object -- 实例对象。
+classinfo -- 可以是直接或间接类名、基本类型或者由它们组成的元组。
+
+
+>>>a = 2
+>>> isinstance (a,int)
+True
+>>> isinstance (a,str)
+False
+>>> isinstance (a,(str,int,list))    # 是元组中的一个返回 True
+True
+
+```
+
 
 
 ## Python的奇怪语法
