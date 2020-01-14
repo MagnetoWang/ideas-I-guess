@@ -211,6 +211,11 @@ empty_set.remove(xxx)
 
 如果元素不存在,不报错
 empty_set.discard(xxx)
+
+初始化
+t = set(['h', 'e', 'l', 'l', 'o'])
+或者
+t = {"sum", "max"}
 ```
 
 ### print
@@ -233,6 +238,10 @@ export PYTHONPATH=`pwd`:$PYTHONPATH
 python3 -m unittest test/*_test.py
 
 pythonpath是维护一个python项目的重要路径！
+
+建议统一用anaconda管理，设置环境
+source /xxxx/anaconda3/bin/activate
+conda activate base
 ```
 
 ### 调试
@@ -485,6 +494,37 @@ conda install tensorflow
 
 ```
 没有return的时候，是默认返回none
+```
+
+
+
+# 新项目
+
+## 爬虫
+
+### 库
+
+```
+
+```
+
+### 问题
+
+#### ssl 验证不通过 urllib.error.URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1051)>
+
+```
+https://www.cnblogs.com/my8100/p/7279133.html
+因为有校验过程，需要跳过
+全局设置加一行代码
+ssl._create_default_https_context = ssl._create_unverified_context
+
+```
+
+#### urllib.error.HTTPError: HTTP Error 403: Forbidden
+
+```
+在请求的对象里面，添加更多头文件信息，模拟浏览器的请求
+
 ```
 
 
