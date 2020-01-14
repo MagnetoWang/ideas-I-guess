@@ -167,6 +167,32 @@ git config --global color.ui true
 git checkout 文件名
 ```
 
+### git stash用法
+
+```
+https://blog.csdn.net/wh_19910525/article/details/7784901
+$git stash
+$do some work
+$git stash pop
+
+
+git stash          # save uncommitted changes
+# pull, edit, etc.
+git stash list     # list stashed changes in this git
+git show stash@{0} # see the last stash 
+git stash pop      # apply last stash and remove it from the list
+
+git stash --help   # for more info
+```
+
+### 生成ssh key
+
+```
+https://www.jianshu.com/p/31cbbbc5f9fa/
+
+ssh-keygen -t rsa -C "your_email@example.com"
+```
+
 
 
 ## 问题
@@ -220,6 +246,8 @@ ssh-keygen -o -f ~/.ssh/id_rsa
 - 解决方案
   - 添加你要push的分支名
   - git push origin branch_name
+- 如果还是无效，就是说明这个分支的权限被保护了，你不能push，只能找管理员帮忙
+- 如果着急使用，可以临时拉个新分支，pull下来，merge本地代码，然后push新分支，等之后让管理员帮你远程merge即可
 
 ### GitHub Desktop was unable to store the account token in the keychain. Please check you have unlocked access to the 'login' keychain.
 
