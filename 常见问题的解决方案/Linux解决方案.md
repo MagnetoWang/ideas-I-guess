@@ -994,6 +994,12 @@ ls file* | tee output.txt | wc -l
 time [command]
 ```
 
+### ab 服务器压力测试
+
+```
+ab -v 10 -c 1 -n 1 -p xxxx -T xxxxx
+```
+
 
 
 ### tail
@@ -1191,6 +1197,14 @@ ls -lR  | grep "^-" | wc -l
 - /var/spool/mail
 
 ## 文件
+
+### 对比两个文件内容
+
+```
+vimdiff 文件路径1 文件路径2
+```
+
+
 
 ### 修改文件权限
 
