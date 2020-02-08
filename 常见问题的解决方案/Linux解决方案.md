@@ -822,6 +822,17 @@ sed -i "44c "--headers \) HDRS_IN=\"$2\"; shift 2 ;;"" config_brpc.sh
   - sed: 1: "config_brpc.sh": command c expects \ followed by text
   - 目前不好解决
 
+### gsed
+
+```
+mac上只能用gsed，不能用sed
+
+安装命令
+brew install gnu-sed
+```
+
+
+
 ### nl
 
 - 计算文件的行号
@@ -849,6 +860,14 @@ sed -i "44c "--headers \) HDRS_IN=\"$2\"; shift 2 ;;"" config_brpc.sh
 - 复制目录
   - cp -r dir_name_source/.  dir_name_dest/ 只复制dir_name_source里面的子目录
   - cp -r dir_name_source  dir_name_dest 这样会把dir_name_source也复制进去
+
+### scp
+
+```
+scp xxx.tar root@xxx:/mnt/disk02/xxx
+```
+
+
 
 ### mv
 
