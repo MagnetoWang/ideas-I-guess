@@ -324,6 +324,13 @@ https://www.jianshu.com/p/85f1d3c0dce0
 # -*- coding: utf-8 -*-
 with open('path\filename', 'w') as file_obj:
     file_obj.write('I love Python.')
+    
+    
+读json
+
+
+读文件
+
 ```
 
 
@@ -389,6 +396,28 @@ False
 >>> isinstance (a,(str,int,list))    # 是元组中的一个返回 True
 True
 
+```
+
+### None
+
+```
+判断是否为None的情况
+if x != None 不建议
+if x is not = None 推荐
+```
+
+### ascii码和字符转换
+
+```
+https://blog.csdn.net/yzy_1996/article/details/89556049
+>>> ord('A')
+65
+>>> ord('中')
+20013
+>>> chr(66)
+'B'
+>>> chr(25991)
+'文'
 ```
 
 
