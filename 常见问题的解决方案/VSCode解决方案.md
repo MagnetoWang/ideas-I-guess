@@ -145,3 +145,14 @@ https://code.visualstudio.com/docs/cpp/faq-cpp
 插件还可以配置需要索引的目录，叫brower.path
 ```
 
+## 超级好用
+
+### 支持excel的表格模式的复制
+
+```
+https://www.zhihu.com/question/36723216
+
+mac：`shift` + `option` + 单击
+win：alt+shift+鼠标拖动
+```
+
