@@ -1419,6 +1419,12 @@ public class Main {
 
 ```
 
+### System.copyArray
+
+```
+
+```
+
 
 
 
@@ -1625,13 +1631,19 @@ switch (enumExample) {
 ```
 mvn versions:set -DnewVersion=${1}
 
-
+目前未解决
 ```
 
 ### spark做codegen的编译源码文件大于64k在1.6版本会报错
 
 ```
 用2.3版本不报错
+```
+
+### java.util.MissingFormatArgumentException: Format specifier '%s'
+
+```
+打印日志的时候，变量和打印的变量个数没有对齐
 ```
 
 
