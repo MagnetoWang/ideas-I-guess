@@ -1406,6 +1406,15 @@ vi /etc/host
 xxx.xxx.xxx.xxx  域名名字
 ```
 
+### 杀死占用某个端口号的进程netstat
+
+```
+netstat -tunlp|grep 7600
+kill -9 xxx
+```
+
+
+
 ### 查看执行程序是否依赖动态库
 
 ```
