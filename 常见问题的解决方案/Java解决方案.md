@@ -2952,11 +2952,28 @@ logger = {Log4jLogger@3571}
 
 ```
 
-
-
 ### 注意
 
 - map结构的key默认是string，所以只需要定义value的type
+
+
+
+## Parquet文件
+
+### 读取parquet文件
+
+```
+https://www.codota.com/code/java/classes/org.apache.hadoop.fs.Path
+
+
+pandas 0.21 introduces new functions for Parquet:
+
+pd.read_parquet('example_pa.parquet', engine='pyarrow')
+or
+pd.read_parquet('example_fp.parquet', engine='fastparquet')
+```
+
+
 
 ## Flatbuffer
 
