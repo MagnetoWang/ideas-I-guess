@@ -637,7 +637,11 @@ qa! 有多个文件被打开，同时退出
 ### 建立临时服务器
 
 ```
+python2
 python -m SimpleHTTPServer 1234
+
+python3
+python -m http.server 1234
 
 在网页上 ip:1234 就可以访问服务器
 ```
