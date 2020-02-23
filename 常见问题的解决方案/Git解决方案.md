@@ -54,9 +54,21 @@ git checkout -b xxx
  git push --set-upstream origin xxx
 ```
 
+### 从某一个commit开始创建本地分支
+
+```
+// 通过checkout 跟上commitId 即可创建制定commit之前的本地分支
+git checkout commitId -b 本地新branchName
 
 
-### 分支与分支之间的合并
+// 依然通过push 跟上你希望的远程新分支名字即可
+git push origin HEAD:远程新branchName
+
+```
+
+
+
+### 分支与分支之间的合并merge
 
 ```
 在idea直接merge，非常方便，还会显示冲突直接选择
@@ -72,6 +84,14 @@ git pull
 git checkout a
 git merge b
 ```
+
+### 开发分支落后主分支太多commit，无法直接merge到主分支
+
+```
+
+```
+
+
 
 ### 更新依赖submodule
 
