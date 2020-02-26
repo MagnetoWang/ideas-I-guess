@@ -426,6 +426,30 @@ while((data = br.readLine())!=null)
 System.out.println(data);
 }
 
+文件写 写文件的路径是相对还是绝对要思考清楚
+String dataPath = dataFile.getParent();
+        File spiltFile = new File(dataPath, "behaviourTable--1.csv");
+        if (!spiltFile.createNewFile()) {
+            return;
+        }
+        int index = 2;
+        FileOutputStream in = new FileOutputStream(spiltFile);
+        in.write(schema.getBytes());
+        in.write("\n".getBytes());
+        for (int i = 0; i < csv.size(); i++) {
+            if (i % size == 49) {
+                in.close();
+                spiltFile = new File(dataPath, "behaviourTable--" + index + ".csv");
+                index++;
+                in = new FileOutputStream(spiltFile);
+                in.write(schema.getBytes());
+                in.write("\n".getBytes());
+            }
+            in.write(csv.get(i).getBytes());
+            in.write("\n".getBytes());
+        }
+        in.close();
+
 
 ```
 
@@ -1115,6 +1139,24 @@ RuntimeException 不需要throw 直接终止程序！
 ```
 https://www.runoob.com/java/java-regular-expressions.html
 ```
+
+### 静态类
+
+```
+静态类只能用于内部类使用
+https://www.jianshu.com/p/80b404da976b
+
+如果一个类要被声明为static的，只有一种情况，就是静态内部类。如果在外部类声明为static，程序会编译都不会过。在一番调查后个人总结出了3点关于内部类和静态内部类（俗称：内嵌类）
+
+1.静态内部类跟静态方法一样，只能访问静态的成员变量和方法，不能访问非静态的方法和属性，但是普通内部类可以访问任意外部类的成员变量和方法
+
+2.静态内部类可以声明普通成员变量和方法，而普通内部类不能声明static成员变量和方法。
+
+1.如果类的构造器或静态工厂中有多个参数，设计这样类时，最好使用Builder模式，特别是当大多数参数都是可选的时候。
+
+                               2.如果现在不能确定参数的个数，最好一开始就使用构建器即Builder模式。
+```
+
 
 
 
@@ -2971,6 +3013,18 @@ pandas 0.21 introduces new functions for Parquet:
 pd.read_parquet('example_pa.parquet', engine='pyarrow')
 or
 pd.read_parquet('example_fp.parquet', engine='fastparquet')
+```
+
+## CSV文件
+
+逗号切割问题
+
+```
+,,广西,百色,,,,,,,,,
+针对表格本身有很多空值行为的逗号，是不好切割的
+Java里要改成
+stringLine.split(",", -1)
+-1的意思是切割的内容中间允许空值
 ```
 
 
