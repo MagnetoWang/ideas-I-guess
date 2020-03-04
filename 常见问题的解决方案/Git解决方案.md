@@ -99,6 +99,22 @@ git merge b
 git submodule update --init --recursive
 ```
 
+### 修改子模块的commit
+
+```
+ git submodule update --init --recursive
+ 
+ cd xxxx-子模块名字目录
+ git checkout 8b2a7b9c3f9e9a39aeb3d5222bcd85b8962ac56
+ git pull
+ cd ..
+ git add xxxx
+ git commit -m "xxx"
+ git push
+```
+
+
+
 ### 撤销push远端的代码
 
 ```
