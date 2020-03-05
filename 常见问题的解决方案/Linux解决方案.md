@@ -878,6 +878,13 @@ scp xxx.tar root@xxx:/mnt/disk02/xxx
 - 修改文件夹名字
 - mv source_name dest_name
 
+```
+批量移动文件到一个文件夹
+mv part-000* train_row
+```
+
+
+
 ### Make -j8 rtidb
 
 - 8个进程编译文件，并且最终可执行文件是名字叫rtidb
@@ -952,6 +959,19 @@ grep -v *.sh 筛选掉不包含.sh的文件
 - wc -l filename 统计行数
 - wc -c filename 统计字节数
 - wc -w filenmae 统计字数
+
+```
+统计当前文件夹下所有文件的行数
+wc -l `find . -name '*'`
+
+打印每个文件的行数
+wc -l `find . -name '*'` | awk '{print $1}'
+ 
+求和
+wc -l `find . -name '*'` | awk '{sum+=$1} END {print "Sum = ", sum}'
+```
+
+
 
 ### hostname
 
@@ -1281,6 +1301,12 @@ awk '{printf "%s,%s,%s,%s %s,%s\n", $1,$2,$3,$4,$5,$6}' log
 1066646,231846592837463974,3827260221581409832,2012-07-15 05:17:46.766,1
 1302399,4260542096088094334,12371595234560663038,2014-12-10 03:46:53.732,2
 格式化输出，逗号隔开
+```
+
+### 批量移动文件夹
+
+```
+mv part-000* train_row
 ```
 
 
@@ -1649,7 +1675,22 @@ https://stackoverflow.com/questions/19943766/hadoop-unable-to-load-native-hadoop
 ### execvp: /bin/bash: Argument list too long
 
 ```
+减少编译文件，拆分开来
+```
 
+
+
+### find: paths must precede expression
+
+```
+https://www.cnblogs.com/peter1994/p/7297656.html
+
+ind /tmp  -maxdepth 1 -mtime 30 -name *.pdf 
+
+find: paths must precede expression
+Usage: find [-H] [-L] [-P] [path...] [expression]
+
+然后就上网查了一下,结果搜索到一篇,大概是这样说的:多文件的查找的时候需要增加单引号,一直是使用的双引号,没想到找多文件的时候居然要单引号.好吧,又学了一招,修改后:
 ```
 
 
