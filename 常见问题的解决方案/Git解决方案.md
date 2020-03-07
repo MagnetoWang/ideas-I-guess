@@ -221,12 +221,36 @@ git stash pop      # apply last stash and remove it from the list
 git stash --help   # for more info
 ```
 
+### git tag
+
+```
+版本号打tag
+git add -u && git commit -m "1.7.6.7-RELEASE" && git push
+git tag -a v1.7.6.7 -m "1.7.6.7-RELEASE"
+git push origin v1.7.6.7
+```
+
+
+
 ### 生成ssh key
 
 ```
 https://www.jianshu.com/p/31cbbbc5f9fa/
 
 ssh-keygen -t rsa -C "your_email@example.com"
+```
+
+## CICD
+
+### 针对master分支发布版本
+
+```
+deploy:
+  stage: deploy
+  script:
+    - mvn deploy -U -Dmaven.test.skip=true
+  only:
+    - master
 ```
 
 
