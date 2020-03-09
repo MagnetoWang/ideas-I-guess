@@ -178,6 +178,10 @@ print list
 for s in list_xxxx:
   实现xxxxxxxx
   
+遍历list的大小
+for index in range(len(list)):
+  xxxxxx
+  
 
 将列表每个元素拼接起来
 code = []
@@ -227,6 +231,14 @@ print(object(s), separator=separator, end=end, file=file, flush=flush)
 打印多个变量的时候，python会默认打印空格隔开，如果不想有空格隔开，可以加seq指定分隔符
 print('pos_name_.insert(std::make_pair(\"', key, "\", \"", value, "\"));", sep="")
 ```
+
+### json格式化输出
+
+```
+json.dumps(dict_xxx, sort_keys=False, indent=4, separators=(',', ':'))
+```
+
+
 
 ## 命令行下的python
 
