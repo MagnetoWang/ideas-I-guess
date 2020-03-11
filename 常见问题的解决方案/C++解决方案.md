@@ -1539,6 +1539,18 @@ int* modifier = const_cast<int*>(&constant);
   - Arena() = delete;
   - void operator=() = default;
 
+## STD标准库函数
+
+```
+列表
+std::copy(features.begin(), features.end(),new_features.HostVector().begin());
+std::shuffle(new_features.HostVector().begin(),new_features.HostVector().end(), rng_);
+std::sort(new_features.HostVector().begin(),new_features.HostVector().end());
+
+```
+
+
+
 ### std::random 随机库使用
 
 - 基本使用：http://www.cnblogs.com/egmkang/archive/2012/09/06/2673253.html
@@ -1648,6 +1660,17 @@ The contents of the vector are "Hello", "Hello"
 
 ```
 
+```
+
+### std::mt19937
+
+```
+/*!
+ * \brief Define mt19937 as default type Random Engine.
+ */
+using RandomEngine = std::mt19937;
+RandomEngine rng_; 
+rng_.seed(seed);
 ```
 
 
@@ -3053,6 +3076,8 @@ mkdir input
 cp etc/hadoop/*.xml input
 bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-3.1.2.jar grep input output 'dfs[a-z.]+'
 cat output/*
+
+
 ```
 
 ### hadoop命令
@@ -3834,6 +3859,15 @@ using Json = nlohmann::json;
 
 Json::iterator
 Json
+```
+
+## Xgboost
+
+### llvm RTTI
+
+```
+https://baike.baidu.com/item/RTTI
+RTTI（Run-Time Type Identification)，通过运行时类型信息程序能够使用基类的指针或引用来检查这些指针或引用所指的对象的实际派生类型。
 ```
 
 
