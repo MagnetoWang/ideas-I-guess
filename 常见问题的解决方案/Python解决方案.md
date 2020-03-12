@@ -432,6 +432,50 @@ https://blog.csdn.net/yzy_1996/article/details/89556049
 '文'
 ```
 
+## 正则表达式
+
+### 获取括号里面的内容
+
+```
+https://www.jb51.net/article/141283.htm
+
+# -*- coding:utf-8 -*-
+#! python2
+import re
+string = 'abe(ac)ad)'
+p1 = re.compile(r'[(](.*?)[)]', re.S) #最小匹配
+p2 = re.compile(r'[(](.*)[)]', re.S)  #贪婪匹配
+print(re.findall(p1, string))
+print(re.findall(p2, string))
+
+输出：
+
+    ['ac']
+    ['ac)ad']
+
+解释一下：
+
+1.正则匹配串前加了r就是为了使得里面的特殊符号不用写反斜杠了。
+
+2.[ ]具有去特殊符号的作用,也就是说[(]里的(只是平凡的括号
+
+3.正则匹配串里的()是为了提取整个正则串中符合括号里的正则的内容
+
+4. .是为了表示除了换行符的任一字符。*克林闭包，出现0次或无限次。
+
+5. 加了？是最小匹配，不加是贪婪匹配。
+
+6. re.S是为了让.表示除了换行符的任一字符。
+
+PS：这里再为大家提供2款非常方便的正则表达式工具供大家参考使用：
+
+JavaScript正则表达式在线测试工具：
+http://tools.jb51.net/regex/javascript
+
+正则表达式在线生成工具：
+http://tools.jb51.net/regex/create_reg
+```
+
 
 
 ## Python的奇怪语法
