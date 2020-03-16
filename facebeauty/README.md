@@ -90,5 +90,33 @@ npm list -g
 ## hexo
 ```
 安装教程：https://hexo.io/zh-cn/index.html
+表格调整：https://hexo.imydl.tech/archives/6742.html
+表格自适应调整：http://igrandcloud.github.io/2016/03/04/markdown-table-style/
+主题优化：https://www.jianshu.com/p/3ff20be8574c
+超酷炫网页：https://www.jianshu.com/p/9f0e90cc32c2
 ```
+
+### 表格自适应
+```
+
+在source/js/utils.js文件中添加
+  wrapTableWithBox: function() {
+    document.querySelectorAll('table').forEach(element => {
+      const box = document.createElement('div');
+      box.className = 'table-container';
+      element.wrap(box);
+    });
+  },
+
+在source/css/_common/scaffolding/tables.styl添加
+.table-container {
+  overflow: auto;
+}
+
+在source/js/next-boot.js文件
+NexT.boot.refresh = function() 函数中添加
+NexT.utils.wrapTableWithBox();
+
+```
+
 
