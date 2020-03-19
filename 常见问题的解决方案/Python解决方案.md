@@ -1,8 +1,12 @@
+
+
 ## 说明
 
 ## 目录
 
-[TOC]
+
+
+
 
 
 
@@ -151,6 +155,13 @@ source ~/python/anaconda3/etc/profile.d/conda.sh
 int(str)
 ```
 
+### 字符串
+
+```
+字符串拼接
+
+```
+
 
 
 ### list对象的基本操作
@@ -264,6 +275,78 @@ python3 -m pdb xxx
 断点的方法和gdb基本一致，可以查看c++解决方案
 ```
 
+### 依赖库导入
+
+```
+https://www.anaconda.com/distribution/#download-section
+
+wget https://repo.anaconda.com/archive/Anaconda3-2020.02-MacOSX-x86_64.sh
+
+sh xx
+bach文件会自动写入路径配置，非常方便
+source ~/.bashrc
+
+
+自动每个终端识别python环境
+conda config --set auto_activate_base True
+
+安装pandas
+conda install -c anaconda pandas
+
+安装pyspark
+conda install -c conda-forge pyspark
+```
+
+### 环境布置
+
+```
+virtualenv
+https://virtualenv.pypa.io/en/stable/
+
+source /opt/rh/rh-python36/enable
+python -m pip install --user virtualenv
+```
+
+### juypter安装
+
+```
+https://jupyter.org/
+conda install -c conda-forge jupyterlab
+或者
+pip install jupyterlab
+
+运行juypter
+https://jupyter.readthedocs.io/en/latest/running.html#running
+jupyter notebook
+
+
+修改ip和端口
+jupyter notebook --ip=172.27.128.37  --port=8889
+
+查看命令
+jupyter notebook --help
+```
+
+### conda配置
+
+```
+查看配置
+conda info
+
+切换源
+conda config --add channels https://mirrors.ustc.edu.cn/anaconda/pkgs/main/
+conda config --add channels https://mirrors.ustc.edu.cn/anaconda/pkgs/free/
+conda config --add channels https://mirrors.ustc.edu.cn/anaconda/cloud/conda-forge/
+conda config --add channels https://mirrors.ustc.edu.cn/anaconda/cloud/msys2/
+conda config --add channels https://mirrors.ustc.edu.cn/anaconda/cloud/bioconda/
+conda config --add channels https://mirrors.ustc.edu.cn/anaconda/cloud/menpo/
+
+conda config --set show_channel_urls yes
+
+```
+
+
+
 ## pycharm下的python
 
 ### 设置自己的项目
@@ -273,6 +356,12 @@ python3 -m pdb xxx
 https://blog.csdn.net/weixin_40807247/article/details/82781032
 
 右键make_directory as-->sources path将当前工作的文件夹加入source_path就可以了。
+```
+
+## 多线程
+
+```
+https://zhuanlan.zhihu.com/p/43352965
 ```
 
 
@@ -581,6 +670,12 @@ conda install tensorflow
 没有return的时候，是默认返回none
 ```
 
+### only list-like objects are allowed to be passed to isin()
+
+```
+输入参数不对，不好用这个方法，不用了
+```
+
 
 
 # 新项目
@@ -610,6 +705,14 @@ ssl._create_default_https_context = ssl._create_unverified_context
 ```
 在请求的对象里面，添加更多头文件信息，模拟浏览器的请求
 
+```
+
+## 数据分析
+
+### pyspark
+
+```
+读数据：https://towardsdatascience.com/a-brief-introduction-to-pyspark-ff4284701873
 ```
 
 
