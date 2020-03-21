@@ -106,6 +106,11 @@ mvn exec:java -Dexec.mainClass="com.jsoft.test.MainClass" -Dexec.args="arg0 arg1
 
 指定测试某个类的单独方法
 mvn clean test -Dtest=xxx.xxxTest#方法名
+
+
+打印debug日志
+https://blog.csdn.net/iteye_6908/article/details/82522034
+mvn clean test -Dtest=xxx.xxxTest#方法名  -X
 ```
 
 #### 安装maven
@@ -1563,6 +1568,44 @@ protected-mode no
 ### Demo
 
 ```
+jar包
+ <dependency>
+            <groupId>org.apache.jmeter</groupId>
+            <artifactId>ApacheJMeter_java</artifactId>
+            <version>5.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.jmeter</groupId>
+            <artifactId>ApacheJMeter_http</artifactId>
+            <version>2.8</version>
+        </dependency>
+
+创建类
+@Log4j
+public class JmeterTest implements JavaSamplerClient {
+
+    @Override
+    public void setupTest(JavaSamplerContext javaSamplerContext) {
+        
+    }
+
+    @Override
+    public SampleResult runTest(JavaSamplerContext javaSamplerContext) {
+        return null;
+    }
+
+    @Override
+    public void teardownTest(JavaSamplerContext javaSamplerContext) {
+
+    }
+
+    @Override
+    public Arguments getDefaultParameters() {
+        return null;
+    }
+}
+
 修改jvm参数
 JVM_ARGS="-Xms1024m -Xmx1024m" jmeter -t test.jmx [etc.]
 
@@ -3131,6 +3174,22 @@ Keras 2.2.3 :
 { "backend": "tensorflow", "keras_version": "2.2.3", "class_name": "Sequential", "config": { "name": "sequential_1", "layers": [ { "class_name": "Dense", "config": { "name": "dense_1", "trainable": true, "batch_input_shape": [ null, 100 ],
 
 2.0.9和2.2.3内部结构修改了
+```
+
+## Spark
+
+### 安装
+
+```
+wget http://ftp.kddilabs.jp/infosystems/apache/spark/spark-2.4.5/spark-2.4.5-bin-hadoop2.7.tgz
+tar -zxvf spark-2.4.5-bin-hadoop2.7.tgz
+cp 
+```
+
+### shuffle排序原理
+
+```
+canUseSerializedShuffle：可以序列化排序的数据，达到性能提升作用
 ```
 
 
