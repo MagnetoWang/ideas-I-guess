@@ -340,6 +340,21 @@ enum UrlTableErrors {
     ERROR_OUT_OF_MEMORY,
 	ERROR_MALFORMED_INPUT,
    };
+
+enum OpReqType {
+  /*! \brief no operation, do not write anything */
+  kNullOp,
+  /*! \brief write gradient to provided space */
+  kWriteTo,
+  /*!
+  * \brief perform an inplace write,
+  * Target shares memory with one of input arguments.
+  * This option only happen when
+  */
+  kWriteInplace,
+  /*! \brief add to the provided space */
+  kAddTo
+};
 ```
 
 
@@ -605,6 +620,12 @@ erase(index) 删除第index个位置的元素
 取对象
 xxx[i] 即可
 
+容器初始化
+std::vector<double> values;
+values.reserve(20);
+
+20个元素初始化为99
+std::vector<long> numbers(20, 99L);
 ```
 
 ```
@@ -1274,6 +1295,26 @@ int main () {
 
 ### 流处理
 
+#### 流式状态
+  ```
+https://blog.csdn.net/yangbomoto/article/details/80782633
+
+badbit, failbit, eofbit
+1. badbit表示发生系统级的错误，如不可恢复的读写错误。通常情况下一旦badbit被置位，流就无法再使用了。
+
+2. failbit 表示发生可恢复的错误，如期望读取一个数值，却读出一个字符等错误。这种问题通常是可以修改的，流还可以继续使用。
+
+3. 当到达文件的结束位置时，eofbit 和 failbit 都会被置位。
+
+4. goodbit 被置位表示流未发生错误。如果badbit failbit 和eofbit 任何一个被置位，则检查流状态的条件会失败。
+
+对应的bad(), fail(), eof(), good()能检查对应位是否被置位，返回1表示被置位。但是，badbit被置位时，fail()也会返回1。所以使用good()和fail()是确定流能否使用的正确方法。。实际上，流当做条件使用的代码就等价于！fail()。而且eof() 和bad() 操作只能表示特定的错误。
+————————————————
+版权声明：本文为CSDN博主「嘿碳头」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/yangbomoto/article/details/80782633
+
+  ```
+
 #### ofstream
 
 - 文档资料：http://www.cplusplus.com/doc/tutorial/files/
@@ -1328,6 +1369,71 @@ int main () {
 #### fstream
 
 - Stream class to both read and write from/to files.
+
+
+#### istream
+```
+读取Shape结构体流式处理
+
+inline std::istream &operator>>(std::istream &is, Shape &shape) {
+  // get (
+  while (true) {
+    char ch = is.get();
+    if (ch == '(') break;
+    if (!isspace(ch)) {
+      is.setstate(std::ios::failbit);
+      return is;
+    }
+  }
+  index_t idx;
+  std::vector<index_t> tmp;
+  while (is >> idx) {
+    tmp.push_back(idx);
+    char ch;
+    do {
+      ch = is.get();
+    } while (isspace(ch));
+    if (ch == ',') {
+      while (true) {
+        ch = is.peek();
+        if (isspace(ch)) {
+          is.get(); continue;
+        }
+        if (ch == ')') {
+          is.get(); break;
+        }
+        break;
+      }
+      if (ch == ')') break;
+    } else if (ch == ')') {
+      break;
+    } else {
+      is.setstate(std::ios::failbit);
+      return is;
+    }
+  }
+  shape.CopyFrom(tmp.begin(), tmp.end());
+  return is;
+}
+```
+
+#### ostream
+```
+打印Shape结构体为字符串
+
+inline std::ostream &operator<<(std::ostream &os, const Shape &shape) {
+  os << '(';
+  for (index_t i = 0; i < shape.ndim(); ++i) {
+    if (i != 0) os << ',';
+    os << static_cast<int>(shape[i]);  // Supports negative Shape 'special codes' for inferring
+  }
+  // python style tuple
+  if (shape.ndim() == 1) os << ',';
+  os << ')';
+  return os;
+}
+
+```
 
 #### 文件流终止
 
@@ -1542,7 +1648,9 @@ int* modifier = const_cast<int*>(&constant);
 ## STD标准库函数
 
 ```
-列表
+列表复制
+std::vector<int> features;
+std::vector<int> new_features;
 std::copy(features.begin(), features.end(),new_features.HostVector().begin());
 std::shuffle(new_features.HostVector().begin(),new_features.HostVector().end(), rng_);
 std::sort(new_features.HostVector().begin(),new_features.HostVector().end());
@@ -3869,8 +3977,20 @@ Json
 https://baike.baidu.com/item/RTTI
 RTTI（Run-Time Type Identification)，通过运行时类型信息程序能够使用基类的指针或引用来检查这些指针或引用所指的对象的实际派生类型。
 ```
+## Mxnet
+
+```
+base.h
+只有枚举类
+
+shape.h
+声明ndarray数组维度和大小
 
 
+ndarray.h
+
+
+```
 
 [TOC]
 
