@@ -1435,6 +1435,25 @@ inline std::ostream &operator<<(std::ostream &os, const Shape &shape) {
 
 ```
 
+#### stringstream
+```
+    std::string value_str;
+    std::stringstream ss;
+    ss << value;
+    ss >> value_str;
+
+　　%% 印出百分比符号，不转换。
+　　%c 整数转成对应的 ASCII 字元。
+　　%d 整数转成十进位。
+　　%f 倍精确度数字转成浮点数。
+　　%o 整数转成八进位。
+　　%s 整数转成字符串。
+　　%x 整数转成小写十六进位。
+　　%X 整数转成大写十六进位。
+　　%n sscanf(str, "%d%n", &dig, &n)，%n表示一共转换了多少位的字符
+
+```
+
 #### 文件流终止
 
 ```
@@ -1493,6 +1512,20 @@ fin.eof() 可以判断结尾结束
 - ​    string1 = 2;              // 这样也是不行的, 因为取消了隐式转换  
 - ​    string2 = 3;              // 这样也是不行的, 因为取消了隐式转换  
 - ​    string3 = string1;        // 这样也是不行的, 因为取消了隐式转换, 除非类实现操作符"="的重载  
+
+### 模板
+
+类型判断is_same
+
+```
+std::is_same和std::decay
+https://blog.csdn.net/czyt1988/article/details/52812797
+
+std::cout << std::is_same<int, int32_t>::value << '\n';   // true
+std::cout << std::is_same<int, int64_t>::value << '\n';   // false
+```
+
+
 
 ### 线程
 
@@ -1654,6 +1687,10 @@ std::vector<int> new_features;
 std::copy(features.begin(), features.end(),new_features.HostVector().begin());
 std::shuffle(new_features.HostVector().begin(),new_features.HostVector().end(), rng_);
 std::sort(new_features.HostVector().begin(),new_features.HostVector().end());
+
+
+std::transform
+std::back_inserter
 
 ```
 
@@ -3987,7 +4024,24 @@ shape.h
 声明ndarray数组维度和大小
 
 
+operator symbol
+
+
 ndarray.h
+
+c_api_ndarray.cc
+实现很多调用函数，比如
+MXImperativeInvoke,MXImperativeInvokeImpl
+
+
+```
+
+## dmlc
+
+```
+有非常多工具库函数
+CSVParser
+
 
 
 ```
