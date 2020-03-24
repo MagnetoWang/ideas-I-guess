@@ -290,11 +290,20 @@ source ~/.bashrc
 自动每个终端识别python环境
 conda config --set auto_activate_base True
 
+安装网站
+https://anaconda.org/conda-forge/pyspark
+
 安装pandas
 conda install -c anaconda pandas
 
 安装pyspark
 conda install -c conda-forge pyspark
+
+
+安装自动补全插件
+conda install -c conda-forge jupyter_contrib_nbextensions
+
+
 ```
 
 ### 环境布置
@@ -325,6 +334,17 @@ jupyter notebook --ip=172.27.128.37  --port=8889
 
 查看命令
 jupyter notebook --help
+
+自动补全
+conda install -c conda-forge jupyter_contrib_nbextensions
+jupyter contrib nbextension install --user --skip-running-check
+3、重启jupyter，在弹出的主页面里，能看到增加了一个Nbextensions标签页，在这个页面里，勾选Hinterland即启用了代码自动补全。
+
+注：如果页面无Hinterland项，或者不全，命令行执行：
+
+
+查看搭建的jupyter搭建服务的token
+jupyter notebook list 
 ```
 
 ### conda配置
@@ -676,6 +696,37 @@ conda install tensorflow
 输入参数不对，不好用这个方法，不用了
 ```
 
+### 作用域
+
+```
+python和c++，java作用域用法完全不一样！！
+
+https://blog.csdn.net/wentyoon/article/details/53301594
+
+L （Local） 局部作用域
+E （Enclosing） 闭包函数外的函数中
+G （Global） 全局作用域
+B （Built-in） 内建作用域
+
+LEGB原则搜索变量，即优先级L>E>G>B。
+
+#dir 为python内建函数
+dir = 1 # Global
+def outer():
+    dir = 2  # Enclosing
+    def inner():
+        dir = 3 # Local
+        return dir
+    return inner
+
+print outer()() # 输出3
+
+
+有local变量，就会跟着local，不管你的作用域在哪里
+无法隔离开来
+
+```
+
 
 
 # 新项目
@@ -713,6 +764,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 ```
 读数据：https://towardsdatascience.com/a-brief-introduction-to-pyspark-ff4284701873
+入门实战：https://www.jianshu.com/p/5a42fe0eed4d
 ```
 
 
