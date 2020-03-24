@@ -939,6 +939,20 @@ UID   PID  PPID   C STIME   TTY           TIME CMD
 ```
 https://blog.csdn.net/stepbystepto/article/details/52951849
 grep -v *.sh 筛选掉不包含.sh的文件
+
+
+全局搜索文件夹所有文件的内容
+grep "#\[1234\]" -R .
+
+搜索以某个数字为开头的一行
+grep "^500147" -R .
+```
+
+### gunzip
+
+```
+文件夹下所有文件批量解压
+cd data && gunzip *.gz
 ```
 
 
@@ -1100,6 +1114,13 @@ gzip -dr test6
 
 - <https://www.runoob.com/linux/linux-comm-patch.html>
 - 命令用于修补文件
+
+### 查看端口占用情况-更通用
+
+```
+netstat -ano | grep 8888
+```
+
 
 
 
@@ -1691,6 +1712,19 @@ find: paths must precede expression
 Usage: find [-H] [-L] [-P] [path...] [expression]
 
 然后就上网查了一下,结果搜索到一篇,大概是这样说的:多文件的查找的时候需要增加单引号,一直是使用的双引号,没想到找多文件的时候居然要单引号.好吧,又学了一招,修改后:
+```
+
+### Binary file (standard input) matches
+
+```
+https://blog.csdn.net/lastsweetop/article/details/4290545
+grep "key" xxx.log时输出
+
+Binary file xxx.log matches
+
+百度了一下：grep认为这是二进制文件，解决方案：grep -a。
+
+grep -a "key" xxx.log
 ```
 
 
