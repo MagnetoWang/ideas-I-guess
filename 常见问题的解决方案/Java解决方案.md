@@ -121,6 +121,9 @@ wget mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/3.6.2/source/apache-maven
 
 unzip apache-maven-3.6.2-bin.zip
 
+
+
+
 在bashrc 和 bash_profiler添加配置
 # maven路径
 export MAVEN_HOME=~/maven/apache-maven-3.6.2
@@ -128,6 +131,13 @@ export PATH=${MAVEN_HOME}/bin:${PATH}
 
 
 配置仓库源，可以拉取jar包速度更快
+
+
+自动式安装
+wget https://mirror.bit.edu.cn/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
+tar xvzf apache-maven-3.6.3-bin.tar.gz
+export MAVEN_HOME=`pwd`/apache-maven-3.6.3
+export PATH=${MAVEN_HOME}/bin:${PATH}
 ```
 
 
