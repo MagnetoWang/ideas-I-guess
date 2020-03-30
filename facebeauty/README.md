@@ -2,6 +2,21 @@
 - nodejs官网：https://www.runoob.com/nodejs
 - next：http://theme-next.iissnan.com/
 
+## 安装环境
+```
+用nvm 安装
+docker 环境
+
+git clone https://github.com/nvm-sh/nvm.git .nvm
+cd nvm/
+sh install.sh
+source ~/.bashrc
+nvm install 11.6.0
+npm config set registry https://registry.npm.taobao.org
+
+node 11.6.0版本是稳定版本，大于这个版本会出现glibc报错
+```
+
 ## 国内镜像源
 ```
 https://www.jianshu.com/p/0deb70e6f395
@@ -94,6 +109,41 @@ npm list -g
 表格自适应调整：http://igrandcloud.github.io/2016/03/04/markdown-table-style/
 主题优化：https://www.jianshu.com/p/3ff20be8574c
 超酷炫网页：https://www.jianshu.com/p/9f0e90cc32c2
+文档编辑：https://blog.csdn.net/nightmare_dimple/article/details/86661474
+```
+
+### 启动文档
+```
+安装nvm
+
+cd /root/
+
+git clone https://github.com/nvm-sh/nvm.git .nvm
+cd nvm/
+sh install.sh
+source ~/.bashrc
+nvm install 11.6.0
+npm config set registry https://registry.npm.taobao.org
+
+sh nvm.sh
+wget https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh
+
+
+cd themes/blog
+export PATH=`pwd`/node_modules/.bin:$PATH
+hexo server
+
+
+npm install hexo
+export PATH=`pwd`/node_modules/.bin:$PATH
+hexo init blog
+cd blog
+
+安装next主题
+git clone https://github.com/iissnan/hexo-theme-next themes/next
+
+hexo server
+
 ```
 
 ### 表格自适应
