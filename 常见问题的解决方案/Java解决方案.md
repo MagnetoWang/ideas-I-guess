@@ -235,13 +235,92 @@ scope 会让jar包只在test目录下有效，main中无法引用。这样方便
 mvn clean idea:idea -DskipTests
 ```
 
+### maven进阶
+
+#### 打包指定不要哪些包，哪些类，哪些资源
+
+```
+用maven-shade-plugin 插件可以选择性要哪些包，和不要哪些包
+filters 可以过滤掉下载的依赖包里面，不要哪些资源。需要把全路径写清楚，不支持递归找文件
+
+<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>${mainClass}</mainClass>
+                                </transformer>
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                	依赖jar包的全名
+                                    <artifact>xxx:ccccc</artifact>
+                                    <excludes>
+                                        <exclude>nlp/dict/*</exclude>
+                                        <exclude>nlp/dict/part_speech/*</exclude>
+                                        <exclude>nlp/dict/sentiment/*</exclude>
+                                        <exclude>nlp/dict/name_entity/*</exclude>
+                                        <exclude>nlp/models/*</exclude>
+                                        <exclude>nlp/performance/*</exclude>
+                                        <exclude>natives/linux_64/*</exclude>
+                                        <exclude>dict/*</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <relocations>
+                                <relocation>
+                                    <pattern>com.google.protobuf</pattern>
+                                    <shadedPattern>shade.protobuf</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.google.common</pattern>
+                                    <shadedPattern>shade.guava</shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+```
+
 
 
 ### 命令行下的Java
 
 ```
 安装jdk
+tar xzvf xxx
 
+export JAVA_HOME=`pwd`/jdk1.8.0_141
+export JRE_HOME=`pwd`/jdk1.8.0_141/jre
+export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib
+export PATH=$PATH:`pwd`/jdk1.8.0_141/bin
+
+wget xxx
+tar xzvf xxxx
+export JAVA_HOME=`pwd`/jdk
+export JRE_HOME=`pwd`/jdk/jre
+export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib
+export PATH=$PATH:`pwd`/jdk/bin
 ```
 
 
