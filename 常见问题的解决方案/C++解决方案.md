@@ -1818,7 +1818,82 @@ RandomEngine rng_;
 rng_.seed(seed);
 ```
 
+### std::clock()
 
+```
+#include <ctime>
+
+返回当前时间
+```
+### std::partial_sum
+
+```
+计算序列部分和
+std::partial_sum
+http://c.biancheng.net/view/686.html
+
+std::vector<int> data {2, 3, 5, 7, 11, 13, 17, 19};
+std::cout << "Partial sums: ";
+std::partial_sum(std::begin(data), std::end(data),std::ostream_iterator<int>{std::cout, " "});
+std::cout << std::endl; // Partial sums: 2 5 10 17 28 41 58 77
+
+```
+### std::stable_sort
+```
+http://c.biancheng.net/view/563.html
+std::stable_sort(std::begin(names), std::end(names),[](const Name& name1, const Name& name2) { return name1.get_second() < name2.get_second(); });
+
+
+https://www.cnblogs.com/xenny/p/9404758.html
+其实你会发现不仅仅sort有stable_sort，partition也有stable_partition，我们都知道sort是一个不稳定的排序，但stable_sort就是如字面意思一样，是一个稳定的sort排序，那么你可能有疑问，排序后，相同的元素会在一起，稳定不稳定不都是一样的么，如果你存在这个疑问的话，那就肯定还是做题力度不够=7=，你只想到了对元素表面的排序，如果是对元素的某种性质排序呢
+string s[4] = {"spring","lip","eye","winter"};
+
+bool cmp(string a, string b){
+    return a.size() < b.size();
+}
+
+sort(s,s+4,cmp);
+
+
+只对元素的size比较，而不是元素字母
+
+```
+
+### std::iota
+```
+http://c.biancheng.net/view/681.html
+定义在 numeric 头文件中的 iota() 函数模板会用连续的 T 类型值填充序列。前两个参数是定义序列的正向迭代器，第三个参数是初始的 T 值。第三个指定的值会被保存到序列的第一个元素中。保存在第一个元素后的值是通过对前面的值运用自增运算符得到的。当然，这意味着 T 类型必须支持 operator++()。下面展示了如何生成一个有连续的浮点值元素的 vector 容器：
+std::vector<double> data(9);
+double initial {-4};
+std::iota (std::begin (data) , std::end (data) , initial);
+std::copy(std::begin(data), std::end(data),std::ostream_iterator<double>{std::cout<< std::fixed << std::setprecision(1), " "});
+std::cout << std::endl;  // -4.0 -3.0 -2.0 -1.0 0.0 1.0 2.0 3.0 4.0
+
+更直接用法
+    std::vector<int64> perm(9);
+    std::iota(perm.begin(), perm.end(), -4.0);
+
+```
+
+### std::bind
+
+```
+https://www.jianshu.com/p/f191e88dcc80
+
+可将std::bind函数看作一个通用的函数适配器，它接受一个可调用对象，生成一个新的可调用对象来“适应”原对象的参数列表。
+
+std::bind将可调用对象与其参数一起进行绑定，绑定后的结果可以使用std::function保存。std::bind主要有以下两个作用：
+
+    将可调用对象和其参数绑定成一个防函数；
+    只绑定部分参数，减少可调用对象传入的参数。
+
+double my_divide (double x, double y) {return x/y;}
+auto fn_half = std::bind (my_divide,_1,2);  
+std::cout << fn_half(10) << '\n';                        // 5
+
+
+
+```
 
 ### union
 
@@ -2098,6 +2173,49 @@ static inline uint64_t GetSecondTimestamp() {
       }
   }
   ```
+
+### 打印人类可读的存储大小
+
+```
+tensorflow/stream_executor代码中看到的
+static string ToString(int64 num_bytes) {
+    if (num_bytes == std::numeric_limits<int64>::min()) {
+      // Special case for number with not representable nagation.
+      return "-8E";
+    }
+
+    const char* neg_str = GetNegStr(&num_bytes);
+
+    // Special case for bytes.
+    if (num_bytes < 1024LL) {
+      // No fractions for bytes.
+      return port::Printf("%s%lldB", neg_str, num_bytes);
+    }
+
+    static const char units[] = "KMGTPE";  // int64 only goes up to E.
+    const char* unit = units;
+    while (num_bytes >= (1024LL) * (1024LL)) {
+      num_bytes /= (1024LL);
+      ++unit;
+      assert(unit < units + sizeof(units));
+    }
+
+    return port::Printf(((*unit == 'K') ? "%s%.1f%c" : "%s%.2f%c"), neg_str,
+                        num_bytes / 1024.0, *unit);
+  }
+  
+  template <typename T>
+  static const char* GetNegStr(T* value) {
+    if (*value < 0) {
+      *value = -(*value);
+      return "-";
+    } else {
+      return "";
+    }
+  }
+```
+
+
 
 ### 大小端检查
 
