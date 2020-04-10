@@ -1820,6 +1820,38 @@ mvn versions:set -DnewVersion=${1}
 打印日志的时候，变量和打印的变量个数没有对齐
 ```
 
+### build.plugins.plugin.version' for org.apache.maven.plugins:maven-compiler-plugin is missing. @ line 72, column 12 
+
+```
+https://blog.csdn.net/jackgaogaogao/article/details/51533663
+
+ <plugins>  
+    <plugin>  
+        <artifactId>maven-compiler-plugin</artifactId>  
+        <configuration>  
+            <source>1.6</source>  
+            <target>1.6</target>  
+            <encoding>UTF-8</encoding>  
+        </configuration>  
+    </plugin>  
+</plugins>
+
+添加version
+
+ <plugins>  
+    <plugin>  
+        <artifactId>maven-compiler-plugin</artifactId>  
+        <verison> xxx</versioon>
+        <configuration>  
+            <source>1.6</source>  
+            <target>1.6</target>  
+            <encoding>UTF-8</encoding>  
+        </configuration>  
+    </plugin>  
+</plugins>
+
+```
+
 
 
 ## 自动化脚本
@@ -3279,6 +3311,19 @@ cp
 
 ```
 canUseSerializedShuffle：可以序列化排序的数据，达到性能提升作用
+```
+
+## MetaBase
+
+```
+数据可视化利器
+https://www.metabase.com/start/docker.html
+```
+
+### 安装
+
+```
+  $ docker run -d -p 3000:3000 --name metabase metabase/metabase
 ```
 
 
