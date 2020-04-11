@@ -1525,6 +1525,12 @@ tmux
 也可以ctrl + z 先停止进程
 jobs 查看停止的进程号
 bg 进程号 即可继续执行程序
+
+
+
+nohup命令
+nohup python -m HTTPServer 8567 >log 2>&1 &
+
 ```
 
 ### 用pid方式，让进城停止，继续运行
@@ -1837,6 +1843,20 @@ finish_time=`date --date='0 days ago' "+%Y-%m-%d %H:%M:%S"`
 duration=$(($(($(date +%s -d "$finish_time")-$(date +%s -d "$start_time")))))
 echo "this shell script execution duration: $duration"
 ```
+
+### for循环遍历
+
+```
+https://www.cnblogs.com/EasonJim/p/8315939.html
+
+list="rootfs usr data data2"  
+for i in $list;  
+do  
+echo $i is appoint ;  
+done  
+```
+
+
 
 ### 执行当前目录下的test脚本
 
