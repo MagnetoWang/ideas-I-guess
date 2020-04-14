@@ -54,6 +54,22 @@ git checkout -b xxx
  git push --set-upstream origin xxx
 ```
 
+### 删除远程分支
+
+```
+git push origin --delete xxxx
+
+https://www.cnblogs.com/utank/p/7880441.html
+删除其他分支
+git branch -d xxx
+
+删除当前的分支-一般不用
+git branch -D xxx
+
+```
+
+
+
 ### 从某一个commit开始创建本地分支
 
 ```
@@ -88,7 +104,7 @@ git merge b
 ### 开发分支落后主分支太多commit，无法直接merge到主分支
 
 ```
-
+只能一个个解决
 ```
 
 
