@@ -27,11 +27,19 @@ docker pull xxx // 拉取镜像
 docker run xxx // 运行镜像
 docker ps -a // 显示所有容器
 docker container start id // 进入容器
+docker stop id // 停止容器
+docker container rm id // 删除容器
+
+docker // 可以启动一个可以用gdb调试的容器
 
 
 快速入门
 docker run -itd xxx // 镜像的名字
 docker attach key // docker run 成功后会返回一个key，这个key可以进入容器内部
+
+端口映射
+docker exec -it 7f91b3579e15230b662894f749f44325f982e16d35bf647f6af0a2ac98cf95f9 /bin/bash
+
 ```
 
 
