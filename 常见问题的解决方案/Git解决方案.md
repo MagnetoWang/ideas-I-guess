@@ -213,6 +213,18 @@ size 5484424
 git config --global color.ui true
 ```
 
+
+
+### git blame xxx 查看文件历史修改记录
+
+```
+https://www.jianshu.com/p/9b691ba43357
+
+git blame 文件名
+```
+
+
+
 ### 撤销某个文件的修改
 
 ```
