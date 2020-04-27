@@ -541,6 +541,44 @@ https://blog.csdn.net/yzy_1996/article/details/89556049
 '文'
 ```
 
+### timeit 计时器
+
+```
+
+https://www.cnblogs.com/PrettyTom/p/6657984.html
+
+#导入timeit.timeit
+from timeit import timeit  
+
+#看执行1000000次x=1的时间：
+timeit('x=1')
+
+#看x=1的执行时间，执行1次(number可以省略，默认值为1000000)：
+timeit('x=1', number=1)
+
+#看一个列表生成器的执行时间,执行1次：
+timeit('[i for i in range(10000)]', number=1)
+
+#看一个列表生成器的执行时间,执行10000次：
+timeit('[i for i in range(100) if i%2==0]', number=10000)
+
+
+测试一个函数的执行时间
+from timeit import timeit
+
+def func():
+    s = 0
+    for i in range(1000):
+        s += i
+    print(s)
+
+# timeit(函数名_字符串，运行环境_字符串，number=运行次数)
+t = timeit('func()', 'from __main__ import func', number=1000)
+print(t)
+```
+
+
+
 ## 正则表达式
 
 ### 获取括号里面的内容
