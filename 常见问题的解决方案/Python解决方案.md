@@ -577,6 +577,20 @@ t = timeit('func()', 'from __main__ import func', number=1000)
 print(t)
 ```
 
+### rst生成文档
+
+```
+pip install -r requirements.txt
+
+txt内容
+sphinx==2.4.4
+-e git+https://github.com/pytorch/pytorch_sphinx_theme.git#egg=pytorch_sphinx_theme
+sphinxcontrib.katex
+matplotlib
+javasphinx
+
+```
+
 
 
 ## 正则表达式
@@ -805,6 +819,37 @@ ssl._create_default_https_context = ssl._create_unverified_context
 入门实战：https://www.jianshu.com/p/5a42fe0eed4d
 ```
 
+## 单元测试
+
+```
+unittest
+https://www.cnblogs.com/feng0815/p/8045850.html
+
+```
+
+## kafka
+
+- python 调用：https://github.com/confluentinc/confluent-kafka-python
+
+```
+kafka客户端：https://github.com/dpkp/kafka-python 
+pykafka：https://github.com/Parsely/pykafka
+kafka demo：https://github.com/muscledreamer/Kafka_Demo
+```
+
+## Pytorch
+
+```
+google风格文档手册：http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
+
+c++使用文档：https://pytorch.org/cppdocs
+
+`python setup.py build` will build everything by default, but sometimes you are
+only interested in a specific component.
+pytorch简直太强了！
+```
+
+### 
 
 
 [TOC]
