@@ -849,7 +849,32 @@ only interested in a specific component.
 pytorch简直太强了！
 ```
 
-### 
+### c++开发
+```
+C++ frontend development tips
+test/cpp/api
+
+
+CUDA development tips
+1. `CUDA_DEVICE_DEBUG=1` will enable CUDA device function debug symbols (`-g -G`).
+    This will be particularly helpful in debugging device code. However, it will
+    slow down the build process for about 50% (compared to only `DEBUG=1`), so use wisely.
+2. `cuda-gdb` and `cuda-memcheck` are your best CUDA debugging friends. Unlike`gdb`,
+   `cuda-gdb` can display actual values in a CUDA tensor (rather than all zeros).
+3. CUDA supports a lot of C++11/14 features such as, `std::numeric_limits`, `std::nextafter`,
+   `std::tuple` etc. in device code. Many of such features are possible because of the
+   [--expt-relaxed-constexpr](https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#constexpr-functions)
+   nvcc flag. There is a known [issue](https://github.com/ROCm-Developer-Tools/HIP/issues/374)
+   that ROCm errors out on device code, which uses such stl functions.
+
+
+```
+
+### cuda性能测试
+```
+https://devblogs.nvidia.com/how-implement-performance-metrics-cuda-cc/
+
+```
 
 
 [TOC]
