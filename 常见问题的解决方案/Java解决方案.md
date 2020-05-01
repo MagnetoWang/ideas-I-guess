@@ -348,7 +348,8 @@ mvn exec:java -Dexec.mainClass="com._4paradigm.predictor.demo.JprofilerTest" -ag
 Java执行jar包
 java -Dfile.encoding=UTF-8 -cp xxx.jar xxx.Main
 
-
+解压jar包
+unzip xxxx.jar
 ```
 
 #### 查看jdk路径
@@ -2854,7 +2855,10 @@ MethodSpec dismiss = MethodSpec.methodBuilder("dismiss")
  **/
 ```
 
-
+### 关闭插件val var
+```
+advanced java folding 关闭即可
+```
 
 ## Jprofiler
 
@@ -3313,7 +3317,35 @@ cp
 canUseSerializedShuffle：可以序列化排序的数据，达到性能提升作用
 ```
 
-## MetaBase
+### 异常
+
+#### Missing an output location for shuffle 4
+
+```
+https://blog.csdn.net/weixin_44455388/article/details/101198654
+
+减少shuffle数据
+主要从代码层面着手，可以将不必要的数据在shuffle前进行过滤，比如原始数据有20个字段，只要选取需要的字段进行处理即可，将会减少一定的shuffle数据。
+
+修改分区
+通过spark.sql.shuffle.partitions控制分区数，默认为200，根据shuffle的量以及计算的复杂度适当提高这个值，例如500。
+
+增加失败的重试次数和重试的时间间隔
+通过spark.shuffle.io.maxRetries控制重试次数，默认是3，可适当增加，例如10。
+通过spark.shuffle.io.retryWait控制重试的时间间隔，默认是5s，可适当增加，例如10s。
+
+提高executor的内存
+在spark-submit提交任务时，适当提高executor的memory值，例如15G或者20G。
+
+考虑是否存在数据倾斜的问题
+
+```
+
+
+
+## 
+
+
 
 ```
 数据可视化利器
