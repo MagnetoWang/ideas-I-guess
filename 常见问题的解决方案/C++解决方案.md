@@ -1907,6 +1907,18 @@ std::cout << fn_half(10) << '\n';                        // 5
 
 ```
 
+### std::enable_if_t
+
+```
+文档：https://en.cppreference.com/w/cpp/types/enable_if
+
+https://www.jianshu.com/p/a961c35910d2
+
+SFINAE是英文Substitution failure is not an error的缩写，意思是匹配失败不是错误
+```
+
+
+
 ### 注释
 
 ```
