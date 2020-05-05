@@ -879,7 +879,31 @@ https://devblogs.nvidia.com/how-implement-performance-metrics-cuda-cc/
 ```
 aten/src/ATen/core/ivalue.h
 
+aten/src/ATen/core/blob.h
 
+#include <c10/util/intrusive_ptr.h>
+#include <c10/util/typeid.h>
+#include <c10/macros/Macros.h>
+
+内部aten字符串
+aten/src/ATen/core/aten_interned_strings.h
+
+随机函数实现
+aten/src/ATen/core/PhiloxRNGEngine.h
+
+
+解决跨系统的编译的问题
+c10/macros/Macros.h
+c10/macros/Export.h
+
+为所有的op函数提供路由功能
+aten/src/ATen/core/dispatch/Dispatcher.h
+
+内置异常函数
+c10/util/Exception.h
+
+添加自定义op函数
+https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/README.md.
 ```
 
 [TOC]
