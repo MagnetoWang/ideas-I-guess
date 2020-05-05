@@ -837,74 +837,7 @@ pykafka：https://github.com/Parsely/pykafka
 kafka demo：https://github.com/muscledreamer/Kafka_Demo
 ```
 
-## Pytorch
 
-```
-google风格文档手册：http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
-
-c++使用文档：https://pytorch.org/cppdocs
-
-`python setup.py build` will build everything by default, but sometimes you are
-only interested in a specific component.
-pytorch简直太强了！
-```
-
-### c++开发
-```
-C++ frontend development tips
-test/cpp/api
-
-
-CUDA development tips
-1. `CUDA_DEVICE_DEBUG=1` will enable CUDA device function debug symbols (`-g -G`).
-    This will be particularly helpful in debugging device code. However, it will
-    slow down the build process for about 50% (compared to only `DEBUG=1`), so use wisely.
-2. `cuda-gdb` and `cuda-memcheck` are your best CUDA debugging friends. Unlike`gdb`,
-   `cuda-gdb` can display actual values in a CUDA tensor (rather than all zeros).
-3. CUDA supports a lot of C++11/14 features such as, `std::numeric_limits`, `std::nextafter`,
-   `std::tuple` etc. in device code. Many of such features are possible because of the
-   [--expt-relaxed-constexpr](https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#constexpr-functions)
-   nvcc flag. There is a known [issue](https://github.com/ROCm-Developer-Tools/HIP/issues/374)
-   that ROCm errors out on device code, which uses such stl functions.
-
-
-```
-
-### cuda性能测试
-```
-https://devblogs.nvidia.com/how-implement-performance-metrics-cuda-cc/
-
-```
-### 源码阅读
-```
-aten/src/ATen/core/ivalue.h
-
-aten/src/ATen/core/blob.h
-
-#include <c10/util/intrusive_ptr.h>
-#include <c10/util/typeid.h>
-#include <c10/macros/Macros.h>
-
-内部aten字符串
-aten/src/ATen/core/aten_interned_strings.h
-
-随机函数实现
-aten/src/ATen/core/PhiloxRNGEngine.h
-
-
-解决跨系统的编译的问题
-c10/macros/Macros.h
-c10/macros/Export.h
-
-为所有的op函数提供路由功能
-aten/src/ATen/core/dispatch/Dispatcher.h
-
-内置异常函数
-c10/util/Exception.h
-
-添加自定义op函数
-https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/README.md.
-```
 
 [TOC]
 
