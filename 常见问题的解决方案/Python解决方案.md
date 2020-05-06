@@ -107,6 +107,8 @@ source ~/python/anaconda3/etc/profile.d/conda.sh
 
 
 
+
+
 ### subprocess
 
 - 调用子进程的函数：http://www.cnblogs.com/vamei/archive/2012/09/23/2698014.html
@@ -303,6 +305,7 @@ conda install -c conda-forge pyspark
 安装自动补全插件
 conda install -c conda-forge jupyter_contrib_nbextensions
 
+安装pytorch
 
 ```
 
@@ -591,6 +594,42 @@ javasphinx
 
 ```
 
+### init .py 作用详解
+```
+https://www.cnblogs.com/Lands-ljk/p/5880483.html
+
+__init__.py 文件的作用是将文件夹变为一个Python模块,Python 中的每个模块的包中，都有__init__.py 文件。
+
+# package
+# __init__.py
+import re
+import urllib
+import sys
+import os
+
+# a.py
+import package 
+print(package.re, package.urllib, package.sys, package.os)
+
+__init__.py中还有一个重要的变量，__all__, 它用来将模块全部导入。
+
+# __init__.py
+__all__ = ['os', 'sys', 're', 'urllib']
+
+# a.py
+from package import *
+
+当导入模块时，解释器按照sys.path列表中的目录顺序来查找导入文件
+import sys
+>>> print(sys.path)
+```
+
+### 文件之间的依赖
+
+```
+
+```
+
 
 
 ## 正则表达式
@@ -824,6 +863,11 @@ ssl._create_default_https_context = ssl._create_unverified_context
 ```
 unittest
 https://www.cnblogs.com/feng0815/p/8045850.html
+
+
+pytest
+https://www.jianshu.com/p/932a4d9f78f8
+
 
 ```
 
