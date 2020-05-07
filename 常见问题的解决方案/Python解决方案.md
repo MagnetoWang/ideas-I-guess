@@ -317,6 +317,58 @@ https://virtualenv.pypa.io/en/stable/
 
 source /opt/rh/rh-python36/enable
 python -m pip install --user virtualenv
+
+
+===========================================================================
+pyenv 可以隔离不同python环境
+https://github.com/pyenv/pyenv-virtualenv
+https://github.com/pyenv/pyenv#basic-github-checkout
+https://www.jianshu.com/p/861f9a474f70
+
+安装
+国外
+git clone https://github.com/pyenv/pyenv.git ~/.pyenv
+国内
+git clone https://gitee.com/mirrors/pyenv.git ~/.pyenv
+export PYTHON_BUILD_MIRROR_URL="https://npm.taobao.org/mirrors/python/"
+
+
+echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bash_profile
+echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bash_profile
+
+bashrc
+
+安装某个python版本
+pyenv install 3.7.1
+
+
+pyenv virtualenv 2.7.1 env271
+
+在当前目录下创建一个 python 版本为2.7.1的环境，环境名字为 env271。 这个环境的真实目录位于~/.pyenv/versions/
+
+pyenv activate env271
+
+（创建时并不激活）激活当前环境。此时已经进入虚拟环境，在当前环境下所有pip等操作都不会影响系统环境和系统路径。
+
+pyenv deactivate
+
+离开已激活的环境，切换回系统环境。但并没有被删除，下次依旧可以启动。
+
+pyenv uninstall env271
+
+删除一个环境，当然也可以到真实目录下删除文件夹
+===========================================================================
+
+安装virtualenvs
+国内码云
+git clone https://gitee.com/cattus/pyenv-virtualenv.git ~/.pyenv/plugins/pyenv-virtualenv
+
+echo 'eval "$(pyenv virtualenv-init -)"' >> ~/.bash_profile
+
+
+
+
+===========================================================================
 ```
 
 ### juypter安装
@@ -627,7 +679,11 @@ import sys
 ### 文件之间的依赖
 
 ```
+https://www.zhihu.com/question/38857862
 
+from 文件夹/模块名 import 函数名
+
+import 模块名
 ```
 
 
@@ -787,6 +843,46 @@ conda install tensorflow
 输入参数不对，不好用这个方法，不用了
 ```
 
+### ImportError: cannot import name 'PILLOW_VERSION' from 'PIL'
+
+```
+https://blog.csdn.net/ternence_hsu/article/details/103821264
+
+要安装7.0.0以下版本才行
+    pip uninstall Pillow
+    pip install Pillow==6.2.2
+pip3 install 'pillow<7.0.0'
+
+conda 安装最合适
+conda install 'pillow<7.0.0'
+
+这个方法也可能无效
+https://blog.csdn.net/Lee_lg/article/details/103901632
+
+直接修改源码，出错的文件，重新导入
+使用from PIL import Image, ImageOps, ImageEnhance, __version__ 替换文件中from PIL import Image, ImageOps, ImageEnhance,PILLOW_VERSION这句。
+
+说白了就是用__version__ 替换原来的PILLOW_VERSION。点击保存即可。
+```
+
+### pyenv-virtualenv: `3.7.1' is not installed in pyenv.
+
+```
+https://stackoverflow.com/questions/51698662/pyenv-virtualenv-3-6-4-is-not-installed-in-pyenv
+
+pyenv install 3.7.1
+```
+
+### Perhaps pyenv-virtualenv has not been loaded into your shell properly.
+
+```
+https://www.cnblogs.com/walker-/p/10976027.html
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
+```
+
+
+
 ### 作用域
 
 ```
@@ -848,6 +944,10 @@ ssl._create_default_https_context = ssl._create_unverified_context
 在请求的对象里面，添加更多头文件信息，模拟浏览器的请求
 
 ```
+
+
+
+
 
 ## 数据分析
 
