@@ -979,6 +979,51 @@ https://www.jianshu.com/p/932a4d9f78f8
 kafka客户端：https://github.com/dpkp/kafka-python 
 pykafka：https://github.com/Parsely/pykafka
 kafka demo：https://github.com/muscledreamer/Kafka_Demo
+
+kafka开发手册：http://kafka.apache.org/25/documentation/streams/developer-guide/
+kafka官网多语言说明：https://cwiki.apache.org/confluence/display/KAFKA/Clients
+多语言功能区别：https://docs.confluent.io/current/clients/index.html
+流式写入：http://kafka.apache.org/25/documentation/streams/core-concepts
+python高性能写入和消费，封装底层c++：https://docs.confluent.io/current/clients/python.html#python-client
+
+kafka客户端配置：https://docs.confluent.io/current/clients/confluent-kafka-python/#pythonclient-configuration
+c语言客户端配置：https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
+kafka schema配置：https://docs.confluent.io/current/schema-registry/index.html
+
+kafka代码演示：https://docs.confluent.io/current/clients/python.html
+
+python3标准库编解码：https://docs.python.org/3/library/codecs.html#standard-encodings
+```
+
+## 安装
+
+```
+wget https://mirrors.tuna.tsinghua.edu.cn/apache/kafka/2.5.0/kafka_2.12-2.5.0.tgz
+```
+
+
+
+### 快速入门
+
+```
+http://kafka.apache.org/quickstart
+
+tar -xzf kafka_2.12-2.5.0.tgz
+cd kafka_2.12-2.5.0
+
+没有zk服务，可启动单节点zk。有则忽略
+bin/zookeeper-server-start.sh config/zookeeper.properties
+
+启动kafka服务
+bin/kafka-server-start.sh config/server.properties
+
+创建topic
+bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic test
+
+检查topic
+bin/kafka-topics.sh --list --bootstrap-server localhost:9092
+
+
 ```
 
 
