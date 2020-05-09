@@ -514,12 +514,25 @@ with open('path\filename', 'w') as file_obj:
 ### class 类
 
 ```
+https://www.runoob.com/python/python-object.html
+
 def __init__(self, texts, batch_size=16):
 	xxxx
 	
 类似于Java的构造函数
 self默认为this
 texts, batch_size=16是传入参数
+
+
+
+    __dict__ : 类的属性（包含一个字典，由类的数据属性组成）
+    __doc__ :类的文档字符串
+    __name__: 类名
+    __module__: 类定义所在的模块（类的全名是'__main__.className'，如果类位于一个导入模块mymod中，那么className.__module__ 等于 mymod）
+    __bases__ : 类的所有父类构成元素（包含了一个由所有父类组成的元组）
+
+
+类的继承
 ```
 
 ### __ getitem __ 等类型函数
@@ -879,6 +892,18 @@ pyenv install 3.7.1
 https://www.cnblogs.com/walker-/p/10976027.html
 eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
+```
+
+### No module named 'Queue'
+
+```
+https://blog.csdn.net/DarrenXf/article/details/82962412
+写法不同
+py3
+import queue
+
+py2
+import Queue
 ```
 
 
