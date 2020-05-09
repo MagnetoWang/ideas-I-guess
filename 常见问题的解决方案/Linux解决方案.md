@@ -912,6 +912,18 @@ mv part-000* train_row
 ```
 目录
 UID   PID  PPID   C STIME   TTY           TIME CMD
+
+
+
+
+ps aux 
+显示进程和目录
+
+ps -xf
+显示所有用户下的进程
+
+ps -cf
+显示本人用户下的进程
 ```
 
 
