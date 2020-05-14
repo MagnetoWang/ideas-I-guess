@@ -37,6 +37,8 @@
   - http://www.blogjava.net/xylz/archive/2011/07/12/354206.html	
   - 此异常是用来描述任务执行时间超过了期望等待时间，也许是一直没有获取到锁，也许是还没有执行完成。
 
+### 
+
 ### 代码规范
 
 - 类名：每个单词首字母大写
@@ -772,6 +774,22 @@ fos.close();
 //文件 或 文件夹大小
 System.out.println(FileUtils.sizeOf(new File("D:/cxyapi")));
 System.out.println(FileUtils.sizeOfDirectory(new File("D:/cxyapi")));
+```
+
+## 并发编程
+
+```
+原子递增
+https://blog.csdn.net/gong_yangyang/article/details/77281456
+错误写法
+cnt必须是原子类，但是get和自增两个操作也要保证是合并在一起做的，中间不能插入其他代码，不然无法保证多线程一致性
+Object[] row = masterDataSet.get(cnt.get());
+cnt ++ ;
+
+正确写法
+Object[] row = masterDataSet.get(cnt.getAndIncrement());
+
+原子
 ```
 
 
@@ -3311,11 +3329,119 @@ tar -zxvf spark-2.4.5-bin-hadoop2.7.tgz
 cp 
 ```
 
+### 概念
+
+```
+spark分区数,task数目,core数,worker节点个数,excutor数量梳理：https://www.cnblogs.com/hadoop-dev/p/6669232.html
+
+job，stage，task：https://www.cnblogs.com/upupfeng/p/12385979.html
+数量调优：https://www.jianshu.com/p/b3d87df219e9
+shuffle调优：https://zhuanlan.zhihu.com/p/21483985
+
+stage
+	exchange
+	wholestageCodegen
+	sortAggregate
+	exchange
+	sortMergeJoin
+	deserializeToObject
+	mapPartitios
+	mapPartitiosWithIndex
+	map
+	existingRDD
+	exchange
+	zipWithIndex
+
+wholestageCodegen
+火山模型和直接代码生成的性能区别
+
+
+
+```
+
+
+
 ### shuffle排序原理
 
 ```
 canUseSerializedShuffle：可以序列化排序的数据，达到性能提升作用
 ```
+
+### 性能优化
+
+```
+https://www.jianshu.com/p/dc69ed5c1d66
+开启G1GC 通过 -XX:+UseG1GC选项
+
+https://www.cnblogs.com/sxdcgaq8080/p/7196580.html
+JVM调优参考
+-Xmx300m                   　　　　　　最大堆大小
+-Xms300m                　　　　　　　　初始堆大小
+-Xmn100m                　  　　　　　　年轻代大小
+-XX:SurvivorRatio=8        　　　　　　Eden区与Survivor区的大小比值，设置为8,则两个Survivor区与一个Eden区的比值为2:8,一个Survivor区占整个年轻代的1/10
+
+-XX:+UseG1GC                　　　　　　使用 G1 (Garbage First) 垃圾收集器    
+-XX:MaxTenuringThreshold=14        　　提升年老代的最大临界值(tenuring threshold). 默认值为 15[每次GC，增加1岁，到15岁如果还要存活，放入Old区]
+-XX:ParallelGCThreads=8            　　设置垃圾收集器在并行阶段使用的线程数[一般设置为本机CPU线程数相等，即本机同时可以处理的个数，设置过大也没有用]
+-XX:ConcGCThreads=8            　　　　并发垃圾收集器使用的线程数量
+
+
+-XX:+DisableExplicitGC　　　　　　　　　　禁止在启动期间显式调用System.gc()
+
+
+-XX:+HeapDumpOnOutOfMemoryError        OOM时导出堆到文件
+-XX:HeapDumpPath=d:/a.dump        　　  导出OOM的路径
+-XX:+PrintGCDetails           　　　　   打印GC详细信息
+-XX:+PrintGCTimeStamps            　　　 打印CG发生的时间戳
+-XX:+PrintHeapAtGC            　　　　　  每一次GC前和GC后，都打印堆信息
+-XX:+TraceClassLoading            　　　  监控类的加载
+-XX:+PrintClassHistogram        　　　　　 按下Ctrl+Break后，打印类的信息
+
+===================================================================================
+join调优
+1.减少data shuffle的规模。多map掉无用column再进行reduce like的操作。2.检查数据是否是skewed data。也就是说join出的key value pair大小极度不均。3. Spark参数调优。4.升级集群。至于是否升级，建议采用ganglia监控集群，如果Total used memory的peak接近所有可用memory，那么要么加大spill到disk的量，要么就升级集群内存。
+===================================================================================
+consolidate机制
+下图说明了优化后的HashShuffleManager的原理。这里说的优化，是指我们可以设置一个参数，spark.shuffle.consolidateFiles。该参数默认值为false，将其设置为true即可开启优化机制。通常来说，如果我们使用HashShuffleManager，那么都建议开启这个选项。
+
+开启consolidate机制之后，在shuffle write过程中，task就不是为下游stage的每个task创建一个磁盘文件了。此时会出现shuffleFileGroup的概念，每个shuffleFileGroup会对应一批磁盘文件，磁盘文件的数量与下游stage的task数量是相同的。一个Executor上有多少个CPU core，就可以并行执行多少个task。而第一批并行执行的每个task都会创建一个shuffleFileGroup，并将数据写入对应的磁盘文件内。
+
+当Executor的CPU core执行完一批task，接着执行下一批task时，下一批task就会复用之前已有的shuffleFileGroup，包括其中的磁盘文件。也就是说，此时task会将数据写入已有的磁盘文件中，而不会写入新的磁盘文件中。因此，consolidate机制允许不同的task复用同一批磁盘文件，这样就可以有效将多个task的磁盘文件进行一定程度上的合并，从而大幅度减少磁盘文件的数量，进而提升shuffle write的性能。
+===================================================================================
+控制每个stage的task数目
+
+
+
+
+
+
+===================================================================================
+SortShuffleManager运行原理
+
+SortShuffleManager的运行机制主要分成两种，一种是普通运行机制，另一种是bypass运行机制。当shuffle read task的数量小于等于spark.shuffle.sort.bypassMergeThreshold参数的值时（默认为200），就会启用bypass机制。
+
+
+===================================================================================
+
+
+===================================================================================
+
+
+===================================================================================
+```
+
+### Tungsten Engine
+
+```
+简要介绍：https://spoddutur.github.io/spark-notes/second_generation_tungsten_engine.html
+火山模型和手写代码的性能差距：https://www.cnblogs.com/snova/p/9195692.html
+whole codegen：https://www.jianshu.com/p/689bf23f31ed
+
+查询优化技术要点：https://zhuanlan.zhihu.com/p/41562506
+Volcano Model是一种经典的基于行的流式迭代模型
+```
+
+
 
 ### 异常
 
@@ -3339,6 +3465,19 @@ https://blog.csdn.net/weixin_44455388/article/details/101198654
 
 考虑是否存在数据倾斜的问题
 
+```
+
+#### Too Large Frame
+
+```
+https://yq.aliyun.com/articles/71172
+数据倾斜太严重了，集中到一个task
+这样导致网络传输开销太大
+
+在成功的任务里，stage26与24的executor完全是同一个，这样数据是完全本地化的，甚至是同一个进程，因而经过优化不再需要通过网络传输
+而在失败的任务里，stage26在执行时发现这个node上有3个executor，为了性能的提升，将数据分配给3个executor执行计算。可见其中也成功了一半，32686这个端口的executor是24中执行的那个，因而虽然它要处理3.3g的数据，但是因为不需要网络传输，也仍然可以成功。可是对于另外两个，即使是同一个节点，但是由于是不同进程，仍然需要通过netty的server拉取数据，而这一次的拉取最大不能超过int最大值，因而失败了一个，导致整个stage失败，也就导致了整个job的失败。
+总结
+由此可见在数据极度倾斜的情况下，增大executor的数量未见得是好事，还是要根据具体情况而来。减小了数量解决了问题，但是这其实并不是最好的解决方案，因为这种情况下，可见数据基本等同于本地执行，完全浪费了集群的并发性，更好的解决方案还需要再继续深入理解。
 ```
 
 
