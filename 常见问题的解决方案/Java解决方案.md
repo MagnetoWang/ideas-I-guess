@@ -3485,7 +3485,20 @@ ${PROJECT_DIR}/bigdata-xyz-0.1.jar
 jvm 参考各个代的内存分配
 https://www.cnblogs.com/itboys/p/7227893.html
 
+
+
 ===================================================================================
+jvm 垃圾回收器
+https://www.cnblogs.com/butterfly100/p/9175673.html
+该选用哪一种垃圾回收器？
+
+1. 客户端程序: 一般使用 -XX:+UseSerialGC (Serial + Serial Old). 特别注意, 当一台机器上起多个 JVM, 每个 JVM 也可以采用这种 GC 组合
+
+2. 吞吐率优先的服务端程序（计算密集型）: -XX:+UseParallelGC 或者 -XX:+UseParallelOldGC
+
+3. 响应时间优先的服务端程序: -XX:+UseConcMarkSweepGC
+
+4. 响应时间优先同时也要兼顾吞吐率的服务端程序：-XX:+UseG1GC
 
 
 ===================================================================================
