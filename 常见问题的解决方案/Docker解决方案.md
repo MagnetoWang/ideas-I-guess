@@ -50,3 +50,11 @@ docker exec -it 7f91b3579e15230b662894f749f44325f982e16d35bf647f6af0a2ac98cf95f9
 - 获取id全名称：docker inspect -f '{{.Id}}' docker_name
 - 文件复制：docker cp ID全称:容器文件路径 本地路径
   - docker cp /Users/magnetowang/Documents/4paradigm/images\ management/mnist7.png b5295ac7bc6b54deca8ab4c6dba818d520de80b3744fd8c1d44634b494f95bfa:/opt/caffe/examples/mnist/
+
+### docker容器挂载
+
+```
+https://www.jianshu.com/p/9fd2f77001a3
+docker run -itd -v /home/code-docker:/code xxxx
+```
+
