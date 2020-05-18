@@ -584,6 +584,17 @@ source ~/.bash_profile
 - --enable-static 生成静态库a文件
 - --enable-shared 生成共享库so文件
 
+### 代码同步
+
+```
+sshfs 可以让本地目录同步到远程服务端，这样本地写代码，自动就能同步到远程编译，不需要vim
+类似docker -v xxx
+属于docker挂载方式，有个干净的编译环境
+
+```
+
+
+
 ## Vim
 
 ### 基本操作
@@ -652,7 +663,13 @@ python -m http.server 1234
 https://www.cnblogs.com/sammyliu/p/5878973.html
 ```
 
+### vnc远程终端控制
+```
+在家自建linux服务器，mac远程控制屏幕即可。这样既有mac的轻薄，也能有linux可视化开发环境
 
+瓶颈
+需要一定网络带宽开销
+```
 
 # Linux下的Shell
 
