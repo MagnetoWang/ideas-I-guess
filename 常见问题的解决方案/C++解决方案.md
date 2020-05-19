@@ -98,16 +98,58 @@ Template <class或者也可以用typename T>
 - 只有指针或者引用可以达到多态。对象不行
 
 ```
+===========================================================================
 对象指针初始化
 	Test* t1 = new Test();
 
     Student* s1; 
     s1 = new Student(); 
+
+===========================================================================
+make_shared shared_ptr
+// make_shared 和 shared_ptr 设计初衷是引入引用计数这个概念来减少程序
+// 员的工作量. 他的设计想法跟 Objective-c 的引用计数有点类似。请看以下代码: 
+
+int main(int argc, const char * argv[])
+{
+    printf("----- start ----- \n");       
+    std::shared_ptr<StructA> pA = std::make_shared<StructA>();
+    std::shared_ptr<StructB> pB (new StructB());
+    printf("----- end ----- \n");
+    return 0;
+}    
+
+环形引用
+环形应用: 就是对象 A 持有对象 B 的强引用, 对象 B 持有对象 A 的强应用,最终导致 A 和 B 都无法释放。
+环形链表
+// 解决方法, 其中一方使用弱引用
+===========================================================================
+weak_ptr
+
+    weak_ptr 主要是用来判断 shared_ptr 所指向的数据内存是否存在, 因为make_shared 只作一次内存分配, shared_ptr 可以把这种内存分配分为两个步骤, weak_ptr 可以通过 lock 来判断 shared_ptr 所指向的数据内存是否被释放
+
+
+===========================================================================
+
+===========================================================================
+
+
+===========================================================================
+
+===========================================================================
+
+
+===========================================================================
+
+===========================================================================
+
+
+===========================================================================
 ```
 
 ### 智能指针
 
-- 参考资料：<https://www.cnblogs.com/wxquare/p/4759020.html>
+- 参考资料：https://www.cnblogs.com/wxquare/p/4759020.html
 - 文档：https://en.cppreference.com/w/cpp/memory/unique_ptr
 
 ```
@@ -164,7 +206,7 @@ unique_ptr 可以实现如下功能：
 shared_ptr unique_ptr 区别非常大
 shared_ptr可以正常赋值等     std::shared_ptr<ModelManager> model = std::make_shared<ModelManager>(config);
 
-unique_ptr 要求非常大，很难用  std::unique_ptr<ModelManager> model(new ModelManager(config));
+unique_ptr 要求非常多，很难用  std::unique_ptr<ModelManager> model(new ModelManager(config));
 
  智能指针与指针的转换
  https://www.cnblogs.com/fushi/p/7768906.html
@@ -683,12 +725,12 @@ std::vector v = { 1, 2, 3, 4 };
 ```
 
 string& assign (const string& str, size_t subpos, size_t sublen);
-  std::string str;
-  std::string base="The quick brown fox jumps over a lazy dog.";
-  str.assign(base);
-  std::cout << str << '\n';
-  // result
-  The quick brown fox jumps over a lazy dog.
+std::string str;
+std::string base="The quick brown fox jumps over a lazy dog.";
+str.assign(base);
+std::cout << str << '\n';
+// result
+The quick brown fox jumps over a lazy dog.
 
 ```
 
@@ -1556,6 +1598,7 @@ std::cout << std::is_same<int, int64_t>::value << '\n';   // false
 ### 性能优化
 
 - insert 对象的时候，其实是复制了一个对象，要想优化，最后insert一个指针或者引用
+- 上面这一行是错误的！！！！！！
 - 不能insert指针或者引用！！！！！！
 - 不能insert指针或者引用！！！！！！
 - 不能insert指针或者引用！！！！！！
@@ -2060,12 +2103,12 @@ std::exception
 
 
 ===================================================================================
-
+std::nth_element
 
 
 
 ===================================================================================
-
+std::this_thread::yield
 
 
 ===================================================================================
@@ -2361,7 +2404,14 @@ CUDA_HOST_DEVICE
 
 ```
 
+## Glibc
+```
+// [Note SSE-AVX transitions]
+// There is a bug in Glibc2.23
+// https://bugs.launchpad.net/ubuntu/+source/glibc/+bug/1663280. Calling zeroall
+// when using AVX/AVX2 code resolves this.
 
+```
 
 ## C++的指针
 
