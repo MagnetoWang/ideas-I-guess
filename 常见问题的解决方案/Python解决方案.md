@@ -1020,7 +1020,7 @@ kafka代码演示：https://docs.confluent.io/current/clients/python.html
 python3标准库编解码：https://docs.python.org/3/library/codecs.html#standard-encodings
 ```
 
-## 安装
+### 安装
 
 ```
 wget https://mirrors.tuna.tsinghua.edu.cn/apache/kafka/2.5.0/kafka_2.12-2.5.0.tgz
@@ -1049,6 +1049,15 @@ bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-fac
 bin/kafka-topics.sh --list --bootstrap-server localhost:9092
 
 
+```
+
+## swig
+
+### 资料
+
+```
+简单示例：https://segmentfault.com/a/1190000013219667
+快速入门：https://www.ibm.com/developerworks/cn/aix/library/au-swig/
 ```
 
 
