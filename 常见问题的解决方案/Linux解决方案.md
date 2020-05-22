@@ -1360,6 +1360,31 @@ awk '{printf "%s,%s,%s,%s %s,%s\n", $1,$2,$3,$4,$5,$6}' log
 ls -l /usr/ | awk '/^d/ {print $NF}'
 
 
+https://mp.weixin.qq.com/s/B9rSVxOgO0WipzzZvxfbKg
+从第一行可以看到这个数据集包含6列：id  qid1    qid2    question1   question2   is_duplicate
+但实际上我们单纯训练一个q-q文本匹配模型的话，只需要最后三列就够了。不懂linux的小伙伴可能会用python打开文件，然后一顿for循环和str.split了。
+但实际上，用上cut之后配合管道只需要一行
+cat train.tsv | cut -f 4,5,6 > train.tsv.cut
+
+
+就把数据集的第4，5，6列提出来了，并且存储在了train.tsv.cut文件中。如果需要的数据来自于两个文件，可以分别cut出来再将这些列拼到一起（新文件是m+n列，可以理解成cat是纵向连接两个或若干个文件，而paste则是横向连接）
+paste file1.txt file2.txt
+
+
+最后，训练数据的去重和shuffle，也完全可以不用python去写，分别用uniq和shuf结合管道就能一行命令搞定
+sort train.tsv.cut | uniq | shuf > train.tsv
+
+
+单机并行数据预处理
+for i in {0..99};
+do
+    python process.py train.tsv.part$i > train.tsv.part$i.tmp &
+done
+wait  // 会等待所有命令执行完
+
+批量杀死包含某个名字的进程
+pkill -f <xxx>
+pkill -f 'process.py'
 
 ```
 
