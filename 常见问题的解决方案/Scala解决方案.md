@@ -22,6 +22,14 @@ Scala中的=>符号可以看做是创建函数实例的语法糖。例如：A =>
 另外，() => T表示函数输入参数为空，而A => Unit则表示函数没有返回值。
 ```
 
+### 资料
+
+```
+基本语法：https://docs.scala-lang.org/style/indentation.html#line-wrapping
+```
+
+
+
 # 新的章节
 
 ## Spark
@@ -337,7 +345,27 @@ val p = println _
 下划线在大部分的应用场景中是以语法糖的形式出现的，可以减少击键次数，并且代码显得更加简洁。但是对于不熟悉下划线的同学阅读起来稍显困难，希望通过本文能够帮你解决这个的困惑。本文成文仓促，如有遗漏，欢迎留言! 转载请注明作者: joymufeng
 ```
 
+#### spark分区
 
+```
+https://blog.csdn.net/sunspeedzy/article/details/69733837?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase
+rdd1.mapPartitionsWithIndex{
+          (partIdx,iter) => {
+              var part_map = scala.collection.mutable.Map[String,Int]()
+              while(iter.hasNext){
+                  var part_name = "part_" + partIdx;
+                  if(part_map.contains(part_name)) {
+                     var ele_cnt = part_map(part_name)
+                     part_map(part_name) = ele_cnt + 1
+                  } else {
+                     part_map(part_name) = 1
+                  }
+                  iter.next()
+              }
+              part_map.iterator
+         }
+}.collect
+```
 
 
 
