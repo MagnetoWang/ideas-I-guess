@@ -26,6 +26,29 @@ Scala中的=>符号可以看做是创建函数实例的语法糖。例如：A =>
 
 ```
 基本语法：https://docs.scala-lang.org/style/indentation.html#line-wrapping
+charsheet展示语法：https://docs.scala-lang.org/cheatsheets/index.html
+集合api：https://docs.scala-lang.org/overviews/collections-2.13/overview.html
+迭代器：https://docs.scala-lang.org/overviews/collections-2.13/trait-iterable.html
+列表接口：https://docs.scala-lang.org/overviews/collections-2.13/seqs.html
+可修改列表接口：https://docs.scala-lang.org/overviews/collections-2.13/concrete-immutable-collection-classes.html
+
+迭代器高级用法：https://docs.scala-lang.org/overviews/collections-2.13/iterators.html
+```
+
+### 符号
+
+```
+If the function used :: instead of #::, then every call to the function would result in another call, thus causing an infinite recursion. Since it uses #::, though, the right-hand side is not evaluated until it is requested. Here are the first few elements of the Fibonacci sequence starting with two ones:
+```
+
+### 分区
+
+```
+自定义分区：https://zhuanlan.zhihu.com/p/43723758
+
+hash分区：有可能出现不同key在一起，因为hash计算后结果会对分区求余，可能分配在一块
+
+
 ```
 
 
@@ -365,6 +388,35 @@ rdd1.mapPartitionsWithIndex{
               part_map.iterator
          }
 }.collect
+```
+
+#### map和flatmap区别
+
+```
+https://blog.csdn.net/u010824591/article/details/50732996
+map：对集合中每个元素进行操作。
+flatMap：对集合中每个元素进行操作然后再扁平化。
+
+val arr=sc.parallelize(Array(("A",1),("B",2),("C",3)))
+arr.flatmap(x=>(x._1+x._2)).foreach(println)
+
+val arr=sc.parallelize(Array(("A",1),("B",2),("C",3)))
+arr.map(x=>(x._1+x._2)).foreach(println)
+```
+
+
+
+### 报错
+
+#### A master URL must be set in your configuration
+
+```
+https://blog.csdn.net/sinat_33761963/article/details/51723175
+https://www.cnblogs.com/ChristianKula/p/9381180.html
+
+val spark = SparkSession.builder.appName("Simple Application").master("local").getOrCreate()
+val data = spark.read.parquet("xxxxx")
+println(data.show())
 ```
 
 
