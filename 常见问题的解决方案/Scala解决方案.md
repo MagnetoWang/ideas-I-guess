@@ -48,7 +48,14 @@ If the function used :: instead of #::, then every call to the function would re
 
 hash分区：有可能出现不同key在一起，因为hash计算后结果会对分区求余，可能分配在一块
 
+自定义分区代码：https://blog.csdn.net/xiao_jun_0820/article/details/45913745
 
+DoubleRDDFunctions
+
+添加一列
+scala> postsDf.filter('postTypeId === 1).withColumn("ratio", 'viewCount / 'score). where('ratio < 35).show()
+
+自增id列，高效做法：https://www.jianshu.com/p/3e998a12ec3c
 ```
 
 
@@ -58,6 +65,20 @@ hash分区：有可能出现不同key在一起，因为hash计算后结果会对
 ## Spark
 
 ### 资料
+
+```
+spark最新动态新闻：https://databricks.com/blog
+```
+
+### 概念
+
+```
+Physical movement of data between partitions is called shuffling
+
+添加一列
+```
+
+
 
 ### 语法
 
@@ -173,6 +194,22 @@ listCols:+rowNum
 #### class 与 object区别
 
 ```
+https://www.jianshu.com/p/e0fc0ab7a9d2
+class Counter {
+    private var value = 0 
+    def increment(step: Int): Unit = { value += step}
+    def current(): Int = { value }
+}
+object MyCounter{
+    def main(args:Array[String]){
+        val myCounter = new Counter
+        myCounter.increment(5)
+        println(myCounter.current)
+    }
+}
+
+scala 中没有 static 关键字对于一个class来说，所有的方法和成员变量在实例被 new 出来之前都是无法访问的因此class文件中的main方法也就没什么用了，scala object 中所有成员变量和方法默认都是 static 的所以 可以直接访问main方法。
+
 
 ```
 
@@ -417,6 +454,26 @@ https://www.cnblogs.com/ChristianKula/p/9381180.html
 val spark = SparkSession.builder.appName("Simple Application").master("local").getOrCreate()
 val data = spark.read.parquet("xxxxx")
 println(data.show())
+```
+
+#### Spark 2.0 DataFrame map操作中Unable to find encoder for type stored in a Dataset.问题的分析与解决
+
+```
+https://www.cnblogs.com/0xcafedaddy/p/7489534.html
+要进行map操作，要先定义一个Encoder。。
+这就增加了系统升级繁重的工作量了。为了更简单一些，幸运的dataset也提供了转化RDD的操作。因此只需要将之前dataframe.map
+在中间修改为：data
+```
+
+#### java.lang.RuntimeException: Error while encoding: java.lang.RuntimeException: java.lang.Long is not a valid external type for schema of timestamp
+
+```
+https://www.cnblogs.com/xiashiwendao/p/7599386.html
+map类型和schema类型不一致导致问题，Schema中定义为Long，但是map的时候映射为String，这里只要把r(1)变为r(1).toLong即可。
+sortIdDataframe.rdd.map(row => {
+      println(row.getString(3))
+        row
+    })
 ```
 
 
