@@ -82,16 +82,68 @@ Physical movement of data between partitions is called shuffling
 
 ### 语法
 
+#### val 和 var区别
+
+```
+val和var。val就不能再赋值了。与之对应的，var可以在它生命周期中被多次赋值。
+
+https://blog.csdn.net/s646575997/article/details/51264115
+```
+
+
+
 #### union
 
 ```
 http://sqlandhadoop.com/spark-dataframe-union-union-all/
 ```
 
-#### for
+#### for循环,foreach
+
+```
+https://alvinalexander.com/scala/iterating-scala-lists-foreach-for-comprehension/
+注意val和var的区别
+
+scala> var sum = 0
+sum: Int = 0
+
+scala> val x = List(1,2,3)
+x: List[Int] = List(1, 2, 3)
+
+scala> x.foreach(sum += _)
+
+scala> println(sum)
+6
+
+
+https://www.yiibai.com/scala/scala_for_loop.html
+for( var x <- Range ){
+   statement(s);
+}
 
 ```
 
+#### aggregate
+
+```
+dataframe可以实现不同类型转换
+https://www.cnblogs.com/mecca/p/5617833.html
+
+ Scala 学习之 aggregate函数
+
+fold和reduce都要求函数的返回值类型需要和我们所操作的RDD类型相同，但是我们有时确实需要一个不同类型的返回值。eg:
+
+在计算平均值时，需要记录便利过程中的计数以及元素的数量，这就需要我们返回一个二元组。可以先对数据使用map操作，来把元素转移为改元素和1的二元组，也就是我们希望的返回类型。这样reduce就可以以二元组的形式进行归约。
+
+aggregate函数把我们从返回值类型必须与输入RDD类型相同的限制中解脱出来。与fold相似，使用aggregate时，需要我们期待返回的类型的初始值，然后通过一个函数吧RDD中的元素合并起来放入累加器。考虑到每个节点是在本地进行累加的，最终 还需要提供第二个函数来将累加器两两合并。eg：
+复制代码
+
+1 val z = sc. parallelize ( List (1 ,2 ,3 ,4 ,5 ,6) , 2)
+2 val result = z.aggregate((0,0))(//初始值
+3   (acc,value)=>(acc._1+value,acc._2+1),//累加器 （元组累加元组结果，RDD单个元素值）=>（元组累加结果＋RDD单个元素，元组累加计数＋1）
+4   (acc1,acc2)=>(acc1._1+acc2._1,acc1._2+acc2._2)//combine 合并函数 合并元组累加结果
+5 )
+6 val avg = result._1/result._2.toDouble 
 ```
 
 
@@ -441,6 +493,35 @@ val arr=sc.parallelize(Array(("A",1),("B",2),("C",3)))
 arr.map(x=>(x._1+x._2)).foreach(println)
 ```
 
+#### dataframe
+
+```
+基本使用：https://docs.databricks.com/spark/latest/dataframes-datasets/introduction-to-dataframes-scala.html	
+reduce简单用法：https://www.zybuluo.com/jewes/note/35032
+
+对某一列求和
+var sum : Long = 0
+    data.foreach(row => {
+      println(row.getLong(row.length - 1))
+      sum += row.getLong(row.length - 1)
+      println("sum" + sum)
+    })
+ 这样写是错误的，因为spark dataframe 是分布式的，只能计算每个分区的值，sum也拿不出来
+ 
+ spark 有 driver和execute两个端，大部分计算放在execute，如果要拿到真正的值，需要用collect方式拉取到driver。传统的单机编程思维很不适合spark
+```
+
+#### 求和
+
+```
+终于知道spark该如何求和了！！！！！！！！！！！！！！！！！
+var sum : Long = 0
+    sum = data.rdd.aggregate((0L))(
+      (value, row) => (value + row.getLong(row.length - 1)),
+      (value1, value2) => (value1 + value2)
+    )
+```
+
 
 
 ### 报错
@@ -450,6 +531,8 @@ arr.map(x=>(x._1+x._2)).foreach(println)
 ```
 https://blog.csdn.net/sinat_33761963/article/details/51723175
 https://www.cnblogs.com/ChristianKula/p/9381180.html
+
+加local
 
 val spark = SparkSession.builder.appName("Simple Application").master("local").getOrCreate()
 val data = spark.read.parquet("xxxxx")
