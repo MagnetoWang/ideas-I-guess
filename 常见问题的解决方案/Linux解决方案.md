@@ -1086,6 +1086,37 @@ time [command]
 ab -v 10 -c 1 -n 1 -p xxxx -T xxxxx
 ```
 
+### perf性能测试
+
+```
+perf 适合linux下检查程序性能
+https://zhuanlan.zhihu.com/p/22194920
+
+# 安装
+yum install perf
+   
+# 分析程序调用函数占用比例
+perf record ./my_app my_args
+perf report
+     
+# 分析程序调用函数占用比例，包含函数调用关系
+perf record --call-graph dwarf ./my_app my_args
+perf report
+  
+# 实时追踪当前整个系统函数占用
+perf top
+  
+# 实时追踪指定进程函数占用
+perf top -p PID
+
+容器里使用方式：
+# 若宿主机没有开放profile权限
+echo -1 > /proc/sys/kernel/perf_event_paranoid
+  
+# 容器run时候需要加上--privileged
+docker run --privileged   ...
+```
+
 
 
 ### tail
