@@ -22,6 +22,25 @@ Scala中的=>符号可以看做是创建函数实例的语法糖。例如：A =>
 另外，() => T表示函数输入参数为空，而A => Unit则表示函数没有返回值。
 ```
 
+#### *
+
+```
+用于函数参数中可变长参数
+https://blog.csdn.net/jxx4903049/article/details/82688117
+
+    scala> def sum(args: Int*) = {
+         | var result = 0
+         | for (arg <- args) result += arg
+         | result
+         | }
+    sum: (args: Int*)Int
+     
+    scala> val s = sum(1,2,3,4,5)
+    s: Int = 15
+```
+
+
+
 ### 资料
 
 ```
@@ -39,6 +58,9 @@ charsheet展示语法：https://docs.scala-lang.org/cheatsheets/index.html
 
 ```
 If the function used :: instead of #::, then every call to the function would result in another call, thus causing an infinite recursion. Since it uses #::, though, the right-hand side is not evaluated until it is requested. Here are the first few elements of the Fibonacci sequence starting with two ones:
+
+
+
 ```
 
 ### 分区
@@ -68,6 +90,8 @@ scala> postsDf.filter('postTypeId === 1).withColumn("ratio", 'viewCount / 'score
 
 ```
 spark最新动态新闻：https://databricks.com/blog
+dataframe接口：https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.Dataset
+sql函数接口：https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.functions$
 ```
 
 ### 概念
@@ -128,6 +152,7 @@ for( var x <- Range ){
 ```
 dataframe可以实现不同类型转换
 https://www.cnblogs.com/mecca/p/5617833.html
+文档：https://www.jianshu.com/p/e0fd975055b3
 
  Scala 学习之 aggregate函数
 
@@ -174,6 +199,23 @@ until不包含上限，如：1 to 3, Range为1,2
 ```
 https://blog.csdn.net/Next__One/article/details/77666782
 ```
+
+#### case
+
+```
+样例类：https://www.cnblogs.com/MOBIN/p/5299951.html
+
+自动生成apply方法，不需要new就可以创建对象
+case本就旨在创建的是不可变数据，所以在使用模式匹配时显得极为容易
+自动生成get方法，不能再set
+里面对象是不可变的
+类似Java的DAO，config的类型
+
+写法如下
+case class People(name:String,age:Int)
+```
+
+
 
 #### AtomicReference
 
@@ -223,6 +265,9 @@ element 2 is orange
 ```
 https://blog.csdn.net/u013176681/article/details/86624076
 Scala的Seq将是Java的List，Scala的List将是Java的LinkedList。
+
+初始化
+val partitionColNames = Seq(keyCol, bucketColName)
 
 seq转map
 
@@ -498,6 +543,8 @@ arr.map(x=>(x._1+x._2)).foreach(println)
 ```
 基本使用：https://docs.databricks.com/spark/latest/dataframes-datasets/introduction-to-dataframes-scala.html	
 reduce简单用法：https://www.zybuluo.com/jewes/note/35032
+接口文档：https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.Dataset
+
 
 对某一列求和
 var sum : Long = 0
