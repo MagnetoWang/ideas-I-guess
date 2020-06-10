@@ -284,6 +284,50 @@ val listCols : List[String] = cols.toList
 listCols:+rowNum
 ```
 
+#### lazy
+
+```
+惰性赋值
+https://www.cnblogs.com/cc11001100/p/10243616.html
+```
+
+
+
+#### 枚举
+
+```
+https://www.cnblogs.com/bonnienote/p/6087195.html
+
+object WeekDay extends Enumeration {
+
+   val Mon, Tue, Wed, Thu, Fri, Sat, Sun = Value    
+
+     //在这里定义具体的枚举实例
+
+  }
+  
+如果不指定ID值，则ID在前一个枚举值基础上＋1，从零开始，缺省name字段为字段名
+
+这时可以用WeekDay.Mon , WeekDay.Tue 来引用枚举值了
+
+这里枚举的类型为WeekDay.Value而不是WeekDay，后者代表对象
+
+可以添加一个类型名称这样定义
+
+object WeekDay extends Enumeration {
+
+    type WeekDay = Value                              
+
+    //这里仅仅是为了将Enumration.Value的类型暴露出来给外界使用而已
+
+    val Mon, Tue, Wed, Thu, Fri, Sat, Sun = Value 
+
+    //在这里定义具体的枚举实例
+
+  }
+  
+```
+
 
 
 ### 进阶语法
@@ -309,6 +353,15 @@ scala 中没有 static 关键字对于一个class来说，所有的方法和成�
 
 
 ```
+
+#### isInstanceOf 和 asInstanceOf 运用
+
+```
+https://blog.csdn.net/weixin_42181200/article/details/80324801
+首先，需要使用isInstanceOf 判断对象是否为指定类的对象，如果是的话，则可以使用 asInstanceOf 将对象转换为指定类型；
+```
+
+
 
 #### 遍历
 
