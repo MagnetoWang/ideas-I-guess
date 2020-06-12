@@ -37,9 +37,10 @@ https://blog.csdn.net/jxx4903049/article/details/82688117
      
     scala> val s = sum(1,2,3,4,5)
     s: Int = 15
+    
+  
+
 ```
-
-
 
 ### 资料
 
@@ -50,6 +51,7 @@ charsheet展示语法：https://docs.scala-lang.org/cheatsheets/index.html
 迭代器：https://docs.scala-lang.org/overviews/collections-2.13/trait-iterable.html
 列表接口：https://docs.scala-lang.org/overviews/collections-2.13/seqs.html
 可修改列表接口：https://docs.scala-lang.org/overviews/collections-2.13/concrete-immutable-collection-classes.html
+Array用法：https://docs.scala-lang.org/overviews/collections-2.13/arrays.html
 
 迭代器高级用法：https://docs.scala-lang.org/overviews/collections-2.13/iterators.html
 ```
@@ -271,9 +273,25 @@ val partitionColNames = Seq(keyCol, bucketColName)
 
 seq转map
 
+java list 转seq 需要导入包
+import scala.collection.JavaConverters._
+val keys : Seq[String] = xxxList.asScala
+        
+或者
+import scala.collection.JavaConversions._
+val keys : Seq[String] = xxxList.toSeq
+
 
 不能添加元素，要用arraybuffer
 ```
+
+#### Array
+
+```
+
+```
+
+
 
 #### ArrayBuffer
 
@@ -326,6 +344,27 @@ object WeekDay extends Enumeration {
 
   }
   
+```
+
+#### 可变长参数
+
+```
+list通过下划线与星号可以变成n个参数
+input.groupBy(cols: _*) // right 多个string对象
+
+input.groupBy(cols) // wrong 一个list对象
+```
+
+#### 日期转毫秒
+
+```
+spark默认是转到秒级别而不是毫秒
+val longCol = data.col(valueCol).cast(LongType)
+
+先转成double * 1000
+再转long
+val longCol = (data.col(valueCol).cast(doubleType) * 1000).cast(LongType)
+
 ```
 
 
