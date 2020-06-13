@@ -147,6 +147,25 @@ for( var x <- Range ){
    statement(s);
 }
 
+
+      for( a <- 1 to 10){
+         println( "Value of a: " + a );
+      }
+
+打印1到10 包括10
+
+      for( a <- 1 until 10){
+         println( "Value of a: " + a );
+      }
+      
+打印1到9，没有10
+
+跳出for循环
+https://www.runoob.com/scala/scala-break-statement.html
+for (i <- 0 until 10 if flag) {
+  res += i
+  if (i == 4) flag = false
+}
 ```
 
 #### aggregate
