@@ -89,6 +89,10 @@
 
 - echo $PATH
 
+### 磁盘测速使用disk speed test
+
+- 可以选择外置硬盘测试
+
 ## 安装软件
 
 ### 安装md5sum
@@ -208,6 +212,18 @@
 - 参考资料：<https://answers.microsoft.com/zh-hans/msoffice/forum/msoffice_powerpoint-mso_mac-mso_mac2016/%E6%AF%8F%E6%AC%A1%E5%90%AF%E5%8A%A8ppt%E6%97%B6/24aa4a9a-013a-49de-8ffe-455fbe5f38b2>
 - 进入目录 ~/Library/Containers/com.microsoft.Powerpoint/Data/Library/Preferences/AutoRecover
 - 删除里面的文件，就可以了
+
+```
+mac 每次打开PPT都会出现一个自动保存的文件，不知道这个文件是保存在哪里，该怎么删除？
+
+打开finder（访达），按 shift+command+G，输入~/Library/Containers/com.microsoft.Powerpoint/Data/Library/Preferences/AutoRecovery/
+然后删除里面的文件即可。
+
+
+链接：https://www.jianshu.com/p/bcee6d56fa3c
+```
+
+
 
 ## 终端
 
