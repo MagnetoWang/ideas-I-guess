@@ -166,6 +166,13 @@ for (i <- 0 until 10 if flag) {
   res += i
   if (i == 4) flag = false
 }
+
+Seq遍历 
+https://www.cnblogs.com/cunchen/p/9464092.html
+val names = Seq("Kitty", "Tom", "Luke", "Kit")
+for (name <- names) {
+  println(name)
+}
 ```
 
 #### aggregate
@@ -667,6 +674,11 @@ var sum : Long = 0
  这样写是错误的，因为spark dataframe 是分布式的，只能计算每个分区的值，sum也拿不出来
  
  spark 有 driver和execute两个端，大部分计算放在execute，如果要拿到真正的值，需要用collect方式拉取到driver。传统的单机编程思维很不适合spark
+ 
+ 
+写入csv文件
+df.coalesce(1).write.option("header", "true").csv("skewData.csv")
+
 ```
 
 #### 求和
@@ -678,6 +690,14 @@ var sum : Long = 0
       (value, row) => (value + row.getLong(row.length - 1)),
       (value1, value2) => (value1 + value2)
     )
+    
+(0L) 初始值
+
+(value, row) => (value + row.getLong(row.length - 1)) row是rdd里面的对象，针对每个对象需要做的处理 value就是你希望返回的值，这里是求和，希望返回一个整数值结果
+
+(value1, value2) => (value1 + value2) 两个value都是你返回的对象，但是这里的value是对应着每个分区计算的结果，如果是算全局的sum，那么每个分区结果计算完以后，还要求和分区的结果，才是真正的所有数据求和
+
+
 ```
 
 
