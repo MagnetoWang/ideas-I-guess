@@ -888,6 +888,12 @@ brew install gnu-sed
 scp xxx.tar root@xxx:/mnt/disk02/xxx
 ```
 
+### rsync
+
+```
+https://www.jianshu.com/p/07b3998e1f53
+```
+
 
 
 ### mv
@@ -1115,6 +1121,12 @@ echo -1 > /proc/sys/kernel/perf_event_paranoid
   
 # 容器run时候需要加上--privileged
 docker run --privileged   ...
+```
+
+### 性能优化
+
+```
+intel vtune或者emon
 ```
 
 
@@ -1424,6 +1436,18 @@ pkill -f 'process.py'
 ```
 mv part-000* train_row
 ```
+
+
+
+### 当前目录按照文件大小排序
+
+```
+https://blog.csdn.net/sqiucheng/article/details/54093638
+
+du -sh ./* |  sort -rn
+```
+
+
 
 ### 给每个文件尾部加空行
 
