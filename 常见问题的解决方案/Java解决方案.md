@@ -776,6 +776,14 @@ System.out.println(FileUtils.sizeOf(new File("D:/cxyapi")));
 System.out.println(FileUtils.sizeOfDirectory(new File("D:/cxyapi")));
 ```
 
+### Java8-行为参数化，匿名，lambda，流式编程
+
+```
+书籍：Java8实战
+```
+
+
+
 ## 并发编程
 
 ```
@@ -3702,10 +3710,18 @@ https://yq.aliyun.com/articles/71172
 https://www.metabase.com/start/docker.html
 ```
 
-### 安装
+### docker安装
 
 ```
   $ docker run -d -p 3000:3000 --name metabase metabase/metabase
+```
+
+## Flux & Mono
+
+### 资料
+
+```
+异步发射器：https://www.jianshu.com/p/611f3667c4d2
 ```
 
 
