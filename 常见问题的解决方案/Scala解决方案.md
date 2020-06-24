@@ -333,6 +333,13 @@ listCols:+rowNum
 ```
 惰性赋值
 https://www.cnblogs.com/cc11001100/p/10243616.html
+
+override lazy val result: DataFrame = compute
+compute是计算方法，被调用一次以后，result不为null，就不会再调用compute了
+
+
+https://www.cnblogs.com/cc11001100/p/10243616.html
+lazy是scala中用来实现惰性赋值的关键字，被lazy修饰的变量初始化的时机是在第一次使用此变量的时候才会赋值，并且仅在第一次调用时计算值，即值只会被计算一次，赋值一次，再之后不会被更改了，这个特性有点熟悉哎？没错，所以lazy修饰的变量必须同时是val修饰的不可变变量。
 ```
 
 
@@ -698,6 +705,15 @@ var sum : Long = 0
 (value1, value2) => (value1 + value2) 两个value都是你返回的对象，但是这里的value是对应着每个分区计算的结果，如果是算全局的sum，那么每个分区结果计算完以后，还要求和分区的结果，才是真正的所有数据求和
 
 
+```
+
+### 无语
+
+```
+ override lazy val
+ 不能lazy var
+ 不能override var
+ 这些限制怎么那么多
 ```
 
 
