@@ -972,6 +972,8 @@ ps -cf
 - 如果字符串匹配包含空格，那么一定要用转义符 \：https://blog.csdn.net/qq_30038111/article/details/83447045
 
 ```
+参数说明：http://c.biancheng.net/view/946.html
+
 https://blog.csdn.net/stepbystepto/article/details/52951849
 grep -v *.sh 筛选掉不包含.sh的文件
 
@@ -981,6 +983,21 @@ grep "#\[1234\]" -R .
 
 搜索以某个数字为开头的一行
 grep "^500147" -R .
+
+
+获取当前行的上下200行内容
+grep -A 200 xxx
+
+
+
+    -A 数字：列出符合条件的行，并列出后续的 n 行；
+    -B 数字：列出符合条件的行，并列出前面的 n 行；
+    -c：统计找到的符合条件的字符串的次数；
+    -i：忽略大小写；
+    -n：输出行号；
+    -v：反向査找；
+    --color=auto：搜索出的关键字用颜色显示；
+
 ```
 
 ### gunzip
@@ -1724,6 +1741,19 @@ cal -y
 yum install gcc
 yum install gcc-c++ libstdc++-devel
 
+```
+
+## 正则表达式
+
+```
+https://jingyan.baidu.com/article/eb9f7b6d452768869364e805.html
+srt文件字幕提取中文
+\d+:\d+:\d+,\d+ --> \d+:\d+:\d+,\d+[\r|\n]{1,2}([\w\W]*?)[\r|\n]{1,2}
+
+全选字幕
+\d+:\d+:\d+,\d+ --> \d+:\d+:\d+,\d+[\r|\n]{1,2}([\w\W]*?)[\r|\n]{2}
+
+\d+:\d+:\d+,\d+ --> \d+:\d+:\d+,\d+[\r|\n]{1,2}[\w\W]*?[\r|\n]{1,2}([\w\W]*?)[\r|\n]{1,2}
 ```
 
 
