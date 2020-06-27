@@ -14,6 +14,31 @@ go中文网：https://books.studygolang.com/The-Golang-Standard-Library-by-Examp
 按照utf8的一个字节为单位，无论英文还是汉字。
 ```
 
+#### defer
+```
+https://www.cnblogs.com/ysherlock/p/8150726.html
+延迟函数 延迟直到函数return的时候，会被调用。尤其是文件close的时候常用
+```
+
+#### chan
+
+```
+http://c.biancheng.net/view/97.html
+管道，起到不同goroutine的通信作用
+```
+
+#### struct
+
+```
+
+```
+
+#### interface
+
+```
+
+```
+
 
 
 ### 相关库
