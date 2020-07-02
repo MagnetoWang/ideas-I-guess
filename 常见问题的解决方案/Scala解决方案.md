@@ -398,6 +398,16 @@ val longCol = data.col(valueCol).cast(LongType)
 再转long
 val longCol = (data.col(valueCol).cast(doubleType) * 1000).cast(LongType)
 
+
+date类型转换问题，转换会有时区问题
+https://yq.aliyun.com/articles/618130
+首先很直观的是直接把DateType cast 成 LongType, 如下:
+
+df.select(df.col("birth").cast(LongType))
+
+但是这样出来都是 null, 这是为什么? 答案就在 org.apache.spark.sql.catalyst.expressions.Cast 中, 先看 canCast 方法, 可以看到 DateType 其实是可以转成 NumericType 的, 然后再看下面castToLong的方法, 可以看到case DateType => buildCast[Int](_, d => null)居然直接是个 null, 看提交记录其实这边有过反复, 然后为了和 hive 统一, 所以返回最后还是返回 null 了.
+
+
 ```
 
 
