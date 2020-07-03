@@ -763,6 +763,13 @@ sortIdDataframe.rdd.map(row => {
     })
 ```
 
+#### scalac bad symbolic reference
+
+```
+scalac bad symbolic reference
+包引用错误，后面是通过对比pom文件，才发现spark版本号没有对应上
+```
+
 
 
 ## 单元测试
