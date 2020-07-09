@@ -114,16 +114,25 @@ npm list -g
 
 ### 启动文档
 ```
+docker exec -it 2eacf16600d9621615c6825768b23346543c0baa2ac44f76429044c7b96c3482 /bin/bash
+
 安装nvm
-
 cd /root/
-
 git clone https://github.com/nvm-sh/nvm.git .nvm
-cd nvm/
+cd .nvm/
 sh install.sh
 source ~/.bashrc
 nvm install 11.6.0
 npm config set registry https://registry.npm.taobao.org
+
+hexo安装 
+npm init -f // 一定要初始化package.json文件，才能安装
+npm install hexo-cli
+export PATH=`pwd`/node_modules/.bin:$PATH   // hexo的path路径要指定
+
+yum install tmux
+
+
 
 sh nvm.sh
 wget https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh
