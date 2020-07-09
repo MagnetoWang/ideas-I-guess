@@ -3335,6 +3335,8 @@ Keras 2.2.3 :
 wget http://ftp.kddilabs.jp/infosystems/apache/spark/spark-2.4.5/spark-2.4.5-bin-hadoop2.7.tgz
 tar -zxvf spark-2.4.5-bin-hadoop2.7.tgz
 cp 
+
+
 ```
 
 ### 概念
@@ -3703,6 +3705,47 @@ https://yq.aliyun.com/articles/71172
 而在失败的任务里，stage26在执行时发现这个node上有3个executor，为了性能的提升，将数据分配给3个executor执行计算。可见其中也成功了一半，32686这个端口的executor是24中执行的那个，因而虽然它要处理3.3g的数据，但是因为不需要网络传输，也仍然可以成功。可是对于另外两个，即使是同一个节点，但是由于是不同进程，仍然需要通过netty的server拉取数据，而这一次的拉取最大不能超过int最大值，因而失败了一个，导致整个stage失败，也就导致了整个job的失败。
 总结
 由此可见在数据极度倾斜的情况下，增大executor的数量未见得是好事，还是要根据具体情况而来。减小了数量解决了问题，但是这其实并不是最好的解决方案，因为这种情况下，可见数据基本等同于本地执行，完全浪费了集群的并发性，更好的解决方案还需要再继续深入理解。
+```
+
+#### Exception in thread "main" java.lang.NoClassDefFoundError: com/sun/jersey/api/client/config/ClientConfig
+
+```
+20/07/08 17:29:21 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+log4j:WARN No appenders could be found for logger (org.apache.hadoop.hdfs.BlockReaderLocal).
+log4j:WARN Please initialize the log4j system properly.
+log4j:WARN See http://logging.apache.org/log4j/1.2/faq.html#noconfig for more info.
+Exception in thread "main" java.lang.NoClassDefFoundError: com/sun/jersey/api/client/config/ClientConfig
+	at org.apache.hadoop.yarn.client.api.TimelineClient.createTimelineClient(TimelineClient.java:55)
+	at org.apache.hadoop.yarn.client.api.impl.YarnClientImpl.createTimelineClient(YarnClientImpl.java:181)
+	at org.apache.hadoop.yarn.client.api.impl.YarnClientImpl.serviceInit(YarnClientImpl.java:168)
+	at org.apache.hadoop.service.AbstractService.init(AbstractService.java:163)
+	at org.apache.spark.deploy.yarn.Client.submitApplication(Client.scala:161)
+	at org.apache.spark.deploy.yarn.Client.run(Client.scala:1135)
+	at org.apache.spark.deploy.yarn.YarnClusterApplication.start(Client.scala:1527)
+	at org.apache.spark.deploy.SparkSubmit.org$apache$spark$deploy$SparkSubmit$$runMain(SparkSubmit.scala:845)
+	at org.apache.spark.deploy.SparkSubmit.doRunMain$1(SparkSubmit.scala:161)
+	at org.apache.spark.deploy.SparkSubmit.submit(SparkSubmit.scala:184)
+	at org.apache.spark.deploy.SparkSubmit.doSubmit(SparkSubmit.scala:86)
+	at org.apache.spark.deploy.SparkSubmit$$anon$2.doSubmit(SparkSubmit.scala:920)
+	at org.apache.spark.deploy.SparkSubmit$.main(SparkSubmit.scala:929)
+	at org.apache.spark.deploy.SparkSubmit.main(SparkSubmit.scala)
+Caused by: java.lang.ClassNotFoundException: com.sun.jersey.api.client.config.ClientConfig
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:335)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 14 more
+	
+这是某个jar包有问题，需要手动更换下
+
+https://blog.csdn.net/zhanglong_4444/article/details/106097216
+spark-2.0后jersey升级到了ver2.x版本，但实际使用时还需要1.x。导致报错。
+
+主要这三个包
+jersey-client-1.19.jar
+jersey-core-1.19.1.jar
+jersey-guice-1.19.jar
+放到${SPAKR_HOME}/jars 目录之下
 ```
 
 
