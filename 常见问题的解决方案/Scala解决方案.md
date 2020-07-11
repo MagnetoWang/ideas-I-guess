@@ -308,13 +308,31 @@ import scala.collection.JavaConversions._
 val keys : Seq[String] = xxxList.toSeq
 
 
+
 不能添加元素，要用arraybuffer
 ```
 
 #### Array
 
 ```
+array 转seq
+val keys: Array[String] = Array(1, 2, 3)
+val cols: Seq[String] = keys
+```
 
+#### Map
+
+```
+https://www.runoob.com/scala/scala-maps.html
+var A:Map[Char,Int] = Map()
+
+A += ('I' -> 1)
+A += ('J' -> 5)
+A += ('K' -> 10)
+A += ('L' -> 100)
+
+
+你可以使用 ++ 运算符或 Map.++() 方法来连接两个 Map，Map 合并时会移除重复的 key。
 ```
 
 
@@ -695,6 +713,23 @@ var sum : Long = 0
  
 写入csv文件
 df.coalesce(1).write.option("header", "true").csv("skewData.csv")
+
+
+distinct
+https://xieyuanpeng.com/2019/06/22/spark-distinct-vs-groupBy/
+针对整行数据校验，去重。单独列没法用这个函数
+
+reduce、reduceByKey
+
+
+根据某一列，去重
+dropDuplicates
+def dropDuplicates(col1: String, cols: String*): Dataset[T]
+Returns a new Dataset with duplicate rows removed, considering only the subset of columns.
+For a static batch Dataset, it just drops duplicate rows. For a streaming Dataset, it will keep all data across triggers as intermediate state to drop duplicates rows. You can use withWatermark to limit how late the duplicate data can be and system will accordingly limit the state. In addition, too late data older than watermark will be dropped to avoid any possibility of duplicates.
+
+
+
 
 ```
 
