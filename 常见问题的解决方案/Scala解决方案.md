@@ -9,8 +9,22 @@ mac
 brew install sbt@1
 
 linux
+wget https://downloads.lightbend.com/scala/2.13.3/scala-2.13.3.tgz
+配置path路径，这样scala环境就有了
+```
+
+### 命令行
 
 ```
+java执行scala的包
+https://blog.csdn.net/leano/article/details/5867108
+
+
+可以把idea的执行命令复制下来好好研究
+java "-javaagent:/Applications/IntelliJ IDEA.app/Contents/lib/idea_rt.jar=63883:/Applications/IntelliJ IDEA.app/Contents/bin" -Dfile.encoding=UTF-8 -classpath /Library/Java/JavaVirtualMachines/jdk1.8.0_191.jdk/Contents/Home/jre/lib/charsets.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_191.jdk/Contents/Home/jre/lib/deploy.jar:/Users/magnetowang/.m2/repository/org/ow2/asm/asm-util/5.2/asm-util-5.2.jar com._4paradigm.ferrari.prophet.SparkUtils
+```
+
+
 
 ### 特殊符号
 
@@ -803,6 +817,56 @@ sortIdDataframe.rdd.map(row => {
 ```
 scalac bad symbolic reference
 包引用错误，后面是通过对比pom文件，才发现spark版本号没有对应上
+```
+
+#### scala.collection.mutable.Buffer$.empty()Lscala/collection/GenTraversable
+
+```
+Exception in thread "main" java.lang.NoSuchMethodError: scala.collection.mutable.Buffer$.empty()Lscala/collection/GenTraversable;
+	at org.apache.spark.sql.SparkSessionExtensions.<init>(SparkSessionExtensions.scala:72)
+	at org.apache.spark.sql.SparkSession$Builder.<init>(SparkSession.scala:780)
+	at org.apache.spark.sql.SparkSession$.builder(SparkSession.scala:981)
+	at com._4paradigm.ferrari.prophet.SparkUtils$.getNoRepeatData(SparkUtils.scala:37)
+	at com._4paradigm.ferrari.prophet.SparkUtils$.main(SparkUtils.scala:17)
+	at com._4paradigm.ferrari.prophet.SparkUtils.main(SparkUtils.scala)
+	
+scala的版本和打包的jar包没有一致
+统一版本号就可以了
+```
+
+#### java.lang.NoClassDefFoundError: scala/collection/Seq
+
+```
+Exception in thread "main" java.lang.NoClassDefFoundError: scala/collection/Seq
+	at com....SparkUtils.main(SparkUtils.scala)
+Caused by: java.lang.ClassNotFoundException: scala.collection.Seq
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:335)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 1 more
+	
+java 执行jar包的时候报错，用-cp的命令添加指定的jar包
+可以使用通配符
+java -cp xxx/*:xxx.jar xxxx
+```
+
+
+
+#### java.lang.NoClassDefFoundError: org/apache/spark/sql/SparkSession$
+
+```
+Exception in thread "main" java.lang.NoClassDefFoundError: org/apache/spark/sql/SparkSession$
+	at com._4paradigm.ferrari.prophet.SparkUtils$.getNoRepeatData(SparkUtils.scala:37)
+	at com._4paradigm.ferrari.prophet.SparkUtils$.main(SparkUtils.scala:17)
+	at com._4paradigm.ferrari.prophet.SparkUtils.main(SparkUtils.scala)
+Caused by: java.lang.ClassNotFoundException: org.apache.spark.sql.SparkSession$
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:335)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 3 more
+	
 ```
 
 
