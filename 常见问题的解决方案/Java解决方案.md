@@ -1532,6 +1532,18 @@ poll
 ### String
 
 ```
+split分隔要注意转义符
+https://www.cnblogs.com/mingforyou/archive/2013/09/03/3299569.html
+1、如果用“.”作为分隔的话,必须是如下写法,String.split("\\."),这样才能正确的分隔开,不能用String.split(".");
+
+2、如果用“|”作为分隔的话,必须是如下写法,String.split("\\|"),这样才能正确的分隔开,不能用String.split("|");
+
+“.”和“|”都是转义字符,必须得加"\\";
+
+3、如果在一个字符串中有多个分隔符,可以用“|”作为连字符,比如,“acount=? and uu =? or n=?”,把三个都分隔出来,可以用String.split("and|or");
+
+使用String.split方法分隔字符串时,分隔符如果用到一些特殊字符,可能会得不到我们预期的结果。 
+
 
 ```
 
@@ -1749,6 +1761,21 @@ JVM_ARGS="-Xms1024m -Xmx1024m" jmeter -t test.jmx [etc.]
 
 - <https://www.cnblogs.com/xyhz0310/p/6803950.html>
 - 前者属于编译时期加载类出现的错误，后者属于运行时期加载类出现的错误
+
+```
+很明显NoClassDefFoundError的错误是因为在运行时类加载器在classpath下找不到需要加载的类，所以我们需要把对应的类加载到classpath中，或者检查为什么类在classpath中是不可用的，这个发生可能的原因如下：
+
+    对应的Class在java的classpath中不可用
+    你可能用jar命令运行你的程序，但类并没有在jar文件的manifest文件中的classpath属性中定义
+    可能程序的启动脚本覆盖了原来的classpath环境变量
+    因为NoClassDefFoundError是java.lang.LinkageError的一个子类，所以可能由于程序依赖的原生的类库不可用而导致
+    检查日志文件中是否有java.lang.ExceptionInInitializerError这样的错误，NoClassDefFoundError有可能是由于静态初始化失败导致的（这是我遇到的问题的解决办法）
+    如果你工作在J2EE的环境，有多个不同的类加载器，也可能导致NoClassDefFoundError。
+    NoClassDefFoundError也可能由于类的静态初始化模块错误导致，当你的类执行一些静态初始化模块操作，如果初始化模块抛出异常，哪些依赖这个类的其他类会抛出NoClassDefFoundError的错误。如果你查看程序日志，会发现一些java.lang.ExceptionInInitializerError的错误日志，ExceptionInInitializerError的错误会导致java.lang.NoClassDefFoundError: Could not initialize class
+
+```
+
+
 
 ### Error: Could not find or load main class
 
