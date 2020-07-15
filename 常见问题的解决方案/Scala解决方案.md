@@ -108,6 +108,12 @@ scala> postsDf.filter('postTypeId === 1).withColumn("ratio", 'viewCount / 'score
 spark最新动态新闻：https://databricks.com/blog
 dataframe接口：https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.Dataset
 sql函数接口：https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.functions$
+
+2.3文档：https://spark.apache.org/docs/2.3.0/api/scala/index.html#org.apache.spark.sql.Dataset
+1.6文档：https://spark.apache.org/docs/1.6.0/api/scala/index.html#org.apache.spark.sql.Dataset
+
+国内文档，访问速度快：http://spark.apachecn.org/#/
+文档github项目：https://github.com/apachecn/spark-doc-zh
 ```
 
 ### 概念
@@ -743,7 +749,18 @@ Returns a new Dataset with duplicate rows removed, considering only the subset o
 For a static batch Dataset, it just drops duplicate rows. For a streaming Dataset, it will keep all data across triggers as intermediate state to drop duplicates rows. You can use withWatermark to limit how late the duplicate data can be and system will accordingly limit the state. In addition, too late data older than watermark will be dropped to avoid any possibility of duplicates.
 
 
-
+column的操作
+  /**
+   * True if the current column is between the lower bound and upper bound, inclusive.
+   *
+   * @group java_expr_ops
+   * @since 1.4.0
+   */
+  def between(lowerBound: Any, upperBound: Any): Column = {
+    (this >= lowerBound) && (this <= upperBound)
+  }
+  
+xxx && xxx 这是表示between的意思，不是逻辑与的关系
 
 ```
 
@@ -765,6 +782,40 @@ var sum : Long = 0
 
 
 ```
+
+#### spark-submit
+
+```
+https://www.jianshu.com/p/1d41174441b6
+
+spark2-submit \      # 第1行
+--class com.google.datalake.TestMain \      #第2行
+--master yarn \      # 第3行
+--deploy-mode client \      # 第4行
+--driver-memory 3g \      # 第5行
+--executor-memory 2g \      # 第6行
+--total-executor-cores 12 \      # 第7行
+--jars /home/jars/test-dep-1.0.0.jar,/home/jars/test-dep2-1.0.0.jar,/home/jars/test-dep3-1.0.0.jar \      # 第8行
+/home/release/jars/test-sql.jar \      # 第9行
+para1 \      # 第10行
+para2 \      # 第11行
+"test sql" \      # 第12行
+parax      # 第13行
+
+第1行：指定该脚本是一个spark submit脚本（spark老版本是spark-submit，新版本spark2.x是spark2-submit）；
+第2行：指定main类的路径；
+第3行：指定master（使用第三方yarn作为spark集群的master）；
+第4行：指定deploy-mode（应用模式，driver进程运行在spark集群之外的机器，从集群角度来看该机器就像是一个client）；
+第5行：分配给driver的内存为3g，也可用m（兆）作为单位；
+第6行：分配给单个executor进程的内存为2g，也可用m（兆）作为单位；
+第7行：分配的所有executor核数（executor进程数最大值）；
+第8行：运行该spark application所需要额外添加的依赖jar，各依赖之间用逗号分隔；
+第9行：被提交给spark集群执行的application jar；
+第10～13行：传递给main方法的参数，按照添加顺序依次传入，如果某个参数含有空格则需要使用双引号将该参数扩起来；
+
+```
+
+
 
 ### 无语
 
@@ -867,6 +918,41 @@ Caused by: java.lang.ClassNotFoundException: org.apache.spark.sql.SparkSession$
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	... 3 more
 	
+	
+	
+```
+
+#### import spark.implicits._ 报红  encoder 也包含，隐士转换排查方向就是怎样让机器知道你这个转换
+
+```
+https://blog.csdn.net/qq_39597203/article/details/83006695
+
+def main(args: Array[String]): Unit = {
+        //Create SparkConf() And Set AppName
+      SparkSession.builder()
+                .appName("Spark Sql basic example")
+                .config("spark.some.config.option", "some-value")
+                .getOrCreate()
+ 
+        //import implicit DF,DS
+        import spark.implicits._ //这里的spark出现了红色，无法导入
+    }
+    
+    
+def main(args: Array[String]): Unit = {
+        //Create SparkConf() And Set AppName
+     val spark=  SparkSession.builder()
+                .appName("Spark Sql basic example")
+                .config("spark.some.config.option", "some-value")
+                .getOrCreate()
+ 
+        //import implicit DF,DS
+        import spark.implicits._
+    }
+
+必须先用sparksession，然后才能从session里面用implicits
+
+
 ```
 
 
