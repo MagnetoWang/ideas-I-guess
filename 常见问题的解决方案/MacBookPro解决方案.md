@@ -93,6 +93,14 @@
 
 - 可以选择外置硬盘测试
 
+### 微信双开
+
+```
+open -n /Applications/WeChat.app/Contents/MacOS/WeChat mac
+```
+
+
+
 ## 安装软件
 
 ### 安装md5sum
