@@ -846,6 +846,16 @@ stoull()//字符串转unsinged long long
 //int, unsigned int, long, unsigned long, long long, unsigned long long
 //float, double
 string to_string(待转换数字)
+
+原始字符串 R
+https://www.cnblogs.com/lidabo/p/7151951.html
+
+// 一个普通的字符串，'\n'被当作是转义字符，表示一个换行符。
+std::string normal_str = "First line.\nSecond line.\nEnd of message.\n";
+
+// 一个raw string，'\'不会被转义处理。因此，"\n"表示两个字符：字符反斜杠 和 字母n。
+std::string raw_str = R"(First line.\nSecond line.\nEnd of message.\n)";
+
 ```
 
 ### wstring
@@ -1947,6 +1957,23 @@ std::cout << fn_half(10) << '\n';                        // 5
 ### decltype
 
 ```
+https://www.cnblogs.com/QG-whz/p/4952980.html
+ int i = 4;
+ decltype(i) a; //推导结果为int。a的类型为int。
+    
+    vector<int >vec;
+    typedef decltype(vec.begin()) vectype;
+    for (vectype i = vec.begin; i != vec.end(); i++)
+    {
+    //...
+    }
+   
+   
+
+如果e是一个没有带括号的标记符表达式或者类成员访问表达式，那么的decltype（e）就是e所命名的实体的类型。此外，如果e是一个被重载的函数，则会导致编译错误。
+否则 ，假设e的类型是T，如果e是一个将亡值，那么decltype（e）为T&&
+否则，假设e的类型是T，如果e是一个左值，那么decltype（e）为T&。
+否则，假设e的类型是T，则decltype（e）为T。
 
 ```
 
