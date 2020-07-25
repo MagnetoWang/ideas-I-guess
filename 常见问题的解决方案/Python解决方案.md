@@ -162,6 +162,8 @@ int(str)
 ```
 字符串拼接
 
+查找字符
+txt.find(xxx)
 ```
 
 
@@ -269,6 +271,36 @@ for num in range(10,20):  # 迭代 10 到 20 之间的数字
 
 ```
 json.dumps(dict_xxx, sort_keys=False, indent=4, separators=(',', ':'))
+
+
+json.load 读取文件
+json.loads 读取json字符串
+```
+
+### yaml格式化读写
+
+```
+https://www.cnblogs.com/yoyoketang/p/9255109.html
+
+
+```
+
+### 文件操作
+
+```
+https://www.cnblogs.com/sysuoyj/archive/2012/03/14/2395789.html
+按行读
+f = open("foo.txt")             # 返回一个文件对象
+line = f.readline()             # 调用文件的 readline()方法
+while line:
+    print line,                 # 后面跟 ',' 将忽略换行符
+    # print(line, end = '')　　　# 在 Python 3中使用
+    line = f.readline()
+
+f.close()
+
+for line in open("foo.txt"):
+    print line
 ```
 
 
@@ -352,6 +384,8 @@ git clone https://github.com/pyenv/pyenv.git ~/.pyenv
 git clone https://gitee.com/mirrors/pyenv.git ~/.pyenv
 export PYTHON_BUILD_MIRROR_URL="https://npm.taobao.org/mirrors/python/"
 
+国内加速
+export v=3.7.1; wget https://npm.taobao.org/mirrors/python/$v/Python-$v.tar.xz -P ~/.pyenv/cache/; pyenv install $v 
 
 echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bash_profile
 echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bash_profile
