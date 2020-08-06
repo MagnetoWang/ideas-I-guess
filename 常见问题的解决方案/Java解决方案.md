@@ -3834,6 +3834,25 @@ Arthas 是Alibaba开源的Java诊断工具，深受开发者喜爱。
 Arthas支持JDK 6+，支持Linux/Mac/Winodws，采用命令行交互模式，同时提供丰富的 Tab 自动补全功能，进一步方便进行问题的定位和诊断。
 ```
 
+## jgrapht
+
+```
+使用说明：https://www.programcreek.com/java-api-examples/index.php?api=org.jgrapht.EdgeFactory
+
+官网：https://jgrapht.org/
+官网使用手册：https://jgrapht.org/guide/UserOverview
+demo例子：https://github.com/jgrapht/jgrapht/wiki/Users:-Running-JGraphT-demos
+```
+
+## Lucene
+
+### 资料
+
+```
+反向索引实现：https://blog.csdn.net/itsoftchenfei/article/details/83052206
+FST字典实现：https://www.cnblogs.com/bonelee/p/6226185.html
+```
+
 
 
 [TOC]
