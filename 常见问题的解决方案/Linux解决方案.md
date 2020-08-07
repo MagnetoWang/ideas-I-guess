@@ -697,6 +697,15 @@ ldd --version
 
 - https://blog.csdn.net/ithomer/article/details/9288353
 
+### /dev/shm 虚拟目录
+
+```
+这个目录是把文件存在内存中的，重启后里面的文件都会消失
+用与借用他人机器，但是又不希望留下痕迹的场景
+```
+
+
+
 ### if语法
 
 - https://blog.csdn.net/yf210yf/article/details/9207147
@@ -1351,6 +1360,20 @@ ls -lR  | grep "^-" | wc -l
 ### 邮件的位置
 
 - /var/spool/mail
+
+### 网络请求
+
+```
+export proxy="http://192.168.5.14:8118"
+export http_proxy=$proxy
+export https_proxy=$proxy
+export ftp_proxy=$proxy
+export no_proxy="localhost, 127.0.0.1, ::1"
+
+https://www.cnblogs.com/EasonJim/p/9826681.html
+```
+
+
 
 ## 文件
 
