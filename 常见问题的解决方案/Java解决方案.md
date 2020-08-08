@@ -1442,6 +1442,33 @@ public class TestThread {
 players.forEach((player) -> System.out.print(player + "; "));
 ```
 
+### Set
+
+```
+hashSet
+
+        result.clear();
+        result.addAll(set1);
+        result.retainAll(set2);
+        System.out.println("交集：" + result);
+ 
+        result.clear();
+        result.addAll(set1);
+        result.removeAll(set2);
+        System.out.println("差集：" + result);
+ 
+        result.clear();
+        result.addAll(set1);
+        result.addAll(set2);
+        System.out.println("并集：" + result);
+交集：[1, 3]
+差集：[5]
+并集：[1, 2, 3, 5]
+
+set1: [1,3,5]
+set2: [1,2,3]
+```
+
 
 
 ### HashMap
@@ -1512,6 +1539,8 @@ List<String> names = new ArrayList<String>() {{
 
 ```
 https://www.jianshu.com/p/c577796e537a
+
+Queue<String> queue = new LinkedList<>();
 
 添加元素
 add offer 
