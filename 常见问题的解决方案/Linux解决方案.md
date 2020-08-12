@@ -539,6 +539,7 @@ The GNU C Library project provides the core libraries for the GNU system and GNU
 
   - tar -zxvf ×××.tar.gz
   - tar -jxvf ×××.tar.bz2
+  - unrar -x xxxxx.rar
   - https://blog.csdn.net/FX677588/article/details/76100538
 
 - 安装zsh
@@ -1213,6 +1214,8 @@ gzip -dr test6
 - <https://www.runoob.com/linux/linux-comm-patch.html>
 - 命令用于修补文件
 
+## 进程管理
+
 ### 查看端口占用情况-更通用
 
 ```
@@ -1231,6 +1234,37 @@ pwdx 10769
 - netstat -anp | grep port
 - 一般p的参数有权限限制，有了p那么才会显示pid数字
 - 参考资料：http://www.cnblogs.com/MacoLee/p/5664306.html
+
+### 进程pid内存使用情况
+
+```
+https://www.cnblogs.com/sky-heaven/p/7654966.html
+
+Linux中查看某个进程占用内存的情况，执行如下命令即可，将其中的[pid]替换成相应进程的PID号：
+
+cat /proc/[pid]/status
+
+回到顶部
+说明
+
+/proc/[pid]/status中所保存的信息除了内存信息，还包括进程IDs、信号等信息，此处暂时只介绍内存相关的信息。
+字段	说明
+VmPeak 	进程所使用的虚拟内存的峰值
+VmSize 	进程当前使用的虚拟内存的大小
+VmLck 	已经锁住的物理内存的大小（锁住的物理内存不能交换到硬盘）
+VmHWM 	进程所使用的物理内存的峰值
+VmRSS 	进程当前使用的物理内存的大小
+VmData 	进程占用的数据段大小
+VmStk 	进程占用的栈大小
+VmExe 	进程占用的代码段大小（不包括库）
+VmLib 	进程所加载的动态库所占用的内存大小（可能与其它进程共享）
+VmPTE 	进程占用的页表大小（交换表项数量）
+VmSwap 	进程所使用的交换区的大小
+
+cat /proc/1161/status
+```
+
+
 
 ### 命令结果保存在变量中
 
