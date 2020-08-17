@@ -41,6 +41,19 @@ http://c.biancheng.net/view/97.html
 
 ```
 
+#### <-
+
+```
+https://studygolang.com/articles/12745?fr=sidebar
+Channel是Go中的一个核心类型，你可以把它看成一个管道，通过它并发核心单元就可以发送或者接收数据进行通讯(communication)。
+
+它的操作符是箭头 <- 。
+
+ch := make(chan int) channel必须先创建再使用:
+ch <- v    // 发送值v到Channel ch中
+v := <-ch  // 从Channel ch中接收数据，并将数据赋值给v
+```
+
 
 
 ### 相关库
@@ -76,5 +89,37 @@ sync.Once 是 Golang package 中使方法只执行一次的对象实现，作用
 
 当一个函数不希望程序在一开始的时候就被执行的时候，我们可以使用 sync.Once 。
 
+```
+
+
+
+
+
+### 内存模型
+
+```
+官网说明：https://golang.org/ref/mem
+
+```
+
+#### 数据一致性
+
+```
+If the effects of a goroutine must be observed by another goroutine, use a synchronization mechanism such as a lock or channel communication to establish a relative ordering.
+
+```
+
+#### 管道通信
+
+```
+
+```
+
+### 多线程
+
+```
+go run -race xxx.go
+-race:可以检测协程并发的时候会不会出现串改某个变量值
+https://www.cnblogs.com/yjf512/p/5144211.html
 ```
 
