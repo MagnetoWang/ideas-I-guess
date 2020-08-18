@@ -1721,6 +1721,14 @@ int* modifier = const_cast<int*>(&constant);
 
 - 不推荐使用
 
+```
+https://baike.baidu.com/item/dynamic_cast
+
+dynamic_cast运算符可以在执行期决定真正的类型。如果 downcast 是安全的（也就说，如果基类指针或者引用确实指向一个派生类对象）这个运算符会传回适当转型过的指针。如果 downcast 不安全，这个运算符会传回空指针（也就是说，基类指针或者引用没有指向一个派生类对象）
+```
+
+
+
 ### delete 和 default函数
 
 - c++11 的新特性
@@ -4721,7 +4729,13 @@ MXImperativeInvoke,MXImperativeInvokeImpl
 CSVParser
 
 
+```
 
+## DCPMM
+
+```
+说明：https://blog.csdn.net/limanjihe/article/details/106158713
+编程工具库：https://pmem.io/pmdk/
 ```
 
 [TOC]
