@@ -134,6 +134,13 @@ Physical movement of data between partitions is called shuffling
 val和var。val就不能再赋值了。与之对应的，var可以在它生命周期中被多次赋值。
 
 https://blog.csdn.net/s646575997/article/details/51264115
+
+var minNum:Int = _ 初始化为0
+var minNum:String = _ 初始化null
+
+在java中，作为类的属性时，变量不需要立刻初始化，但是在scala中必须要立刻初始化。
+    val的变量定义的时候必须赋值
+    var的变量可以使用默认初始化,既用下划线对变量赋值,但是使用的时候要注意以下几点:
 ```
 
 
