@@ -670,6 +670,12 @@ https://www.cnblogs.com/sammyliu/p/5878973.html
 
 瓶颈
 需要一定网络带宽开销
+
+
+ vncserver -geometry 1920x1080
+ 
+ export LC_ALL="en_US.UTF-8"
+export LANGUAGE="en_US.UTF-8"
 ```
 
 # Linux下的Shell
@@ -1007,6 +1013,10 @@ grep -A 200 xxx
     -n：输出行号；
     -v：反向査找；
     --color=auto：搜索出的关键字用颜色显示；
+    
+    
+ripgrep xxx
+递归搜索所有文件的内容
 
 ```
 
@@ -1956,6 +1966,79 @@ Binary file xxx.log matches
 grep -a "key" xxx.log
 ```
 
+### cpu抖动问题
+
+```
+https://zhuanlan.zhihu.com/p/172013683
+
+该文章指出其中两个原因
+1，内存读写频繁，导致内存不足，因为调用mmap函数次数太多
+2. 内存碎片太多，导致调用compact_zone函数次数太多，需要不停整合内存碎片
+
+对于数据库读写来说，cpu抖动会影响读写的成功率，就是写不进数据，读不出数据的情况
+
+为什么会有内存读写频繁呢
+因为es的索引
+
+如何发现读写频繁问题
+用perf工具
+
+
+ElasticSearch稳定性排查过程简述
+es读写经常失败
+查看cpu利用率-尽量可视化成图
+发现cpu抖动
+排查user和system进程占用情况
+es热点线程和gc是user进程，在抖动的时候，没有变化
+system进程cpu增长很多
+用perf排查，和相关工具查看内存
+pgpgin 换入页字节数
+pgpgout 换出页字节数
+pgscand 直接扫描内存页数
+pgscank 后台线程扫描内存
+
+查看系统日志发现
+内存不断回收
+系统分配内存失败
+
+查看内存占用情况
+PageCache 内存由系统维护，可以被回收的
+如果系统内存不足，则内核通过回收 PageCache 的内存即可提供足够的空闲内存
+
+PageCache 回收问题
+MMap 就可能导致 PageCache 不能正常回收，原因是 MMap 后应用程序会引用到这部分内存，则内核在回收内存时会忽略这部分内存。而 ES 节点读取文件的方式默认就是 MMap，整体的内存
+
+方案一解决
+替换 MMap 去访问文件，在 Java 中即可采用 NIO 方式读取文件
+
+新问题
+采用 NIO 访问文件也存在问题，即数据会多一次内存复制，会导致延迟方面比 MMap 方式的高，经过测试发现延迟会高 30%左右
+
+方案二解决
+两者结合起来，目的是加快内存回收的同时降低延迟，采取的策略是根据访问频率来确定文件的读写方式（即高频采用 MMap 方式，这样可以保证延迟低，低频采用 Nio 方式，这样可以加快内核回收 PageCache）
+查询用mmap
+排序用mmap
+拿结果用 niofs
+结果
+延迟方面和 MMap 基本一致
+内存回收方面也比 MMap 好
+
+上线后抖动仍然存在！
+老方法排查
+perf发现 高阶内存不足
+系统在进行内存碎片整合（即有 compact_zone()等函数调用），这就意味着此时系统高阶内存是不足，为了进一步验证当前的高阶内存不足，通过 cat/proc/buddyinfo 查看当前系统空闲内存的分布情况
+空闲内存很多，但是大部分是碎片
+
+优化 PageCache 间的内存碎片
+1、释放内存：释放 PageCache 内存，保证新的空闲内存尽可能连续，具体的处理措施是 echo1 > /proc/sys/vm/drop_cache
+2、保留一定空闲内存：目的是避免内存的不断申请和回收，导致内存碎片化再次变的严重，具体处理措施是限制 PageCache 的大小（这里依赖 tlinux 的实现），具体的命令是 echo36 > /proc/sys/vm/pagecache_limit_ratio
+结果
+此时的空闲也是在 4G 左右，但是大于等于 2 阶的高阶内存占比达到 95%左右，即高阶内存当前是非常充足的，并且机器的 CPU 几乎没有抖动
+
+
+
+```
+
 
 
 ## 常用代码
@@ -2140,6 +2223,10 @@ flex
 ```
 
 ```
+
+
+
+
 
 
 
