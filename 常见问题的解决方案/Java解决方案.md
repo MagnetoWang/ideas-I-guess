@@ -2205,6 +2205,20 @@ MethodSpec main = MethodSpec.methodBuilder("main")
 
 ```
 
+### 个人总结
+
+```
+javapoet用最原始的字符串方式，来生成代码
+用户使用的时候，只需要想办法构造代码字符串即可
+
+为了方便构造代码字符串，javapoet提供相关类，比如方法类，接口类等等方便快速构造结构化的代码
+也提供包管理，自动找到包的引用
+同时提高结构流，循环流，分支流之类的
+
+```
+
+
+
 ### Example
 
 以 `HelloWorld` 类为例:
@@ -3590,9 +3604,39 @@ https://www.cnblogs.com/butterfly100/p/9175673.html
 
 
 ===================================================================================
+程序bug排查
+https://www.cnblogs.com/kongzhongqijing/articles/3630264.html
+
+线程dump工具：https://www.ibm.com/support/pages/ibm-thread-and-monitor-dump-analyzer-java-tmda
+jstack 进程pid号
+
+一般进程进入死锁会需要查看线程的状态
+NEW,未启动的。不会出现在Dump中。
+
+RUNNABLE,在虚拟机内执行的。运行中状态，可能里面还能看到locked字样，表明它获得了某把锁。
+
+BLOCKED,受阻塞并等待监视器锁。被某个锁(synchronizers)給block住了。
+
+WATING,无限期等待另一个线程执行特定操作。等待某个condition或monitor发生，一般停留在park(), wait(), sleep(),join() 等语句里。
+
+TIMED_WATING,有时限的等待另一个线程的特定操作。和WAITING的区别是wait() 等语句加上了时间限制 wait(timeout)。
+
+TERMINATED,已退出的。
 
 ===================================================================================
+频繁GC问题或内存溢出问题
 
+一、使用jps查看线程ID
+
+二、使用jstat -gc 3331 250 20 查看gc情况，一般比较关注PERM区的情况，查看GC的增长情况。
+
+三、使用jstat -gccause：额外输出上次GC原因
+
+四、使用jmap -dump:format=b,file=heapDump 3331生成堆转储文件
+
+五、使用jhat或者可视化工具（Eclipse Memory Analyzer 、IBM HeapAnalyzer）分析堆情况。
+
+六、结合代码解决内存溢出或泄露问题。
 
 ===================================================================================
 
