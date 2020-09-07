@@ -403,9 +403,14 @@ enum OpReqType {
 
 ```
 常见问题：https://www.cnblogs.com/fnlingnzb-learner/p/6903966.html
+高级用法：https://www.cnblogs.com/sinferwu/articles/6902530.html
+
 
 通过可变参数灵活设置日志输出：https://blog.csdn.net/bat67/article/details/77542165
 gcc编译器特有的宏：__VA_ARGS__ ，用于可变参数
+
+
+
 ```
 
 
@@ -1058,7 +1063,34 @@ fn(x,x,xx,xxx);
 ### noexcept
 
 ```
+使用说明：https://www.cnblogs.com/sword03/p/10020344.html
 
+constexpr initializer_list() noexcept
+      : _M_array(0), _M_len(0) { }
+
+该关键字告诉编译器，函数中不会发生异常,这有利于编译器对程序做更多的优化。
+如果在运行时，noexecpt函数向外抛出了异常（如果函数内部捕捉了异常并完成处理，这种情况不算抛出异常），程序会直接终止，调用std::terminate()函数，该函数内部会调用std::abort()终止程序。
+
+```
+
+### __builtin_expect
+
+```
+使用说明：https://www.jianshu.com/p/2684613a300f
+
+这个指令是gcc引入的，作用是允许程序员将最有可能执行的分支告诉编译器。这个指令的写法为：__builtin_expect(EXP, N)。
+意思是：EXP==N的概率很大。
+
+内核里面的宏
+#define likely(x) __builtin_expect(!!(x), 1) //x很可能为真       
+#define unlikely(x) __builtin_expect(!!(x), 0) //x很可能为假
+
+调用代码
+int x, y;
+ if(unlikely(x > 0))
+    y = 1; 
+else 
+    y = -1;
 
 ```
 
@@ -1538,6 +1570,24 @@ inline std::ostream &operator<<(std::ostream &os, const Shape &shape) {
 
 ```
 字符串输出流
+```
+
+#### std::fpos_t
+
+```
+https://en.cppreference.com/w/cpp/io/c/fpos_t
+
+std::fpos_t pos;
+fgetpos(&*_file, &pos) == 0
+fseek(&*_file, -len, SEEK_END) == 0
+fsetpos(&*_file, &pos) == 0
+```
+
+#### std::fpos
+
+```
+https://en.cppreference.com/w/cpp/io/fpos
+
 ```
 
 
@@ -2541,7 +2591,12 @@ CUDA_HOST_DEVICE
 
 ```
 
+
+
+
+
 ## Glibc
+
 ```
 // [Note SSE-AVX transitions]
 // There is a bug in Glibc2.23
@@ -2975,6 +3030,17 @@ static Slice TrimSpace(Slice s) {
   return Slice(s.data() + start, limit - start);
 }
 #endif
+```
+
+### 单例模式
+
+```
+
+static Classxxxx& singleton() {
+        static Classxxxx classxxxx;
+        return classxxxx;
+}
+
 ```
 
 
