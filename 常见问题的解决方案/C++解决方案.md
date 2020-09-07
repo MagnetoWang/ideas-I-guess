@@ -399,6 +399,25 @@ enum OpReqType {
 };
 ```
 
+### 宏使用
+
+```
+常见问题：https://www.cnblogs.com/fnlingnzb-learner/p/6903966.html
+
+通过可变参数灵活设置日志输出：https://blog.csdn.net/bat67/article/details/77542165
+gcc编译器特有的宏：__VA_ARGS__ ，用于可变参数
+```
+
+
+
+### 可变参数 ... 省略号
+
+```
+... 可以用来表示函数的参数个数是可变的
+
+
+```
+
 
 
 ### Class的正确使用
@@ -1036,6 +1055,15 @@ fn(x,x,xx,xxx);
 - std::exception
 - 资料：<https://blog.csdn.net/fengbingchun/article/details/78303734>
 
+### noexcept
+
+```
+
+
+```
+
+
+
 ### using使用
 
 ```
@@ -1506,6 +1534,14 @@ inline std::ostream &operator<<(std::ostream &os, const Shape &shape) {
 
 ```
 
+#### std::ostringstream
+
+```
+字符串输出流
+```
+
+
+
 #### 文件流终止
 
 ```
@@ -1537,6 +1573,16 @@ fin.eof() 可以判断结尾结束
 - int snprintf(char *restrict buf, size_t n, const char * restrict  format, ...);
 - 最多从源串中拷贝n－1个字符到目标串中，然后再在后面加一个0。所以如果目标串的大小为n 的话，将不会溢出
 - 函数返回值:若成功则返回欲写入的字符串长度，若出错则返回负值。
+
+### 网络请求
+
+```
+boost/asio.hpp
+
+boost/asio/streambuf.hpp
+```
+
+
 
 ### sizeof使用
 
@@ -1613,6 +1659,14 @@ std::cout << std::is_same<int, int64_t>::value << '\n';   // false
 - 不能insert指针或者引用！！！！！！
 - 不能insert指针或者引用！！！！！！
 - 这会在STL中因为赋值操作，导致指针失效！！！
+
+### 实现Java的synchronized机制
+
+```
+代码：https://www.codeproject.com/Articles/12362/A-quot-synchronized-quot-statement-for-C-like-in-J
+```
+
+
 
 
 ### 并发
@@ -1955,6 +2009,54 @@ std::cout << fn_half(10) << '\n';                        // 5
 
 
 ```
+
+### std::exception
+
+```
+异常类
+
+```
+
+
+
+### std::getenv
+```
+文档：https://en.cppreference.com/w/cpp/utility/program/getenv
+头文件：#include <cstdlib>
+
+
+#include <iostream>
+#include <cstdlib>
+ 
+int main()
+{
+    if(const char* env_p = std::getenv("PATH"))
+        std::cout << "Your PATH is: " << env_p << '\n';
+}
+```
+
+### std::function
+
+```
+基本使用：https://www.jianshu.com/p/f191e88dcc80
+std::function<void(boost::asio::streambuf&)> prep_request_func
+
+std::function 是一个可调用对象包装器，是一个类模板，可以容纳除了类成员函数指针之外的所有可调用对象，它可以用统一的方式处理函数、函数对象、函数指针，并允许保存和延迟它们的执行。
+定义格式：std::function<函数类型>。
+std::function可以取代函数指针的作用，因为它可以延迟函数的执行，特别适合作为回调函数使用。它比普通函数指针更加的灵活和便利。
+
+
+```
+
+### std::ref
+
+```
+文档：http://www.cplusplus.com/reference/functional/ref/
+
+```
+
+
+
 
 ### union
 
@@ -4737,6 +4839,34 @@ CSVParser
 说明：https://blog.csdn.net/limanjihe/article/details/106158713
 编程工具库：https://pmem.io/pmdk/
 ```
+
+## asio网络库
+
+### 资料
+
+```
+优点和缺点：https://zhuanlan.zhihu.com/p/37590580
+
+
+```
+
+### 配置
+
+```
+单线程设置
+asio::io_context context(1); // one thread
+
+
+transfer_at_least
+```
+
+### reactor模式和proactor模式
+
+```
+
+```
+
+
 
 [TOC]
 
