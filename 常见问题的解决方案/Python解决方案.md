@@ -231,10 +231,25 @@ empty_set.remove(xxx)
 如果元素不存在,不报错
 empty_set.discard(xxx)
 
+集合 交集、并集、差集运算
+交集 	& 	取两集合公共的元素 	>>> set1 & set2
+{3}
+并集 	| 	取两集合全部的元素 	>>> set1 | set2
+{1,2,3,4,5}
+差集 	- 	取一个集合中另一集合没有的元素 	>>> set1 - set2
+{1,2}
+>>> set2 - set1
+{4,5}
+对称差集 	^ 	取集合 A 和 B 中不属于 A&B 的元素 	>>> set1 ^ set2
+{1,2,4,5}
+
+
 初始化
 t = set(['h', 'e', 'l', 'l', 'o'])
 或者
 t = {"sum", "max"}
+
+
 ```
 
 ### print
@@ -611,6 +626,28 @@ __contains__():当使用in，not in 对象的时候 调用(not in 是在in完成
 
 ```
 
+### __ file __
+
+```
+https://blog.csdn.net/bestallen/article/details/52079847
+
+__file__表示显示文件当前的位置
+
+但是：
+
+如果当前文件包含在sys.path里面，那么，__file__返回一个相对路径！
+
+如果当前文件不包含在sys.path里面，那么__file__返回一个绝对路径！
+```
+
+### __ name __
+
+```
+返回当前文件的名字
+```
+
+
+
 ### 打印当前路径
 
 ```
@@ -759,6 +796,68 @@ https://www.zhihu.com/question/38857862
 from 文件夹/模块名 import 函数名
 
 import 模块名
+```
+
+### yield
+
+```
+说明：https://developer.ibm.com/zh/technologies/python/articles/os-cn-python-yield/
+
+ yield 的函数在 Python 中被称之为 generator（生成器）
+ 
+def fab(max):
+    n, a, b = 0, 0, 1
+    while n < max:
+        yield b
+        # print b
+        a, b = b, a + b
+        n = n + 1
+        
+
+这一段是生成斐波列数字的代码
+print改成yield以后
+for n in fab(5):
+	print n
+	
+那么for循环中每次会调用fab函数计算
+而不是只调用一次，然后拿全部的斐波列数字的结果
+生成器就是每次生成下次结果，之前的结果不关系，从而节省了空间！
+```
+
+
+
+### range 和 xrange区别
+
+```
+xrange() 函数用法与 range 完全相同，所不同的是生成的不是一个数组，而是一个生成器。
+xrange可以比range更节省空间
+```
+
+### logging设置
+
+```
+https://www.cnblogs.com/pycode/p/logging.html
+
+logging.basicConfig(level=logging.DEBUG,format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',  \
+                    datefmt='%a, %d %b %Y %H:%M:%S')
+logger = logging.getLogger(__name__)
+logger.info("hello world")
+
+
+format: 指定输出的格式和内容，format可以输出很多有用信息，如上例所示:
+
+    %(levelno)s: 打印日志级别的数值
+    %(levelname)s: 打印日志级别名称
+    %(pathname)s: 打印当前执行程序的路径，其实就是sys.argv[0]
+    %(filename)s: 打印当前执行程序名
+    %(funcName)s: 打印日志的当前函数
+    %(lineno)d: 打印日志的当前行号
+    %(asctime)s: 打印日志的时间
+    %(thread)d: 打印线程ID
+    %(threadName)s: 打印线程名称
+    %(process)d: 打印进程ID
+    %(message)s: 打印日志信息
+
 ```
 
 
