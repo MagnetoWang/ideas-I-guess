@@ -2105,6 +2105,28 @@ std::function可以取代函数指针的作用，因为它可以延迟函数的�
 
 ```
 
+### std::type_index
+
+```
+基本使用：https://blog.csdn.net/audi2/article/details/104014908
+
+typeid运算符，返回类型信息const std::type_info&。这种类型是不能赋值的。例如：
+
+    const std::typeinfo& a = typeid(int);  //初始化可以
+    a = typeid(double);  //再赋值就是错误
+
+为了解决这个问题，C++引入了std::type_index类。这个类可以理解为封装了一个指向typeinfo的指针。理论上，std::type_index是值语义的。例如：
+
+    std::type_index a = typeid(int);  //实际是调用构造函数 std::type_index(typeid(int));
+    std::type_index b = a;
+    assert(a==b); //a,b都指向同一个type_info
+    b=typeid(double);   //重新赋值
+    assert(a!=b);  //a,b不再相同，a不受影响，仍指向int的type_info
+    std::cout <<a.name();   //实际调用的是底层type_info::name()函数
+
+这样就可以把type_index对象当做普通值（像int，std::string）一样放到容器里，或者放到类中当做普通数据成员。
+```
+
 
 
 
