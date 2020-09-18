@@ -164,6 +164,13 @@ int(str)
 
 查找字符
 txt.find(xxx)
+
+字符串小写
+str = "www.runoob.com"
+print(str.upper())          # 把所有字符中的小写字母转换成大写字母
+print(str.lower())          # 把所有字符中的大写字母转换成小写字母
+print(str.capitalize())     # 把第一个字母转化为大写字母，其余小写
+print(str.title())          # 把每个单词的第一个字母转化为大写，其余小写 
 ```
 
 
@@ -216,7 +223,12 @@ dict["xxx"] = xxxxxx
 循环遍历字典
  for key, value in dict.items():
         print("pos_name_.insert(\"", key, "\", \" ", value, "\");")
+        
+
+get方法获取元素，如果找不到返回none
 ```
+
+
 
 
 
@@ -1077,6 +1089,20 @@ import queue
 
 py2
 import Queue
+```
+
+### missing 1 required positional argument
+
+```
+https://blog.csdn.net/GodLordGee/article/details/89382886
+
+t = Test
+t.add_xdf()
+报错
+原因是类没有实例化
+t = Test()
+t.add_xdf()
+所以python很奇葩，c++的话编译就会报错了
 ```
 
 
