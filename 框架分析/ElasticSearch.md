@@ -7,6 +7,14 @@
 - 多动手
 - 多尝试
 
+### 资料
+
+```
+es在腾讯中的使用：https://zhuanlan.zhihu.com/p/99184436
+fst内存优化：https://zhuanlan.zhihu.com/p/146083622
+ex热线程问题：https://www.elastic.co/guide/en/elasticsearch/reference/6.3/cluster-nodes-hot-threads.html
+```
+
 
 
 ## Basic Concepts
