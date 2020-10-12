@@ -1570,6 +1570,19 @@ inline std::ostream &operator<<(std::ostream &os, const Shape &shape) {
 
 ```
 字符串输出流
+http://www.cplusplus.com/reference/sstream/ostringstream/
+
+Objects of this class use a string buffer that contains a sequence of characters. This sequence of characters can be accessed directly as a string object, using member str.
+
+std::ostringstream oss;
+    oss << "print schema\n";
+    for (int i = 0; i < schema.size(); i++) {
+        oss << schema.get(i).name() << ":";
+        if (i + 1 != schema.size()) {
+            oss << ", ";
+        }
+    }
+    std::cout << oss.str();
 ```
 
 #### std::fpos_t
@@ -1845,7 +1858,7 @@ dynamic_cast运算符可以在执行期决定真正的类型。如果 downcast �
 
 ## STD标准库函数
 
-```
+```c++
 列表复制
 std::vector<int> features;
 std::vector<int> new_features;
@@ -3280,6 +3293,12 @@ int main()
 
 ```
 
+#### boost::any
+
+```
+
+```
+
 
 
 ### mutex.h
@@ -3553,7 +3572,15 @@ square-root 这就是我们测试的函数
   you can use INSTANTIATE_TEST_SUITE_P to instantiate the test suite with any set of parameters you want. googletest defines a number of functions for generating test parameters. They return what we call (surprise!) parameter generators. Here is a summary of them, which are all in the testing namespace
   ```
 
+### 高级配置
 
+```
+INSTANTIATE_TEST_CASE_P：https://www.cnblogs.com/jycboy/p/6118073.html
+实例化具有任何您想要的参数的测试用例。 Google Test定义了一些用于生成测试参数的函数。 它们返回我们所谓的参数生成器（surprise！）
+
+
+
+```
 
 ## BRPC
 
