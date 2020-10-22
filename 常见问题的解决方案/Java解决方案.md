@@ -803,7 +803,7 @@ Object[] row = masterDataSet.get(cnt.getAndIncrement());
 
 ```
 
-## 多线程
+### 多线程
 
 ```
 线程总结：https://www.jianshu.com/p/b8197dd2934c
@@ -820,9 +820,133 @@ class DemoThread extends Thread {
 
 DemoThread t = new DemoThread();
 t.start();
+
+
+runnable使用方法
+
+
+线程池使用：https://www.jianshu.com/p/7ab4ae9443b9
+public class ThreadPoolTest {
+    public static void main(String[] args) {
+        ExecutorService executor = Executors.newFixedThreadPool(5);
+        for (int i = 0; i < 10; i++) {
+            executor.submit(() -> {
+                System.out.println("thread id is: " + Thread.currentThread().getId());
+                try {
+                    Thread.sleep(1000L);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+    }
+}
+```
+
+### 线程池
+
+```
+线程池原理：https://www.cnblogs.com/dolphin0520/p/3932921.html
+public ThreadPoolExecutor(int corePoolSize,int maximumPoolSize,long keepAliveTime,TimeUnit unit,
+            BlockingQueue<Runnable> workQueue);
+            
+            
+四种高级线程池：https://zhuanlan.zhihu.com/p/240892588
+    Executors.newCachedThreadPool：创建可缓存无限制数量的线程池，如果线程中没有空闲线程池的话此时再来任务会新建线程，如果超过60秒此线程无用，那么就会将此线程销毁。简单来说就是忙不来的时候无限制创建临时线程，闲下来再回收
+
+public static ExecutorService newCachedThreadPool() {
+    return new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue < runnable > ());
+}
+
+    Executors.newFixedThreadPool：创建固定大小的线程池，可控制线程最大的并发数，超出的线程会在队列中等待。简单来说就是忙不来的时候会将任务放到无限长度的队列里。
+
+public static ExecutorService newFixedThreadPool(int nThreads) {
+    return new ThreadPoolExecutor(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue < runnable > ());
+}
+
+    Executors.newSingleThreadExecutor：创建线程池中线程数量为1的线程池，用唯一线程来执行任务，保证任务是按照指定顺序执行
+
+public static ExecutorService newSingleThreadExecutor() {
+    return new FinalizableDelegatedExecutorService(new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue < runnable > ()));
+}
+
+    Executors.newScheduledThreadPool：创建固定大小的线程池，支持定时及周期性的任务执行
+
+public ScheduledThreadPoolExecutor(int corePoolSize) {
+    super(corePoolSize, Integer.MAX_VALUE, 0, NANOSECONDS, new DelayedWorkQueue());
+}
+
+简单使用
+ExecutorService service = Executors.newFixedThreadPool(5);
+                service.execute(
+                        new Runnable() {
+                            @Override
+                            // run 内部如果要使用外部变量，必须是final类型
+                            public void run() {
+                                System.out.println(Thread.currentThread().getId());
+                            }
+                        }
+                );
+                // 如果之后不再使用，一定要关掉线程池
+                service.shutdown();
 ```
 
 
+
+### 线程等待
+
+```
+https://www.cnblogs.com/lixin-link/p/10998058.html
+while循环
+join方法
+wait 和 notify方式 synchronized锁
+CountDownLatch
+Future 和 callable方法
+BlockingQueue方法
+CyclicBarrier
+
+
+countdownLatch使用：https://www.cnblogs.com/Lee_xy_z/p/10470181.html
+public static void main(String[] args) {
+        ExecutorService service = Executors.newFixedThreadPool(3);
+        final CountDownLatch latch = new CountDownLatch(3);
+        for (int i = 0; i < 3; i++) {
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        System.out.println("子线程" + Thread.currentThread().getName() + "开始执行");
+                        Thread.sleep((long) (Math.random() * 10000));
+                        System.out.println("子线程"+Thread.currentThread().getName()+"执行完成");
+                        每次使用一个线程就减一，计数的个数需要提前计算好，到底要用调几个线程
+                        latch.countDown();//当前线程调用此方法，则计数减一
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            service.execute(runnable);
+        }
+
+        try {
+            System.out.println("主线程"+Thread.currentThread().getName()+"等待子线程执行完成...");
+            // 这里会等待所有线程，如果线程是9个，而计数器是10，那么这里会永远被阻塞住。所以计数器和线程数一定要提前计算好
+            latch.await();//阻塞当前线程，直到计数器的值为0
+            System.out.println("主线程"+Thread.currentThread().getName()+"开始执行...");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+```
+
+
+
+### 异步接口
+
+```
+
+```
 
 ## Java语法
 
@@ -2112,6 +2236,7 @@ User user = gson.fromJson(jsonString, User.class);
 - 类似与xml的文件：<https://www.ibm.com/developerworks/cn/xml/x-cn-yamlintro/index.html>
 - 官网：<http://www.yaml.org/>
 - Java版本：<http://jyaml.sourceforge.net/tutorial.html>
+- 字符串缩进要求：https://www.cnblogs.com/didispace/p/12524194.html
 
 ### 总结
 
@@ -2130,6 +2255,8 @@ children:
         age: 15
     -   name: Jenny Smith
         age 12
+        
+       
 ```
 
 
@@ -3948,7 +4075,12 @@ demo例子：https://github.com/jgrapht/jgrapht/wiki/Users:-Running-JGraphT-demo
 FST字典实现：https://www.cnblogs.com/bonelee/p/6226185.html
 ```
 
+## Gitlab
+### 基本使用
+```
 
+
+```
 
 [TOC]
 
