@@ -1014,7 +1014,9 @@ grep -A 200 xxx
     -v：反向査找；
     --color=auto：搜索出的关键字用颜色显示；
     
-    
+grep -r xxx dir/
+搜索某个目录下所有文件
+
 ripgrep xxx
 递归搜索所有文件的内容
 
@@ -1810,6 +1812,15 @@ yum install gcc-c++ libstdc++-devel
 
 ```
 
+## 系统排查
+
+```
+查看磁盘空间 df -h
+可视化看板磁盘工具：Baobab是一款分析磁盘使用情况的图形工具，它可以分析本地硬盘空间、分析挂载硬盘或设备空间，同时界面简单易操作，且分析结果以环状或树形状显示。
+https://wiki.deepin.org/wiki/Baobab
+
+```
+
 ## 正则表达式
 
 ```
@@ -2037,6 +2048,15 @@ perf发现 高阶内存不足
 
 
 
+```
+
+## Linux的内核
+
+### 资料
+
+```
+物理页内存分配：https://www.kernel.org/doc/gorman/html/understand/understand009.html
+物理内存管理：https://www.kernel.org/doc/gorman/html/understand/understand005.html
 ```
 
 
