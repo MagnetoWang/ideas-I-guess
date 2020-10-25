@@ -790,7 +790,8 @@ int main ()
 
 - 选择子字符串
   - xx.substr(0,3);
-  - 左闭右开
+  - 从0开始，选3个字符
+  - 注意不是0 到 3！！！！！
 - 字符串比较
 
   - a.compare(b)
@@ -882,6 +883,8 @@ std::string raw_str = R"(First line.\nSecond line.\nEnd of message.\n)";
 
 ```
 
+
+
 ### wstring
 
 - 文档：http://www.cplusplus.com/reference/string/wstring/
@@ -950,6 +953,7 @@ insert
 find
 
 erase
+
 
 
 ```
@@ -3078,6 +3082,15 @@ static Classxxxx& singleton() {
 
 ```
 
+### 编译c++文件
+
+```
+编译
+g++ xxx.cpp -o xxx
+执行
+./xxx
+```
+
 
 
 ## C++工具集
@@ -4611,7 +4624,7 @@ c.cpp
 d.cpp
 ```
 
-### 生成core文件，然后调试
+### 生成core文件，然后gdb调试
 
 ```
 快速上手：https://blog.csdn.net/u011806486/article/details/81409992
@@ -4628,6 +4641,7 @@ ulimit -c 0
 
 调试
 gdb 可执行程序 core
+gdb ./xxx/xxx执行程序  core.29373
 
 
 进阶 进入gdb界面以后
