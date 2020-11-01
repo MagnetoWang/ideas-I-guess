@@ -292,6 +292,12 @@ for num in range(10,20):  # 迭代 10 到 20 之间的数字
 
 ```
 
+### del 删除对象
+
+```
+del xxx
+```
+
 
 
 ### json格式化输出
@@ -1267,6 +1273,51 @@ bin/kafka-topics.sh --list --bootstrap-server localhost:9092
 ```
 简单示例：https://segmentfault.com/a/1190000013219667
 快速入门：https://www.ibm.com/developerworks/cn/aix/library/au-swig/
+```
+
+## pandas
+
+```
+中文论坛：https://www.pypandas.cn/
+官网：https://pandas.pydata.org/pandas-docs/stable/index.html
+
+```
+
+### 基础使用
+
+```
+读数据头和尾
+In [13]: df.head()
+Out[13]: 
+                   A         B         C         D
+2013-01-01  0.469112 -0.282863 -1.509059 -1.135632
+2013-01-02  1.212112 -0.173215  0.119209 -1.044236
+2013-01-03 -0.861849 -2.104569 -0.494929  1.071804
+2013-01-04  0.721555 -0.706771 -1.039575  0.271860
+2013-01-05 -0.424972  0.567020  0.276232 -1.087401
+
+In [14]: df.tail(3)
+Out[14]: 
+                   A         B         C         D
+2013-01-04  0.721555 -0.706771 -1.039575  0.271860
+2013-01-05 -0.424972  0.567020  0.276232 -1.087401
+2013-01-06 -0.673690  0.113648 -1.478427  0.524988
+
+显示索引与列名：
+
+In [15]: df.index
+Out[15]: 
+DatetimeIndex(['2013-01-01', '2013-01-02', '2013-01-03', '2013-01-04',
+               '2013-01-05', '2013-01-06'],
+              dtype='datetime64[ns]', freq='D')
+
+In [16]: df.columns
+Out[16]: Index(['A', 'B', 'C', 'D'], dtype='object')
+
+
+set_index 设置索引
+groupby之后rank
+
 ```
 
 
