@@ -256,6 +256,9 @@ git stash --help   # for more info
 git add -u && git commit -m "1.7.6.7-RELEASE" && git push
 git tag -a v1.7.6.7 -m "1.7.6.7-RELEASE"
 git push origin v1.7.6.7
+
+git tag -a v1.7.7.8-rc3 -m "1.7.7.8-rc3"
+git push origin v1.7.7.8-rc3
 ```
 
 
@@ -267,6 +270,39 @@ https://www.jianshu.com/p/31cbbbc5f9fa/
 
 ssh-keygen -t rsa -C "your_email@example.com"
 ```
+
+
+
+### 统计git成员代码情况
+
+```
+https://rzrobert.github.io/2017/02/04/git%E7%BB%9F%E8%AE%A1%E9%A1%B9%E7%9B%AE%E4%B8%AD%E5%90%84%E6%88%90%E5%91%98%E4%BB%A3%E7%A0%81%E9%87%8F/
+
+查看git上个人代码量
+
+git log --author="username" --pretty=tformat: --numstat | awk '{ add += $1; subs += $2; loc += $1 - $2 } END { printf "added lines: %s, removed lines: %s, total lines: %s\n", add, subs, loc }' -
+
+统计每个人的增删行数
+
+git log --format='%aN' | sort -u | while read name; do echo -en "$name\t"; git log --author="$name" --pretty=tformat: --numstat | awk '{ add += $1; subs += $2; loc += $1 - $2 } END { printf "added lines: %s, removed lines: %s, total lines: %s\n", add, subs, loc }' -; done
+
+查看仓库提交者排名前 5
+
+git log --pretty='%aN' | sort | uniq -c | sort -k1 -n -r | head -n 5
+
+贡献者统计：
+
+git log --pretty='%aN' | sort -u | wc -l
+
+提交数统计：
+
+git log --oneline | wc -l
+
+```
+
+
+
+
 
 ## CICD
 
@@ -376,3 +412,28 @@ x  -----删除忽略文件已经对git来说不识别的文件
 所以不能下载下下来
 ```
 
+### fatal: Cannot update paths and switch to branch 'feat/insert-sdk' at the same time.
+
+```
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## end
