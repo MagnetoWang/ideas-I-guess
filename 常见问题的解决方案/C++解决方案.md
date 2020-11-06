@@ -672,6 +672,16 @@ std::map<int, string> int_to_string = {
 - 基本操作
 - 和map基本一致
 
+### list使用
+
+```
+双向链表，常数级别的插入数据
+但是！！！
+不支持随机访问！！！！！！！！
+一定注意这个性质，不同场景不同需求
+
+```
+
 ### vector使用
 
 - 参考文档：http://www.cplusplus.com/reference/vector/vector/
@@ -682,6 +692,7 @@ reserve(number) 提前开辟vector空间，可以减少后面自动增长的开�
 clear() 清除所有的元素
 push_back(element) 往最后一个位置插入元素
 erase(index) 删除第index个位置的元素
+
 
 取对象
 xxx[i] 即可
