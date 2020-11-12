@@ -306,6 +306,60 @@ git log --oneline | wc -l
 
 ## CICD
 
+### 安装cicd在服务器上
+
+```
+https://docs.gitlab.com/runner/install/
+
+讲解：https://developer.aliyun.com/article/719968
+
+背景，已经有gitlab的服务，但是公用的机器资源不够，需要在自己的服务器搭建一个runner
+
+docker run -d --name gitlab-runner --restart always -v /srv/gitlab-runner/config:/etc/gitlab-runner -v /var/run/docker.sock:/var/run/docker.sock gitlab/gitlab-runner:latest
+--name gitlab-runner 这个名字可以随意，最好定制化的名字
+注册gitlab
+docker exec -it gitlab-runner bash
+gitlab-runner register
+
+填信息和token，可以在gitlab网页的cicd设置中看到，类似于和gitlab取得联系和信任
+------------------------------------------------------------------------
+输入Gitlab实例的地址
+
+Please enter the gitlab-ci coordinator URL (e.g. https://gitlab.com )
+http://xxx
+
+输入token
+
+Please enter the gitlab-ci token for this runner
+xxx
+
+输入Runner的描述
+
+Please enter the gitlab-ci description for this runner
+[hostname] my-runner 这个随意
+
+输入与Runner关联的标签
+
+Please enter the gitlab-ci tags for this runner (comma separated):
+my-tag,another-tag 这个随意
+
+输入Ruuner的执行者
+
+Please enter the executor: ssh, docker+machine, docker-ssh+machine, kubernetes, docker, parallels, virtualbox, docker-ssh, shell:
+docker
+
+如果上面执行者为docker，需要你在.gitlab-ci.yml中指定docker版本
+
+Please enter the Docker image (eg. ruby:2.1):
+alpine:latest 这个也可以随意
+------------------------------------------------------------------------
+修改toml文件
+vim /srv/gitlab-runner/config/config.toml
+每次修改需要重启docker
+docker restart gitlab-runner
+
+```
+
 ### 针对master分支发布版本
 
 ```
@@ -317,7 +371,12 @@ deploy:
     - master
 ```
 
+### 修改cicd产出日志的限制
 
+```
+
+
+```
 
 ## 问题
 
