@@ -358,6 +358,30 @@ vim /srv/gitlab-runner/config/config.toml
 每次修改需要重启docker
 docker restart gitlab-runner
 
+
+配置示例
+[[runners]]
+  name = "wangzixian"
+  url = "xxxx"
+  token = "xxx"
+  executor = "docker"
+  output_limit = 409600
+  [runners.custom_build_dir]
+  [runners.cache]
+    [runners.cache.s3]
+    [runners.cache.gcs]
+    [runners.cache.azure]
+  [runners.docker]
+    tls_verify = false
+    image = "xxxxx"
+    privileged = false
+    disable_entrypoint_overwrite = false
+    oom_kill_disable = false
+    disable_cache = false
+    volumes = ["/cache"]
+    shm_size = 0
+    pull_policy = "if-not-present"
+
 ```
 
 ### 针对master分支发布版本
