@@ -237,6 +237,29 @@ scope 会让jar包只在test目录下有效，main中无法引用。这样方便
 mvn clean idea:idea -DskipTests
 ```
 
+
+
+#### debug的方法
+
+```
+mvn跑test的时候，经常报错，但是无法在命令行端debug
+可是日志信息是打不全的，这个时候需要用throw的方式，把异常信息栈打印出来
+因为用println的方式，会无穷无尽，无法快速定位，必须找到问题的根源所在
+
+try {
+            builder = xxx
+        } catch (Exception e) {
+                e.printStackTrace();
+                throw e;
+        }
+
+2020-11-15 11:43:46 INFO  xxxx
+java.lang.NullPointerException
+    xxxxxx
+    xxxx
+
+```
+
 ### maven进阶
 
 #### 打包指定不要哪些包，哪些类，哪些资源
@@ -1613,6 +1636,11 @@ hashSet
 
 set1: [1,3,5]
 set2: [1,2,3]
+
+Set<String> s1 = new HashSet<>();
+
+// Add a few elements
+s1.add("HTML");
 ```
 
 
