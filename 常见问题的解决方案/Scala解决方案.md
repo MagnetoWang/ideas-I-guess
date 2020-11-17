@@ -53,6 +53,9 @@ https://blog.csdn.net/jxx4903049/article/details/82688117
     s: Int = 15
     
   
+形参 sum(args: Int*)
+如果输入是array类型
+那么 sum(arr: _*) 意思是将arr每个元素传入进去
 
 ```
 
@@ -347,6 +350,50 @@ val keys: Array[String] = Array(1, 2, 3)
 val cols: Seq[String] = keys
 ```
 
+#### List
+
+```
+不可变列表
+// 字符串列表
+val site: List[String] = List("Runoob", "Google", "Baidu")
+
+// 整型列表
+val nums: List[Int] = List(1, 2, 3, 4)
+
+// 空列表
+val empty: List[Nothing] = List()
+
+
+
+::: 两个列表可以拼接
+:: 列表拼接元素 有操作元
+val nums1: List[Int] = List(3, 4)
+val nums2: List[Int] = List(1, 2)
+nums1 ::: nums2
+1 :: nums1 必须1在左边， 意思是nums1调用::方法，参数是1
+
+
+```
+
+#### 元祖
+```
+val pair = (99, "oo", "dsfsd")
+println(pair._1)
+println(pair._2)
+println(pair._3)
+
+```
+
+#### Set
+```
+val nums = Set(1,2,3)
+nums + 5
+nums - 3
+nums ++ List(5,6)
+```
+
+
+
 #### Map
 
 ```
@@ -488,7 +535,13 @@ https://blog.csdn.net/weixin_42181200/article/details/80324801
 首先，需要使用isInstanceOf 判断对象是否为指定类的对象，如果是的话，则可以使用 asInstanceOf 将对象转换为指定类型；
 ```
 
+#### column和字符串互转
+```
+cols: Seq[String]
+srcDF: DataFrame
+val columns = cols.map(srcDF(_))
 
+```
 
 #### 遍历
 
@@ -790,6 +843,14 @@ var sum : Long = 0
 
 ```
 
+#### 尾递归优化
+
+```
+scala会针对递归函数做优化
+所以不用太担心递归和循环之间性能差问题
+
+```
+
 #### spark-submit
 
 ```
@@ -822,7 +883,29 @@ parax      # 第13行
 
 ```
 
+### 代码代码
 
+#### 初始化
+
+```
+val spark = SparkSession.builder.appName("Simple Application").master("local").getOrCreate()
+val data = spark.read.parquet(path)
+data.coalesce(1).write.option("header", "true").csv(output)
+
+```
+
+
+
+#### 定义变量
+
+```
+val big = new java.math.BigInteger("12345")
+val numbers = Array("zero", "one", "two")
+
+
+
+
+```
 
 ### 无语
 
