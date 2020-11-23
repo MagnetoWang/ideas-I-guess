@@ -11,6 +11,9 @@ brew install sbt@1
 linux
 wget https://downloads.lightbend.com/scala/2.13.3/scala-2.13.3.tgz
 配置path路径，这样scala环境就有了
+
+安装spark
+
 ```
 
 ### 命令行
@@ -109,14 +112,18 @@ scala> postsDf.filter('postTypeId === 1).withColumn("ratio", 'viewCount / 'score
 
 ```
 spark最新动态新闻：https://databricks.com/blog
-dataframe接口：https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.Dataset
+dataframe接口：https://spark.apache.org/docs/latest/api/scala/org/apache/spark/sql/Dataset.html
 sql函数接口：https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.functions$
+统计行数：https://spark.apache.org/docs/latest/api/scala/org/apache/spark/sql/DataFrameStatFunctions.html
+groupby例子：https://sparkbyexamples.com/spark/using-groupby-on-dataframe/
 
 2.3文档：https://spark.apache.org/docs/2.3.0/api/scala/index.html#org.apache.spark.sql.Dataset
 1.6文档：https://spark.apache.org/docs/1.6.0/api/scala/index.html#org.apache.spark.sql.Dataset
 
 国内文档，访问速度快：http://spark.apachecn.org/#/
 文档github项目：https://github.com/apachecn/spark-doc-zh
+
+
 ```
 
 ### 概念
@@ -843,6 +850,56 @@ var sum : Long = 0
 
 ```
 
+#### partition by和 group by的区别
+
+```
+例子说明：https://www.cnblogs.com/hello-yz/p/9962356.html
+1. group by是分组函数，partition by是分析函数（然后像sum()等是聚合函数）；
+
+2. 在执行顺序上，
+
+以下是常用sql关键字的优先级
+
+from > where > group by > having > order by
+
+而partition by应用在以上关键字之后，实际上就是在执行完select之后，在所得结果集之上进行partition。
+
+3. partition by相比较于group by，能够在保留全部数据的基础上，只对其中某些字段做分组排序（类似excel中的操作），而group by则只保留参与分组的字段和聚合函数的结果（类似excel中的pivot）。
+sql1
+select a.cc,a.num, min(a.num) over (partition by a.cc order by a.num asc) as amount
+from table_temp a
+group by a.cc,a.num;
+
+sql2
+select a.cc,a.num, min(a.num) over (partition by a.cc order by a.num desc) as amount
+from table_temp a
+group by a.cc,a.num;
+
+一个是asc 一个是desc
+两个sql的唯一区别在于a.num的排序上，但从结果红框中的数据对比可以看到amount值并不相同，且第二个结果集amount并不都是最小值1。
+在这里就是要注意将聚合函数用在partition后的结果集上时，聚合函数是逐条累积计算值的！
+逐条累积的意思是：sql1的结果会一样，因为是升序，第一条就是最小值
+sql2结果都不一样，因为是降序，每次都会找到最小值
+对于数据 1，2，3，4
+升序找min
+1 1
+2 1
+3 1
+4 1
+
+降序找min，逐条计算找到min
+4 4
+3 3
+2 2
+1 1
+
+
+```
+
+
+
+
+
 #### 尾递归优化
 
 ```
@@ -894,6 +951,37 @@ data.coalesce(1).write.option("header", "true").csv(output)
 
 ```
 
+#### 定义dataframe
+
+```
+import spark.implicits._
+val simpleData = Seq(("James","Sales","NY",90000,34,10000),
+    ("Michael","Sales","NY",86000,56,20000),
+    ("Robert","Sales","CA",81000,30,23000),
+    ("Maria","Finance","CA",90000,24,23000),
+    ("Raman","Finance","CA",99000,40,24000),
+    ("Scott","Finance","NY",83000,36,19000),
+    ("Jen","Finance","NY",79000,53,15000),
+    ("Jeff","Marketing","CA",80000,25,18000),
+    ("Kumar","Marketing","NY",91000,50,21000)
+  )
+val df = simpleData.toDF("employee_name","department","state","salary","age","bonus")
+df.show()
+```
+
+#### 运行scala程序
+
+```
+    object RunAppDemo {  
+        def main(args: Array[String]): Unit = {
+        	println("Hello, Scala")  
+        }  
+    }  
+    
+需要用object方式才能编写main函数，class不行！！！
+    
+```
+
 
 
 #### 定义变量
@@ -906,6 +994,18 @@ val numbers = Array("zero", "one", "two")
 
 
 ```
+
+#### 统计函数
+
+```
+import org.apache.spark.sql.functions._
+df.groupBy("department").count()
+df.groupBy("department").min()
+df.groupBy("department").max()
+df.groupBy("department").avg()
+```
+
+
 
 ### 无语
 
@@ -1009,6 +1109,37 @@ Caused by: java.lang.ClassNotFoundException: org.apache.spark.sql.SparkSession$
 	... 3 more
 	
 	
+Error: A JNI error has occurred, please check your installation and try again
+Exception in thread "main" java.lang.NoClassDefFoundError: org/apache/spark/sql/Dataset
+	at java.lang.Class.getDeclaredMethods0(Native Method)
+	at java.lang.Class.privateGetDeclaredMethods(Class.java:2701)
+	at java.lang.Class.privateGetMethodRecursive(Class.java:3048)
+	at java.lang.Class.getMethod0(Class.java:3018)
+	at java.lang.Class.getMethod(Class.java:1784)
+	at sun.launcher.LauncherHelper.validateMainClass(LauncherHelper.java:544)
+	at sun.launcher.LauncherHelper.checkAndLoadMain(LauncherHelper.java:526)
+Caused by: java.lang.ClassNotFoundException: org.apache.spark.sql.Dataset
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:382)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:349)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 7 more
+
+
+idea 上没有找到jar包，检查pom
+scala和spark依赖都添加了！
+有可能是编译顺序有问题
+scala要先编译
+写了简单demo，scala编译成功
+那就是spark的依赖没有找到
+pom明明依赖了但是却没有加载，神奇的是，命令行可以执行程序
+网上搜索发现
+原因是：IDEA默认下是不加载pom下的provided依赖的，而Eclipse是支持的。
+所以需要在idea的config中勾选加载provide：https://www.cnblogs.com/parent-absent-son/p/10064856.html
+
+
+
+
 	
 ```
 
