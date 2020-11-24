@@ -39,7 +39,7 @@ Scala中的=>符号可以看做是创建函数实例的语法糖。例如：A =>
 另外，() => T表示函数输入参数为空，而A => Unit则表示函数没有返回值。
 ```
 
-#### *
+#### * 和 _*
 
 ```
 用于函数参数中可变长参数
@@ -773,9 +773,19 @@ flatMap：对集合中每个元素进行操作然后再扁平化。
 
 val arr=sc.parallelize(Array(("A",1),("B",2),("C",3)))
 arr.flatmap(x=>(x._1+x._2)).foreach(println)
+A
+1
+B
+2
+C
+3
+
 
 val arr=sc.parallelize(Array(("A",1),("B",2),("C",3)))
 arr.map(x=>(x._1+x._2)).foreach(println)
+A1
+B2
+C3
 ```
 
 #### dataframe
@@ -984,13 +994,15 @@ df.show()
 
 
 
-#### 定义变量
+#### 定义变量和函数
 
 ```
 val big = new java.math.BigInteger("12345")
 val numbers = Array("zero", "one", "two")
 
+def functions(data: DataFrame, keys: Seq[String]): Unit = {
 
+ }
 
 
 ```
@@ -1131,7 +1143,7 @@ scala和spark依赖都添加了！
 有可能是编译顺序有问题
 scala要先编译
 写了简单demo，scala编译成功
-那就是spark的依赖没有找到
+那就是spark的依赖没有找到，但是检查实际依赖包，发现有spark的包
 pom明明依赖了但是却没有加载，神奇的是，命令行可以执行程序
 网上搜索发现
 原因是：IDEA默认下是不加载pom下的provided依赖的，而Eclipse是支持的。
