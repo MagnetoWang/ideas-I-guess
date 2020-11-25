@@ -839,6 +839,40 @@ column的操作
   
 xxx && xxx 这是表示between的意思，不是逻辑与的关系
 
+
+mapPartitions操作，针对每个分片的计算
+// data是dataframe类型，keys是输入字符串list，需要映射成column，然后根据key做分片
+val df = data.repartition(keys.map(data(_)): _*)
+// 分片以后可以调用mapPartitions，针对每个分片编写计算逻辑，输入是df每一行，也就是row，输出是Iterator[row]，返回一个迭代器，迭代器的元素《类型》就是输入的row
+    df.mapPartitions(row => {
+    // 返回的迭代器可以是来自flatmap，或者map
+      val iter = row.flatMap(row => {
+//        row.getLong(0)
+        Option(null)
+
+      })
+      iter
+    })(Encoders(df.schema)) // 这里是最难以理解，新手不明白的地方，encoder表示输出的row，需要编解码，用于网络传输，编解码的字段类型和名字，需要人为给，一般都是原始数据集的schema
+    
+这是源码中的函数声明
+ def mapPartitions[U : Encoder](func: Iterator[T] => Iterator[U]): Dataset[U] = {
+ 
+ 
+ 最后发现encoder这个怎么也编译不过去
+ 改成rdd就行了
+ df.rdd.mapPartitions(row => {
+//      row.foreach()
+      val iter = row.flatMap(row => {
+
+        logger.info(row.toString())
+//        row.getLong(0)
+        Option(null)
+//        row
+
+      })
+      iter
+    })
+
 ```
 
 #### 求和
@@ -907,6 +941,12 @@ sql2结果都不一样，因为是降序，每次都会找到最小值
 ```
 
 
+
+#### 隐式转换和隐式参数
+
+```
+https://www.cnblogs.com/MOBIN/p/5351900.html
+```
 
 
 
@@ -1015,6 +1055,13 @@ df.groupBy("department").count()
 df.groupBy("department").min()
 df.groupBy("department").max()
 df.groupBy("department").avg()
+```
+
+#### 打印日志
+
+```
+import org.slf4j.LoggerFactory
+val logger = LoggerFactory.getLogger(this.getClass)
 ```
 
 
