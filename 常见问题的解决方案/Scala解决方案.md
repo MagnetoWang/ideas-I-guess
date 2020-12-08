@@ -11,8 +11,36 @@ brew install sbt@1
 linux
 wget https://downloads.lightbend.com/scala/2.13.3/scala-2.13.3.tgz
 配置path路径，这样scala环境就有了
+其他版本号
+wget https://downloads.lightbend.com/scala/2.13.3/scala-2.13.3.tgz
+wget https://downloads.lightbend.com/scala/2.11.8/scala-2.11.8.tgz
+wget https://downloads.lightbend.com/scala/2.12.8/scala-2.12.8.tgz
 
 安装spark
+wget https://archive.apache.org/dist/spark/spark-2.3.0/spark-2.3.0-bin-hadoop2.7.tgz
+
+tar -zxvf spark-2.3.0-bin-hadoop2.7.tgz
+
+cd spark-2.3.0-bin-hadoop2.7/conf
+
+mv spark-env.sh.template spark-env.sh
+vi spark-env.sh：添加SPARK_HOME
+vi ~/.bashrc：添加SPARK_HOME      
+source ~/.bashrc
+执行spark-shell 报错，解决后run fe报错
+
+SPARK_HOME=/home/wangzixian/my-env/spark
+vi ~/.bash_profile
+#spark 环境
+export PATH=$PATH:~/my-env/spark
+source ~/.bash_profile
+
+不同版本的spark
+wget https://archive.apache.org/dist/spark/spark-3.0.0/spark-3.0.0-bin-hadoop3.2.tgz
+
+
+要想在idea编写spark程序，最好手动引入jar包和配置scala环境
+还要对应上相关的版本号
 
 ```
 
@@ -114,6 +142,7 @@ scala> postsDf.filter('postTypeId === 1).withColumn("ratio", 'viewCount / 'score
 spark最新动态新闻：https://databricks.com/blog
 dataframe接口：https://spark.apache.org/docs/latest/api/scala/org/apache/spark/sql/Dataset.html
 sql函数接口：https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.functions$
+column类型：https://spark.apache.org/docs/latest/api/scala/org/apache/spark/sql/Column.html
 统计行数：https://spark.apache.org/docs/latest/api/scala/org/apache/spark/sql/DataFrameStatFunctions.html
 groupby例子：https://sparkbyexamples.com/spark/using-groupby-on-dataframe/
 
@@ -379,6 +408,17 @@ val nums2: List[Int] = List(1, 2)
 nums1 ::: nums2
 1 :: nums1 必须1在左边， 意思是nums1调用::方法，参数是1
 
+java list转 seq
+https://www.cnblogs.com/pekkle/p/9367577.html
+1. List 转 Seq：
+List<String> tmpList = new ArrayList<>();
+tmpList.add("abc");
+Seq<String> tmpSeq = JavaConverters.asScalaIteratorConverter(tmpList.iterator()).asScala().toSeq();
+
+2. Seq 转 List：
+List<String> tmpList = scala.collection.JavaConversions.seqAsJavaList(tmpSeq);
+
+
 
 ```
 
@@ -544,9 +584,13 @@ https://blog.csdn.net/weixin_42181200/article/details/80324801
 
 #### column和字符串互转
 ```
+字符串 2 column
 cols: Seq[String]
 srcDF: DataFrame
 val columns = cols.map(srcDF(_))
+
+
+column 2 string
 
 ```
 
@@ -948,6 +992,12 @@ sql2结果都不一样，因为是降序，每次都会找到最小值
 https://www.cnblogs.com/MOBIN/p/5351900.html
 ```
 
+#### 样例类和模式匹配
+
+```
+
+```
+
 
 
 #### 尾递归优化
@@ -957,6 +1007,17 @@ scala会针对递归函数做优化
 所以不用太担心递归和循环之间性能差问题
 
 ```
+
+#### java和scala的写法对比
+
+```
+新建list
+List<String> nodes = new ArrayList<>();
+val nodes: util.List[String] = new util.ArrayList[String]
+
+```
+
+
 
 #### spark-submit
 
@@ -1017,6 +1078,9 @@ val simpleData = Seq(("James","Sales","NY",90000,34,10000),
   )
 val df = simpleData.toDF("employee_name","department","state","salary","age","bonus")
 df.show()
+
+读取parquet文件
+
 ```
 
 #### 运行scala程序
@@ -1233,6 +1297,15 @@ def main(args: Array[String]): Unit = {
 必须先用sparksession，然后才能从session里面用implicits
 
 
+```
+
+#### spark type mismatch dataframe
+
+```
+大概率是spark和scala版本号没有对齐
+尤其是在idea中，一定要手动引入scala和spark的环境变量和jar包
+https://blog.csdn.net/shenziheng1/article/details/98541432
+还有就是项目重新启动，把.idea删除，这个配置总是有缓存，导致手动的设置不生效
 ```
 
 
