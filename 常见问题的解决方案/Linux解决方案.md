@@ -859,6 +859,27 @@ sed -i "44c "--headers \) HDRS_IN=\"$2\"; shift 2 ;;"" config_brpc.sh
   - sed: 1: "config_brpc.sh": command c expects \ followed by text
   - 目前不好解决
 
+```
+基础说明：https://linux.cn/article-11367-1.html
+常见的 sed 替换字符串的语法。
+
+    sed -i 's/Search_String/Replacement_String/g' Input_File
+
+首先我们需要了解 sed 语法来做到这一点。请参阅有关的细节。
+
+    sed：这是一个 Linux 命令。
+    -i：这是 sed 命令的一个选项，它有什么作用？默认情况下，sed 打印结果到标准输出。当你使用 sed 添加这个选项时，那么它会在适当的位置修改文件。当你添加一个后缀（比如，-i.bak）时，就会创建原始文件的备份。
+    s：字母 s 是一个替换命令。
+    Search_String：搜索一个给定的字符串或正则表达式。
+    Replacement_String：替换的字符串。
+    g：全局替换标志。默认情况下，sed 命令替换每一行第一次出现的模式，它不会替换行中的其他的匹配结果。但是，提供了该替换标志时，所有匹配都将被替换。
+    /：分界符。
+    Input_File：要执行操作的文件名。
+
+```
+
+
+
 ### gsed
 
 ```
@@ -1022,7 +1043,7 @@ ripgrep xxx
 
 ```
 
-### gunzip
+### gunzip 解压gz文件
 
 ```
 文件夹下所有文件批量解压
@@ -1179,7 +1200,7 @@ intel vtune或者emon
 - 持续更新文件内容
   - **tail -f test.log**
 
-### tar
+### tar  zip
 
 - <https://www.jb51.net/LINUXjishu/43356.html>
 
@@ -1210,6 +1231,49 @@ gzip -rv test6
 
 递归地解压目录
 gzip -dr test6
+
+
+zip方式压缩，一般window需要这个格式
+将 /home/html/ 这个目录下所有文件和文件夹打包为当前目录下的 html.zip：
+
+zip -q -r html.zip /home/html
+
+如果在我们在 /home/html 目录下，可以执行以下命令：
+
+zip -q -r html.zip *
+
+从压缩文件 cp.zip 中删除文件 a.c
+
+zip -dv cp.zip a.c
+
+unzip 解压
+unzip xx.zip
+
+查看压缩文件中包含的文件
+# unzip -l abc.zip 
+Archive: abc.zip
+ Length   Date  Time  Name
+--------  ----  ----  ----
+  94618 05-21-10 20:44  a11.jpg
+  202001 05-21-10 20:44  a22.jpg
+    16 05-22-10 15:01  11.txt
+  46468 05-23-10 10:30  w456.JPG
+  140085 03-14-10 21:49  my.asp
+--------          -------
+  483188          5 files
+
+-v 参数用于查看压缩文件目录信息，但是不解压该文件。
+# unzip -v abc.zip 
+Archive: abc.zip
+Length  Method  Size Ratio  Date  Time  CRC-32  Name
+-------- ------ ------- -----  ----  ----  ------  ----
+  94618 Defl:N  93353  1% 05-21-10 20:44 9e661437 a11.jpg
+ 202001 Defl:N  201833  0% 05-21-10 20:44 1da462eb a22.jpg
+   16 Stored    16  0% 05-22-10 15:01 ae8a9910 ? +-|￥+-? (11).txt
+  46468 Defl:N  39997 14% 05-23-10 10:30 962861f2 w456.JPG
+ 140085 Defl:N  36765 74% 03-14-10 21:49 836fcc3f my.asp
+--------     ------- ---              -------
+ 483188      371964 23%              5 files
 ```
 
 
@@ -1225,6 +1289,17 @@ gzip -dr test6
 
 - <https://www.runoob.com/linux/linux-comm-patch.html>
 - 命令用于修补文件
+
+### awk and 
+
+```
+根据每一行分号分割
+awk -F ':' '{ print $1 }' demo.txt
+
+
+```
+
+
 
 ## 进程管理
 
