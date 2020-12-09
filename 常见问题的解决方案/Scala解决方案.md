@@ -549,6 +549,18 @@ df.select(df.col("birth").cast(LongType))
 
 ```
 
+#### 函数
+
+```
+默认参数写法
+def addInt( a:Int=5, b:Int=7 ) : Int = {
+      var sum:Int = 0
+      sum = a + b
+
+      return sum
+   }
+```
+
 
 
 ### 进阶语法
@@ -917,6 +929,14 @@ val df = data.repartition(keys.map(data(_)): _*)
       iter
     })
 
+在原有数据基础上增加行数
+val res:Dataframe
+res.rdd.flatMap(row => {
+      val arr = row.toSeq.toArray
+      var arrays = Seq(row)
+//      arrays = arrays :+ Row.fromSeq(arr)
+      arrays
+    })
 ```
 
 #### 求和
@@ -1014,6 +1034,49 @@ scala会针对递归函数做优化
 新建list
 List<String> nodes = new ArrayList<>();
 val nodes: util.List[String] = new util.ArrayList[String]
+
+```
+
+#### 自定义函数注册-这样可以使用sql字符串执行
+
+```
+https://www.cnblogs.com/itboys/p/9347403.html
+
+
+
+调用sqlContext.udf.register()
+
+此时注册的方法 只能在sql()中可见，对DataFrame API不可见
+
+用法：sqlContext.udf.register("makeDt", makeDT(_:String,_:String,_:String))
+
+示例：
+复制代码
+
+def makeDT(date: String, time: String, tz: String) = s"$date $time $tz"
+sqlContext.udf.register("makeDt", makeDT(_:String,_:String,_:String))
+ 
+// Now we can use our function directly in SparkSQL.
+sqlContext.sql("SELECT amount, makeDt(date, time, tz) from df").take(2)
+// but not outside
+df.select($"customer_id", makeDt($"date", $"time", $"tz"), $"amount").take(2) // fails
+
+复制代码
+
+2）调用spark.sql.function.udf()方法
+
+此时注册的方法，对外部可见
+
+用法：valmakeDt = udf(makeDT(_:String,_:String,_:String))
+
+示例：
+
+import org.apache.spark.sql.functions.udf
+val makeDt = udf(makeDT(_:String,_:String,_:String))
+// now this works
+df.select($"customer_id", makeDt($"date", $"time", $"tz"), $"amount").take(2)
+
+ 
 
 ```
 
@@ -1126,6 +1189,12 @@ df.groupBy("department").avg()
 ```
 import org.slf4j.LoggerFactory
 val logger = LoggerFactory.getLogger(this.getClass)
+```
+
+### spark迭代
+
+```
+内置百分位计算udf：https://github.com/apache/spark/blob/master/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/aggregate/ApproximatePercentile.scala
 ```
 
 
