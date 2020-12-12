@@ -803,6 +803,26 @@ System.out.println(FileUtils.sizeOfDirectory(new File("D:/cxyapi")));
 
 ```
 书籍：Java8实战
+
+hashmap foreach遍历：https://blog.csdn.net/w605283073/article/details/80708943
+    import java.io.IOException;
+    import java.util.HashMap;
+    import java.util.Map;
+     
+    public class Test {
+     
+    	public static void main(String[] args) throws IOException {
+     
+    		Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+    		map.put(1, 10);
+    		map.put(2, 20);
+    		map.forEach((k, v) -> System.out.println("key: " + k + " value:" + v));
+    		//scala中写法
+    		map.forEach((k, v) => System.out.println("key: " + k + " value:" + v));
+    	}
+    }
+    
+
 ```
 
 
