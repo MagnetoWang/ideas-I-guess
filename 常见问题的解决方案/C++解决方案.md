@@ -4751,7 +4751,21 @@ n: 执行一行源程序代码，此行代码中的函数调用也一并执行�
 
 打印变量
 p <变量名称>
+
+gdb disassemble
+反汇编某个函数，然后排查地址是否变化
+https://www.cnblogs.com/qiangxia/p/4683309.html
 ```
+
+### 排查工具推荐
+
+```
+valgrind：https://my.oschina.net/u/269082/blog/832657
+
+sanitizer：https://www.jianshu.com/p/3a2df9b7c353
+```
+
+
 
 ### Unable to find Mach task port for process-id 801: (os/kern) failure (0x5)
 
