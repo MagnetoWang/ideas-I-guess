@@ -1218,6 +1218,9 @@ parax      # 第13行
 第9行：被提交给spark集群执行的application jar；
 第10～13行：传递给main方法的参数，按照添加顺序依次传入，如果某个参数含有空格则需要使用双引号将该参数扩起来；
 
+保留历史执行情况
+--conf spark.eventLog.dir=hdfs://m7-qaperf-hdp01/tmp/feoutput/history 
+--conf spark.eventLog.enabled=true
 ```
 
 ### 代码代码
@@ -1296,6 +1299,26 @@ df.groupBy("department").avg()
 import org.slf4j.LoggerFactory
 val logger = LoggerFactory.getLogger(this.getClass)
 ```
+
+
+
+
+
+### 性能调优
+
+```
+所有参数说明：https://www.cnblogs.com/pekkle/p/10525757.html
+美团调优：https://tech.meituan.com/2016/04/29/spark-tuning-basic.html
+task，job，stage关系：https://www.cnblogs.com/upupfeng/p/12385979.html
+
+
+分页分段高效查询：https://www.cnblogs.com/whiterock/p/7423715.html
+rows_number使用：https://www.cnblogs.com/weixing/p/5460697.html
+
+
+```
+
+
 
 ### spark迭代
 
@@ -1481,6 +1504,19 @@ def main(args: Array[String]): Unit = {
 尤其是在idea中，一定要手动引入scala和spark的环境变量和jar包
 https://blog.csdn.net/shenziheng1/article/details/98541432
 还有就是项目重新启动，把.idea删除，这个配置总是有缓存，导致手动的设置不生效
+```
+
+#### Failed to load class "org.slf4j.impl.StaticLoggerBinder"
+
+```
+https://www.cnblogs.com/justlove/p/7637681.html
+
+需要添加包
+<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-nop</artifactId>
+			<version>1.7.2</version>
+		</dependency>
 ```
 
 
