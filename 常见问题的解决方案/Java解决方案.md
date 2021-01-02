@@ -418,6 +418,26 @@ version 指定了myapp项目的当前版本，SNAPSHOT意为快照，说明该�
 name 声明了一个对于用户更为友好的项目名称，不是必须的，推荐为每个pom声明name，以方便信息交流。 
 ```
 
+#### 日志
+
+```
+log4j.rootLogger=INFO,console
+log4j.additivity.org.apache=true
+
+# console
+log4j.appender.console=org.apache.log4j.ConsoleAppender
+log4j.appender.console.Threshold=INFO
+log4j.appender.console.ImmediateFlush=true
+log4j.appender.console.Target=System.out
+log4j.appender.console.layout=org.apache.log4j.PatternLayout
+log4j.appender.console.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} [%p] %C{1} %L-%m%n
+
+# spark log
+log4j.logger.org.apache.spark=ERROR,console
+log4j.logger.org.spark_project.jetty=ERROR,console
+
+```
+
 
 
 ### 自定义一个异常类并使用
@@ -1767,7 +1787,9 @@ https://www.cnblogs.com/mingforyou/archive/2013/09/03/3299569.html
 
 使用String.split方法分隔字符串时,分隔符如果用到一些特殊字符,可能会得不到我们预期的结果。 
 
-
+分隔符注意事项
+StringUtils.split()和string.split()的区别
+https://www.cnblogs.com/yulinlewis/p/10680697.html
 ```
 
 ### Enum
