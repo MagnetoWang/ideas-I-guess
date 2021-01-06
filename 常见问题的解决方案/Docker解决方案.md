@@ -40,6 +40,16 @@ docker attach key // docker run 成功后会返回一个key，这个key可以进
 端口映射
 docker exec -it 7f91b3579e15230b662894f749f44325f982e16d35bf647f6af0a2ac98cf95f9 /bin/bash
 
+
+docker打包
+docker commit 3be143f6ecd3884a442485faf235e599b2e42bcf76df80fc937b1497c2bc0ac3 xxx-your image name
+
+sha256:0688a561dc6ad4c8215220e88fdc275ebd20f2c4428647ec8c965a877396ac32
+docker push xxxx
+
+docker镜像保存文件，并可以拷贝到其他机器上使用
+docker save xxxx-镜像的名字而不是commit id > vnc-image.tar
+
 ```
 
 
