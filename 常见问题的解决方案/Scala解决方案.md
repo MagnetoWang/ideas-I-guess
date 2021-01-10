@@ -442,6 +442,9 @@ xs.distinct 	不含重复元素的xs的子序列。
 #### Array
 
 ```
+初始化
+private val outputArr = Array.fill[Any](10)(null)
+
 array 转seq
 val keys: Array[String] = Array(1, 2, 3)
 val cols: Seq[String] = keys
@@ -646,6 +649,75 @@ def addInt( a:Int=5, b:Int=7 ) : Int = {
 
       return sum
    }
+   
+   
+scanLeft
+http://allaboutscala.com/tutorials/chapter-8-beginner-tutorial-using-scala-collection-functions/scala-scanleft-example/
+
+1. How to initialize a sequence of numbers
+
+The code below show how to initialize a Sequence of numbers. Note that we're not using our donuts examples similar to previous tutorials because it will be easier to visualize each iteration of the scanLeft method.
+
+
+println("Step 1: How to initialize a sequence of numbers")
+val numbers: Seq[Int] = Seq(1, 2, 3, 4, 5)
+println(s"Elements of numbers = $numbers")
+
+You should see the following output when you run your Scala application in IntelliJ:
+
+
+Step 1: How to initialize a sequence of numbers
+Elements of numbers = List(1, 2, 3, 4, 5)
+
+ 
+
+2. How to create a running total using the scanLeft function
+
+The code below shows how to use the scanLeft method to create a running total from all the elements in the numbers Sequence of Step 1.
+
+
+println("\nStep 2: How to create a running total using the scanLeft function")
+val runningTotal: Seq[Int] = numbers.scanLeft(0)(_ + _)
+println(s"Running total of all elements in the collection = $runningTotal")
+
+You should see the following output when you run your Scala application in IntelliJ:
+
+
+Step 2:: How to create a running total using the scanLeft function
+Running total of all elements in the collection = List(0, 1, 3, 6, 10, 15)
+
+ 
+
+NOTE:
+
+    If you've never used the scanLeft method in the past, it may not be obvious on how it works. The iteration below should hopefully help you visualize the inner working of the scanLeft method.
+
+
+scanLeft method iterations
+0 + 1             =    1
+1 + 2             =    3
+1 + 2 + 3         =    6
+1 + 2 + 3 + 4     =   10
+1 + 2 + 3 + 4 + 5 =   15
+How to create a running total using the scanLeft function explicitly
+
+Similar to the example in Step 2, we will show how to use the scanLeft method to create a running total from the numbers Sequence in Step 1. However, in the code below, we will be more explicit with the operator function we pass through to the scanLeft method.
+
+
+println("\nStep 3: How to create a running total using the scanLeft function explicitly")
+val runningTotal2: Seq[Int] = numbers.scanLeft(0)((a, b) => a + b)
+println(s"Running total of all elements in the collection = $runningTotal2")
+
+You should see the following output when you run your Scala application in IntelliJ:
+
+
+Step 3: How to create a running total using the scanLeft function explicitly
+Running total of all elements in the collection = List(0, 1, 3, 6, 10, 15)
+
+NOTE:
+
+    Similar to Step 2, the iterations shown below should help you visualize each iteration of the scanLeft method.
+
 ```
 
 
