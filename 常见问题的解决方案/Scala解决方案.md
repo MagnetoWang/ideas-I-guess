@@ -1325,6 +1325,17 @@ df.show()
 
 读取parquet文件
 
+
+打印某一列
+https://www.cnblogs.com/wcgstudy/p/11052173.html
+StructType 有许多 StructField
+StructField 描述一个字段信息
+case class StructField(
+        name: String,
+        dataType: DataType,
+        nullable: Boolean = true,
+        metadata: Metadata = Metadata.empty) {}
+
 ```
 
 #### 运行scala程序
@@ -1653,5 +1664,16 @@ HelloSuite @a pending test, org.example.HelloWordSpec'
 mvn test -Dsuites='org.example.HelloSuite hello'
 
 
+```
+
+## SQL
+
+### 语法
+
+```
+count(1) 和 count(*) 区别
+https://www.cnblogs.com/CareySon/p/DifferenceBetweenCountStarAndCount1.html
+
+count(1)，其实就是计算一共有多少符合条件的行
 ```
 
