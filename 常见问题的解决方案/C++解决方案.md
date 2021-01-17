@@ -1309,7 +1309,9 @@ int close(int fd);
 #### ifstream
 
 ```
+https://www.cnblogs.com/azraelly/archive/2012/04/14/2446914.html
 
+#include <fiostream.h>
 ```
 
 
@@ -1566,8 +1568,8 @@ inline std::ostream &operator<<(std::ostream &os, const Shape &shape) {
 ```
     std::string value_str;
     std::stringstream ss;
-    ss << value;
-    ss >> value_str;
+    ss << value; 读数据
+    ss >> value_str; 写数据 赋值
 
 　　%% 印出百分比符号，不转换。
 　　%c 整数转成对应的 ASCII 字元。
@@ -4718,6 +4720,14 @@ sh bazel-0.29.0-installer-darwin-x86_64.sh --prefix=/xxx/xxx/third_party
     "version": 4
 }
 ```
+
+## GCC && CMKAE
+
+```
+-Weffc++ 编译的时候用来判断变量是否初始化
+```
+
+
 
 ## GDB的使用
 
