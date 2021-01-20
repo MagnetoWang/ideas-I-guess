@@ -1299,6 +1299,12 @@ awk -F ':' '{ print $1 }' demo.txt
 
 ```
 
+### chmod
+
+```
+chmod -R 777 1003
+```
+
 
 
 ## 进程管理
@@ -1349,6 +1355,18 @@ VmPTE 	进程占用的页表大小（交换表项数量）
 VmSwap 	进程所使用的交换区的大小
 
 cat /proc/1161/status
+```
+
+### 批量删除进程
+
+```
+wangzixian/software/idea
+
+
+
+
+ps -xf | grep wangzixian/software/idea | awk '{print $1}' | while read line; do kill -9 $line; done
+
 ```
 
 
@@ -1512,6 +1530,15 @@ vimdiff 文件路径1 文件路径2
 chmod 数字 文件名 
 
 chmod 777 xxx //  满权限
+```
+
+### chown 修改用户对某个文件的权限
+
+```
+chown 1003 xxx.java
+
+1003 是用户id号
+命令 id 就可以看到自己在服务器上的id号了
 ```
 
 
