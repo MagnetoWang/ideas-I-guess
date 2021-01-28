@@ -544,6 +544,13 @@ A += ('L' -> 100)
 
 
 你可以使用 ++ 运算符或 Map.++() 方法来连接两个 Map，Map 合并时会移除重复的 key。
+
+
+for循环更新
+var dataMap: Map[String, DataFrame] = Map()
+    parquetMap.forEach((k, v) => {
+      dataMap += (k -> spark.read.parquet(v))
+    })
 ```
 
 
@@ -1294,6 +1301,19 @@ parax      # 第13行
 --conf spark.eventLog.dir=hdfs://m7-qaperf-hdp01/tmp/feoutput/history 
 --conf spark.eventLog.enabled=true
 ```
+
+
+
+#### InMemoryTableScanExec Leaf Physical Operator
+
+```
+https://jaceklaskowski.gitbooks.io/mastering-spark-sql/content/spark-sql-SparkPlan-InMemoryTableScanExec.html
+
+```
+
+
+
+
 
 ### 代码代码
 
