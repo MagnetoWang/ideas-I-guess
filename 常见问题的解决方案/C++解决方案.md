@@ -682,6 +682,37 @@ std::map<int, string> int_to_string = {
 
 ```
 
+### stack
+
+```
+https://www.cplusplus.com/reference/stack/stack/
+
+empty
+    Test whether container is empty (public member function )
+
+size
+    Return size (public member function )
+
+top
+    Access next element (public member function )
+
+push
+    Insert element (public member function )
+
+emplace
+    Construct and insert element (public member function )
+
+pop
+    Remove top element (public member function )
+
+swap
+    Swap contents (public member function )
+    
+   
+```
+
+
+
 ### vector使用
 
 - 参考文档：http://www.cplusplus.com/reference/vector/vector/
@@ -766,6 +797,15 @@ str.assign(base);
 std::cout << str << '\n';
 // result
 The quick brown fox jumps over a lazy dog.
+
+从0开始，选3个字符。注意不是0 到 3！！！！
+xx.substr(0,3);
+
+字符串长度
+int n = s.size();
+
+往第一个位置插入字符1
+result.insert((result.begin(), '1');
 
 ```
 
@@ -1161,6 +1201,60 @@ multiple definition of `LogError(char const*)'
 注意
 如果非要在头文件定义函数，建议添加static
 ```
+
+
+
+### 编程常用函数
+
+```
+
+prev()和next()函数用法详解
+#include <iostream>     // std::cout
+#include <iterator>     // std::next
+#include <list>         // std::list
+
+http://c.biancheng.net/view/7384.html
+prev 原意为“上一个”，但 prev() 的功能远比它的本意大得多，该函数可用来获取一个距离指定迭代器 n 个元素的迭代器。
+
+和 prev 相反，next 原意为“下一个”，但其功能和 prev() 函数类似，即用来获取一个距离指定迭代器 n 个元素的迭代器。
+
+
+#include <ctype.h>
+C 库函数 void isalnum(int c) 检查所传的字符是否是字母和数字。
+
+fill_n()
+  std::vector<int> myvector (8,10);        // myvector: 10 10 10 10 10 10 10 10
+  std::fill_n (myvector.begin(),4,20);     // myvector: 20 20 20 20 10 10 10 10
+  std::fill_n (myvector.begin()+3,3,33);   // myvector: 20 20 20 33 33 33 10 10
+OutputIterator fill_n (OutputIterator first, Size n, const T& val);
+Assigns val to the first n elements of the sequence pointed by first.
+
+
+strtod
+#include <stdio.h>
+#include <stdlib.h>
+double strtod(const char *str, char **endptr)
+Parameters
+
+    str − This is the value to be converted to a string.
+
+    endptr − This is the reference to an already allocated object of type char*, whose value is set by the function to the next character in str after the numerical value.
+
+int main () { 
+   char str[30] = "20.30300 This is test";
+   char *ptr;
+   double ret;
+
+   ret = strtod(str, &ptr);
+   printf("The number(double) is %lf\n", ret);
+   printf("String part is |%s|", ptr);
+
+   return(0);
+}
+
+```
+
+
 
 ### C++的定义和声明
 
