@@ -50,6 +50,8 @@ docker push xxxx
 docker镜像保存文件，并可以拷贝到其他机器上使用
 docker save xxxx-镜像的名字而不是commit id > vnc-image.tar
 
+docker load < ubuntu.tar
+
 ```
 
 
@@ -66,5 +68,41 @@ docker save xxxx-镜像的名字而不是commit id > vnc-image.tar
 ```
 https://www.jianshu.com/p/9fd2f77001a3
 docker run -itd -v /home/code-docker:/code xxxx
+```
+
+### dockerfile build 镜像
+
+```
+FROM python:3.7-alpine3.9
+LABEL  MAINTAINER="soulteary <soulteary@gmail.com>"
+ 
+ENV LIBRARY_PATH /lib:/usr/lib
+ 
+RUN wget https://github.com/soulteary/gitbook2pdf/archive/master.zip -O /tmp/app.zip && \
+    cd /tmp && unzip app.zip && mv /tmp/gitbook2pdf-master /app
+ 
+RUN cat /etc/apk/repositories | sed -e "s/dl-cdn.alpinelinux.org/mirrors.aliyun.com/" | tee /etc/apk/repositories && \
+    apk add build-base python3-dev gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev libxslt-dev && \
+    cd /app && pip install -i https://mirrors.aliyun.com/pypi/simple/ -r /app/requirements.txt && \
+    apk del build-base && rm -rf /var/cache/apk/*
+ 
+VOLUME [ "/app/output" ]
+VOLUME [ "/usr/share/fonts/" ]
+ 
+WORKDIR /app
+ 
+ENTRYPOINT [ "python", "/app/gitbook.py" ]
+
+
+教程：https://soulteary.com/2019/05/07/generate-small-gitbook-pdf-using-the-docker-with-python.html
+将上面的内容写到dockerfile里面
+当前目录下执行
+docker build -t mygitbook:1 .
+这个时候就开始在打包了
+
+docker run --rm -v `pwd`/fonts:/usr/share/fonts \
+                -v `pwd`/output:/app/output \
+                mygitbook:1 https://jaceklaskowski.gitbooks.io/mastering-spark-sql/content/
+          
 ```
 
