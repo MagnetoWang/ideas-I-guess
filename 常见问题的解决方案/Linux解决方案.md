@@ -798,6 +798,32 @@ int1 -le int2　　　　int1小于等于int2为真
 
 ```
 
+### wget
+
+```
+wget -r -nH --cut-dirs=5 ftp://ftp.io/pub
+
+wget 下载文件夹
+
+
+
+
+wget 
+
+递归下载：
+
+wget -r -l1 --no-parent http://172.27.128.206:8080/rp/
+
+拉取 http://172.27.128.206:8080/rp/ 下内容，其中
+
+-r 递归模式
+
+-l 递归深度，1表示当前目录，不会拉取次级目录。0表示最大深度。
+
+
+
+```
+
 
 
 ### unset
