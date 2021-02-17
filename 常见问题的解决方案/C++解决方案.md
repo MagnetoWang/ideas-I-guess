@@ -642,6 +642,10 @@ int main()
     for (auto& e : map) {
         std::cout << e.first << e.second << std::endl;
     }
+    
+    
+
+
 
 ```
 
@@ -672,6 +676,36 @@ std::map<int, string> int_to_string = {
 - 基本操作
 - 和map基本一致
 
+
+
+```
+// unordered_map::cbegin/cend example
+#include <iostream>
+#include <unordered_map>
+
+int main ()
+{
+  std::unordered_map<std::string,std::string> mymap;
+  mymap = {{"Australia","Canberra"},{"U.S.","Washington"},{"France","Paris"}};
+
+  std::cout << "mymap contains:";
+  for ( auto it = mymap.cbegin(); it != mymap.cend(); ++it )
+    std::cout << " " << it->first << ":" << it->second;  // cannot modify *it
+  std::cout << std::endl;
+
+  std::cout << "mymap's buckets contain:\n";
+  for ( unsigned i = 0; i < mymap.bucket_count(); ++i) {
+    std::cout << "bucket #" << i << " contains:";
+    for ( auto local_it = mymap.cbegin(i); local_it!= mymap.cend(i); ++local_it )
+      std::cout << " " << local_it->first << ":" << local_it->second;
+    std::cout << std::endl;
+    }
+  return 0;
+}
+```
+
+
+
 ### list使用
 
 ```
@@ -686,6 +720,7 @@ std::map<int, string> int_to_string = {
 
 ```
 https://www.cplusplus.com/reference/stack/stack/
+#include <stack>          // std::stack
 
 empty
     Test whether container is empty (public member function )
@@ -723,7 +758,8 @@ reserve(number) 提前开辟vector空间，可以减少后面自动增长的开�
 clear() 清除所有的元素
 push_back(element) 往最后一个位置插入元素
 erase(index) 删除第index个位置的元素
-
+pop_back() 删除最后一个元素
+push_back(element) 添加元素到最后
 
 取对象
 xxx[i] 即可
@@ -755,6 +791,30 @@ std::vector<llvm::Value*>* args
 
 new 和 取地址符 在函数传递的区别
 
+
+
+insert用法
+    #include <iostream> 
+    #include <vector> 
+    #include <array> 
+    using namespace std;
+    int main()
+    {
+        std::vector<int> demo{1,2};
+        //第一种格式用法
+        demo.insert(demo.begin() + 1, 3);//{1,3,2}
+        //第二种格式用法
+        demo.insert(demo.end(), 2, 5);//{1,3,2,5,5}
+        //第三种格式用法
+        std::array<int,3>test{ 7,8,9 };
+        demo.insert(demo.end(), test.begin(), test.end());//{1,3,2,5,5,7,8,9}
+        //第四种格式用法
+        demo.insert(demo.end(), { 10,11 });//{1,3,2,5,5,7,8,9,10,11}
+        for (int i = 0; i < demo.size(); i++) {
+            cout << demo[i] << " ";
+        }
+        return 0;
+    }
 ```
 
 #### 高级用法
@@ -1251,6 +1311,25 @@ int main () {
 
    return(0);
 }
+
+
+isspace
+https://www.runoob.com/cprogramming/c-function-isspace.html
+' '     (0x20)    space (SPC) 空格符
+'\t'    (0x09)    horizontal tab (TAB) 水平制表符    
+'\n'    (0x0a)    newline (LF) 换行符
+'\v'    (0x0b)    vertical tab (VT) 垂直制表符
+'\f'    (0x0c)    feed (FF) 换页符
+'\r'    (0x0d)    carriage return (CR) 回车符
+int isspace(int c);
+参数
+
+    c -- 这是要检查的字符。
+
+返回值
+
+如果 c 是一个空白字符，则该函数返回非零值（true），否则返回 0（false）。
+
 
 ```
 
