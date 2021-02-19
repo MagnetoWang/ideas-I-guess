@@ -994,6 +994,54 @@ std::string raw_str = R"(First line.\nSecond line.\nEnd of message.\n)";
 
 ```
 
+### queue
+
+```
+http://c.biancheng.net/view/479.html
+
+
+对 priority_queue 进行操作有一些限制：
+
+    push(const T& obj)：将obj的副本放到容器的适当位置，这通常会包含一个排序操作。
+    push(T&& obj)：将obj放到容器的适当位置，这通常会包含一个排序操作。
+    emplace(T constructor a rgs...)：通过调用传入参数的构造函数，在序列的适当位置构造一个T对象。为了维持优先顺序，通常需要一个排序操作。
+    top()：返回优先级队列中第一个元素的引用。
+    pop()：移除第一个元素。
+    size()：返回队列中元素的个数。
+    empty()：如果队列为空的话，返回true。
+    swap(priority_queue<T>& other)：和参数的元素进行交换，所包含对象的类型必须相同。
+
+
+
+优先队列使用，找中位数
+class MedianFinder {
+    priority_queue<int> lo;                              // max heap
+    priority_queue<int, vector<int>, greater<int>> hi;   // min heap
+
+public:
+    // Adds a number into the data structure.
+    void addNum(int num)
+    {
+        lo.push(num);                                    // Add to max heap
+
+        hi.push(lo.top());                               // balancing step
+        lo.pop();
+
+        if (lo.size() < hi.size()) {                     // maintain size property
+            lo.push(hi.top());
+            hi.pop();
+        }
+    }
+
+    // Returns the median of current data stream
+    double findMedian()
+    {
+        return lo.size() > hi.size() ? (double) lo.top() : (lo.top() + hi.top()) * 0.5;
+    }
+};
+
+```
+
 
 
 ### wstring
@@ -1064,6 +1112,30 @@ insert
 find
 
 erase
+
+简单使用 求最长连续子序列，用set维护结果
+class Solution {
+public:
+    int longestConsecutive(vector<int>& nums) {
+        unordered_set<int> s;
+        int res = 0;
+        for (int e : nums) {
+            s.insert(e);
+        }
+        for (const int& num : s) {
+            if (s.count(num) == 1) {
+                int begin = num;
+                int cnt = 1;
+                while (s.count(begin + 1) != 0) {
+                    begin++;
+                    cnt++;
+                }
+                res = max(cnt, res);
+            }
+        }
+        return res;
+    }
+};
 
 
 
