@@ -1,3 +1,5 @@
+
+
 ## 说明
 
 ## 目录
@@ -261,6 +263,17 @@ java.lang.NullPointerException
 ```
 
 ### maven进阶
+
+#### idea报错
+
+```
+idea创建第一个maven项目报错：Cannot resolve plugin org.apache.maven.plugins:maven-clean-plugin:2.5
+
+要对齐.m2的配置！！！
+不要下载错了
+```
+
+
 
 #### 打包指定不要哪些包，哪些类，哪些资源
 
@@ -1747,6 +1760,11 @@ List<String> names = new ArrayList<String>() {{
                             
                         }
                     };
+                    
+                    
+list 和 数组转换 https://www.jianshu.com/p/7eee157f74fc
+strList.toArray(strArray1);
+Arrays.asList()
 ```
 
 ### Queue
@@ -1764,6 +1782,8 @@ poll
 
 
 推荐isEmpty来循环判断队列比较合适
+
+
 ```
 
 ### Class
@@ -3175,6 +3195,44 @@ MethodSpec dismiss = MethodSpec.methodBuilder("dismiss")
 advanced java folding 关闭即可
 ```
 
+
+
+### idea无法启动
+
+```
+idea报错
+Picked up JAVA_TOOL_OPTIONS: 
+OpenJDK 64-Bit Server VM warning: Option UseConcMarkSweepGC was deprecated in version 9.0 and will likely be removed in a future release.
+IDE has not been initialized yet
+
+
+
+ROOT=~
+SOFTWARE=$ROOT/software
+jdk_version=jdk-9.0.4+12
+export JAVA_HOME=$SOFTWARE/$jdk_version
+export JRE_HOME=$SOFTWARE/$jdk_version/jre
+export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib
+export PATH=$SOFTWARE/$jdk_version/bin:$PATH
+export IDEA_JDK=$JAVA_HOME
+sh idea.sh 
+
+要把之前的idea的进程杀死
+ps -xf | grep wangzixian/software/idea | awk '{print $1}' | while read line; do kill -9 $line; done
+
+
+  100  ps -xf | grep idea.sh
+  101  ps -xf | grep idea
+  102  ps -xf | grep wangzixian/software/idea
+  103  ps -xf | grep wangzixian/software/idea | awk '{print $2}'
+  104  ps -xf | grep wangzixian/software/idea | awk '{print $1}'
+  105  ps -xf | grep wangzixian/software/idea | awk '{print $1}' | while read line; do kill -9 $line; done
+  106  sh idea.sh 
+
+```
+
+
+
 ## Jprofiler
 
 ### 资料
@@ -4152,6 +4210,33 @@ FST字典实现：https://www.cnblogs.com/bonelee/p/6226185.html
 
 ```
 
-[TOC]
 
+## PostgreSQL
+### 数据库安装
+```
+下载官网的postgre 直接continue
+
+```
+
+### 启动服务
+```
+sudo上面新建了用户，所以每次都需要-U
+sudo -u postgres psql
+createdb mydb -U postgres
+psql mydb -U postgres
+
+开始基本使用
+ SELECT version();
+
+\h 查询手册
+\q 退出
+
+```
+
+
+
+
+
+
+[TOC]
 
