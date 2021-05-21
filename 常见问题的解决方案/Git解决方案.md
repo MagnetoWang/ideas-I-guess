@@ -7,6 +7,15 @@
 - http://www.ruanyifeng.com/blog/2015/12/git-cheat-sheet.html
 - https://git-scm.com/book/zh/v1/Git-%E5%B7%A5%E5%85%B7-%E5%82%A8%E8%97%8F%EF%BC%88Stashing%EF%BC%89
 
+### 修改用户名
+
+```
+git config --global user.name xxx
+git config --global user.email xxx
+```
+
+
+
 ### 远程仓库代码覆盖本地代码
 
 - git reset --hard $HEAD
@@ -53,6 +62,15 @@ git checkout -b xxx
 希望把xxx推到远程某个分支名上
  git push --set-upstream origin xxx
 ```
+
+### 新建分支
+
+```
+ git checkout -b branchname
+ git push origin branchname
+```
+
+
 
 ### 删除远程分支
 
@@ -300,7 +318,17 @@ git log --oneline | wc -l
 
 ```
 
+### git 查询一个文件的历史所有更改内容
 
+```
+
+
+git log --pretty=oneline pom.xml> log.txt
+awk '{print $1}'
+
+git show 3cd413eabb29e23dce952dc775c9e41fa99460c8
+
+```
 
 
 
@@ -398,9 +426,50 @@ deploy:
 ### 修改cicd产出日志的限制
 
 ```
+需要修改docker的toml配置
+
+```
+
+
+
+### Github cicd 部署
+
+```
+https://docs.github.com/cn/actions/hosting-your-own-runners/adding-self-hosted-runners
+
+配置说明：https://cloud.tencent.com/developer/article/1614404
+
+
+所用到的action插件
+
+    actions/checkout@v2 ：拉代码
+    actions/cache@v1：缓存
+    actions/upload-artifact@v1：打包上传构件
+    actions/download-artifact@v1：下载构件
+    easingthemes/ssh-deploy@v2.0.7：ssh-deploy部署插件
+    contention/rsync-deployments@v1.0.0：rsync同步插件
+    appleboy/ssh-action@master：ssh命令行插件
+
+上传自定义的docker镜像
+创建token：https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token
+token在action使用
+https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#github-context
+https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#env
+
+在服务器上login token
+export CR_PAT=YOUR_TOKEN
+echo $CR_PAT | docker login ghcr.io -u USERNAME --password-stdin
+
+This example pushes the latest version of IMAGE-NAME.
+$ docker push ghcr.io/OWNER/IMAGE_NAME:latest
+
+This example pushes the 2.5 version of the image.
+$ docker push ghcr.io/OWNER/IMAGE-NAME:2.5
 
 
 ```
+
+
 
 ## 问题
 
@@ -499,6 +568,32 @@ x  -----删除忽略文件已经对git来说不识别的文件
 
 ```
 
+```
+
+
+
+### hint: Pulling without specifying how to reconcile divergent branches is
+
+```
+hint: Pulling without specifying how to reconcile divergent branches is
+hint: discouraged. You can squelch this message by running one of the following
+hint: commands sometime before your next pull:
+hint:
+hint:   git config pull.rebase false  # merge (the default strategy)
+hint:   git config pull.rebase true   # rebase
+hint:   git config pull.ff only       # fast-forward only
+hint:
+hint: You can replace "git config" with "git config --global" to set a default
+hint: preference for all repositories. You can also pass --rebase, --no-rebase,
+hint: or --ff-only on the command line to override the configured default per
+hint: invocation.
+Already up to date.
+
+
+git pull 会因为本地分支和远程分支有冲突自动生成一个commit
+所以才会出现上面异常
+可以先git fetch
+然后git merge
 ```
 
 
