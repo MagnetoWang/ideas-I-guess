@@ -1227,6 +1227,10 @@ public class ObjectFactory {
 }
 返回的类型都由输入决定！！！！
 String instance = ObjectFactory.getInstance(String.class);
+
+
+
+反射实现：https://www.jianshu.com/p/356e1d7a9d11
 ```
 
 
@@ -1849,6 +1853,12 @@ public class Main {
   }
 }
 
+枚举里面定义方法
+public enum Color {  
+    RED("红色", 1), GREEN("绿色", 2), BLANK("白色", 3), YELLO("黄色", 4);  
+    }
+https://blog.csdn.net/qq_27093465/article/details/52180865
+
 ```
 
 ## JDK8
@@ -2169,6 +2179,24 @@ https://blog.csdn.net/jackgaogaogao/article/details/51533663
     </plugin>  
 </plugins>
 
+```
+
+### TestNG by default disables loading DTD from unsecured Urls. If you need to explicitly load the DTD from a http url, please do so by using the JVM argument [-Dtestng.dtd.http=true]
+
+```
+org.testng.TestNGException: 
+TestNG by default disables loading DTD from unsecured Urls. If you need to explicitly load the DTD from a http url, please do so by using the JVM argument [-Dtestng.dtd.http=true]
+	at org.testng.xml.TestNGContentHandler.resolveEntity(TestNGContentHandler.java:115)
+	at org.apache.xerces.util.EntityResolverWrapper.resolveEntity(Unknown Source)
+	at org.apache.xerces.impl.XMLEntityManager.resolveEntity(Unknown Source)
+	at org.apache.xerces.impl.XMLDocumentScannerImpl$DTDDispatcher.dispatch(Unknown Source)
+	at org.apache.xerces.impl.XMLDocumentFragmentScannerImpl.scanDocument(Unknown Source)
+	at org.apache.xerces.parsers.XML11Configuration.parse(Unknown Source)
+	at org.apache.xerces.parsers.XML11Configuration.parse(Unknown Source)
+	
+
+降低版本号
+或者添加参数
 ```
 
 
@@ -4234,6 +4262,17 @@ psql mydb -U postgres
 ```
 
 
+
+## calsite
+
+### 资料
+
+```
+注册一个函数：https://zhuanlan.zhihu.com/p/65472726
+calsite基本概念：https://matt33.com/2019/03/07/apache-calcite-process-flow/
+javacc研究与心得：https://www.cnblogs.com/Gavin_Liu/archive/2009/03/07/1405029.html
+
+```
 
 
 
