@@ -13,6 +13,7 @@
 ### 资料
 
 - Java泛型高级用法：<http://angelikalanger.com/GenericsFAQ/JavaGenericsFAQ.html>
+- java风格检测：http://hoverruan.github.io/blog/2013/06/21/using-maven-checkstyle-plugin/
 
 ### 异常
 
@@ -1231,6 +1232,40 @@ String instance = ObjectFactory.getInstance(String.class);
 
 
 反射实现：https://www.jianshu.com/p/356e1d7a9d11
+
+==================================================================================================================
+
+通过反射获取类的成员变量：https://www.jianshu.com/p/1361f1f43e99
+getField和getDeclaredField都是Class类的方法
+getField
+
+获取一个类的 ==public成员变量，包括基类== 。
+getDeclaredField
+
+获取一个类的 ==所有成员变量，不包括基类== 。
+Field.setAccessible
+
+成员变量为private，必须进行此操作。
+
+==================================================================================================================
+通过反射获取类的方法
+getDeclaredMethod
+
+获取字段的访问权限
+getModifiers()方法用于以整数形式返回用于字段对象的修饰符，作为声明的时间。应该使用Modifier类来解码修饰符。
+
+==================================================================================================================
+Modifier 类提供了static方法和常量，对类和成员访问修饰符进行解码
+modifier 的数字表示权限，用二进制表示不同权限的情况
+https://blog.csdn.net/zengxiantao1994/article/details/73927754
+
+
+
+==================================================================================================================
+
+
+
+
 ```
 
 
