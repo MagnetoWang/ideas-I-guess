@@ -14,6 +14,31 @@ git config --global user.name xxx
 git config --global user.email xxx
 ```
 
+### Git rebase 
+
+```
+git rebase --edit-todo
+
+合并某个分支，但是没有commit
+git rebase xxx 
+
+出现冲突，先修改，然后
+git add xxxx
+再执行
+git rebase --continue
+重复上面两个操作
+
+修复冲突后继续更改
+git rebase --continue
+
+
+放弃更改
+git rebase --abort  
+
+
+
+```
+
 
 
 ### 远程仓库代码覆盖本地代码
