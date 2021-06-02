@@ -918,6 +918,9 @@ public class ThreadPoolTest {
         }
     }
 }
+
+
+
 ```
 
 ### 线程池
@@ -966,6 +969,26 @@ ExecutorService service = Executors.newFixedThreadPool(5);
                 );
                 // 如果之后不再使用，一定要关掉线程池
                 service.shutdown();
+                
+                
+                
+定时线程使用
+http://www.yanzuoguang.com/article/130
+
+public class ScheduledExecutorServiceTest {
+    public static void main(String[] args) {
+        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+        executorService.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("run "+ System.currentTimeMillis());
+            }
+        }, 0, 100, TimeUnit.MILLISECONDS);
+    }
+}
+
+
+
 ```
 
 
@@ -1024,6 +1047,22 @@ public static void main(String[] args) {
 ```
 
 ```
+
+###  测试
+
+```
+junit不能直接测试多线程，因为会直接中断线程任务
+需要让junit不插手多线程的任务
+https://blog.yumc.pw/posts/Use-The-ThreadPool-On-JUnit/
+
+需要加一行 executorService.awaitTermination(10, TimeUnit.SECONDS);
+至少让单元测试运行10秒，保证多线程里面的任务可以跑完
+
+
+关闭线程池：https://juejin.cn/post/6844903631846637576
+```
+
+
 
 ## Java语法
 
@@ -2234,6 +2273,53 @@ TestNG by default disables loading DTD from unsecured Urls. If you need to expli
 或者添加参数
 ```
 
+### [ERROR] Forbidden method invocation: java.lang.System#exit(int) [Please do not try to kill the world]
+
+```
+https://github.com/checkstyle/checkstyle/issues/1217
+
+    <plugin>
+      <groupId>de.thetaphi</groupId>
+      <artifactId>forbiddenapis</artifactId>
+      <version>1.8</version>
+      <configuration>
+        <targetVersion>${java.version}</targetVersion>
+        <!-- disallow undocumented classes like sun.misc.Unsafe: -->
+        <internalRuntimeForbidden>true</internalRuntimeForbidden>
+        <!--
+          if the used Java version is too new,
+          don't fail, just do nothing:
+        -->
+        <failOnUnsupportedJava>false</failOnUnsupportedJava>
+        <bundledSignatures>
+          <!--
+            This will automatically choose the right
+            signatures based on 'maven.compiler.target':
+          -->
+          <bundledSignature>jdk-unsafe</bundledSignature>
+          <bundledSignature>jdk-deprecated</bundledSignature>
+        </bundledSignatures>
+      </configuration>
+      <executions>
+        <execution>
+          <goals>
+            <goal>check</goal>
+            <goal>testCheck</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
+    
+   注释上面这个插件
+   
+   
+ <!--        <plugin>-->
+<!--          <groupId>de.thetaphi</groupId>-->
+<!--          <artifactId>forbiddenapis</artifactId>-->
+<!--          <version>${forbiddenapis.version}</version>-->
+<!--        </plugin>-->
+```
+
 
 
 ## 自动化脚本
@@ -3294,6 +3380,15 @@ ps -xf | grep wangzixian/software/idea | awk '{print $1}' | while read line; do 
 
 ```
 
+### 异常 
+
+```
+java: JDK isn't specified for module 
+https://blog.csdn.net/weixin_44259720/article/details/105294743
+
+在IDEA中关掉该项目，将文件目录下的 .idea文件删除，然后重新打开项目即可。
+```
+
 
 
 ## Jprofiler
@@ -4278,21 +4373,46 @@ FST字典实现：https://www.cnblogs.com/bonelee/p/6226185.html
 ### 数据库安装
 ```
 下载官网的postgre 直接continue
+java连接sql：https://www.tutorialspoint.com/postgresql/postgresql_java.htm
 
+数据类型：https://www.runoob.com/postgresql/postgresql-data-type.html
 ```
 
-### 启动服务
+### 命令行使用
 ```
 sudo上面新建了用户，所以每次都需要-U
 sudo -u postgres psql
+创建数据库
 createdb mydb -U postgres
+
+进去mydb数据库
 psql mydb -U postgres
+
+查看库里的所有表 \d
+
+执行sql \g就是立刻返回结果
+select * from company \g
+
 
 开始基本使用
  SELECT version();
 
 \h 查询手册
 \q 退出
+
+```
+
+### Sql语法
+
+```
+建表
+CREATE TYPE mood AS ENUM ('sad', 'ok', 'happy');
+CREATE TABLE person (
+    name text,
+    current_mood mood
+);
+
+写入数据
 
 ```
 
