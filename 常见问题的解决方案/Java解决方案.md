@@ -151,6 +151,8 @@ export PATH=${MAVEN_HOME}/bin:${PATH}
 
 ```
 在pom里面添加插件并制定jar包入口
+               <build>
+        <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -161,14 +163,45 @@ export PATH=${MAVEN_HOME}/bin:${PATH}
                             <classpathPrefix>./lib/</classpathPrefix>
                             <!--<classpathPrefix>/RELATION/appuser/test_tools/lib/</classpathPrefix>-->
                             <!--<classpathPrefix>/home/work/tools/lib/</classpathPrefix>-->
-                            <mainClass>com._4paradigm.predictor.demo.JprofilerTest</mainClass>
+                            <mainClass>xxxxx.xxx.UdfTools</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
             </plugin>
+        </plugins>
+    </build>
+            
+            
+上面插件有时候没有生效，可以改用下面这个：https://www.jianshu.com/p/0d85d0539b1a
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-shade-plugin</artifactId>
+    <executions>
+        <execution>
+            <goals>
+                <goal>shade</goal>
+            </goals>
+            <configuration>
+                <shadedArtifactAttached>true</shadedArtifactAttached>
+                <transformers>
+                    <transformer implementation=
+                      "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                        <mainClass>com.michealyang.jetty.embeded.EmbeddedJettyServer</mainClass>
+                </transformer>
+            </transformers>
+        </configuration>
+        </execution>
+    </executions>
+</plugin>
+
             
 在pom.xml目录下执行
 mvn clean install -Dmaven.test.skip=true
+mvn clean package -Dmaven.test.skip=true
+
+
+执行jar包
+java -Dfile.encoding=UTF-8 -cp xxx.jar xxx.Main
 ```
 
 #### 找maven的settings.xml位置
@@ -450,6 +483,13 @@ log4j.appender.console.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} [%p] %C{
 log4j.logger.org.apache.spark=ERROR,console
 log4j.logger.org.spark_project.jetty=ERROR,console
 
+```
+
+#### 实现命令行工具
+
+```
+基本使用：https://www.cnblogs.com/widget90/p/10528620.html
+文档：https://www.tutorialspoint.com/commons_cli/commons_cli_pdf_version.htm
 ```
 
 
@@ -4414,6 +4454,26 @@ CREATE TABLE person (
 
 写入数据
 
+```
+
+### 异常
+
+#### org.postgresql.util.PSQLException: ERROR: no schema has been selected to create in
+
+```
+org.postgresql.util.PSQLException: ERROR: no schema has been selected to create in
+        at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2510)
+        at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2245)
+        at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:311)
+        at org.postgresql.jdbc.PgStatement.executeInternal(PgStatement.java:447)
+        at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:368)
+        at org.postgresql.jdbc.PgStatement.executeWithFlags(PgStatement.java:309)
+        at org.postgresql.jdbc.PgStatement.executeCachedSql(PgStatement.java:295)
+        at org.postgresql.jdbc.PgStatement.executeWithFlags(PgStatement.java:272)
+        at org.postgresql.jdbc.PgStatement.executeUpdate(PgStatement.java:246)
+        
+  
+search_path概念：https://postgresqlco.nf/doc/zh/param/search_path/
 ```
 
 
