@@ -225,6 +225,7 @@ dict["xxx"] = xxxxxx
         print("pos_name_.insert(\"", key, "\", \" ", value, "\");")
         
 
+判断字典是否存在某个key
 get方法获取元素，如果找不到返回none
 ```
 
@@ -944,6 +945,15 @@ http://tools.jb51.net/regex/javascript
 
 正则表达式在线生成工具：
 http://tools.jb51.net/regex/create_reg
+
+
+正则表达式函数封装
+# 输入正则表达式字符串 和 原始字符串即可 
+# 返回list，找到所有符合正则表达式的结果
+def find_target_string(reg, ctx):
+    import re
+    p1 = re.compile(reg, re.S) #最小匹配
+    return re.findall(p1, ctx)
 ```
 
 
