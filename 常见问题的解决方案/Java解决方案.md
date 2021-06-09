@@ -2360,6 +2360,41 @@ https://github.com/checkstyle/checkstyle/issues/1217
 <!--        </plugin>-->
 ```
 
+### 'static' modifier out of order with the JLS suggestions
+
+```
+'static' modifier out of order with the JLS suggestions
+
+
+public or private should come before static, which should come before final.
+```
+
+### AvoidStarImportCheck
+
+```
+不能用 * 的原因，就是会编译出错
+https://stackoverflow.com/questions/147454/why-is-using-a-wild-card-with-a-java-import-statement-bad
+```
+
+### Utility classes should not have a public or default constructor.
+
+```
+class StringUtils { // Compliant
+
+  private StringUtils() {
+    throw new IllegalStateException("Utility class");
+  }
+
+  public static String concatenate(String s1, String s2) {
+    return s1 + s2;
+  }
+
+}
+
+
+工具类不能有构造函数，必须加一个throw
+```
+
 
 
 ## 自动化脚本
