@@ -539,7 +539,7 @@ The GNU C Library project provides the core libraries for the GNU system and GNU
 
   - tar -zxvf ×××.tar.gz
   - tar -jxvf ×××.tar.bz2
-  - unrar -x xxxxx.rar
+  - unrar -x xxxxx.rar 需要安装rar软件 brew install carlocab/personal/unrar
   - https://blog.csdn.net/FX677588/article/details/76100538
 
 - 安装zsh
@@ -795,7 +795,10 @@ int1 -le int2　　　　int1小于等于int2为真
 ### export
 
 ```
-
+    #设置历史命令记录数  
+    export HISTSIZE=1000  
+    #记录历史文件大小   
+    export HISTFILESIZE=450  
 ```
 
 ### wget
@@ -951,10 +954,13 @@ brew install gnu-sed
 scp xxx.tar root@xxx:/mnt/disk02/xxx
 ```
 
-### rsync
+### rsync 文件夹增量更新
 
 ```
 https://www.jianshu.com/p/07b3998e1f53
+
+文件夹增量更新 已经有的文件，不会复制
+rsync -avzh src dst
 ```
 
 
@@ -1067,6 +1073,42 @@ grep -r xxx dir/
 ripgrep xxx
 递归搜索所有文件的内容
 
+
+
+递归某个字符串在所有文件出现的地方
+https://blog.csdn.net/BabyFish13/article/details/79709028
+
+ grep -rn "xxxxx"  dir
+ 
+ 
+ --递归查找目录下含有该字符串的所有文件
+grep -rn "data_chushou_pay_info"  /home/hadoop/nisj/automationDemand/
+ 
+--查找当前目录下后缀名过滤的文件
+grep -Rn "data_chushou_pay_info" *.py
+ 
+--当前目录及设定子目录下的符合条件的文件
+grep -Rn "data_chushou_pay_info" /home/hadoop/nisj/automationDemand/ *.py
+ 
+--结合find命令过滤目录及文件名后缀
+find /home/hadoop/nisj/automationDemand/ -type f -name '*.py'|xargs grep -n 'data_chushou_pay_info'
+
+
+-r 是递归查找
+-n 是显示行号
+-R 查找所有文件包含子目录
+-i 忽略大小写 
+
+
+有意思的命令行参数：
+grep -i pattern files ：不区分大小写地搜索。默认情况区分大小写
+grep -l pattern files ：只列出匹配的文件名,不列出路径
+grep -L pattern files ：列出不匹配的文件名
+grep -w pattern files ：只匹配整个单词，而不是字符串的一部分（如匹配‘magic’，而不是‘magical’）
+grep -C number pattern files ：匹配的上下文分别显示[number]行
+grep pattern1 | pattern2 files ：显示匹配 pattern1 或 pattern2 的行
+grep pattern1 files | grep pattern2 ：显示既匹配 pattern1 又匹配 pattern2 的行 
+
 ```
 
 ### gunzip 解压gz文件
@@ -1074,6 +1116,9 @@ ripgrep xxx
 ```
 文件夹下所有文件批量解压
 cd data && gunzip *.gz
+
+
+unrar -x xxxxx.rar 需要安装rar软件 brew install carlocab/personal/unrar
 ```
 
 
@@ -1275,6 +1320,9 @@ zip -dv cp.zip a.c
 unzip 解压
 unzip xx.zip
 
+
+unrar -x xxxxx.rar 需要安装rar软件 brew install carlocab/personal/unrar
+
 查看压缩文件中包含的文件
 # unzip -l abc.zip 
 Archive: abc.zip
@@ -1325,10 +1373,13 @@ awk -F ':' '{ print $1 }' demo.txt
 
 ```
 
-### chmod
+### chmod chown
 
 ```
-chmod -R 777 1003
+chmod -R 777 文件名
+
+修改用户号
+chown 1003 ./ -R
 ```
 
 
@@ -2029,6 +2080,52 @@ sh xxx | wait
 所有命令 后面可以加个  & 说明是放在后台执行
 ls -l &
 xxx &
+```
+
+### 颜色高亮配置
+
+```
+https://www.jianshu.com/p/4239d3ea72fe
+
+PS1的常用参数以及含义:
+　　\d ：代表日期，格式为weekday month date，例如："Mon Aug 1"
+　　\H ：完整的主机名称
+　　\h ：仅取主机名中的第一个名字
+　　\t ：显示时间为24小时格式，如：HH：MM：SS
+　　\T ：显示时间为12小时格式
+　　\A ：显示时间为24小时格式：HH：MM
+　　\u ：当前用户的账号名称
+　　\v ：BASH的版本信息
+　　\w ：完整的工作目录名称
+　　\W ：利用basename取得工作目录名称，只显示最后一个目录名
+　　# ：下达的第几个命令
+　　$ ：提示字符，如果是root用户，提示符为 # ，普通用户则为 $
+
+
+
+
+
+# 颜色设置
+black=$'\[\e[1;30m\]'
+red=$'\[\e[1;31m\]'
+green=$'\[\e[1;32m\]'
+yellow=$'\[\e[1;33m\]'
+blue=$'\[\e[1;34m\]'
+magenta=$'\[\e[1;35m\]'
+cyan=$'\[\e[1;36m\]'
+white=$'\[\e[1;37m\]'
+normal=$'\[\e[m\]'
+
+
+export LS_COLORS='no=00:fi=00:di=01;33:ln=01;36:pi=40;33:so=01;35:bd=40;33;01:cd=40;33;01:or=01;05;37;41:mi=01;05;37;41:ex=01;35:*.cmd=01;35:*.exe=01;35:*.com=01;35:*.btm=01;35:*.bat=01;35:*.sh=01;35:*.csh=01;35:*.tar=01;31:*.tgz=01;31:*.arj=01;31:*.taz=01;31:*.lzh=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.gz=01;31:*.bz2=01;31:*.bz=01;31:*.tz=01;31:*.rpm=01;31:*.cpio=01;31:*.jpg=01;35:*.gif=01;35:*.bmp=01;35:*.xbm=01;35:*.xpm=01;35:*.png=01;35:*.tif=01;35:'
+
+# export LS_COLORS='rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.jpg=01;35:*.jpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.axv=01;35:*.anx=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.axa=00;36:*.oga=00;36:*.spx=00;36:*.xspf=00;36:'
+
+黄色
+export PS1='[\[\e[1;33m\]\u@\h \w \t]$ '
+
+青色
+export PS1='[\[\e[1;36m\]\u@\h \w \t]$ '
 ```
 
 
