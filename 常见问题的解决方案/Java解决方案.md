@@ -182,6 +182,16 @@ export PATH=${MAVEN_HOME}/bin:${PATH}
                 <goal>shade</goal>
             </goals>
             <configuration>
+             <filters>
+                 <filter>
+                   <artifact>*:*</artifact>
+                   <excludes>
+                     <exclude>META-INF/*.SF</exclude>
+                     <exclude>META-INF/*.DSA</exclude>
+                     <exclude>META-INF/*.RSA</exclude>
+                   </excludes>
+                 </filter>
+               </filters>
                 <shadedArtifactAttached>true</shadedArtifactAttached>
                 <transformers>
                     <transformer implementation=
@@ -2393,6 +2403,22 @@ class StringUtils { // Compliant
 
 
 工具类不能有构造函数，必须加一个throw
+```
+
+### Exception in thread "main" java.lang.SecurityException: Invalid signature file digest for Manifest main attributes
+
+```
+打包要过滤多个重复配置文件
+https://www.cnblogs.com/hark0623/p/6253043.html
+
+Exception in thread "main" java.lang.SecurityException: Invalid signature file digest for Manifest main attributes
+	at sun.security.util.SignatureFileVerifier.processImpl(SignatureFileVerifier.java:330)
+	at sun.security.util.SignatureFileVerifier.process(SignatureFileVerifier.java:263)
+	at java.util.jar.JarVerifier.processEntry(JarVerifier.java:318)
+	at java.util.jar.JarVerifier.update(JarVerifier.java:230)
+	at java.util.jar.JarFile.initializeVerifier(JarFile.java:383)
+	at java.util.jar.JarFile.ensureInitialization(JarFile.java:618)
+	at java.util.jar.JavaUtilJarAccessImpl.ensureInitialization(JavaUtilJarAcc
 ```
 
 
