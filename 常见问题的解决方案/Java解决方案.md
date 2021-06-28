@@ -147,7 +147,7 @@ export PATH=${MAVEN_HOME}/bin:${PATH}
 
 
 
-#### 发布含main入口的jar包
+#### 发布含main入口的jar包，可执行jar包
 
 ```
 在pom里面添加插件并制定jar包入口
@@ -213,6 +213,32 @@ mvn clean package -Dmaven.test.skip=true
 执行jar包
 java -Dfile.encoding=UTF-8 -cp xxx.jar xxx.Main
 ```
+
+#### 整合项目所有的依赖包，放到一个目录下
+
+```
+添加相关插件
+
+<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <!--<configuration>-->
+                        <!--<outputDirectory>${project.build.directory}/lib-->
+                        <!--</outputDirectory>-->
+                        <!--</configuration>-->
+                    </execution>
+                </executions>
+            </plugin>
+```
+
+
 
 #### 找maven的settings.xml位置
 
@@ -906,7 +932,48 @@ hashmap foreach遍历：https://blog.csdn.net/w605283073/article/details/8070894
     	}
     }
     
+    
 
+lamda map用法
+xxfunc(Arrays.asList(jars).stream().map(e -> path + "/" + e).collect(Collectors.toList()));
+
+
+```
+
+### 动态加载jar和类
+
+```
+基本思路：https://blog.csdn.net/liuxiao723846/article/details/47441547
+
+
+【实例3 把上述方法部署到web服务器上，就会抛出异常，需要使用线程上下文类加载器】
+
+URLClassLoader loader = new URLClassLoader(urls);  
+//如果用于WEB应用，则需要使用以下构造方法  
+//URLClassLoader loader = new URLClassLoader(urls, Thread.currentThread().getContextClassLoader());  
+
+
+获取一个jar包所有的class：https://www.baeldung.com/jar-file-get-class-names
+
+
+public static Set<Class> getClassesFromJarFile(File jarFile) throws IOException, ClassNotFoundException {
+    Set<String> classNames = getClassNamesFromJarFile(jarFile);
+    Set<Class> classes = new HashSet<>(classNames.size());
+    try (URLClassLoader cl = URLClassLoader.newInstance(
+           new URL[] { new URL("jar:file:" + jarFile + "!/") })) {
+        for (String name : classNames) {
+            Class clazz = cl.loadClass(name); // Load the class by its name
+            classes.add(clazz);
+        }
+    }
+    return classes;
+}
+
+
+
+注意
+注释掉scope或将provided改为compile，因为最后打包提交的时候要用到这个jar包。
+provide会导致找不到环境变量的包
 ```
 
 
@@ -1603,6 +1670,16 @@ public static void main(String args[]){
  
 RuntimeException 和 Exception 完全不一样！！！！
 RuntimeException 不需要throw 直接终止程序！
+
+
+有些异常无法捕获
+https://zhuanlan.zhihu.com/p/67234342
+https://www.jianshu.com/p/ccfd0b14f377
+像这类 java.lang.NoClassDefFoundError: org/apache/commons/collections4/IterableUtils，由于NoClassDefFoundError是Throwable的Error子类，所以Exception是捕捉不到的
+
+三 解决办法
+catch(Throwable t)
+{ }
 ```
 
 ### 正则表达式
@@ -1893,6 +1970,17 @@ List<String> names = new ArrayList<String>() {{
 list 和 数组转换 https://www.jianshu.com/p/7eee157f74fc
 strList.toArray(strArray1);
 Arrays.asList()
+
+
+数组类型强制转换
+//要转换的list集合
+ List<String> testList = new ArrayList<String>(){{add("aa");add("bb");add("cc");}};
+
+ //使用toArray(T[] a)方法
+ String[] array2 = testList.toArray(new String[testList.size()]);
+
+
+ArrayList<String> arrayList = new ArrayList<String>(Arrays.asList(arrays));
 ```
 
 ### Queue
@@ -2562,6 +2650,9 @@ String jsonObject = gson.toJson(user); // {"name":"怪盗kidou","age":24}
 Gson gson = new Gson();
 String jsonString = "{\"name\":\"怪盗kidou\",\"age\":24}";
 User user = gson.fromJson(jsonString, User.class);
+
+2.8.3以上的版本可以直接用静态方法解析json字符串
+JsonElement je = JsonParser.parseString(readFileToString(new File(path)));
 
 ```
 
