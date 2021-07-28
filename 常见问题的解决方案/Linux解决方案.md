@@ -1823,6 +1823,27 @@ tar -zxvf xxx.tar
 unzip xx.zip
 压缩
 tar czvf xxx.tar xxx
+
+
+
+解压rpm包
+rpm2cpio mysql-connector-java-8.0.24-1.fc33.src.rpm | cpio -div
+
+
+解压报错：https://www.cnblogs.com/xqzt/p/5032865.html
+gzip: stdin: not in gzip format 
+tar: Child returned status 1 
+tar: Error is not recoverable: exiting now
+
+解决办法：
+1.首先用 file 命令查看该文件的真实属性
+[sa@cistest local]$ file rlwrap-0.30.tar.gz
+rlwrap-0.30.tar.gz: tar archive
+2.根据真实属性选择解压命令即可解决
+[sa@cistest local]$ tar xvf rlwrap-0.30.tar.gz
+
+
+
 ```
 
 ### 环境变量和export的用法
@@ -2124,8 +2145,13 @@ export LS_COLORS='no=00:fi=00:di=01;33:ln=01;36:pi=40;33:so=01;35:bd=40;33;01:cd
 黄色
 export PS1='[\[\e[1;33m\]\u@\h \w \t]$ '
 
+
 青色
 export PS1='[\[\e[1;36m\]\u@\h \w \t]$ '
+
+
+前面显示青色 后面显示黄色 色彩更加鲜明
+export PS1='\[\e[1;36m\][\u@\h \w \t]$ \[\e[1;33m\]'
 ```
 
 
