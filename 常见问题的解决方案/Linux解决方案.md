@@ -1133,6 +1133,14 @@ unrar -x xxxxx.rar 需要安装rar软件 brew install carlocab/personal/unrar
 - find ../ -iname 营销*
   - 从上一个目录开始查询
 
+```
+找出某个文件的全路径
+find  $PWD | xargs ls -ld | grep lz4
+
+```
+
+
+
 ### wc
 
 - 基本用法：http://www.cnblogs.com/peida/archive/2012/12/18/2822758.html

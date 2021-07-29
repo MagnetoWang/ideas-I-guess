@@ -15,6 +15,21 @@
 - Java泛型高级用法：<http://angelikalanger.com/GenericsFAQ/JavaGenericsFAQ.html>
 - java风格检测：http://hoverruan.github.io/blog/2013/06/21/using-maven-checkstyle-plugin/
 
+### 安装Java
+
+```
+下载Java包
+
+在.bashrc里面配置路径
+# Java配置
+export JAVA_HOME=$ROOT/j2sdk-bundle
+export JRE_HOME=$ROOT/j2sdk-bundle/jre
+export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib
+export PATH=$PATH:$JAVA_HOME/bin
+```
+
+
+
 ### 异常
 
 #### 异常介绍
@@ -39,8 +54,6 @@
 - java.util.concurrent.TimeoutException
   - http://www.blogjava.net/xylz/archive/2011/07/12/354206.html	
   - 此异常是用来描述任务执行时间超过了期望等待时间，也许是一直没有获取到锁，也许是还没有执行完成。
-
-### 
 
 ### 代码规范
 
@@ -112,6 +125,8 @@ mvn exec:java -Dexec.mainClass="com.jsoft.test.MainClass" -Dexec.args="arg0 arg1
 指定测试某个类的单独方法
 mvn clean test -Dtest=xxx.xxxTest#方法名
 
+修改项目版本号
+mvn versions:set -DnewVersion=1.7.3.9-rc2
 
 打印debug日志
 https://blog.csdn.net/iteye_6908/article/details/82522034
@@ -2619,6 +2634,22 @@ properties.getProperty("变量名");
 
 ```
 
+### 获取当前类和名字
+
+```
+https://www.huaweicloud.com/articles/af74a73f5ad4c8847a9bf5fb090ff22f.html
+
+Thread.currentThread().getStackTrace()[1].getClassName();
+Thread.currentThread().getStackTrace()[1].getMethodName();
+
+或者
+
+this.getClass().getName();
+
+```
+
+
+
 ### gson
 
 ```
@@ -2653,6 +2684,15 @@ User user = gson.fromJson(jsonString, User.class);
 
 2.8.3以上的版本可以直接用静态方法解析json字符串
 JsonElement je = JsonParser.parseString(readFileToString(new File(path)));
+
+
+if (withPretty) {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            JsonParser jp = new JsonParser();
+            return gson.toJson(jp.parse(jo.toString()));
+        } else {
+            return jo.toString();
+        }
 
 ```
 
