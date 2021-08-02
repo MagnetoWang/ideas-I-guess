@@ -2027,6 +2027,14 @@ yum install gcc-c++ libstdc++-devel
 可视化看板磁盘工具：Baobab是一款分析磁盘使用情况的图形工具，它可以分析本地硬盘空间、分析挂载硬盘或设备空间，同时界面简单易操作，且分析结果以环状或树形状显示。
 https://wiki.deepin.org/wiki/Baobab
 
+
+du -sh 查看当前目录所占空间
+
+du -ah --max-depth=1
+
+du -sh : 查看当前目录总共占的容量。而不单独列出各子项占用的容量 
+
+du -lh --max-depth=1 : 查看当前目录下一级子文件和子目录占用的磁盘容量
 ```
 
 ## 正则表达式
