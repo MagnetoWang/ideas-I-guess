@@ -35,7 +35,7 @@ git rebase --continue
 放弃更改
 git rebase --abort  
 
-
+使用说明：https://zhuanlan.zhihu.com/p/34197548
 
 ```
 
@@ -76,6 +76,14 @@ git reset --hard commitID
 
 - git pull
 - git checkout  xxx
+
+### 删除远程分支
+
+```
+git push origin --delete <branchName>
+```
+
+
 
 ### 本地分支推到远程分支
 
@@ -353,6 +361,36 @@ awk '{print $1}'
 
 git show 3cd413eabb29e23dce952dc775c9e41fa99460c8
 
+```
+
+### 项目迁移保留历史commit
+
+```
+https://www.huaweicloud.com/articles/e5d045b6fb38a4f9b481345b3f4f5409.html
+
+1). 从原地址克隆一份裸版本库，比如原本托管于 GitHub。
+
+git clone --bare git@git.oschina.net:tantexian/wishPatterns.git
+
+--bare 创建的克隆版本库都不包含工作区，直接就是版本库的内容，这样的版本库称为裸版本库。
+
+2). 然后到新的 Git 服务器上创建一个新项目，比如 wishPatterns。
+
+3). 以镜像推送的方式上传代码到 GitCafe 服务器上。
+
+cd wishPatterns.git
+git push --mirror https://github.com/tantexian/wishPatterns.git
+
+-- mirror 克隆出来的裸版本对上游版本库进行了注册，这样可以在裸版本库中使用git fetch命令和上游版本库进行持续同步。
+
+4). 删除本地代码
+
+cd ..
+rm -rf wishPatterns.git
+
+5). 到新服务器 GitCafe 上找到 Clone 地址，直接 Clone 到本地就可以了。
+
+git clone https://github.com/tantexian/wishPatterns.git
 ```
 
 
