@@ -543,6 +543,13 @@ log4j.logger.org.spark_project.jetty=ERROR,console
 文档：https://www.tutorialspoint.com/commons_cli/commons_cli_pdf_version.htm
 ```
 
+#### 反编译
+
+```
+通过jdk自带的javap方法查看经过计算的class文件：
+命令：javap -verbose XXX.class
+```
+
 
 
 ### 自定义一个异常类并使用
@@ -1284,6 +1291,15 @@ public @interface MyTarget {
 
 https://blog.csdn.net/yaomingyang/article/details/81201817
 https://blog.csdn.net/a327369238/article/details/52673338
+```
+
+### 迭代器
+
+```
+Iterable Iterator 两者区别
+
+java.lang.Iterable
+java.util.Iterator
 ```
 
 
