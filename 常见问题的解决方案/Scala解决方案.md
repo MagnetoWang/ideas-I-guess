@@ -8,6 +8,11 @@
 mac
 brew install sbt@1
 
+下载scala源码
+wget https://github.com/scala/scala/archive/v2.10.5.tar.gz
+wget https://github.com/scala/scala/archive/v2.11.8.tar.gz
+ 
+
 linux
 wget https://downloads.lightbend.com/scala/2.13.3/scala-2.13.3.tgz
 配置path路径，这样scala环境就有了
@@ -15,6 +20,15 @@ wget https://downloads.lightbend.com/scala/2.13.3/scala-2.13.3.tgz
 wget https://downloads.lightbend.com/scala/2.13.3/scala-2.13.3.tgz
 wget https://downloads.lightbend.com/scala/2.11.8/scala-2.11.8.tgz
 wget https://downloads.lightbend.com/scala/2.12.8/scala-2.12.8.tgz
+
+2.11.8
+wget https://downloads.lightbend.com/scala/2.11.8/scala-2.11.8.tgz
+
+2.10.5
+wget https://downloads.lightbend.com/scala/2.10.5/scala-2.10.5.tgz
+
+
+https://github.com/scala/scala/archive/v2.10.5.tar.gz
 
 安装spark
 wget https://archive.apache.org/dist/spark/spark-2.3.0/spark-2.3.0-bin-hadoop2.7.tgz
@@ -53,6 +67,10 @@ https://blog.csdn.net/leano/article/details/5867108
 
 可以把idea的执行命令复制下来好好研究
 java "-javaagent:/Applications/IntelliJ IDEA.app/Contents/lib/idea_rt.jar=63883:/Applications/IntelliJ IDEA.app/Contents/bin" -Dfile.encoding=UTF-8 -classpath /Library/Java/JavaVirtualMachines/jdk1.8.0_191.jdk/Contents/Home/jre/lib/charsets.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_191.jdk/Contents/Home/jre/lib/deploy.jar:/Users/magnetowang/.m2/repository/org/ow2/asm/asm-util/5.2/asm-util-5.2.jar com._4paradigm.ferrari.prophet.SparkUtils
+
+
+scala项目打可执行jar包
+
 ```
 
 
@@ -90,6 +108,38 @@ https://blog.csdn.net/jxx4903049/article/details/82688117
 
 ```
 
+#### Akka ! 感叹号
+
+```
+消息通过以下方法之一发送给Actor。
+
+!表示“一劳永逸”，例如异步发送消息并立即返回。也称为tell。
+	
+?异步发送消息并返回Future表示可能的答复。也称为ask。
+
+```
+
+#### @ 符号
+
+```
+https://notes.mengxin.science/2018/09/07/scala-special-symbol-usage/
+@ 详细用法：https://stanzhai.site/blog/post/stanzhai/Scala%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D%E7%9A%84%60-%60%E6%93%8D%E4%BD%9C%E7%AC%A6-2
+
+def intent = {
+ case req @ GET(Path(Seg("api" :: "user" :: IntPathElement(userId) :: Nil))) =>
+      val f = (userManager ? FindUserById(userId))
+      respond(f, req)
+      
+ case req @ GET(Path(Seg("api" :: "user" :: Nil))) & Params(EmailParam(email)) =>
+      val f = (userManager ? FindUserByEmail(email))
+      respond(f, req)  
+}
+
+在处理 request 请求的时候，需要匹配请求的路径，然后还需要直接使用 requet。
+```
+
+
+
 ### 资料
 
 ```
@@ -102,6 +152,8 @@ charsheet展示语法：https://docs.scala-lang.org/cheatsheets/index.html
 Array用法：https://docs.scala-lang.org/overviews/collections-2.13/arrays.html
 
 迭代器高级用法：https://docs.scala-lang.org/overviews/collections-2.13/iterators.html
+akka系统：https://guobinhit.github.io/akka-guide/
+akka文档：https://doc.akka.io/docs/akka/current/typed/actors.html
 ```
 
 ### 符号
@@ -134,6 +186,18 @@ scala> postsDf.filter('postTypeId === 1).withColumn("ratio", 'viewCount / 'score
 
 # 新的章节
 
+## Akka
+
+### 基本语法
+
+```
+actorRef：https://blog.csdn.net/lovehuangjiaju/article/details/51045146
+actor示例：https://blog.csdn.net/lovehuangjiaju/article/details/51045146
+RemotingLifecycleEvent：http://jasonqu.github.io/akka-doc-cn/2.3.6/scala/book/chapter5/03_remoting.html
+```
+
+
+
 ## Spark
 
 ### 资料
@@ -152,6 +216,12 @@ groupby例子：https://sparkbyexamples.com/spark/using-groupby-on-dataframe/
 国内文档，访问速度快：http://spark.apachecn.org/#/
 文档github项目：https://github.com/apachecn/spark-doc-zh
 
+sparkSQL文档：https://spark.apache.org/docs/3.0.0-preview/sql-ref-syntax-ddl-create-view.html
+
+dataset接口使用：https://spark.apache.org/docs/latest/api/scala/org/apache/spark/sql/Dataset.html
+JavaRDD接口使用：https://spark.apache.org/docs/latest/api/scala/org/apache/spark/api/java/JavaRDD.html
+parquet文件读取：https://www.tabnine.com/code/java/methods/org.apache.spark.sql.DataFrameReader/parquet
+csv读写：https://docs.databricks.com/data/data-sources/read-csv.html#supported-options
 
 ```
 
@@ -551,6 +621,8 @@ var dataMap: Map[String, DataFrame] = Map()
     parquetMap.forEach((k, v) => {
       dataMap += (k -> spark.read.parquet(v))
     })
+    
+    
 ```
 
 
@@ -794,6 +866,43 @@ trait Equal {
 }
 ```
 
+
+
+#### tail
+
+```
+ https://www.codenong.com/cs106294867/
+ 
+ object ParamParser {
+  var tableName:String=_
+  var memory:String=_
+  def main(args: Array[String]): Unit = {
+    val list=List("--table","temp.test_table","--memory","4G")
+    parse(list)
+    print(tableName)
+      print(memory)
+  }
+
+  //实际就是匹配特定的一段
+  def parse(list:List[String]):Unit= list match {
+    case "--table" :: value :: tail =>{
+       tableName=value
+      parse(tail)
+    }
+    case "--memory" :: value :: tail=>{
+      memory=value;
+    }
+    case Nil=>
+  }
+}
+
+这个语法关键的部分其实是scala中list的模式匹配，
+case “–table” :: value :: tail 语义其实就是匹配这种结构
+“–table”::接下来的元素::其他元素，tail就是其他的意思，这种结构连到一起就是匹配上的，所以参数里面的写法"–table","temp.test_table"会被匹配上，value则取值就是temp.test_table.
+```
+
+
+
 #### 下划线使用大全
 
 ```
@@ -1009,6 +1118,14 @@ A1
 B2
 C3
 ```
+
+#### rdd
+
+```
+rdd 转 df：https://www.jianshu.com/p/94a3188436af
+```
+
+
 
 #### dataframe
 
@@ -1311,7 +1428,63 @@ https://jaceklaskowski.gitbooks.io/mastering-spark-sql/content/spark-sql-SparkPl
 
 ```
 
+#### 在Java代码中无法引用DataFrame
 
+```
+https://blog.csdn.net/love__guo/article/details/90898730
+
+In Scala and Java, a DataFrame is represented by a Dataset of Rows. 
+In the Scala API, DataFrame is simply a type alias of Dataset[Row]. 
+While, in Java API, users need to use Dataset<Row> to represent a DataFrame.
+
+
+根本就没有DataFrame！！一直都是Dataset<Row>，DataFrame就是一个别称、小名！！
+```
+
+#### withScope
+
+```
+spark到处使用withScope的原因：https://zhuanlan.zhihu.com/p/59062272
+```
+
+#### 访问控制修饰符添加作用域
+
+```
+Scala 的访问修饰符可以添加作用域参数。作用域的语法如下：
+
+private[x]或protected[x]
+
+其中 x 代表某个包，类或者对象，表示可以访问这个 Private 或的 protected 的范围直到 X。
+
+通过为访问修饰符添加作用域参数，可以非常精确的控制所定义的类型能够被其它类型访问的范围。尤其是可以支持 Java 语言支持的 package private，package protected 等效果。
+
+
+package bobsrockets
+package navigation{
+  private[bobsrockets] class Navigator{
+    protected[navigation] def useStarChart(){}
+    class LegOfJourney{
+        private[Navigator]  val distance=100
+      }
+    private[this] var speed = 200
+    }
+  }
+  package launch{
+    import navigation._
+    object Vehicle{
+      private[launch] val guide=new Navigator
+    }
+}
+
+在这个例子中，类 Navigator 使用 private[bobsrockets] 来修饰，这表示这个类可以被 bobsrockets 中所有类型访问，比如通常情况下 Vehicle 无法访问私有类型 Navigator，但使用包作用域之后，Vechile 中可以访问 Navigator。
+
+这种技巧在分散在多个 Package 的大型项目时非常有用，它允许你定义一些在多个子包中可以访问，但对使用这些 API 的外部客户代码隐藏，而这种效果在 Java 中是无法实现的。
+
+此外，Scala 还支持一种比 private 还要严格的访问控制，本例中的 private[this]，只允许在定义该成员的类型中访问，它表示该成员不仅仅只能在定义该成员的类型中访问，而且只能是由该类型本身访问。比如：本例中 speed，使用 protected[this]，speed，和 this.speed 只在定义该成员的实例中可以访问，下面的用法也是不合法的，即使它们也在 Navigator 里面。当由于是新创建的另外的实例，编译出错：
+
+
+https://wiki.jikexueyuan.com/project/scala-development-guide/add-scope.html
+```
 
 
 
@@ -1622,6 +1795,39 @@ https://www.cnblogs.com/justlove/p/7637681.html
 		</dependency>
 ```
 
+#### missing parameter type for expanded function
+
+```
+https://stackoverflow.com/questions/7627117/scala-underscore-error-missing-parameter-type-for-expanded-function
+
+
+```
+
+#### spark cannot resolve overloaded constructor Schema
+
+```
+这段代码会报错
+因为schema这里会报红
+
+def getCurrentSchema1(data: SerializableBuffer, ser: SerializerInstance): Schema = {
+    if (output.size == 0) {
+      return new Schema(new FieldSchema("Response code", "string", "") :: Nil, null)
+    } else {
+      val fieldSchemas = output.map { attr =>
+        new FieldSchema(attr.name, HiveMetastoreTypes.toMetastoreType(attr.dataType), "")
+      }
+      return new Schema(fieldSchemas, null)
+    }
+
+
+
+加这个一行代码，还是报错
+import scala.collection.JavaConverters._
+
+加下面这个才成功
+import scala.collection.JavaConversions._
+```
+
 
 
 ## 单元测试
@@ -1695,5 +1901,8 @@ count(1) 和 count(*) 区别
 https://www.cnblogs.com/CareySon/p/DifferenceBetweenCountStarAndCount1.html
 
 count(1)，其实就是计算一共有多少符合条件的行
+
+
+
 ```
 
