@@ -1502,6 +1502,8 @@ https://www.runoob.com/java/java-abstraction.html
 ### switch
 
 ```
+java se7 以上支持匹配字符串
+
 public class Test {
    public static void main(String args[]){
       //char grade = args[0].charAt(0);
@@ -4647,6 +4649,10 @@ select * from company \g
 
 \h 查询手册
 \q 退出
+
+\dt 查看所有表
+\d 查看所有表和表的详细信息
+\dt test* 筛选表名前缀是test的表
 
 ```
 
