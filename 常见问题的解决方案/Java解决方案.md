@@ -475,6 +475,23 @@ java -Dfile.encoding=UTF-8 -cp xxx.jar xxx.Main
 unzip xxxx.jar
 ```
 
+#### Java加载类终极解决方案
+
+```
+直接执行
+java -Dfile.encoding=UTF-8 -cp xxx.jar xxx.Main
+经常会出现找不到包之类的问题
+
+原因是需要配置classpath，把相关的所有类全部写到classpath中
+export CLASSPATH=xxx
+
+
+但是java -cp还是报错没有加载成功
+
+```
+
+
+
 #### 查看jdk路径
 
 ```
@@ -1900,6 +1917,23 @@ public class TestThread {
     
 复杂写法
 players.forEach((player) -> System.out.print(player + "; "));
+
+
+JAVA高级写法参考
+rootNode.descendants.stream().map(n -> n.table)
+        .collect(Collectors.toCollection(LinkedHashSet::new));
+        
+supersqlPrivileges.stream().map(s -> true).collect(Collectors.toList());
+
+allFields.stream().anyMatch(i -> i >= lower && i < upper)
+
+List<Pair<String, V>> result = range.entrySet().stream()
+        .flatMap(e -> e.getValue().stream().map(v -> Pair.of(e.getKey(), v)))
+        .collect(Collectors.toList())
+ 
+List<Pair<String, String>> txts
+List<String> sqls = txts.stream().map(x -> x.getLeft() + "\n" + x.getRight()).collect(Collectors.toList());
+
 ```
 
 ### Set
@@ -2540,6 +2574,21 @@ Exception in thread "main" java.lang.SecurityException: Invalid signature file d
 	at java.util.jar.JarFile.initializeVerifier(JarFile.java:383)
 	at java.util.jar.JarFile.ensureInitialization(JarFile.java:618)
 	at java.util.jar.JavaUtilJarAccessImpl.ensureInitialization(JavaUtilJarAcc
+```
+
+### CheckStyle
+
+```
+Method length is 371 lines (max allowed is 370). [MethodLength]
+方法类里面不能超过371行
+
+ImportOrder
+遵循顺序
+（1）同组的包放在一起
+
+（2）同组的包按照一定的顺序，一般是按照字典顺序
+
+（3）不同组之间的包流一个空行
 ```
 
 
