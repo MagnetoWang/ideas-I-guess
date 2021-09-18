@@ -20,6 +20,7 @@ wget https://downloads.lightbend.com/scala/2.13.3/scala-2.13.3.tgz
 wget https://downloads.lightbend.com/scala/2.13.3/scala-2.13.3.tgz
 wget https://downloads.lightbend.com/scala/2.11.8/scala-2.11.8.tgz
 wget https://downloads.lightbend.com/scala/2.12.8/scala-2.12.8.tgz
+wget https://downloads.lightbend.com/scala/2.12.10/scala-2.12.10.tgz
 
 2.11.8
 wget https://downloads.lightbend.com/scala/2.11.8/scala-2.11.8.tgz
@@ -180,6 +181,14 @@ DoubleRDDFunctions
 scala> postsDf.filter('postTypeId === 1).withColumn("ratio", 'viewCount / 'score). where('ratio < 35).show()
 
 自增id列，高效做法：https://www.jianshu.com/p/3e998a12ec3c
+```
+
+### JAVA 和 SCALA
+
+```
+等价类
+java Tuple2<String, String>
+scala Array[(String, String)]
 ```
 
 
@@ -1233,6 +1242,8 @@ window.repartition(20, keys.map(window(_)): _*).foreach(
     )
 
 
+修改dataframe的列类型
+
 ```
 
 #### 求和
@@ -1497,6 +1508,14 @@ val spark = SparkSession.builder.appName("Simple Application").master("local").g
 val data = spark.read.parquet(path)
 data.coalesce(1).write.option("header", "true").csv(output)
 
+
+object TestMain {
+  def main(args: Array[String]): Unit = {
+    val spark = SparkSession.builder.appName("Simple Application").master("local").getOrCreate()
+    
+  }
+}
+
 ```
 
 #### 定义dataframe
@@ -1528,8 +1547,35 @@ case class StructField(
         dataType: DataType,
         nullable: Boolean = true,
         metadata: Metadata = Metadata.empty) {}
+ 
+初始化schema
+val newSchema = StructType(Seq())
+newSchema.add(f)
+xxx
+
+初始化字段
+new StructField("id", DataTypes.IntegerType, false, Metadata.empty()),
+
+遍历schema
+df.schema.fields.foreach(xxxxx)
+注意
+ newSchema = newSchema.add(field) 这样写才是新的schema
 
 ```
+
+#### 修改dataframe的类型
+
+```
+
+    val cols = df.columns
+            val newColumnsSchema = cols.map(c => {
+              df(c).cast(StringType)
+            })
+    df.select(newColumnsSchema: _*).printSchema()
+     df.show()
+```
+
+
 
 #### 运行scala程序
 
