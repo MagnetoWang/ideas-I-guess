@@ -14,6 +14,14 @@
 
 ### 常识
 
+#### 安装
+
+```
+
+```
+
+
+
 #### pip命令
 
 ```
@@ -602,6 +610,22 @@ with open('path\filename', 'w') as file_obj:
 
 
 读文件
+一行一行读
+with open('filepath','r') as f:
+    line =f.readline()
+    while line:
+        print(line)
+        line=f.readline()
+        
+
+打开文件
+f=open(path,'r')
+f.close()
+
+全读
+with open('filepath','r') as f:
+    ff=f.read()
+
 
 ```
 
