@@ -905,6 +905,15 @@ sed -i "44c "--headers \) HDRS_IN=\"$2\"; shift 2 ;;"" config_brpc.sh
     /：分界符。
     Input_File：要执行操作的文件名。
 
+
+获取指定哪几行的日志
+file=xxx
+
+first=`cat -n $file | grep "xxx" | head -1 | awk {'print $1}'`
+last=`cat -n $file | grep "xxx" | tail -1 | awk {'print $1}'`
+
+sed -n  "$first,${last}p" $file > test.log 
+
 ```
 
 
@@ -952,6 +961,10 @@ brew install gnu-sed
 
 ```
 scp xxx.tar root@xxx:/mnt/disk02/xxx
+
+
+scp文件夹
+scp -P xxx端口号 -r xxxx  root@xxx:xxx
 ```
 
 ### rsync 文件夹增量更新
@@ -1118,7 +1131,8 @@ grep pattern1 files | grep pattern2 ：显示既匹配 pattern1 又匹配 patter
 cd data && gunzip *.gz
 
 
-unrar -x xxxxx.rar 需要安装rar软件 brew install carlocab/personal/unrar
+unrar -x xxxxx.rar 
+需要安装rar软件 brew install carlocab/personal/unrar
 ```
 
 
@@ -1654,6 +1668,18 @@ echo "xxx.27.128.37\ xx-xx" > /etc/hosts
 特殊字符要加斜杆
 ```
 
+### 找出某个文件的全路径
+
+```
+包含文件详细信息
+find  $PWD | xargs ls -ld | grep lz4
+
+纯文件路径
+find  $PWD | grep target | grep .jar
+```
+
+
+
 ### 文件文本处理大全
 
 ```
@@ -1670,6 +1696,13 @@ awk '{printf "%s,%s,%s,%s %s,%s\n", $1,$2,$3,$4,$5,$6}' log
 1066646,231846592837463974,3827260221581409832,2012-07-15 05:17:46.766,1
 1302399,4260542096088094334,12371595234560663038,2014-12-10 03:46:53.732,2
 格式化输出，逗号隔开
+
+1、打印文件的第一列(域)                 ： awk '{print $1}' filename
+2、打印文件的前两列(域)                 ： awk '{print $1,$2}' filename
+3、打印完第一列，然后打印第二列  ： awk '{print $1 $2}' filename
+4、打印文本文件的总行数                ： awk 'END{print NR}' filename
+5、打印文本第一行                          ：awk 'NR==1{print}' filename
+6、打印文本第二行第一列                ：sed -n "2, 1p" filename | awk 'print $1'
 
 
 输出某个路径下的所有文件夹，而没有文件
@@ -1701,6 +1734,10 @@ wait  // 会等待所有命令执行完
 批量杀死包含某个名字的进程
 pkill -f <xxx>
 pkill -f 'process.py'
+
+
+
+
 
 ```
 
@@ -2170,6 +2207,17 @@ export PS1='[\[\e[1;36m\]\u@\h \w \t]$ '
 export PS1='\[\e[1;36m\][\u@\h \w \t]$ \[\e[1;33m\]'
 ```
 
+### 删除多余空行
+
+```
+正则表达式
+^\s*(?=\r?$)\n
+
+
+\[Loaded.*
+
+```
+
 
 
 ## 问题
@@ -2243,6 +2291,94 @@ Binary file xxx.log matches
 
 grep -a "key" xxx.log
 ```
+
+### 代码风格问题
+
+```
+<module name="ImportOrder">
+      <property name="groups" value="org.apache.calcite,org.apache,au.com.,com.,io.,mondrian.,net.,org.,scala.,/^javax?\./"/>
+      <property name="ordered" value="true"/>
+      <property name="separated" value="true"/>
+      <property name="option" value="bottom"/>
+    </module>
+    
+   
+
+Extra separation in import group before 'org.yaml.snakeyaml.error.YAMLException' [ImportOrder]
+
+
+
+'com.tencent.supersql.common.utils.jdbc.JdbcDriver.getJdbcDriver' should be separated from previous imports. [ImportOrder]
+Audit done.
+
+
+Open parentheses exceed closes by 2 or more [HydromaticFileSet]
+不能连续两个括号在同一行
+
+
+Extra separation in import group before 'org.yaml.snakeyaml.error.YAMLException' [ImportOrder]
+
+Wrong order for 'com.tencent.supersql.common.utils.jdbc.JdbcDriver' import. [ImportOrder]
+
+'com.tencent.supersql.common.utils.jdbc.JdbcDriver.getJdbcDriver' should be separated from previous imports. [ImportOrder]
+Audit done.
+
+检查导入包的顺序/分组。确保导入包的分组按照指定的顺序排列（例如，java.排在首位，javax.排在第二，以此类推），并且每个分组内导入的包都是按照字典序排列的。静态导入必须放在最后，并且也是按照字典序排列的。
+
+中文说明：https://www.jianshu.com/p/9d6a6815ea52
+
+
+
+ Checks the ordering/grouping of imports. Features are:
+
+    groups type/static imports: ensures that groups of imports come in a specific order (e.g., java. comes first, javax. comes second, then everything else)
+    adds a separation between type import groups : ensures that a blank line sit between each group
+    type/static import groups aren't separated internally: ensures that each group aren't separated internally by blank line or comment
+    sorts type/static imports inside each group: ensures that imports within each group are in lexicographic order
+    sorts according to case: ensures that the comparison between imports is case sensitive, in ASCII sort order
+    arrange static imports: ensures the relative order between type imports and static imports (see ImportOrderOption)
+
+    Property option - specify policy on the relative order between type imports and static imports. Type is com.puppycrawl.tools.checkstyle.checks.imports.ImportOrderOption. Default value is under.
+    Property groups - specify list of type import groups (every group identified either by a common prefix string, or by a regular expression enclosed in forward slashes (e.g. /regexp/). All type imports, which does not match any group, falls into an additional group, located at the end. Thus, the empty list of type groups (the default value) means one group for all type imports. Type is java.lang.String[]. Validation type is java.util.regex.Pattern. Default value is "".
+    Property ordered - control whether type imports within each group should be sorted. It doesn't affect sorting for static imports. Type is boolean. Default value is true.
+    Property separated - control whether type import groups should be separated by, at least, one blank line or comment and aren't separated internally. It doesn't affect separations for static imports. Type is boolean. Default value is false.
+    Property separatedStaticGroups - control whether static import groups should be separated by, at least, one blank line or comment and aren't separated internally. This property has effect only when the property option is set to top or bottom and when property staticGroups is enabled. Type is boolean. Default value is false.
+    Property caseSensitive - control whether string comparison should be case sensitive or not. Case sensitive sorting is in ASCII sort order. It affects both type imports and static imports. Type is boolean. Default value is true.
+    Property staticGroups - specify list of static import groups (every group identified either by a common prefix string, or by a regular expression enclosed in forward slashes (e.g. /regexp/). All static imports, which does not match any group, falls into an additional group, located at the end. Thus, the empty list of static groups (the default value) means one group for all static imports. This property has effect only when the property option is set to top or bottom. Type is java.lang.String[]. Validation type is java.util.regex.Pattern. Default value is "".
+    Property sortStaticImportsAlphabetically - control whether static imports located at top or bottom are sorted within the group. Type is boolean. Default value is false.
+    Property useContainerOrderingForStatic - control whether to use container ordering (Eclipse IDE term) for static imports or not. Type is boolean. Default value is false.
+    Property tokens - tokens to check Type is java.lang.String[]. Validation type is tokenSet. Default value is: STATIC_IMPORT.
+
+To configure the check:
+
+ <module name="ImportOrder"/>
+ 
+
+Example:
+
+ import java.io.IOException;
+ import java.net.URL;
+
+ import java.io.IOException; // violation, extra separation before import
+                             // and wrong order, comes before 'java.net.URL'.
+ import javax.net.ssl.TrustManager; // violation, extra separation due to above comment
+ import javax.swing.JComponent;
+ import org.apache.http.conn.ClientConnectionManager; // OK
+ import java.util.Set; // violation, wrong order, 'java' should not come after 'org' imports
+ import com.neurologic.http.HttpClient; // violation, wrong order, 'com' imports comes at top
+ import com.neurologic.http.impl.ApacheHttpClient; // OK
+
+
+
+
+ (whitespace) WhitespaceAfter: ',' is not followed by whitespace.
+ 
+ 
+ Kotlin: Incompatible classes were found in dependencies. Remove them from the classpath or use '-Xskip-metadata-version-check' to suppress errors
+
+```
+
+
 
 ### cpu抖动问题
 
