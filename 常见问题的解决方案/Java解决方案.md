@@ -160,6 +160,17 @@ export MAVEN_HOME=`pwd`/apache-maven-3.6.3
 export PATH=${MAVEN_HOME}/bin:${PATH}
 ```
 
+#### mvn插件使用
+
+```
+maven-dependency-plugin 管理依赖的插件
+http://maven.apache.org/plugins/maven-dependency-plugin/build-classpath-mojo.html
+
+
+
+
+```
+
 
 
 #### 发布含main入口的jar包，可执行jar包
@@ -251,6 +262,38 @@ java -Dfile.encoding=UTF-8 -cp xxx.jar xxx.Main
                     </execution>
                 </executions>
             </plugin>
+            
+          
+ spark插件参考
+  <!-- This plugin dumps the test classpath into a file -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>generate-test-classpath</id>
+            <phase>test-compile</phase>
+            <goals>
+              <goal>build-classpath</goal>
+            </goals>
+            <configuration>
+              <includeScope>test</includeScope>
+              <outputProperty>test_classpath</outputProperty>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-module-dependencies</id>
+            <phase>${build.copyDependenciesPhase}</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <includeScope>runtime</includeScope>
+              <outputDirectory>${jars.target.dir}</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 ```
 
 
@@ -2576,6 +2619,19 @@ Exception in thread "main" java.lang.SecurityException: Invalid signature file d
 	at java.util.jar.JavaUtilJarAccessImpl.ensureInitialization(JavaUtilJarAcc
 ```
 
+### mvn的所有异常
+
+```
+
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-jar-plugin:3.1.2:jar (default-jar) on project spark-tags_2.12: You have to use a classifier to attach supplemental artifacts to the project instead of replacing them. -> [Help 1]
+[ERROR]
+
+
+```
+
+
+
 ### CheckStyle
 
 ```
@@ -2658,7 +2714,7 @@ this.loadBalanceType = LoadBalanceType.ROUND_ROBIN.getId();
 
 ## 常用代码片段
 
-### 打印logger
+### 打印logger-到底怎么配置logger
 
 ```
 import org.slf4j.Logger;
@@ -2673,6 +2729,11 @@ maven包
     <artifactId>slf4j-api</artifactId>
     <version>1.7.25</version>
 </dependency>
+
+配置log（已经验证n次了）！！！！
+需要在main或者test的resource处放 log4j.properties文件
+不然无法初始化日志系统
+
 ```
 
 
@@ -2713,6 +2774,15 @@ Thread.currentThread().getStackTrace()[1].getMethodName();
 
 this.getClass().getName();
 
+```
+
+### 读文件转字符串
+
+```
+  public static String readFileToString(String path) throws IOException {
+    String context = FileUtils.readFileToString(new File(path));
+    return context;
+  }
 ```
 
 
@@ -2761,6 +2831,13 @@ if (withPretty) {
             return jo.toString();
         }
 
+```
+
+## 常用命令
+
+```
+查看java加载包的日志
+java -verbose:class
 ```
 
 
