@@ -131,6 +131,17 @@ mvn versions:set -DnewVersion=1.7.3.9-rc2
 打印debug日志
 https://blog.csdn.net/iteye_6908/article/details/82522034
 mvn clean test -Dtest=xxx.xxxTest#方法名  -X
+
+
+将项目的依赖都统一放到一个目录下
+mvn dependency:copy-dependencies -DoutputDirectory=/xxx/lib
+
+
+mvn设置离线状态，不用每次从网络下载包，直接用本地即可，提高效率
+<updatePolicy>always</updatePolicy>
+<updatePolicy>never</updatePolicy>
+<updatePolicy>daily</updatePolicy> 每天
+
 ```
 
 #### 安装maven
@@ -158,6 +169,11 @@ wget https://mirror.bit.edu.cn/apache/maven/maven-3/3.6.3/binaries/apache-maven-
 tar xvzf apache-maven-3.6.3-bin.tar.gz
 export MAVEN_HOME=`pwd`/apache-maven-3.6.3
 export PATH=${MAVEN_HOME}/bin:${PATH}
+
+
+安装3.5.4
+文档：https://maven.apache.org/docs/3.5.4/release-notes.html
+包位置：https://archive.apache.org/dist/maven/maven-3/3.5.4/binaries/
 ```
 
 #### mvn插件使用
@@ -244,6 +260,7 @@ java -Dfile.encoding=UTF-8 -cp xxx.jar xxx.Main
 
 ```
 添加相关插件
+mvn clean package
 
 <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -290,6 +307,48 @@ java -Dfile.encoding=UTF-8 -cp xxx.jar xxx.Main
             <configuration>
               <includeScope>runtime</includeScope>
               <outputDirectory>${jars.target.dir}</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+```
+
+#### maven-dependency-plugin
+
+```
+maven-dependency-plugin
+
+
+三种标签情况
+删除某个包的依赖
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <id>analyze</id>
+            <goals>
+              <goal>analyze-only</goal>
+            </goals>
+            <configuration>
+              <failOnWarning>true</failOnWarning>
+ 
+ 
+              <!-- ignore jsr305 for both "used but undeclared" and "declared but unused" -->
+              <ignoredDependencies>
+                <ignoredDependency>com.google.code.findbugs:jsr305</ignoredDependency>
+              </ignoredDependencies>
+ 
+              <!-- ignore annotations for "used but undeclared" warnings -->
+              <ignoredUsedUndeclaredDependencies>
+                <ignoredUsedUndeclaredDependency>com.google.code.findbugs:annotations</ignoredUsedUndeclaredDependency>
+              </ignoredUsedUndeclaredDependencies>
+ 
+              <!-- ignore annotations for "unused but declared" warnings -->
+              <ignoredUnusedDeclaredDependencies>
+                <ignoredUnusedDeclaredDependency>com.google.code.findbugs:annotations</ignoredUnusedDeclaredDependency>
+              </ignoredUnusedDeclaredDependencies>
             </configuration>
           </execution>
         </executions>
@@ -516,6 +575,12 @@ java -Dfile.encoding=UTF-8 -cp xxx.jar xxx.Main
 
 解压jar包
 unzip xxxx.jar
+
+查看java加载包的日志
+java -verbose:class
+
+java依赖打印
+mvn dependency:tree -Dverbose > tree.txt
 ```
 
 #### Java加载类终极解决方案
