@@ -17,7 +17,51 @@
 #### 安装
 
 ```
+源码编译python2 
+mkdir /usr/local/python2.7
+./configure --prefix=/usr/local/python2.7/ --enable-shared
+make & make install
 
+
+推荐安装
+国外
+git clone https://github.com/pyenv/pyenv.git ~/.pyenv
+国内
+git clone https://gitee.com/mirrors/pyenv.git ~/.pyenv
+export PYTHON_BUILD_MIRROR_URL="https://npm.taobao.org/mirrors/python/"
+
+HOME=~
+PYENV_ROOT="$HOME/.pyenv"
+PATH="$PYENV_ROOT/bin:$PATH"
+
+国内加速
+export v=3.7.1; wget https://npm.taobao.org/mirrors/python/$v/Python-$v.tar.xz -P ~/.pyenv/cache/; pyenv install $v 
+
+export v=2.7.18; wget https://npm.taobao.org/mirrors/python/$v/Python-$v.tar.xz -P ~/.pyenv/cache/; pyenv install $v 
+
+bashrc
+
+安装某个python版本
+pyenv install 3.7.1
+pyenv install 2.7.18
+
+Installed Python-2.7.18 to /root/.pyenv/versions/2.7.18
+
+pyenv virtualenv 2.7.18 env2718
+
+在当前目录下创建一个 python 版本为2.7.1的环境，环境名字为 env271。 这个环境的真实目录位于~/.pyenv/versions/
+
+pyenv activate env2718
+
+（创建时并不激活）激活当前环境。此时已经进入虚拟环境，在当前环境下所有pip等操作都不会影响系统环境和系统路径。
+
+pyenv deactivate
+
+离开已激活的环境，切换回系统环境。但并没有被删除，下次依旧可以启动。
+
+pyenv uninstall env271
+
+删除一个环境，当然也可以到真实目录下删除文件夹
 ```
 
 
@@ -414,7 +458,7 @@ python -m pip install --user virtualenv
 
 
 ===========================================================================
-pyenv 可以隔离不同python环境
+推荐pyenv 可以隔离不同python环境
 https://github.com/pyenv/pyenv-virtualenv
 https://github.com/pyenv/pyenv#basic-github-checkout
 https://www.jianshu.com/p/861f9a474f70
@@ -427,10 +471,12 @@ git clone https://gitee.com/mirrors/pyenv.git ~/.pyenv
 export PYTHON_BUILD_MIRROR_URL="https://npm.taobao.org/mirrors/python/"
 
 国内加速
-export v=3.7.1; wget https://npm.taobao.org/mirrors/python/$v/Python-$v.tar.xz -P ~/.pyenv/cache/; pyenv install $v 
-
+echo 'HOME=~' >> ~/.bash_profile
 echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bash_profile
 echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bash_profile
+
+export v=3.7.1; wget https://npm.taobao.org/mirrors/python/$v/Python-$v.tar.xz -P ~/.pyenv/cache/; pyenv install $v 
+
 
 bashrc
 
@@ -573,6 +619,29 @@ https://zhuanlan.zhihu.com/p/43352965
 ### input()和raw_input()
 
 - raw_input() 将所有输入作为字符串看待，返回字符串类型。而 input() 在对待纯数字输入时具有自己的特性，它返回所输入的数字的类型（ int, float )
+
+### 异常
+
+```
+python2异常写法
+import sys
+
+try:
+    f = open('myfile.txt')
+    s = f.readline()
+    i = int(s.strip())
+except IOError as e:
+    print "I/O error({0}): {1}".format(e.errno, e.strerror)
+except ValueError:
+    print "Could not convert data to an integer."
+except:
+    print "Unexpected error:", sys.exc_info()[0]
+    raise
+    
+    
+```
+
+
 
 ### 文件读写
 
