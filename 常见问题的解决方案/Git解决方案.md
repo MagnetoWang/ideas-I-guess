@@ -99,8 +99,10 @@ git checkout -b xxx
 ### 新建分支
 
 ```
- git checkout -b branchname
- git push origin branchname
+
+git checkout 主分支
+git checkout -b branchname // 从主分支拉新分支
+git push origin branchname // 推送到远程分支
 ```
 
 
