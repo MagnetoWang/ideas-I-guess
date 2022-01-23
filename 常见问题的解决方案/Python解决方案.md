@@ -146,6 +146,15 @@ source ~/python/anaconda3/etc/profile.d/conda.sh
 - 类名
   - 大写首字母其余小写
   - LocalLauncher
+- 常量
+  - MAX_SIZE
+
+### 常量管理
+```
+https://blog.csdn.net/Michael_star/article/details/42552477
+
+```
+
 
 ### 单元测试
 
@@ -223,6 +232,11 @@ print(str.upper())          # 把所有字符中的小写字母转换成大写�
 print(str.lower())          # 把所有字符中的大写字母转换成小写字母
 print(str.capitalize())     # 把第一个字母转化为大写字母，其余小写
 print(str.title())          # 把每个单词的第一个字母转化为大写，其余小写 
+
+
+匹配开头字符串
+str(e).startswith(db):
+
 ```
 
 
@@ -387,9 +401,33 @@ f.close()
 
 for line in open("foo.txt"):
     print line
+
+
+读写文件
+def readFile(path):
+    with open(path) as f:
+        lines = f.read().split("\n")
+    return lines
+
+def writeFile(path, content):
+    with open(path, 'w') as f:
+        f.write(content)
+
+
+
+os.path.join
+os.path.normpath(path) 此方法返回代表标准化路径的字符串值，保证读写文件路径的正确性
+
+           
 ```
 
+### 日期操作
+```
+time模板：https://blog.csdn.net/qq_36512295/article/details/99694528
 
+```
+
+### datetime
 
 ## 命令行下的python
 
@@ -641,7 +679,39 @@ except:
     
 ```
 
+### 打印异常堆栈
+```
 
+
+import traceback
+
+
+def BBQ():
+    traceback.print_stack()
+
+
+获取异常堆栈的字符串
+
+def print_exception(etype, value, tb, limit=None, file=None, chain=True):
+    """Print exception up to 'limit' stack trace entries from 'tb' to 'file'.
+    This differs from print_tb() in the following ways: (1) if
+    traceback is not None, it prints a header "Traceback (most recent
+    call last):"; (2) it prints the exception type and value after the
+    stack trace; (3) if type is SyntaxError and value has the
+    appropriate format, it prints the line where the syntax error
+    occurred with a caret on the next line indicating the approximate
+    position of the error.
+    """
+    # format_exception has ignored etype for some time, and code such as cgitb
+    # passes in bogus values as a result. For compatibility with such code we
+    # ignore it here (rather than in the new TracebackException API).
+    if file is None:
+        file = sys.stderr
+    for line in TracebackException(
+            type(value), value, tb, limit=limit).format(chain=chain):
+        print(line, file=file, end="")
+
+```
 
 ### 文件读写
 
@@ -992,6 +1062,9 @@ format: 指定输出的格式和内容，format可以输出很多有用信息，
     %(process)d: 打印进程ID
     %(message)s: 打印日志信息
 
+  
+
+
 ```
 
 
@@ -1047,6 +1120,69 @@ def find_target_string(reg, ctx):
     import re
     p1 = re.compile(reg, re.S) #最小匹配
     return re.findall(p1, ctx)
+
+
+获取大括号里面的内容 ${xxxxx}
+
+[\$\{](.*?)[\}]
+
+```
+
+### 获取正则的结果
+```
+
+现在，让我们尝试一下它应该匹配的字符串，例如 tempo。在这个例子中 match() 将返回一个 匹配对象，因此你应该将结果储存到一个变量中以供稍后使用。
+>>>
+
+>>> m = p.match('tempo')
+>>> m
+<re.Match object; span=(0, 5), match='tempo'>
+
+现在你可以检查 匹配对象 以获取有关匹配字符串的信息。 匹配对象实例也有几个方法和属性；最重要的是：
+
+方法 / 属性
+	
+
+目的
+group() 返回正则匹配的字符串
+
+start() 返回匹配的开始位置
+
+end() 返回匹配的结束位置
+
+span() 返回包含匹配 (start, end) 位置的元组
+
+
+
+```
+
+### python re模块中 (?P<name>) (?P=name) 及 \g<name> 三者的使用区别
+```
+https://blog.csdn.net/qq_35696312/article/details/95051232
+
+模糊匹配
+class _TemplateMetaclass(type):
+    pattern = r"""
+    %(delim)s(?:
+      (?P<escaped>%(delim)s) |   # Escape sequence of two delimiters
+      (?P<named>%(id)s)      |   # delimiter and a Python identifier
+      {(?P<braced>%(bid)s)}  |   # delimiter and a braced identifier
+      (?P<invalid>)              # Other ill-formed delimiter exprs
+    )
+    """
+
+    def __init__(cls, name, bases, dct):
+        super(_TemplateMetaclass, cls).__init__(name, bases, dct)
+        if 'pattern' in dct:
+            pattern = cls.pattern
+        else:
+            pattern = _TemplateMetaclass.pattern % {
+                'delim' : _re.escape(cls.delimiter),
+                'id'    : cls.idpattern,
+                'bid'   : cls.braceidpattern or cls.idpattern,
+                }
+        cls.pattern = _re.compile(pattern, cls.flags | _re.VERBOSE)
+
 ```
 
 
@@ -1224,6 +1360,12 @@ t.add_xdf()
 所以python很奇葩，c++的话编译就会报错了
 ```
 
+### TypeError: str() takes at most 1 argument (2 given)
+```
+python2不支持这样写
+s2b = lambda x: bytes(x, encoding='utf-8')
+
+```
 
 
 ### 作用域
