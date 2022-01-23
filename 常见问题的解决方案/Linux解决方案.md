@@ -678,6 +678,19 @@ https://www.cnblogs.com/sammyliu/p/5878973.html
 export LANGUAGE="en_US.UTF-8"
 ```
 
+### 机器诊断
+
+```
+把脉
+
+文件配置
+ulimit -a
+网络配置
+sysctl -p
+```
+
+
+
 # Linux下的Shell
 
 ## 基础
@@ -777,6 +790,12 @@ int1 -le int2　　　　int1小于等于int2为真
 
 - example：https://www.cyberciti.biz/faq/shell-script-while-loop-examples/
 
+```
+
+```
+
+
+
 ### for语法
 
 - for element in $file
@@ -787,6 +806,23 @@ int1 -le int2　　　　int1小于等于int2为真
 - 循环1到100
   - for i in {1..100}
   - for i in `seq 1 100`
+
+```
+while是完全按行读取，不管行内有多少段文字；
+
+for是按行读取，如果行内文字有空格，则分开读取，即一次读取一个字符串。
+
+ core/xxx/ttt.java                
+ core/xxx/{zz.java => kkk.java}      
+ pom.xml    
+
+因为=> 两边是空格，for打印这一行就是不完整的了
+要用while
+
+
+```
+
+
 
 ### 运算符
 
@@ -914,6 +950,23 @@ last=`cat -n $file | grep "xxx" | tail -1 | awk {'print $1}'`
 
 sed -n  "$first,${last}p" $file > test.log 
 
+
+
+替换所有文件中的www.bcak.com.cn为bcak.com.cn
+sed -i "s/www.bcak.com.cn/bcak.com.cn/g" `grep www.bcak.com.cn -rl /home`
+
+old="import static org/.apache/.calcite/.supersql/.util/.func/.SuperSqlFuncUtil/.defineFunction;"
+new="import static supersql/.utils/.UdfTools/.defineFunction;"
+sed -i "s/$old/$new" `grep -rl $old .`
+
+
+替换 20210922 字符串为 20210923
+old="idex.date 20210922"
+new="idex.date 20210923"
+sed -i "s/$old/$new/g" select-spark.conf
+
+打印哪些文件存在old字符串
+grep -rl $old .
 ```
 
 
@@ -1183,11 +1236,21 @@ wc -l `find . -name '*'` | awk '{sum+=$1} END {print "Sum = ", sum}'
 - 参考链接：https://codingstandards.iteye.com/blog/804648
 
 ### crontab
+```
+参考资料：https://www.cnblogs.com/0201zcr/p/4739207.html
+demo参考：http://einverne.github.io/post/2017/03/crontab-schedule-task.html
+执行脚本出现Permission denied：https://stackoverflow.com/questions/21646551/permission-denied-with-bash-sh-to-run-cron
 
-- 参考资料：https://www.cnblogs.com/0201zcr/p/4739207.html
-- demo参考：http://einverne.github.io/post/2017/03/crontab-schedule-task.html
-- 执行脚本出现Permission denied：https://stackoverflow.com/questions/21646551/permission-denied-with-bash-sh-to-run-cron
+查看当前用户的时程表
+crontab -l
 
+开始编辑定时任务
+crontab -e
+
+每分钟执行一次我的命令
+* * * * * myCommand
+
+```
 ### date
 
 - 参考资料
@@ -1393,6 +1456,13 @@ Length  Method  Size Ratio  Date  Time  CRC-32  Name
 awk -F ':' '{ print $1 }' demo.txt
 
 
+根据  | 分割字符串
+awk -F '|' '{ print $1 }'
+
+拼接字符串
+cat exception_log | awk -F ":" '{print "cp /data/idex/history/20220114/"$1" /data/idex/ngcp/."}'
+cp /data/idex/history/20220114/18d362c8-fbca-46d8-9249-2fb7f70590a6.log /data/idex/ngcp/.
+
 ```
 
 ### chmod chown
@@ -1402,8 +1472,19 @@ chmod -R 777 文件名
 
 修改用户号
 chown 1003 ./ -R
+
+
+修改路径权限
+sudo chown -R $(whoami) /usr/local/share/man/man8
 ```
 
+### chage 
+```
+chage -M 99999 idex
+
+设置的密码永久生效
+
+```
 
 
 ## 进程管理
@@ -1621,6 +1702,19 @@ https://www.cnblogs.com/EasonJim/p/9826681.html
 vimdiff 文件路径1 文件路径2
 ```
 
+### 对比两个文件夹内容
+```
+diff -Naur <dir1> <dir2>
+
+```
+### 获取百万级别文件列表
+```
+获取文件列表大小
+find `pwd` | xargs ls -lah 
+
+find `pwd` | xargs ls -lah | awk '{print $5}' > ../txt
+
+```
 
 
 ### 修改文件权限
@@ -1992,11 +2086,15 @@ tmux
 也可以ctrl + z 先停止进程
 jobs 查看停止的进程号
 bg 进程号 即可继续执行程序
-
+fg %jobnumber（是命令编号，不是进程号）将选中的命令调出。
+kill %1 1是jobs号，前面一定要是%
 
 
 nohup命令
 nohup python -m HTTPServer 8567 >log 2>&1 &
+
+
+watch  -n 10 sh  test.sh  &  #每10s在后台执行一次test.sh脚本
 
 ```
 
@@ -2207,17 +2305,43 @@ export PS1='[\[\e[1;36m\]\u@\h \w \t]$ '
 export PS1='\[\e[1;36m\][\u@\h \w \t]$ \[\e[1;33m\]'
 ```
 
-### 删除多余空行
+### 正则表达式
 
 ```
-正则表达式
+删除多余空行
 ^\s*(?=\r?$)\n
+
+\s
 
 
 \[Loaded.*
 
+
+删除多余空格
+
+^\s*
+
+^\s+
+
+
 ```
 
+
+### 定时任务cron
+```
+
+crontab -e 
+
+* * * * * /usr/local/sa/agent/secu-tcs-agent-mon-safe.sh  > /dev/null 2>&1
+
+* * * * * /root/wangzixian/cloud/script_tools/docker_stats.sh > /root/wangzixian/temp/docker_stats.log
+
+
+* * * * * sh /root/wangzixian/my-tools/crontab_echo.sh  > /root/wangzixian/my-tools/crontab_echo.log
+* * * * * sh /root/wangzixian/my-tools/docker_stats.sh  > /root/wangzixian/my-tools/docker_stats.log
+
+* * * * * sh /data/idex/idex-tools/docker_stats.sh /data/idex/idex-tools/docker_stats.log
+```
 
 
 ## 问题
@@ -2640,15 +2764,76 @@ flex
 ```
 
 
+## 常用工具
+### mongo
+···
 
-## docker
+mongodb的表就是集合
+show collections
 
-```
+> help
+        db.help()                    help on db methods
+        db.mycoll.help()             help on collection methods
+        sh.help()                    sharding helpers
+        rs.help()                    replica set helpers
+        help admin                   administrative help
+        help connect                 connecting to a db help
+        help keys                    key shortcuts
+        help misc                    misc things to know
+        help mr                      mapreduce
 
-```
+        show dbs                     show database names
+        show collections             show collections in current database
+        show users                   show users in current database
+        show profile                 show most recent system.profile entries with time >= 1ms
+        show logs                    show the accessible logger names
+        show log [name]              prints out the last segment of log in memory, 'global' is default
+        use <db_name>                set current database
+        db.foo.find()                list objects in collection foo
+        db.foo.find( { a : 1 } )     list objects in foo where a == 1
+        it                           result of the last line evaluated; use to further iterate
+        DBQuery.                                                                                        shellBatchSize = x   set default number of items to display on shell
+        exit                         quit the mongo shell
+
+db.c_idex_documents.find()
+
+db.c_idex_documents.find({owner : 'huileihe'})
+
+模糊查询
+db.c_idex_documents.find({owner : 'huileihe', prefix_path: /5131/})
+
+1.%xx%
+
+   sql:
+
+       select * from user where name like "%花%";
+
+   mongo:
+
+       db.user.find(name:/花/);
+
+2.xx%
+
+   sql:
+
+      select * from user where name like "花%";
+
+   mongo:
+
+       db.user.find(name:/^花/);
+
+3.不区分大小写
+
+       db.user.find(name:/a/i);
 
 
 
+多条件查询
+https://segmentfault.com/a/1190000037451303
+db.users.find({age: 18, sex: 'girl'})
+
+
+···
 
 
 
