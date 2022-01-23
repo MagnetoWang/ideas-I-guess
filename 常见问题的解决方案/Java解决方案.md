@@ -20,6 +20,11 @@
 ```
 下载Java包
 
+openjdk 11
+wget https://download.java.net/openjdk/jdk11/ri/openjdk-11+28_linux-x64_bin.tar.gz
+
+
+
 在.bashrc里面配置路径
 # Java配置
 export JAVA_HOME=$ROOT/j2sdk-bundle
@@ -353,6 +358,31 @@ maven-dependency-plugin
           </execution>
         </executions>
       </plugin>
+```
+
+#### Maven-source-plugin
+
+```
+maven-source-plugin：打包的时候附带源码
+
+         <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            
+ 执行 mvn install，maven会自动将source install到repository 。
+ 执行 mvn deploy，maven会自动将source deploy到remote-repository 。
+ 执行 mvn source:jar，单独打包源码。
+ 注意：在多项目构建中，将source-plugin置于顶层或parent的pom中并不会发挥作用，必须置于具体项目的pom中。 
 ```
 
 
@@ -2437,8 +2467,6 @@ JVM_ARGS="-Xms1024m -Xmx1024m" jmeter -t test.jmx [etc.]
 
 ```
 
-
-
 ### Error: Could not find or load main class
 
 ```
@@ -2508,6 +2536,14 @@ switch (enumExample) {
         break;
     }
 }
+```
+
+### Failed to execute goal net.alchim31.maven:scala-maven-plugin:4.0.2:compile (scala-compile-first) on project xxx: Execution scala-compile-first of goal net.alchim31.maven:scala-maven-plugin:4.0.2:compile failed.
+```
+https://www.jianshu.com/p/5b81d87a678c
+
+scala版本没有对齐
+
 ```
 
 ### idea报Cannot find class in classpath
@@ -2682,6 +2718,39 @@ Exception in thread "main" java.lang.SecurityException: Invalid signature file d
 	at java.util.jar.JarFile.initializeVerifier(JarFile.java:383)
 	at java.util.jar.JarFile.ensureInitialization(JarFile.java:618)
 	at java.util.jar.JavaUtilJarAccessImpl.ensureInitialization(JavaUtilJarAcc
+
+
+
+有些Jar包会在metainf里包含一个.SF：包含原Jar包内的class文件和资源文件的Hash， 用来校验文件的完整度等验证。
+
+但是在打fat-jar的时候，我们是把很多jar包合成了一个，这样fatjar下就会存在各个jar包中的签名文件，但是他们显然无法跟最终的fatjar作校验。
+
+解决方案，添加插件
+<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>1.7.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 ```
 
 ### mvn的所有异常
@@ -2693,6 +2762,22 @@ Exception in thread "main" java.lang.SecurityException: Invalid signature file d
 [ERROR]
 
 
+
+
+
+
+
+
+ PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target -> [Help 1]
+
+https://www.cnblogs.com/wpbxin/p/11746229.html
+
+一般请求某个仓库如果出现异常，就无法继续查找下一个仓库
+所以有时候我们仓库里面有相关的包，但是因为查找顺序会出现很多不容易避开的问题
+
+
+was cached in the local repository, resolution will not be reattempted until the update interval of tianqiong-releases has elapsed or updates are forced
+https://blog.51cto.com/qiangsh/1743074
 ```
 
 
@@ -4845,6 +4930,15 @@ select * from company \g
 \d 查看所有表和表的详细信息
 \dt test* 筛选表名前缀是test的表
 
+
+结果换行显示 加上 \x
+select * from xxx limit 1; \x
+
+
+导出数据
+\copy (select * from xxx limit 1) to 'test.csv'
+
+
 ```
 
 ### Sql语法
@@ -4858,6 +4952,65 @@ CREATE TABLE person (
 );
 
 写入数据
+
+```
+
+### python使用
+```
+python建表
+__author__ = "MuT6 Sch01aR"
+ 
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column,String,Integer
+ 
+engine = create_engine("mysql+pymysql://root:root@127.0.0.1/test",encoding="utf-8",echo=True,max_overflow=5)
+#连接mysql数据库，echo为是否打印结果
+ 
+Base = declarative_base() #生成orm基类
+ 
+class User(Base): #继承生成的orm基类
+    __tablename__ = "sql_test" #表名
+    id = Column(Integer,primary_key=True) #设置主键
+    user_name = Column(String(32))
+    user_password = Column(String(64))
+ 
+class Admin(Base):
+    __tablename__ = "admin"
+    id = Column(Integer, primary_key=True)
+    username = Column(String(32))
+    password = Column(String(64))
+ 
+Base.metadata.create_all(engine) #创建表结构
+#父类Base调用所有继承他的子类来创建表结构
+
+```
+### 文档
+```
+时间戳加减：https://www.jianshu.com/p/dce269262793
+
+SELECT now()::timestamp(0) + '1 year';  --当前时间加1年
+SELECT now()::timestamp(0) + '1 month';  --当前时间加一个月
+SELECT now()::timestamp(0) + '1 day';  --当前时间加一天
+SELECT now()::timestamp(0) + '1 hour';  --当前时间加一个小时
+SELECT now()::timestamp(0) + '1 min';  --当前时间加一分钟
+SELECT now()::timestamp(0) + '1 sec';  --加一秒钟
+select now()::timestamp(0) + '1 year 1 month 1 day 1 hour 1 min 1 sec';  --加1年1月1天1时1分1秒
+SELECT now()::timestamp(0) + (col || ' day')::interval FROM table --把col字段转换成天 然后相加
+
+
+SELECT now()::timestamp +'-7 day';
+
+
+select to_char(now()::timestamp +'-7 day')
+
+select cast (now()::timestamp +'-7 day' as bigint)
+
+
+select cast ((now()::timestamp +'-7 day') AT TIME ZONE 'UTC' as bigint)
+
+
+select (now()::timestamp +'-7 day') AT TIME ZONE 'UTC'
 
 ```
 
