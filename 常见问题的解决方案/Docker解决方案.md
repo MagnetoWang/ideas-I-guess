@@ -20,6 +20,8 @@
 
 
 
+
+
 ### 容器操作
 
 ```
@@ -29,6 +31,9 @@ docker ps -a // 显示所有容器
 docker container start id // 进入容器
 docker stop id // 停止容器
 docker container rm id // 删除容器
+
+查看容器内部所有信息
+docker inspect xxxx(Container)
 
 docker // 可以启动一个可以用gdb调试的容器
 
@@ -52,6 +57,29 @@ docker save xxxx-镜像的名字而不是commit id > vnc-image.tar
 
 docker load < ubuntu.tar
 
+
+保存镜像
+docker save redis:5.0.7 > redis.tar
+加载镜像
+docker load < redis.tar
+
+
+docker
+
+```
+
+### 高级操作
+
+```
+容器里面里面执行复杂命令，
+docker run -d --restart always -e --name=${xxxx} --net=host -v /data/xxx/log:/opt/xxx/log -w /opt/xxx --cap-add SYS_ADMIN -e xxx系统环境参数=25333 docker镜像名字 sh -c "mount -t nfs -o vers=3,nolock,proto=tcp,noresvport ${xxx}:${xxx} /root/xxx && mount -t nfs -o vers=3,nolock,proto=tcp,noresvport ${xxx}:${xxx} /root/xxx/xx && gunicorn -c conf/gunicorn_conf.py xxxx.application:flask_app"
+
+如果要传递变量
+
+
+
+查看内存，cpu占用
+docker stats
 ```
 
 
@@ -62,6 +90,12 @@ docker load < ubuntu.tar
 - 获取id全名称：docker inspect -f '{{.Id}}' docker_name
 - 文件复制：docker cp ID全称:容器文件路径 本地路径
   - docker cp /Users/magnetowang/Documents/4paradigm/images\ management/mnist7.png b5295ac7bc6b54deca8ab4c6dba818d520de80b3744fd8c1d44634b494f95bfa:/opt/caffe/examples/mnist/
+
+```
+
+```
+
+
 
 ### docker容器挂载
 
@@ -105,4 +139,15 @@ docker run --rm -v `pwd`/fonts:/usr/share/fonts \
                 mygitbook:1 https://jaceklaskowski.gitbooks.io/mastering-spark-sql/content/
           
 ```
+### docker存活监控脚本
+```
 
+is_alive_docker=`docker inspect --format '{{.State.Running}}' dockerxxxxxx`
+
+echo docker alive status: $is_alive_docker
+
+if [ $is_alive_docker = 'false' ]; then
+    sleep 3
+fi
+
+```
