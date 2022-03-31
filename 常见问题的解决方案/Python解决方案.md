@@ -132,6 +132,16 @@ source ~/python/anaconda3/etc/profile.d/conda.sh
 - https://docs.python.org/2/tutorial/inputoutput.html#methods-of-file-objects
 - 所有函数的库文档：https://docs.python.org/2.7/library/stdtypes.html#file-objects
 
+### python2 和 python3
+```
+安装依赖
+python2 pip install -r requirement.txt
+python3 pip3 install -r requirement.txt
+
+
+
+```
+
 ### 代码规范
 
 - 函数名称
@@ -414,6 +424,10 @@ def writeFile(path, content):
         f.write(content)
 
 
+返回列表
+readlines 
+
+
 
 os.path.join
 os.path.normpath(path) 此方法返回代表标准化路径的字符串值，保证读写文件路径的正确性
@@ -428,6 +442,169 @@ time模板：https://blog.csdn.net/qq_36512295/article/details/99694528
 ```
 
 ### datetime
+
+
+### 装饰器
+```
+
+为什么需要装饰器：https://zhuanlan.zhihu.com/p/45458873
+Python functools.wraps 深入理解：https://zhuanlan.zhihu.com/p/45535784
+
+---------------------------------------------------
+def timer(func):
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        func(*args, **kwargs) #此处拿到了被装饰的函数func
+        time.sleep(2)#模拟耗时操作
+        long = time.time() - start
+        print(f'共耗时{long}秒。')
+    return wrapper #返回内层函数的引用
+
+@timer
+def add(a, b):
+    print(a+b)
+
+add(1, 2) #正常调用add
+
+---------------------------------------------------
+def auth(permission):
+    def _auth(func):
+        def wrapper(*args, **kwargs):
+            print(f"验证权限[{permission}]...")
+            func(*args, **kwargs)
+            print("执行完毕...")
+
+        return wrapper
+
+    return _auth
+
+
+@auth("add")
+def add(a, b):
+    """
+    求和运算
+    """
+    print(a + b)
+
+
+add(1, 2)  # 正常调用add
+
+输出：
+验证权限[add]...
+3
+执行完毕...
+---------------------------------------------------
+def auth(permission):
+    def _auth(func):
+        @functools.wraps(func) # 注意此处
+        def wrapper(*args, **kwargs):
+            print(f"验证权限[{permission}]...")
+            func(*args, **kwargs)
+            print("执行完毕...")
+
+        return wrapper
+
+    return _auth
+
+
+@auth("add")
+def add(a, b):
+    """
+    求和运算
+    """
+    print(a + b)
+
+print(add)
+print(add.__name__)
+print(add.__doc__)
+
+输出：
+<function add at 0x10997c488>
+add
+求和运算
+---------------------------------------------------
+
+functools.wraps对我们的装饰器函数进行了装饰之后，add表面上看起来还是add。
+
+functools.wraps内部通过partial和update_wrapper对函数进行再加工，将原始被装饰函数(add)的属性拷贝给装饰器函数(wrapper)。内部实现原理我们下文分解。
+
+
+---------------------------------------------------
+
+总结：
+
+1、装饰器原则：1）不能修改原函数 2）不能修改调用方式
+
+2、装饰器通过嵌套函数和闭包实现
+
+3、装饰器执行顺序：洋葱法则
+
+4、装饰器通过语法糖“@”修饰
+
+5、谨记装饰器返回的是持有被装饰函数引用的闭包函数的引用这条原则。
+
+
+---------------------------------------------------
+装饰器-参数
+
+可能有人问，如果我的业务逻辑函数 foo 需要参数怎么办？比如
+def foo(name):
+    print("i am %s" % name)
+
+我们可以在定义 wrapper 函数的时候指定参数：
+def wrapper(name):
+        logging.warn("%s is running" % func.__name__)
+        return func(name)
+    return wrapper
+
+这样 foo 函数定义的参数就可以定义在 wrapper 函数中。这时，又有人要问了，如果 foo 函数接收两个参数呢？三个参数呢？更有甚者，我可能传很多个。当装饰器不知道 foo 到底有多少个参数时，我们可以用 *args 来代替
+
+def wrapper(*args):
+        logging.warn("%s is running" % func.__name__)
+        return func(*args)
+    return wrapper
+
+如此一来，甭管 foo 定义了多少个参数，我都可以完整地传递到 func 中去。这样就不影响 foo 的业务逻辑了。这时还有读者会问，如果 foo 函数还定义了一些关键字参数呢？比如：
+
+def foo(name, age=None, height=None):
+    print("I am %s, age %s, height %s" % (name, age, height))
+
+
+这时，你就可以把 wrapper 函数指定关键字函数：
+def wrapper(*args, **kwargs):
+        # args是一个数组，kwargs一个字典
+        logging.warn("%s is running" % func.__name__)
+        return func(*args, **kwargs)
+    return wrapper
+
+带参数的装饰器
+
+def use_logging(level):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            if level == "warn":
+                logging.warn("%s is running" % func.__name__)
+            elif level == "info":
+                logging.info("%s is running" % func.__name__)
+            return func(*args)
+        return wrapper
+
+    return decorator
+
+@use_logging(level="warn")
+def foo(name='foo'):
+    print("i am %s" % name)
+
+foo()
+
+
+
+
+
+
+---------------------------------------------------
+
+```
 
 ## 命令行下的python
 
@@ -681,7 +858,6 @@ except:
 
 ### 打印异常堆栈
 ```
-
 
 import traceback
 
@@ -1026,6 +1202,11 @@ for n in fab(5):
 那么for循环中每次会调用fab函数计算
 而不是只调用一次，然后拿全部的斐波列数字的结果
 生成器就是每次生成下次结果，之前的结果不关系，从而节省了空间！
+
+
+最明显的说明
+for i in ff
+
 ```
 
 
@@ -1063,6 +1244,53 @@ format: 指定输出的格式和内容，format可以输出很多有用信息，
     %(message)s: 打印日志信息
 
   
+
+设置日志有效期7天
+
+_log_format = '%(asctime)s [%(levelname)s] %(pathname)s:%(funcName)s:%(lineno)s [%(processName)s]:%(message)s'
+backup_count = 10
+log_max_bytes_per_file = 1024 * 1024 * 50
+
+LOG_CONFIG = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'key_value': {
+            'format': _log_format
+        }
+    },
+    'handlers': {
+        'rotate_file_handler': {
+            'level': log_level,
+            'class': 'cloghandler.ConcurrentRotatingFileHandler',
+            'formatter': 'key_value',
+            'filename': log_file,
+            'backupCount': backup_count,
+            'maxBytes': log_max_bytes_per_file,
+        },
+    },
+    'loggers': {
+        'flask.general': {
+            'handlers': ['rotate_file_handler'],
+            'level': log_level,
+            'propagate': False,
+        },
+        'flask.application': {
+            'handlers': ['rotate_file_handler'],
+            'level': log_level,
+            'propagate': False,
+        }
+    }
+}
+
+def get_loggers(logger):
+    formatter = logging.Formatter(_log_format)
+    # FileHandler
+    fh = cloghandler.ConcurrentRotatingFileHandler(log_file, backupCount=backup_count, maxBytes=log_max_bytes_per_file)
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
+    logging.config.dictConfig(LOG_CONFIG)
+    return logging.getLogger(__name__)
 
 
 ```
