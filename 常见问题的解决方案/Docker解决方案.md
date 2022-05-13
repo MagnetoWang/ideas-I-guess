@@ -18,7 +18,25 @@
 - 删除容器：docker container rm **id**
 - 显示所有容器：docker ps -a
 
+### 镜像加速
+```
+参考文档；https://yeasy.gitbook.io/docker_practice/install/mirror
 
+systemctl cat docker
+
+vi /etc/docker/daemon.json
+粘贴下面内容
+{
+  "registry-mirrors": [
+    "https://hub-mirror.c.163.com",
+    "https://mirror.baidubce.com"
+  ]
+}
+
+重启服务
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+```
 
 
 
@@ -48,7 +66,6 @@ docker exec -it 7f91b3579e15230b662894f749f44325f982e16d35bf647f6af0a2ac98cf95f9
 
 docker打包
 docker commit 3be143f6ecd3884a442485faf235e599b2e42bcf76df80fc937b1497c2bc0ac3 xxx-your image name
-
 sha256:0688a561dc6ad4c8215220e88fdc275ebd20f2c4428647ec8c965a877396ac32
 docker push xxxx
 
@@ -149,5 +166,18 @@ echo docker alive status: $is_alive_docker
 if [ $is_alive_docker = 'false' ]; then
     sleep 3
 fi
+
+```
+
+### 常用容器服务
+```
+
+启动postgres 服务
+https://hub.docker.com/_/postgres?tab=description
+
+docker pull postgres
+docker run --net=host --name test_postgres -e POSTGRES_PASSWORD=123456 -e POSTGRES_USER=magnetowang -e PGDATA=/var/lib/postgresql/data/pgdata -v /data/home/magnetowang/docker/postgres/pgdata:/var/lib/postgresql/data/c -p 5432:5432 -d postgres
+
+-e PGDATA=/var/lib/postgresql/data/pgdata
 
 ```
