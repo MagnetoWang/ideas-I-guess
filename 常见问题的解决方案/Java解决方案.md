@@ -52,7 +52,21 @@ export PATH=$PATH:$JAVA_HOME/bin
   - Error:unchecked
   - Exception
     - checked
-    - RuntimeException:unchecked
+    - RuntimeException:
+    
+#### 打印异常栈
+```
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
+String r = ExceptionUtils.getStackTrace(e);
+
+```
+
+#### 打印异常栈的版本号
+```
+
+
+```
 
 #### 并发
 
@@ -402,6 +416,30 @@ java 测试框架
 mvn clean test -Dtest=xxx包名.*Test,package_xxx.test_xxx
 
 *Test 执行后缀为Test
+```
+
+#### maven指定settings.xml
+```
+mvn -s YourOwnSettings.xml clean package
+
+
+```
+
+#### maven编译子模块
+```
+https://blog.csdn.net/xingbaozhen1210/article/details/89213789
+
+-pl, --projects
+        Build specified reactor projects instead of all projects
+-am, --also-make
+        If project list is specified, also build projects required by the list
+-amd, --also-make-dependents
+        If project list is specified, also build projects that depend on projects on the list
+
+
+mvn install -pl xxx/xxx -DskipTests
+
+
 ```
 
 #### maven依赖下的jar包冲突
@@ -1113,6 +1151,11 @@ hashmap foreach遍历：https://blog.csdn.net/w605283073/article/details/8070894
 
 lamda map用法
 xxfunc(Arrays.asList(jars).stream().map(e -> path + "/" + e).collect(Collectors.toList()));
+
+
+List<TTTT> x;
+x.stream().map(TTTT::getMethod).collect(Collectors.toList());
+
 
 
 ```
@@ -2757,6 +2800,8 @@ Exception in thread "main" java.lang.SecurityException: Invalid signature file d
 
 ```
 
+================================================================================================
+
 [INFO] ------------------------------------------------------------------------
 [ERROR] Failed to execute goal org.apache.maven.plugins:maven-jar-plugin:3.1.2:jar (default-jar) on project spark-tags_2.12: You have to use a classifier to attach supplemental artifacts to the project instead of replacing them. -> [Help 1]
 [ERROR]
@@ -2776,8 +2821,126 @@ https://www.cnblogs.com/wpbxin/p/11746229.html
 所以有时候我们仓库里面有相关的包，但是因为查找顺序会出现很多不容易避开的问题
 
 
+================================================================================================
+
 was cached in the local repository, resolution will not be reattempted until the update interval of tianqiong-releases has elapsed or updates are forced
 https://blog.51cto.com/qiangsh/1743074
+
+Maven默认会使用本地缓存的库来编译工程，对于上次下载失败的库，maven会在​​~/.m2/repository/<group>/<artifact>/<version>/​​​目录下创建xxx.lastUpdated文件，一旦这个文件存在，那么在直到下一次nexus更新之前都不会更新这个依赖库。
+
+​删除v~/.m2/repository/<group>/<artifact>/<version>/目录下的*.lastUpdated文件，然后再次运行mvn compile编译工程。
+修改~/.m2/settings.xml 或/opt/maven/conf/settings.xml文件，将其中的仓库添加 <updatePolicy>always</updatePolicy>来强制每次都更新依赖库。
+<repositories>
+        <repository>
+                <id>central</id>
+                <url>http://central</url>
+                <releases>
+                        <enabled>true</enabled>
+                        <updatePolicy>always</updatePolicy>
+                </releases>
+                <snapshots>
+                        <enabled>true</enabled>
+                        <updatePolicy>always</updatePolicy>
+                </snapshots>
+        </repository>
+</repositories>
+
+
+
+
+
+================================================================================================
+
+
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-jar-plugin:2.6:jar (default-jar) on project hybris-common: Execution default-jar of goal org.apache.maven.plugins:maven-jar-plugin:2.6:jar failed: An API incompatibility was encountered while executing org.apache.maven.plugins:maven-jar-plugin:2.6:jar: java.lang.ExceptionInInitializerError: null
+[ERROR] -----------------------------------------------------
+[ERROR] realm =    plugin>org.apache.maven.plugins:maven-jar-plugin:2.6
+[ERROR] strategy = org.codehaus.plexus.classworlds.strategy.SelfFirstStrategy
+[ERROR] urls[0] = file:/root/.m2/repository/org/apache/maven/plugins/maven-jar-plugin/2.6/maven-jar-plugin-2.6.jar
+[ERROR] urls[1] = file:/root/.m2/repository/org/slf4j/slf4j-jdk14/1.5.6/slf4j-jdk14-1.5.6.jar
+[ERROR] urls[2] = file:/root/.m2/repository/org/slf4j/jcl-over-slf4j/1.5.6/jcl-over-slf4j-1.5.6.jar
+[ERROR] urls[3] = file:/root/.m2/repository/org/apache/maven/reporting/maven-reporting-api/2.2.1/maven-reporting-api-2.2.1.jar
+[ERROR] urls[4] = file:/root/.m2/repository/org/apache/maven/doxia/doxia-sink-api/1.1/doxia-sink-api-1.1.jar
+[ERROR] urls[5] = file:/root/.m2/repository/org/apache/maven/doxia/doxia-logging-api/1.1/doxia-logging-api-1.1.jar
+[ERROR] urls[6] = file:/root/.m2/repository/junit/junit/3.8.1/junit-3.8.1.jar
+[ERROR] urls[7] = file:/root/.m2/repository/commons-cli/commons-cli/1.2/commons-cli-1.2.jar
+[ERROR] urls[8] = file:/root/.m2/repository/org/codehaus/plexus/plexus-interactivity-api/1.0-alpha-4/plexus-interactivity-api-1.0-alpha-4.jar
+[ERROR] urls[9] = file:/root/.m2/repository/backport-util-concurrent/backport-util-concurrent/3.1/backport-util-concurrent-3.1.jar
+[ERROR] urls[10] = file:/root/.m2/repository/org/sonatype/plexus/plexus-sec-dispatcher/1.3/plexus-sec-dispatcher-1.3.jar
+[ERROR] urls[11] = file:/root/.m2/repository/org/sonatype/plexus/plexus-cipher/1.4/plexus-cipher-1.4.jar
+[ERROR] urls[12] = file:/root/.m2/repository/org/codehaus/plexus/plexus-interpolation/1.11/plexus-interpolation-1.11.jar
+[ERROR] urls[13] = file:/root/.m2/repository/org/apache/maven/maven-archiver/2.6/maven-archiver-2.6.jar
+[ERROR] urls[14] = file:/root/.m2/repository/org/apache/maven/shared/maven-shared-utils/0.7/maven-shared-utils-0.7.jar
+[ERROR] urls[15] = file:/root/.m2/repository/com/google/code/findbugs/jsr305/2.0.1/jsr305-2.0.1.jar
+[ERROR] urls[16] = file:/root/.m2/repository/org/codehaus/plexus/plexus-utils/3.0.20/plexus-utils-3.0.20.jar
+[ERROR] urls[17] = file:/root/.m2/repository/org/codehaus/plexus/plexus-archiver/2.9/plexus-archiver-2.9.jar
+[ERROR] urls[18] = file:/root/.m2/repository/org/codehaus/plexus/plexus-io/2.4/plexus-io-2.4.jar
+[ERROR] urls[19] = file:/root/.m2/repository/commons-io/commons-io/2.2/commons-io-2.2.jar
+[ERROR] urls[20] = file:/root/.m2/repository/org/apache/commons/commons-compress/1.9/commons-compress-1.9.jar
+[ERROR] Number of foreign imports: 1
+[ERROR] import: Entry[import  from realm ClassRealm[maven.api, parent: null]]
+[ERROR] 
+[ERROR] -----------------------------------------------------
+[ERROR] : Index 1 out of bounds for length 1
+[ERROR] -> [Help 1]
+
+
+java版本太高了，用java11打包会失败
+mvn-jar-plugins版本是2.6
+改成java1.8
+
+https://stackoverflow.com/questions/46353477/jdk9-and-maven-jar-plugin
+
+
+
+
+================================================================================================
+
+[WARNING] Could not transfer metadata net.minidev:json-smart/maven-metadata.xml from/to maven-default-http-blocker (http://0.0.0.0/): transfer failed for http://0.0.0.0/net/minidev/json-smart/maven-metadata.xml, proxy: ProxyInfo{host='web-proxy.tencent.com', userName='null', port=8080, type='http', nonProxyHosts='null'}
+[WARNING] Could not transfer metadata net.minidev:json-smart/maven-metadata.xml from/to alimaven (http://maven.aliyun.com/nexus/content/groups/public/): transfer failed for http://maven.aliyun.com/nexus/content/groups/public/net/minidev/json-smart/maven-metadata.xml, proxy: ProxyInfo{host='web-proxy.tencent.com', userName='null', port=8080, type='http', nonProxyHosts='null'}
+D
+
+
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  10:21 min
+[INFO] Finished at: 2022-04-20T19:46:52+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal on project hybris-service-biz: Could not resolve dependencies for project com.tencent.cloud:hybris-service-biz:jar:2.0.0-wedata-SNAPSHOT: Failed to collect dependencies at org.apache.hive:hive-metastore:jar:2.3.5 -> org.apache.hive:hive-serde:jar:2.3.5 -> org.apache.hive:hive-common:jar:2.3.5 -> com.github.joshelser:dropwizard-metrics-hadoop-metrics2-reporter:jar:0.1.2 -> org.apache.hadoop:hadoop-common:jar:2.8.5 -> org.apache.hadoop:hadoop-auth:jar:2.8.5 -> com.nimbusds:nimbus-jose-jwt:jar:4.41.1 -> net.minidev:json-smart:jar:2.3-SNAPSHOT: Failed to read artifact descriptor for net.minidev:json-smart:jar:2.3-SNAPSHOT: Could not transfer artifact net.minidev:json-smart:pom:2.3-SNAPSHOT from/to maven-default-http-blocker (http://0.0.0.0/): Blocked mirror for repositories: [tbds (http://tbdsrepo.oa.com/repository/tbds/, default, releases+snapshots)] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/DependencyResolutionException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :hybris-service-biz
+
+
+maven-default-http-blocker (http://0.0.0.0/)
+mvn3.8.1以上的默认只支持https，不支持http
+
+================================================================================================
+
+[ERROR] Failed to execute goal on project hybris-inferschema-online: Could not resolve dependencies for project com.tencent.cloud:hybris-inferschema-online:jar:2.0.0-wedata-SNAPSHOT: Failed to collect dependencies at com.tencent.cloud:lakefs-cosn-client:jar:1.0: Failed to read artifact descriptor for com.tencent.cloud:lakefs-cosn-client:jar:1.0: Could not transfer artifact com.tencent.cloud:lakefs-cosn-client:pom:1.0 from/to alimaven (http://maven.aliyun.com/nexus/content/groups/public/): Transfer failed for http://maven.aliyun.com/nexus/content/groups/public/com/tencent/cloud/lakefs-cosn-client/1.0/lakefs-cosn-client-1.0.pom ProxyInfo{host='web-proxy.tencent.com', userName='null', port=8080, type='http', nonProxyHosts='null'}: Connect to web-proxy.tencent.com:8080 [web-proxy.tencent.com/10.28.36.104] failed: Connection timed out (Connection timed out) -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/DependencyResolutionException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :hybris-inferschema-online
+
+
+
+
+================================================================================================
+
 ```
 
 
@@ -4358,457 +4521,6 @@ Keras 2.2.3 :
 2.0.9和2.2.3内部结构修改了
 ```
 
-## Spark
-
-### 安装
-
-```
-wget http://ftp.kddilabs.jp/infosystems/apache/spark/spark-2.4.5/spark-2.4.5-bin-hadoop2.7.tgz
-tar -zxvf spark-2.4.5-bin-hadoop2.7.tgz
-cp 
-
-
-```
-
-### 概念
-
-```
-spark分区数,task数目,core数,worker节点个数,excutor数量梳理：https://www.cnblogs.com/hadoop-dev/p/6669232.html
-spark配置说明：http://spark.apache.org/docs/latest/configuration.html
-
-job，stage，task：https://www.cnblogs.com/upupfeng/p/12385979.html
-数量调优：https://www.jianshu.com/p/b3d87df219e9
-shuffle调优：https://zhuanlan.zhihu.com/p/21483985
-
-stage
-	exchange
-	wholestageCodegen
-	sortAggregate
-	exchange
-	sortMergeJoin
-	deserializeToObject
-	mapPartitios
-	mapPartitiosWithIndex
-	map
-	existingRDD
-	exchange
-	zipWithIndex
-
-wholestageCodegen
-火山模型和直接代码生成的性能区别
-
-CoarseGrainedExecutorBackend
-ShuffleBlockFetcherIterator
-
-
-```
-
-
-
-### shuffle排序原理
-
-```
-canUseSerializedShuffle：可以序列化排序的数据，达到性能提升作用
-```
-
-### 性能优化
-
-```
-https://www.jianshu.com/p/dc69ed5c1d66
-开启G1GC 通过 -XX:+UseG1GC选项
-
-https://www.cnblogs.com/sxdcgaq8080/p/7196580.html
-JVM调优参考
--Xmx300m                   　　　　　　最大堆大小
--Xms300m                　　　　　　　　初始堆大小
--Xmn100m                　  　　　　　　年轻代大小
--XX:SurvivorRatio=8        　　　　　　Eden区与Survivor区的大小比值，设置为8,则两个Survivor区与一个Eden区的比值为2:8,一个Survivor区占整个年轻代的1/10
-
--XX:+UseG1GC                　　　　　　使用 G1 (Garbage First) 垃圾收集器    
--XX:MaxTenuringThreshold=14        　　提升年老代的最大临界值(tenuring threshold). 默认值为 15[每次GC，增加1岁，到15岁如果还要存活，放入Old区]
--XX:ParallelGCThreads=8            　　设置垃圾收集器在并行阶段使用的线程数[一般设置为本机CPU线程数相等，即本机同时可以处理的个数，设置过大也没有用]
--XX:ConcGCThreads=8            　　　　并发垃圾收集器使用的线程数量
-
-
--XX:+DisableExplicitGC　　　　　　　　　　禁止在启动期间显式调用System.gc()
-
-
--XX:+HeapDumpOnOutOfMemoryError        OOM时导出堆到文件
--XX:HeapDumpPath=d:/a.dump        　　  导出OOM的路径
--XX:+PrintGCDetails           　　　　   打印GC详细信息
--XX:+PrintGCTimeStamps            　　　 打印CG发生的时间戳
--XX:+PrintHeapAtGC            　　　　　  每一次GC前和GC后，都打印堆信息
--XX:+TraceClassLoading            　　　  监控类的加载
--XX:+PrintClassHistogram        　　　　　 按下Ctrl+Break后，打印类的信息
-
-===================================================================================
-join调优
-1.减少data shuffle的规模。多map掉无用column再进行reduce like的操作。2.检查数据是否是skewed data。也就是说join出的key value pair大小极度不均。3. Spark参数调优。4.升级集群。至于是否升级，建议采用ganglia监控集群，如果Total used memory的peak接近所有可用memory，那么要么加大spill到disk的量，要么就升级集群内存。
-===================================================================================
-consolidate机制
-下图说明了优化后的HashShuffleManager的原理。这里说的优化，是指我们可以设置一个参数，spark.shuffle.consolidateFiles。该参数默认值为false，将其设置为true即可开启优化机制。通常来说，如果我们使用HashShuffleManager，那么都建议开启这个选项。
-
-开启consolidate机制之后，在shuffle write过程中，task就不是为下游stage的每个task创建一个磁盘文件了。此时会出现shuffleFileGroup的概念，每个shuffleFileGroup会对应一批磁盘文件，磁盘文件的数量与下游stage的task数量是相同的。一个Executor上有多少个CPU core，就可以并行执行多少个task。而第一批并行执行的每个task都会创建一个shuffleFileGroup，并将数据写入对应的磁盘文件内。
-
-当Executor的CPU core执行完一批task，接着执行下一批task时，下一批task就会复用之前已有的shuffleFileGroup，包括其中的磁盘文件。也就是说，此时task会将数据写入已有的磁盘文件中，而不会写入新的磁盘文件中。因此，consolidate机制允许不同的task复用同一批磁盘文件，这样就可以有效将多个task的磁盘文件进行一定程度上的合并，从而大幅度减少磁盘文件的数量，进而提升shuffle write的性能。
-===================================================================================
-控制每个stage的task数目
-
-
-
-
-
-
-===================================================================================
-shuffle调优
-https://www.cnblogs.com/qingyunzong/p/8954552.html
-
-SortShuffleManager运行原理
-SortShuffleManager的运行机制主要分成两种，一种是普通运行机制，另一种是bypass运行机制。当shuffle read task的数量小于等于spark.shuffle.sort.bypassMergeThreshold参数的值时（默认为200），就会启用bypass机制。
-
-
-===================================================================================
-基础调优
-https://zhuanlan.zhihu.com/p/21484009
-
-原则一：避免创建重复的RDD
-原则二：尽可能复用同一个RDD
-原则三：对多次使用的RDD进行持久化
-原则四：尽量避免使用shuffle类算子
-原则五：使用map-side预聚合的shuffle操作
-原则六：使用高性能的算子
-原则七：广播大变量
-原则八：使用Kryo优化序列化性能
-原则九：优化数据结构
-
-
-===================================================================================
-NODE_LOCAL
-https://www.cnblogs.com/shishanyuan/p/4721326.html
-通过页面监控可以看到该作业分为8个任务，其中一个任务的数据来源于两个数据分片，其他的任务各对应一个数据分片，即显示7个任务获取数据的类型为（NODE_LOCAL），1个任务获取数据的类型为任何位置（ANY）。
-
-数据本地化运行
-https://www.cnblogs.com/jxhd1/p/6702224.html
- TaskScheduler在发送task的时候，会根据数据所在的节点发送task,这时候的数据本地化的级别是最高的，如果这个task在这个Executor中等待了三秒，重试发射了5次还是依然无法执行，那么TaskScheduler就会认为这个Executor的计算资源满了，TaskScheduler会降低一级数据本地化的级别，重新发送task到其他的Executor中执行，如果还是依然无法执行，那么继续降低数据本地化的级别...
- 
-    现在想让每一个task都能拿到最好的数据本地化级别，那么调优点就是等待时间加长。注意！如果过度调大等待时间，虽然为每一个task都拿到了最好的数据本地化级别，但是我们job执行的时间也会随之延长
-
-    spark.locality.wait 3s//相当于是全局的，下面默认以3s为准，手动设置了，以手动的为准
-    spark.locality.wait.process
-    spark.locality.wait.node
-    spark.locality.wait.rack
-    newSparkConf.set("spark.locality.wait","100")
-
-
-===================================================================================
-jvm 参数调优
-https://www.jianshu.com/p/43f4283df1b7
-bin/spark-submit \
---class com.xyz.bigdata.calendar.PeriodCalculator \
---master yarn \
---deploy-mode cluster \
---queue default_queue \
---num-executors 50 \
---executor-cores 2 \
---executor-memory 4G \
---driver-memory 2G \
---conf "spark.default.parallelism=250" \
---conf "spark.shuffle.memoryFraction=0.3" \
---conf "spark.storage.memoryFraction=0.5" \
---conf "spark.driver.extraJavaOptions=-XX:+UseG1GC" \
---conf "spark.executor.extraJavaOptions=-XX:+UseG1GC" \
---verbose \
-${PROJECT_DIR}/bigdata-xyz-0.1.jar
-
-
-
-===================================================================================
-jvm 参考各个代的内存分配
-https://www.cnblogs.com/itboys/p/7227893.html
-
-
-
-===================================================================================
-jvm 垃圾回收器
-https://www.cnblogs.com/butterfly100/p/9175673.html
-该选用哪一种垃圾回收器？
-
-1. 客户端程序: 一般使用 -XX:+UseSerialGC (Serial + Serial Old). 特别注意, 当一台机器上起多个 JVM, 每个 JVM 也可以采用这种 GC 组合
-
-2. 吞吐率优先的服务端程序（计算密集型）: -XX:+UseParallelGC 或者 -XX:+UseParallelOldGC
-
-3. 响应时间优先的服务端程序: -XX:+UseConcMarkSweepGC
-
-4. 响应时间优先同时也要兼顾吞吐率的服务端程序：-XX:+UseG1GC
-
-
-===================================================================================
-程序bug排查
-https://www.cnblogs.com/kongzhongqijing/articles/3630264.html
-
-线程dump工具：https://www.ibm.com/support/pages/ibm-thread-and-monitor-dump-analyzer-java-tmda
-jstack 进程pid号
-
-一般进程进入死锁会需要查看线程的状态
-NEW,未启动的。不会出现在Dump中。
-
-RUNNABLE,在虚拟机内执行的。运行中状态，可能里面还能看到locked字样，表明它获得了某把锁。
-
-BLOCKED,受阻塞并等待监视器锁。被某个锁(synchronizers)給block住了。
-
-WATING,无限期等待另一个线程执行特定操作。等待某个condition或monitor发生，一般停留在park(), wait(), sleep(),join() 等语句里。
-
-TIMED_WATING,有时限的等待另一个线程的特定操作。和WAITING的区别是wait() 等语句加上了时间限制 wait(timeout)。
-
-TERMINATED,已退出的。
-
-===================================================================================
-频繁GC问题或内存溢出问题
-
-一、使用jps查看线程ID
-
-二、使用jstat -gc 3331 250 20 查看gc情况，一般比较关注PERM区的情况，查看GC的增长情况。
-
-三、使用jstat -gccause：额外输出上次GC原因
-
-四、使用jmap -dump:format=b,file=heapDump 3331生成堆转储文件
-
-五、使用jhat或者可视化工具（Eclipse Memory Analyzer 、IBM HeapAnalyzer）分析堆情况。
-
-六、结合代码解决内存溢出或泄露问题。
-
-===================================================================================
-
-
-===================================================================================
-
-
-===================================================================================
-
-
-===================================================================================
-
-
-===================================================================================
-
-===================================================================================
-
-
-===================================================================================
-
-
-===================================================================================
-
-===================================================================================
-
-
-===================================================================================
-
-
-===================================================================================
-
-
-
-===================================================================================
-
-
-===================================================================================
-
-
-===================================================================================
-
-===================================================================================
-
-
-===================================================================================
-
-
-===================================================================================
-
-
-
-
-===================================================================================
-
-
-===================================================================================
-
-
-===================================================================================
-
-===================================================================================
-
-
-===================================================================================
-
-
-===================================================================================
-
-
-===================================================================================
-
-
-===================================================================================
-
-
-===================================================================================
-
-
-
-
-
-===================================================================================
-
-
-===================================================================================
-
-
-===================================================================================
-
-===================================================================================
-
-
-===================================================================================
-
-
-===================================================================================
-
-
-===================================================================================
-
-
-===================================================================================
-
-
-===================================================================================
-
-
-
-
-
-===================================================================================
-
-
-===================================================================================
-
-
-===================================================================================
-
-===================================================================================
-
-
-===================================================================================
-
-
-===================================================================================
-
-
-===================================================================================
-
-
-===================================================================================
-
-
-===================================================================================
-```
-
-### Tungsten Engine
-
-```
-简要介绍：https://spoddutur.github.io/spark-notes/second_generation_tungsten_engine.html
-火山模型和手写代码的性能差距：https://www.cnblogs.com/snova/p/9195692.html
-whole codegen：https://www.jianshu.com/p/689bf23f31ed
-
-查询优化技术要点：https://zhuanlan.zhihu.com/p/41562506
-Volcano Model是一种经典的基于行的流式迭代模型
-```
-
-### 类型转换
-
-```
-时间戳 转
-```
-
-
-
-### 异常
-
-#### Missing an output location for shuffle 4
-
-```
-https://blog.csdn.net/weixin_44455388/article/details/101198654
-
-减少shuffle数据
-主要从代码层面着手，可以将不必要的数据在shuffle前进行过滤，比如原始数据有20个字段，只要选取需要的字段进行处理即可，将会减少一定的shuffle数据。
-
-修改分区
-通过spark.sql.shuffle.partitions控制分区数，默认为200，根据shuffle的量以及计算的复杂度适当提高这个值，例如500。
-
-增加失败的重试次数和重试的时间间隔
-通过spark.shuffle.io.maxRetries控制重试次数，默认是3，可适当增加，例如10。
-通过spark.shuffle.io.retryWait控制重试的时间间隔，默认是5s，可适当增加，例如10s。
-
-提高executor的内存
-在spark-submit提交任务时，适当提高executor的memory值，例如15G或者20G。
-
-考虑是否存在数据倾斜的问题
-
-```
-
-#### Too Large Frame
-
-```
-https://yq.aliyun.com/articles/71172
-数据倾斜太严重了，集中到一个task
-这样导致网络传输开销太大
-
-在成功的任务里，stage26与24的executor完全是同一个，这样数据是完全本地化的，甚至是同一个进程，因而经过优化不再需要通过网络传输
-而在失败的任务里，stage26在执行时发现这个node上有3个executor，为了性能的提升，将数据分配给3个executor执行计算。可见其中也成功了一半，32686这个端口的executor是24中执行的那个，因而虽然它要处理3.3g的数据，但是因为不需要网络传输，也仍然可以成功。可是对于另外两个，即使是同一个节点，但是由于是不同进程，仍然需要通过netty的server拉取数据，而这一次的拉取最大不能超过int最大值，因而失败了一个，导致整个stage失败，也就导致了整个job的失败。
-总结
-由此可见在数据极度倾斜的情况下，增大executor的数量未见得是好事，还是要根据具体情况而来。减小了数量解决了问题，但是这其实并不是最好的解决方案，因为这种情况下，可见数据基本等同于本地执行，完全浪费了集群的并发性，更好的解决方案还需要再继续深入理解。
-```
-
-#### Exception in thread "main" java.lang.NoClassDefFoundError: com/sun/jersey/api/client/config/ClientConfig
-
-```
-20/07/08 17:29:21 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
-log4j:WARN No appenders could be found for logger (org.apache.hadoop.hdfs.BlockReaderLocal).
-log4j:WARN Please initialize the log4j system properly.
-log4j:WARN See http://logging.apache.org/log4j/1.2/faq.html#noconfig for more info.
-Exception in thread "main" java.lang.NoClassDefFoundError: com/sun/jersey/api/client/config/ClientConfig
-	at org.apache.hadoop.yarn.client.api.TimelineClient.createTimelineClient(TimelineClient.java:55)
-	at org.apache.hadoop.yarn.client.api.impl.YarnClientImpl.createTimelineClient(YarnClientImpl.java:181)
-	at org.apache.hadoop.yarn.client.api.impl.YarnClientImpl.serviceInit(YarnClientImpl.java:168)
-	at org.apache.hadoop.service.AbstractService.init(AbstractService.java:163)
-	at org.apache.spark.deploy.yarn.Client.submitApplication(Client.scala:161)
-	at org.apache.spark.deploy.yarn.Client.run(Client.scala:1135)
-	at org.apache.spark.deploy.yarn.YarnClusterApplication.start(Client.scala:1527)
-	at org.apache.spark.deploy.SparkSubmit.org$apache$spark$deploy$SparkSubmit$$runMain(SparkSubmit.scala:845)
-	at org.apache.spark.deploy.SparkSubmit.doRunMain$1(SparkSubmit.scala:161)
-	at org.apache.spark.deploy.SparkSubmit.submit(SparkSubmit.scala:184)
-	at org.apache.spark.deploy.SparkSubmit.doSubmit(SparkSubmit.scala:86)
-	at org.apache.spark.deploy.SparkSubmit$$anon$2.doSubmit(SparkSubmit.scala:920)
-	at org.apache.spark.deploy.SparkSubmit$.main(SparkSubmit.scala:929)
-	at org.apache.spark.deploy.SparkSubmit.main(SparkSubmit.scala)
-Caused by: java.lang.ClassNotFoundException: com.sun.jersey.api.client.config.ClientConfig
-	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
-	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
-	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:335)
-	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
-	... 14 more
-	
-这是某个jar包有问题，需要手动更换下
-
-https://blog.csdn.net/zhanglong_4444/article/details/106097216
-spark-2.0后jersey升级到了ver2.x版本，但实际使用时还需要1.x。导致报错。
-
-主要这三个包
-jersey-client-1.19.jar
-jersey-core-1.19.1.jar
-jersey-guice-1.19.jar
-放到${SPAKR_HOME}/jars 目录之下
-```
-
 
 
 ## 
@@ -4902,6 +4614,9 @@ FST字典实现：https://www.cnblogs.com/bonelee/p/6226185.html
 java连接sql：https://www.tutorialspoint.com/postgresql/postgresql_java.htm
 
 数据类型：https://www.runoob.com/postgresql/postgresql-data-type.html
+pg的db和schema区别：https://blog.csdn.net/weixin_44375561/article/details/119355144
+
+
 ```
 
 ### 命令行使用
@@ -4938,6 +4653,35 @@ select * from xxx limit 1; \x
 导出数据
 \copy (select * from xxx limit 1) to 'test.csv'
 
+查看表的实际占用空间
+select pg_total_relation_size('表名')
+
+
+当前日期转数字
+https://blog.csdn.net/snn1410/article/details/7741283
+
+select to_number(current_date::text, '999999999999');
+ to_number 
+-----------
+  20220414
+
+
+当前日志转时间戳(int)
+select current_date;
+    date    
+------------
+ 2022-04-14
+(1 row)
+
+
+select current_time;
+       timetz       
+--------------------
+ 20:15:10.924443+08
+(1 row)
+
+
+select 
 
 ```
 
@@ -5012,6 +4756,30 @@ select cast ((now()::timestamp +'-7 day') AT TIME ZONE 'UTC' as bigint)
 
 select (now()::timestamp +'-7 day') AT TIME ZONE 'UTC'
 
+
+
+统计每小时任务量
+select 
+to_char(to_timestamp(start_time), 'yyyy-mm-dd:HH') as task_hours, count(*) as cnt
+from t_task_history
+where to_timestamp(start_time) > '2022-04-06T00:00:00'::timestamp and to_timestamp(start_time) < '2022-04-08T00:00:00'::timestamp 
+group by
+task_hours
+order by
+cnt desc;
+
+
+统计最近10分钟用户活跃数
+select  count(distinct "user") as cnt
+from t_task_history
+where to_timestamp(created_at) > now()::timestamp + '-10 min' and to_timestamp(created_at) < now()::timestamp
+
+
+
+
+
+获取当前时间的小时
+select date_part('hour', now());
 ```
 
 ### 异常
