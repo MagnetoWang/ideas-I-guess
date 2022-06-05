@@ -2093,7 +2093,6 @@ kill %1 1是jobs号，前面一定要是%
 nohup命令
 nohup python -m HTTPServer 8567 >log 2>&1 &
 
-
 watch  -n 10 sh  test.sh  &  #每10s在后台执行一次test.sh脚本
 
 ```
@@ -2833,7 +2832,40 @@ https://segmentfault.com/a/1190000037451303
 db.users.find({age: 18, sex: 'girl'})
 
 
+
+
+MongoDB 特点
+
+    面向集合存储：MongoDB 是面向集合的，数据以 collection 分组存储。每个 collection 在数据库中都有唯一的名称。
+    模式自由：集合的概念类似 MySQL 里的表，但它不需要定义任何模式。
+    结构松散：对于存储在数据库中的文档，不需要设置相同的字段，并且相同的字段不需要相同的数据类型，不同结构的文档可以存在同一个 collection 里。
+    高效的二进制存储：存储在集合中的文档，是以键值对的形式存在的。键用于唯一标识一个文档，一般是 ObjectId 类型，值是以 BSON 形式存在的。BSON = Binary JSON， 是在 JSON 基础上加了一些类型及元数据描述的格式。
+    支持索引：可以在任意属性上建立索引，包含内部对象。MongoDB 的索引和 MySQL 的索引基本一样，可以在指定属性上创建索引以提高查询的速度。除此之外，MongoDB 还提供创建基于地理空间的索引的能力。
+    支持 mapreduce：通过分治的方式完成复杂的聚合任务。
+    支持 failover：通过主从复制机制，可以实现数据备份、故障恢复、读扩展等功能。基于复制集的复制机制提供了自动故障恢复的功能，确保了集群数据不会丢失。
+    支持分片：MongoDB 支持集群自动切分数据，可以使集群存储更多的数据，实现更大的负载，在数据插入和更新时，能够自动路由和存储。
+    支持存储大文件：MongoDB 中 BSON 对象最大不能超过 16 MB。对于大文件的存储，BSON 格式无法满足。GridFS 机制提供了一个存储大文件的机制，可以将一个大文件分割成为多个较小的文档进行存储。
+
+MongoDB 要素
+
+    database: 数据库。
+    collection: 数据集合，相当于 MySQL 的 table。
+    document: 数据记录行，相当于 MySQL 的 row。
+    field: 数据域，相当于 MySQL 的 column。
+    index: 索引。
+    primary key: 主键。
+
+MongoDB ObjectId
+ObjectId 可以快速生成并排序，长度为 12 个字节，包括：
+
+    一个 4 字节的时间戳，表示 unix 时间戳
+    5 字节随机值
+    3 字节递增计数器，初始化为随机值
+
+在 MongoDB 中，存储在集合中的每个文档都需要一个唯一的 _id 字段作为主键。如果插入的文档省略了 _id 字段，则自动为文档生成一个 _id。
 ···
+
+
 
 
 
