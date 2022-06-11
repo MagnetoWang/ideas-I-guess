@@ -1913,6 +1913,14 @@ catch(Throwable t)
 { }
 ```
 
+### 打印堆栈
+```
+for (StackTraceElement e : Thread.currentThread().getStackTrace()) {
+    logger.info(String.format("my track %s", e.toString()));
+}
+
+
+```
 ### 正则表达式
 
 ```
@@ -2213,7 +2221,16 @@ List<String> names = new ArrayList<String>() {{
                             
                         }
                     };
-                    
+
+List<Map<String, String>> xx = new ArrayList() {{
+    add(new HashMap() {{
+        put("port", "88");
+    }});
+    add(new HashMap() {{
+        put("port", "88");
+    }});
+}};
+
                     
 list 和 数组转换 https://www.jianshu.com/p/7eee157f74fc
 strList.toArray(strArray1);
@@ -2229,6 +2246,9 @@ Arrays.asList()
 
 
 ArrayList<String> arrayList = new ArrayList<String>(Arrays.asList(arrays));
+
+
+
 ```
 
 ### Queue
@@ -2413,66 +2433,6 @@ protected-mode no
 
 
 
-## JMeter
-
-### 资料
-
-- 中文文档：<http://www.testclass.net/jmeter/jmeter-doc-01/>
-- 入门教程：https://www.jianshu.com/p/0e4daecc8122
-- 入门教程：<http://www.cnblogs.com/zhangchaoyang/articles/2530731.html>
-- 官网：<https://jmeter.apache.org/>
-- 高阶教程： <https://www.jianshu.com/p/0e4daecc8122>
-- java编程使用JMeter示例： <https://www.jianshu.com/p/a88e5cb1d6cb>
-- Java请求：<https://www.cnblogs.com/yangxia-test/p/4019541.html>
-- jmeter系列文章：<https://www.cnblogs.com/yangxia-test/category/431240.html>
-- 多场景并发测试：<https://blog.csdn.net/laofashi2015/article/details/78552663>
-- 在jmeter情况下，修改jvm参数：<http://jmeter.apache.org/usermanual/get-started.html>
-
-### Demo
-
-```
-jar包
- <dependency>
-            <groupId>org.apache.jmeter</groupId>
-            <artifactId>ApacheJMeter_java</artifactId>
-            <version>5.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.jmeter</groupId>
-            <artifactId>ApacheJMeter_http</artifactId>
-            <version>2.8</version>
-        </dependency>
-
-创建类
-@Log4j
-public class JmeterTest implements JavaSamplerClient {
-
-    @Override
-    public void setupTest(JavaSamplerContext javaSamplerContext) {
-        
-    }
-
-    @Override
-    public SampleResult runTest(JavaSamplerContext javaSamplerContext) {
-        return null;
-    }
-
-    @Override
-    public void teardownTest(JavaSamplerContext javaSamplerContext) {
-
-    }
-
-    @Override
-    public Arguments getDefaultParameters() {
-        return null;
-    }
-}
-
-修改jvm参数
-JVM_ARGS="-Xms1024m -Xmx1024m" jmeter -t test.jmx [etc.]
-
-```
 
 
 
@@ -2941,6 +2901,52 @@ mvn3.8.1以上的默认只支持https，不支持http
 
 ================================================================================================
 
+https://www.cnblogs.com/ried12138/p/14840635.html
+
+ Fatal error compiling: java.lang.IllegalAccessError: class lombok.javac.apt.LombokProcessor (in unnamed module @0x2aa7399c) cannot access class com.sun.tools.javac.processing.JavacProcessingEnvironment (in module jdk.compiler) because module jdk.compiler does not export com.sun.tools.javac.processing to unnamed module @0x2aa7399c
+
+
+================================================================================================
+
+[ERROR] Failed to execute goal on project hybris-inferschema-online: Could not resolve dependencies for project com.tencent.cloud:hybris-inferschema-online:jar:1.5.0: Failed to collect dependencies at com.tencent.cloud:lakefs-cosn-client:jar:1.0: Failed to read artifact descriptor for com.tencent.cloud:lakefs-cosn-client:jar:1.0: Could not transfer artifact com.tencent.cloud:lakefs-cosn-client:pom:1.0 from/to alimaven (http://maven.aliyun.com/nexus/content/groups/public/): Transfer failed for http://maven.aliyun.com/nexus/content/groups/public/com/tencent/cloud/lakefs-cosn-client/1.0/lakefs-cosn-client-1.0.pom ProxyInfo{host='web-proxy.tencent.com', userName='null', port=8080, type='http', nonProxyHosts='null'}: web-proxy.tencent.com: nodename nor servname provided, or not known -> [Help 1]
+
+
+注释 <proxies> 标签的内容
+关闭代理
+================================================================================================
+
+
+[ERROR] Failed to execute goal on project dep-hive311: Could not resolve dependencies for project com.tencent.cloud:dep-hive311:jar:1.0.0: Failed to collect dependencies at org.apache.hive:hive-jdbc:jar:3.1.1 -> org.apache.hive:hive-service:jar:3.1.1 -> org.apache.hive:hive-llap-server:jar:3.1.1 -> org.apache.hbase:hbase-server:jar:2.0.0-alpha4 -> org.glassfish.web:javax.servlet.jsp:jar:2.3.2 -> org.glassfish:javax.el:jar:3.0.1-b06-SNAPSHOT: Failed to read artifact descriptor for org.glassfish:javax.el:jar:3.0.1-b06-SNAPSHOT: Could not transfer artifact org.glassfish:javax.el:pom:3.0.1-b06-SNAPSHOT from/to jvnet-nexus-snapshots (https://maven.java.net/content/repositories/snapshots): Transfer failed for https://maven.java.net/content/repositories/snapshots/org/glassfish/javax.el/3.0.1-b06-SNAPSHOT/javax.el-3.0.1-b06-SNAPSHOT.pom: Remote host closed connection during handshake: SSL peer shut down incorrectly -> [Help 1]
+
+
+https://cloud.tencent.com/developer/article/1948981
+
+
+https://icode.best/i/81187038460452
+
+
+配置repo1仓库
+
+<mirror>
+            <id>repo1</id>
+            <name>repo1 maven</name>
+            <url>https://repo1.maven.org/maven2/</url>
+            <mirrorOf>central</mirrorOf>
+        </mirror> 
+
+glassfish jar包
+https://repo1.maven.org/maven2/org/glassfish/javax.el/3.0.1-b06/
+================================================================================================
+镜像仓库大全
+https://blog.csdn.net/Hello_World_QWP/article/details/82459915
+
+
+================================================================================================
+
+
+
+
+================================================================================================
 ```
 
 
@@ -3088,6 +3094,9 @@ Thread.currentThread().getStackTrace()[1].getMethodName();
 this.getClass().getName();
 
 ```
+
+
+
 
 ### 读文件转字符串
 
@@ -4523,10 +4532,7 @@ Keras 2.2.3 :
 
 
 
-## 
-
-
-
+## docker
 ```
 数据可视化利器
 https://www.metabase.com/start/docker.html
@@ -4606,201 +4612,6 @@ FST字典实现：https://www.cnblogs.com/bonelee/p/6226185.html
 
 ```
 
-
-## PostgreSQL
-### 数据库安装
-```
-下载官网的postgre 直接continue
-java连接sql：https://www.tutorialspoint.com/postgresql/postgresql_java.htm
-
-数据类型：https://www.runoob.com/postgresql/postgresql-data-type.html
-pg的db和schema区别：https://blog.csdn.net/weixin_44375561/article/details/119355144
-
-
-```
-
-### 命令行使用
-```
-sudo上面新建了用户，所以每次都需要-U
-sudo -u postgres psql
-创建数据库
-createdb mydb -U postgres
-
-进去mydb数据库
-psql mydb -U postgres
-
-查看库里的所有表 \d
-
-执行sql \g就是立刻返回结果
-select * from company \g
-
-
-开始基本使用
- SELECT version();
-
-\h 查询手册
-\q 退出
-
-\dt 查看所有表
-\d 查看所有表和表的详细信息
-\dt test* 筛选表名前缀是test的表
-
-
-结果换行显示 加上 \x
-select * from xxx limit 1; \x
-
-
-导出数据
-\copy (select * from xxx limit 1) to 'test.csv'
-
-查看表的实际占用空间
-select pg_total_relation_size('表名')
-
-
-当前日期转数字
-https://blog.csdn.net/snn1410/article/details/7741283
-
-select to_number(current_date::text, '999999999999');
- to_number 
------------
-  20220414
-
-
-当前日志转时间戳(int)
-select current_date;
-    date    
-------------
- 2022-04-14
-(1 row)
-
-
-select current_time;
-       timetz       
---------------------
- 20:15:10.924443+08
-(1 row)
-
-
-select 
-
-```
-
-### Sql语法
-
-```
-建表
-CREATE TYPE mood AS ENUM ('sad', 'ok', 'happy');
-CREATE TABLE person (
-    name text,
-    current_mood mood
-);
-
-写入数据
-
-```
-
-### python使用
-```
-python建表
-__author__ = "MuT6 Sch01aR"
- 
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column,String,Integer
- 
-engine = create_engine("mysql+pymysql://root:root@127.0.0.1/test",encoding="utf-8",echo=True,max_overflow=5)
-#连接mysql数据库，echo为是否打印结果
- 
-Base = declarative_base() #生成orm基类
- 
-class User(Base): #继承生成的orm基类
-    __tablename__ = "sql_test" #表名
-    id = Column(Integer,primary_key=True) #设置主键
-    user_name = Column(String(32))
-    user_password = Column(String(64))
- 
-class Admin(Base):
-    __tablename__ = "admin"
-    id = Column(Integer, primary_key=True)
-    username = Column(String(32))
-    password = Column(String(64))
- 
-Base.metadata.create_all(engine) #创建表结构
-#父类Base调用所有继承他的子类来创建表结构
-
-```
-### 文档
-```
-时间戳加减：https://www.jianshu.com/p/dce269262793
-
-SELECT now()::timestamp(0) + '1 year';  --当前时间加1年
-SELECT now()::timestamp(0) + '1 month';  --当前时间加一个月
-SELECT now()::timestamp(0) + '1 day';  --当前时间加一天
-SELECT now()::timestamp(0) + '1 hour';  --当前时间加一个小时
-SELECT now()::timestamp(0) + '1 min';  --当前时间加一分钟
-SELECT now()::timestamp(0) + '1 sec';  --加一秒钟
-select now()::timestamp(0) + '1 year 1 month 1 day 1 hour 1 min 1 sec';  --加1年1月1天1时1分1秒
-SELECT now()::timestamp(0) + (col || ' day')::interval FROM table --把col字段转换成天 然后相加
-
-
-SELECT now()::timestamp +'-7 day';
-
-
-select to_char(now()::timestamp +'-7 day')
-
-select cast (now()::timestamp +'-7 day' as bigint)
-
-
-select cast ((now()::timestamp +'-7 day') AT TIME ZONE 'UTC' as bigint)
-
-
-select (now()::timestamp +'-7 day') AT TIME ZONE 'UTC'
-
-
-
-统计每小时任务量
-select 
-to_char(to_timestamp(start_time), 'yyyy-mm-dd:HH') as task_hours, count(*) as cnt
-from t_task_history
-where to_timestamp(start_time) > '2022-04-06T00:00:00'::timestamp and to_timestamp(start_time) < '2022-04-08T00:00:00'::timestamp 
-group by
-task_hours
-order by
-cnt desc;
-
-
-统计最近10分钟用户活跃数
-select  count(distinct "user") as cnt
-from t_task_history
-where to_timestamp(created_at) > now()::timestamp + '-10 min' and to_timestamp(created_at) < now()::timestamp
-
-
-
-
-
-获取当前时间的小时
-select date_part('hour', now());
-```
-
-### 异常
-
-#### org.postgresql.util.PSQLException: ERROR: no schema has been selected to create in
-
-```
-org.postgresql.util.PSQLException: ERROR: no schema has been selected to create in
-        at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2510)
-        at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2245)
-        at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:311)
-        at org.postgresql.jdbc.PgStatement.executeInternal(PgStatement.java:447)
-        at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:368)
-        at org.postgresql.jdbc.PgStatement.executeWithFlags(PgStatement.java:309)
-        at org.postgresql.jdbc.PgStatement.executeCachedSql(PgStatement.java:295)
-        at org.postgresql.jdbc.PgStatement.executeWithFlags(PgStatement.java:272)
-        at org.postgresql.jdbc.PgStatement.executeUpdate(PgStatement.java:246)
-        
-  
-search_path概念：https://postgresqlco.nf/doc/zh/param/search_path/
-```
 
 
 
