@@ -139,7 +139,8 @@ python2 pip install -r requirement.txt
 python3 pip3 install -r requirement.txt
 
 
-
+获取依赖
+pip freeze requirement.txt
 ```
 
 ### 代码规范
@@ -698,7 +699,6 @@ bashrc
 安装某个python版本
 pyenv install 3.7.1
 
-
 pyenv virtualenv 2.7.1 env271
 
 在当前目录下创建一个 python 版本为2.7.1的环境，环境名字为 env271。 这个环境的真实目录位于~/.pyenv/versions/
@@ -853,7 +853,14 @@ except:
     print "Unexpected error:", sys.exc_info()[0]
     raise
     
-    
+
+捕捉所有类型异常（包括SystemExit）
+try:
+    xxxx
+except BaseException as e:
+    xxxx
+
+
 ```
 
 ### 打印异常堆栈
@@ -1223,11 +1230,34 @@ xrange可以比range更节省空间
 ```
 https://www.cnblogs.com/pycode/p/logging.html
 
+---------------------------------------------
+初级版日志设置
 logging.basicConfig(level=logging.DEBUG,format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',  \
                     datefmt='%a, %d %b %Y %H:%M:%S')
 logger = logging.getLogger(__name__)
 logger.info("hello world")
 
+---------------------------------------------
+高级版设置-包含定向清理
+pip install ConcurrentLogHandler
+
+log_file = '/root/xxxx.log'
+log_format = '%(asctime)s [%(levelname)s] %(pathname)s:%(funcName)s:%(lineno)s [%(processName)s]:%(message)s'
+backup_count = 10
+log_max_bytes_per_file = 1024 * 1024 * 50
+logging.basicConfig(level=logging.DEBUG,
+                    filename=log_file,
+                    filemode='a',
+                    format=log_format,
+                    datefmt='%a, %d %b %Y %H:%M:%S')
+# 日志清理策略
+fh = cloghandler.ConcurrentRotatingFileHandler(log_file, backupCount=backup_count, maxBytes=log_max_bytes_per_file)
+# fh.setFormatter(formatter)
+# logging.config.dictConfig(LOG_CONFIG)
+my_log = logging.getLogger('plc_python2')
+my_log.addHandler(fh)
+my_log.info("xx")
+---------------------------------------------
 
 format: 指定输出的格式和内容，format可以输出很多有用信息，如上例所示:
 
