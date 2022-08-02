@@ -14,7 +14,7 @@ git config --global user.name xxx
 git config --global user.email xxx
 ```
 
-### Git rebase 
+### Git rebase 合并commit
 
 ```
 git rebase --edit-todo
@@ -64,6 +64,14 @@ git clone -b  apache-arrow-0.14.0 --single-branch https://github.com/apache/arro
 
 ```
 git checkout .
+```
+
+### 撤销当前commit，但是修改内容不回退
+```
+必须用soft
+git reset --soft HEAD^
+
+
 ```
 
 ### 回滚指定位置
@@ -153,7 +161,12 @@ git pull
 git checkout a
 git merge b
 ```
+### 合并某个commit功能
+```
 
+ git cherry-pick 1d502fb0bca93c23d89c8d95b3714be4ace67fb8
+
+```
 ### 开发分支落后主分支太多commit，无法直接merge到主分支
 
 ```
@@ -182,7 +195,14 @@ git submodule update --init --recursive
  git push
 ```
 
+### 修改commit的message信息
+```
+https://docs.github.com/cn/pull-requests/committing-changes-to-your-project/creating-and-editing-commits/changing-a-commit-message
 
+重写最近的提交消息
+ git commit --amend
+
+```
 
 ### 撤销push远端的代码
 
@@ -395,7 +415,15 @@ rm -rf wishPatterns.git
 git clone https://github.com/tantexian/wishPatterns.git
 ```
 
+### git关闭权限
+```
+https://learnku.com/laravel/t/5340/linux-solution-to-modify-the-file-permissions-caused-by-the-git-record-file-changes
 
+git 默认会跟踪文件的权限修改，当我们使用 chmod 指令的时候，git 也会把被修改权限的文件添加到被修改的状态。
+
+cat .git/config
+git config core.filemode false
+```
 
 ## CICD
 
