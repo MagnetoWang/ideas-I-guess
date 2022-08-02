@@ -170,14 +170,17 @@ fi
 ```
 
 ### 常用容器服务
-```
 
-启动postgres 服务
+#### 启动 postgres 服务
+```
+版本9比较稳定，最新版可能有各种兼容问题
+
 https://hub.docker.com/_/postgres?tab=description
 
-docker pull postgres
-docker run --net=host --name test_postgres -e POSTGRES_PASSWORD=123456 -e POSTGRES_USER=magnetowang -e PGDATA=/var/lib/postgresql/data/pgdata -v /data/home/magnetowang/docker/postgres/pgdata:/var/lib/postgresql/data/c -p 5432:5432 -d postgres
+docker pull postgres:9
+docker run --net=host --name test_postgres -e POSTGRES_PASSWORD=123456 -e POSTGRES_USER=magnetowang -e PGDATA=/var/lib/postgresql/data/pgdata -v /data/home/magnetowang/docker/postgres/pgdata:/var/lib/postgresql/data/c -p 5432:5432 -d postgres:9
 
--e PGDATA=/var/lib/postgresql/data/pgdata
+
+
 
 ```
