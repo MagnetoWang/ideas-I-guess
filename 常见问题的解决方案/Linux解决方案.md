@@ -2114,6 +2114,7 @@ kill -CONT 16079
 
 ```
 time xxxx
+
 xxx 可以使执行脚本也可以是执行程序
 
 结果
@@ -2342,6 +2343,51 @@ crontab -e
 * * * * * sh /data/idex/idex-tools/docker_stats.sh /data/idex/idex-tools/docker_stats.log
 ```
 
+### 快速集成classpath-跑java
+```
+
+CLASSPATH=/usr/local/services/hybris-realview-1.0/log/temp/log4j.xml
+JAVABIN=/usr/bin/java
+ROOT=/usr/local/services/hybris-realview-1.0/lib
+
+for f in $ROOT/*.jar; do \
+  CLASSPATH=${CLASSPATH}:$f; \
+done 
+
+HIVE=/usr/local/services/hybris-realview-1.0/hive235
+for f in $HIVE/*.jar; do \
+  CLASSPATH=${CLASSPATH}:$f; \
+done 
+
+
+echo $CLASSPATH
+
+$JAVABIN \
+-Xms32m \
+-Xmx128m \
+-XX:+HeapDumpOnOutOfMemoryError \
+-XX:HeapDumpPath=$ROOT/tmp \
+-Dlogback.configurationFile=file:/usr/local/services/hybris-realview-1.0/log/temp/log4j2.xml \
+-Dlog4j.configurationFile=file:/usr/local/services/hybris-realview-1.0/log/temp/log4j2.xml \
+-DtaskType=126 \
+-DtaskId_mould=98 \
+-DtaskId=20220630012603998 \
+-DcurRunDate=20220630190700 \
+-Dtries=0 \
+-DrunnerStateCode=9 \
+-Dlhotse_taskState=key__state___9 \
+-Djar.name=hybris-crawler-wedataUS-2.0.0-wedata-SNAPSHOT.jar \
+-Dfile.encoding=UTF-8 \
+-Dinstance_info=20220630012603998_20220630190700 \
+-cp $CLASSPATH \
+com.tencent.hybris.engine.crawler.hive.HbaseCrawlerTest
+
+
+
+
+
+```
+
 
 ## 问题
 
@@ -2358,6 +2404,11 @@ crontab -e
 ```
 ssh-keygen -t rsa
 s生成公钥和秘钥，公钥是可以随意发布的，秘钥只能你一个人持有
+
+
+密钥写入到服务端
+ssh-copy-id  root@xxxxxxx
+
 ```
 
 ### tar解压报错常见原因
