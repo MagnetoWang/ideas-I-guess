@@ -22,6 +22,23 @@ command + p
 ```
 
 
+### 登录远程服务器失败
+```
+open failed：administratively prohibited：open failed 
+
+
+需要修改远程服务器的sshd配置
+cat /etc/ssh/sshd_config | grep AllowTcpForwarding
+修改 AllowTcpForwarding 为 true
+
+
+centos 6重启ssh
+service ssh restart
+
+centos 7重启ssh
+systemctl restart sshd
+```
+
 
 ### 颜色配置
 
