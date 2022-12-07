@@ -12,6 +12,15 @@
 ```
 git config --global user.name xxx
 git config --global user.email xxx
+
+git config --global user.name magnetowang
+git config --global user.email magnetowang@tencent.com
+```
+
+### git 中文乱码
+```
+git config --global core.quotepath false
+
 ```
 
 ### Git rebase 合并commit
@@ -165,6 +174,12 @@ git merge b
 ```
 
  git cherry-pick 1d502fb0bca93c23d89c8d95b3714be4ace67fb8
+
+
+回退cherry-pick之前状态
+
+git cherry-pick --abort
+
 
 ```
 ### 开发分支落后主分支太多commit，无法直接merge到主分支
@@ -423,6 +438,41 @@ git 默认会跟踪文件的权限修改，当我们使用 chmod 指令的时候
 
 cat .git/config
 git config core.filemode false
+```
+
+### git工具
+```
+#!/usr/bin/env bash
+
+RUN_NAME="xxxx"
+REPO_PATH="xxx"
+
+go env -w GOSUMDB="sum.golang.google.cn"
+export GO111MODULE=on
+
+
+export GO15VENDOREXPERIMENT="1"
+
+GIT_SHA=$(git rev-parse --short HEAD || echo "GitNotFound")
+DATE=$(date '+%Y%m%d%H%M%S')
+VERSION=${GIT_SHA}-${DATE}
+
+LINK_OPERATOR="="
+
+COMMIT_ID=`git log |head -n 1| awk '{print $2;}'`
+AUTHOR=`git log |head -n 2| grep Author| awk '{print $2;}'`
+BRANCH=`git branch | awk '/\*/ {match($0,/\* (.+)/,ss);print ss[1]}'`
+BUILD_HOST=`ip addr show dev eth0 scope global | awk '/ inet / {match($0,/([0-9.]+)\/[0-9]+/,ss);print ss[1]}'`
+BUILD_USER=`whoami`
+BUILD_TIME=`date '+%Y-%m-%d %H:%M:%S'`
+BUILD_INFO="$COMMIT_ID,$AUTHOR,$BRANCH,$BUILD_HOST,$BUILD_USER,$BUILD_TIME"
+
+LD_FLAGS=""
+LD_FLAGS="${LD_FLAGS} -X '${REPO_PATH}/common/build_info.BuildInfo${LINK_OPERATOR}${BUILD_INFO}'"
+
+go build -i -v -ldflags "${LD_FLAGS}" -o output/bin/${RUN_NAME}
+
+
 ```
 
 ## CICD
