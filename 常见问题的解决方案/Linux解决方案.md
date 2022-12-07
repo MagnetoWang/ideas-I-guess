@@ -539,7 +539,7 @@ The GNU C Library project provides the core libraries for the GNU system and GNU
 
   - tar -zxvf ×××.tar.gz
   - tar -jxvf ×××.tar.bz2
-  - unrar -x xxxxx.rar 需要安装rar软件 brew install carlocab/personal/unrar
+  - unrar x xxxxx.rar 需要安装rar软件 brew install carlocab/personal/unrar
   - https://blog.csdn.net/FX677588/article/details/76100538
 
 - 安装zsh
@@ -1474,6 +1474,10 @@ chmod -R 777 文件名
 chown 1003 ./ -R
 
 
+修改用户名和用户组
+chown [-R] xx:xxx filename
+chown hdfs:hadoop log.txt
+
 修改路径权限
 sudo chown -R $(whoami) /usr/local/share/man/man8
 ```
@@ -1507,6 +1511,32 @@ pwdx 10769
 - netstat -anp | grep port
 - 一般p的参数有权限限制，有了p那么才会显示pid数字
 - 参考资料：http://www.cnblogs.com/MacoLee/p/5664306.html
+
+### 进程无法被kill
+```
+
+https://blog.csdn.net/u010416101/article/details/72331799
+
+
+
+Reference
+今天安装集群的时候，发现一个进程一直存在，kill -9 pid 也干不掉，就找找原因了。
+
+kill -9发送SIGKILL信号将其终止，但是以下两种情况不起作用：
+
+a、该进程处于”Zombie”状态（使用ps命令返回defunct的进程）。此时进程已经释放所有资源，但还未得到其父进程的确认。”zombie”进程要等到下次重启时才会消失，但它的存在不会影响系统性能。
+
+b、 该进程处于”kernel mode”（核心态）且在等待不可获得的资源。处于核心态的进程忽略所有信号处理，因此对于这些一直处于核心态的进程只能通过重启系统实现。进程在AIX 中会处于两种状态，即用户态和核心态。只有处于用户态的进程才可以用“kill”命令将其终止。
+
+用top命令查看发现zombie进程数是0，看来这三个进程不属于僵尸进程，应该是b这中情况，就是这些进程进入核心态等待磁盘资源时出现磁盘空间不足的故障，这时我强制关闭了数据库，所以这几个进程就一直处于核心态无法被杀除，看来只能重启了。
+————————————————
+版权声明：本文为CSDN博主「在风中的意志」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/u010416101/article/details/72331799
+
+
+
+```
+
 
 ### 进程pid内存使用情况
 
@@ -2303,6 +2333,16 @@ export PS1='[\[\e[1;36m\]\u@\h \w \t]$ '
 
 前面显示青色 后面显示黄色 色彩更加鲜明
 export PS1='\[\e[1;36m\][\u@\h \w \t]$ \[\e[1;33m\]'
+
+
+export PS1='\[\e[1;36m\][\u@\h \w \t]$ \[\e[1;33m\]'
+
+export PS1='[\u@\h \w \t]'
+
+
+PS1="[\e[37;1m][[\e[31;1m]\u [\e[36;1m]@ [\e[33;1m]\h [\e[35;40m]\W[\e[37;1m]] [\e[33;1m]\$[\e[0m] "
+
+
 ```
 
 ### 正则表达式
