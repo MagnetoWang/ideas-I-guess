@@ -80,6 +80,9 @@ git checkout .
 必须用soft
 git reset --soft HEAD^
 
+撤销多个commit
+git reset --soft HEAD~3
+
 
 ```
 
@@ -226,6 +229,8 @@ git reset --hard <版本号>
 git push origin <分支名> --force
 
 https://blog.csdn.net/xs20691718/article/details/51901161
+
+
 ```
 
 
