@@ -6,7 +6,41 @@
 gpu计算：https://www.bilibili.com/video/BV1hE41187Mb?p=3
 ```
 
+### cuda 查看
+```
+import paddle
 
+
+# 打印 PaddlePaddle 版本信息
+print("PaddlePaddle 版本信息：", paddle.__version__)
+
+# 判断是否有可用的 GPU
+if paddle.device.is_compiled_with_cuda():
+    print("GPU 可用")
+else:
+    print("GPU 不可用")
+
+# 获取当前可用的 GPU 数量
+device_count = paddle.device.cuda.device_count()
+print("当前可用的 GPU 数量：", device_count)
+
+# 获取当前使用的 GPU 的计算能力
+device_capability = paddle.device.cuda.get_device_capability()
+print("当前使用的 GPU 的计算能力：", device_capability)
+
+# 获取当前使用的 GPU 的属性
+device_properties = paddle.device.cuda.get_device_properties(paddle.get_device())
+print("当前使用的 GPU 的属性：", device_properties)
+
+# 获取当前使用的 GPU 名称
+device_name = paddle.device.cuda.get_device_name(paddle.get_device())
+print("当前使用的 GPU 名称：", device_name)
+
+# 获取所有可用的设备
+available_devices = paddle.device.get_available_device()
+print("所有可用的设备：", available_devices)
+
+```
 
 ### 显卡
 
