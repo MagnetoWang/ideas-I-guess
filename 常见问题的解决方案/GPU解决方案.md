@@ -4,6 +4,53 @@
 
 ```
 gpu计算：https://www.bilibili.com/video/BV1hE41187Mb?p=3
+
+
+HPC 中kernel fusion是什么，该怎么学习呢? - 有了琦琦的棍子的回答 - 知乎
+https://www.zhihu.com/question/514144710/answer/2491596085
+
+
+高性能计算工程师需要什么技术堆栈？ opencl dsp neon perf profile tvm？ - 有了琦琦的棍子的回答 - 知乎
+https://www.zhihu.com/question/481648758/answer/2206937333
+
+CUDA WarpReduce学习 - zzk again的文章 - 知乎
+https://zhuanlan.zhihu.com/p/492560229
+
+
+GPU硬件的发展与特性分析---Tesla系列汇总 - kaiyuan的文章 - 知乎
+https://zhuanlan.zhihu.com/p/515584277
+
+
+cuda笔记
+https://github.com/DefTruth/CUDA-Learn-Note
+
+
+
+如何学习cuda编程？ - DefTruth的回答 - 知乎
+https://www.zhihu.com/question/62996995/answer/3369541594
+
+
+[C++][3W字]💡静态链接和静态库实践指北-原理篇 - DefTruth的文章 - 知乎
+https://zhuanlan.zhihu.com/p/595527528
+
+推理部署工程师面试题库 - 进击的Killua的文章 - 知乎
+https://zhuanlan.zhihu.com/p/673046520
+
+
+OneFlow技术年货：800+页免费“大模型”电子书 - OneFlow的文章 - 知乎
+https://zhuanlan.zhihu.com/p/675561734
+
+
+[AI编译器后端优化]循环优化 - 守夜人的文章 - 知乎
+https://zhuanlan.zhihu.com/p/685444117
+
+
+
+理解Tensor Core - Frank Wang的文章 - 知乎
+https://zhuanlan.zhihu.com/p/75753718
+
+
+
 ```
 
 ### cuda 查看
@@ -176,4 +223,101 @@ volatile 可以防止编译器提前优化代码，因为共享内存的方面�
 ```
 
 
+## 算子优化
+```
+[CUDA 学习笔记] Reduce 算子优化 - PeakCrosser的文章 - 知乎
+https://zhuanlan.zhihu.com/p/688610091
 
+英伟达官方文档
+https://developer.download.nvidia.cn/assets/cuda/files/reduction.pdf
+
+深入浅出GPU优化系列：reduce优化 - 有了琦琦的棍子的文章 - 知乎
+https://zhuanlan.zhihu.com/p/426978026
+
+漫谈高性能计算与性能优化：计算 - 有了琦琦的棍子的文章 - 知乎
+https://zhuanlan.zhihu.com/p/688613416
+
+
+如何看待DeepMind最新的AI系统AlphaTensor可以发现矩阵相乘的求解方法？ - 有了琦琦的棍子的回答 - 知乎
+https://www.zhihu.com/question/557880171/answer/2705627296
+
+
+如何实现一个高效的Softmax CUDA kernel？——OneFlow 性能优化分享 - OneFlow的文章 - 知乎
+https://zhuanlan.zhihu.com/p/341059988
+
+
+高效CUDA Scan算法浅析 - 熊勒个猫的文章 - 知乎
+https://zhuanlan.zhihu.com/p/499963645
+
+
+FasterTransformer Decoding 源码分析(八)-FFNLayer MoE(下篇) - 进击的Killua的文章 - 知乎
+https://zhuanlan.zhihu.com/p/672189305
+
+FlashAttention 的速度优化原理是怎样的？ - DefTruth的回答 - 知乎
+https://www.zhihu.com/question/611236756/answer/3410300997
+
+
+CUDA优化之LayerNorm性能优化实践 - OneFlow的文章 - 知乎
+https://zhuanlan.zhihu.com/p/443026261
+
+[施工中] CUDA GEMM 理论性能分析与 kernel 优化 - 李少侠的文章 - 知乎
+https://zhuanlan.zhihu.com/p/441146275
+
+
+FlashAttention v2核心代码解析(一） - 进击的Killua的文章 - 知乎
+https://zhuanlan.zhihu.com/p/686225377
+
+
+有没有大模型推理加速引擎FasterTransformer入门级教程？ - 进击的Killua的回答 - 知乎
+https://www.zhihu.com/question/602468960/answer/3315182172
+
+```
+
+### GEMM（矩阵乘）的优化
+1. Spmv（稀疏矩阵乘）
+
+## 性能分析
+```
+
+
+利用Nsight System 和 Nsight Compute进行性能优化分析 - 进击的Killua的文章 - 知乎
+https://zhuanlan.zhihu.com/p/673282220
+
+
+【推理引擎】NN模型部署框架/推理引擎总结 - eyesighting的文章 - 知乎
+https://zhuanlan.zhihu.com/p/672617025
+
+
+Optimize softmax cuda kernel
+https://github.com/Oneflow-Inc/oneflow/pull/4058
+
+
+【分布式训练技术分享七】聊聊字节 AML 万卡工作 MegaScale: Scaling Large Language Model Training to More Than 10,000 GPUs - 无恶不作的文章 - 知乎
+https://zhuanlan.zhihu.com/p/684619370
+
+
+混合输入矩阵乘法的性能优化 - OneFlow的文章 - 知乎
+https://zhuanlan.zhihu.com/p/685893061
+
+
+
+DeepSpeed-FastGen：通过 MII 和 DeepSpeed-Inference 实现 LLM 高吞吐量文本生成 - 微软DeepSpeed的文章 - 知乎
+https://zhuanlan.zhihu.com/p/665494115
+
+
+[Transformer 101系列] LLM模型量化世界观(上) - aaronxic的文章 - 知乎
+https://zhuanlan.zhihu.com/p/686232369
+
+
+```
+
+
+
+### 
+
+### 
+
+
+## 面试
+1. 推理部署工程师面试题库 - 进击的Killua的文章 - 知乎 https://zhuanlan.zhihu.com/p/673046520
+2. 
