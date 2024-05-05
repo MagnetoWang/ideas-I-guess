@@ -19,6 +19,11 @@ some technical experience and exploring new technologies in the future
 
 
 ## TODOLIST
-- Spark solutions
-- Flink solutions
-- Hbase solutions
+- Spark solutions - very soon
+- Flink solutions - very soon
+- Hbase solutions - maybe slowly
+- Pytorch solutions - very soon
+- PaddlePaddle solutions - very soon
+
+## Nice to meet you
+If you have any amazing technical ideas or challenging scenarios, please contact me.
