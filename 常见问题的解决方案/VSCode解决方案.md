@@ -59,16 +59,61 @@ systemctl restart sshd
 - 插件：fileheader
 - 输入命令fileheader即可
 
-### c++自动补全
+### c++ clangd集成高效开发
+1. 机器安装clangd 和 cmkae
+2. 项目能源码编译 cmake命令
+3. vscode安装插件，然后配置clangd cmake 和 项目源码路径
+4. 最终实现跳转功能
+```shell
+apt-get update
+apt install sudo -y
+apt install clang clangd lldb ccache -y
 
-- 参考资料：<https://blog.csdn.net/cbc000/article/details/80670413>
-- 添加插件
+# cmake
+cur_dir=/docker/root/projects/demo/package
+export PATH="$cur_dir/cmake-3.24.0-linux-x86_64/bin:$PATH"
+export PATH="$cur_dir/lib:$cur_dir/bin:$PATH"
+
+
+# 项目源码需要生成 compile_commands.json
+cmake DCMAKE_EXPORT_COMPILE_COMMANDS=1 xxxxxx
+
+
+VSCODE操作
+# 下载插件 clangd
+"clangd.arguments": [
+        "--compile-commands-dir=/docker/root/projects/demo/github/Paddle/build",
+        "-log=verbose",
+        "-pretty",
+        "--background-index",
+        "-j=12",
+        "--all-scopes-completion",
+        "--completion-style=detailed",
+        "--clang-tidy",
+        "--query-driver=clang++"
+    ],
+    "clangd.path": "/usr/bin/clangd"
+
+# 下载 cmake 插件
+    
+    "cmake.cmakePath": "/docker/root/projects/demo/package/cmake-3.24.0-linux-x86_64/bin/cmake"
+    
+
+# 下载 cmake tools插件
+# 配置build目录
+    "cmake.additionalCompilerSearchDirs": [
+        "/docker/root/projects/demo/github/Paddle"
+    ],
+    "cmake.buildDirectory": "/docker/root/projects/demo/github/Paddle/build",
+ 
+
 
 ```
-/.vscode/c_cpp_properties.json
-在includePath
-添加你的库头文件地址也可以增强补全功能
-```
+
+### c++ 加速编译过程 ccache
+1. apt install ccache -y   
+2. /usr/bin/ccache
+3. ccache -M 0
 
 
 
