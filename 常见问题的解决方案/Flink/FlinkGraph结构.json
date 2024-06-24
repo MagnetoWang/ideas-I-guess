@@ -1,0 +1,106 @@
+{
+	"jid": "e1aa9c0c2124bfe5c0371efd149b3c03",
+	"name": "my job",
+	"nodes": [{
+		"id": "92389d4d23cf10d31b91ae3864df9bd0",
+		"parallelism": -1,
+		"operator": "",
+		"operator_strategy": "",
+		"description": "source 1",
+		"optimizer_properties": {}
+	}, {
+		"id": "a7016375eee071d01b95b91ca40de86b",
+		"parallelism": -1,
+		"operator": "",
+		"operator_strategy": "",
+		"description": "source 2",
+		"optimizer_properties": {}
+	}, {
+		"id": "0efbd82ad750446fef04ecbe2a48694a",
+		"parallelism": -1,
+		"operator": "",
+		"operator_strategy": "",
+		"description": "source 3",
+		"optimizer_properties": {}
+	}, {
+		"id": "aadc2f260b8a24e24d4741f5598792d4",
+		"parallelism": -1,
+		"operator": "",
+		"operator_strategy": "",
+		"description": "intermediate 1",
+		"inputs": [{
+			"num": 0,
+			"id": "92389d4d23cf10d31b91ae3864df9bd0",
+			"exchange": "pipelined"
+		}],
+		"optimizer_properties": {}
+	}, {
+		"id": "6fd5777969e95d6d98761b4bea16ffd7",
+		"parallelism": -1,
+		"operator": "",
+		"operator_strategy": "",
+		"description": "intermediate 2",
+		"inputs": [{
+			"num": 0,
+			"id": "a7016375eee071d01b95b91ca40de86b",
+			"exchange": "pipelined"
+		}],
+		"optimizer_properties": {}
+	}, {
+		"id": "3bd810d20f5bec59250f05e5952e6a98",
+		"parallelism": -1,
+		"operator": "",
+		"operator_strategy": "",
+		"description": "join 1",
+		"inputs": [{
+			"num": 0,
+			"id": "aadc2f260b8a24e24d4741f5598792d4",
+			"exchange": "blocking"
+		}, {
+			"num": 1,
+			"id": "6fd5777969e95d6d98761b4bea16ffd7",
+			"exchange": "blocking"
+		}],
+		"optimizer_properties": {}
+	}, {
+		"id": "deebb0ffc15b752f7597249e48f8a32a",
+		"parallelism": -1,
+		"operator": "",
+		"operator_strategy": "",
+		"description": "join 2",
+		"inputs": [{
+			"num": 0,
+			"id": "3bd810d20f5bec59250f05e5952e6a98",
+			"exchange": "pipelined"
+		}, {
+			"num": 1,
+			"id": "0efbd82ad750446fef04ecbe2a48694a",
+			"exchange": "blocking"
+		}],
+		"optimizer_properties": {}
+	}, {
+		"id": "70e5bdb4f9e79122fb67a96f94e31703",
+		"parallelism": -1,
+		"operator": "",
+		"operator_strategy": "",
+		"description": "sink 1",
+		"inputs": [{
+			"num": 0,
+			"id": "deebb0ffc15b752f7597249e48f8a32a",
+			"exchange": "pipelined"
+		}],
+		"optimizer_properties": {}
+	}, {
+		"id": "3784fe8d56f032cc1e7e011777a5bdcb",
+		"parallelism": -1,
+		"operator": "",
+		"operator_strategy": "",
+		"description": "sink 2",
+		"inputs": [{
+			"num": 0,
+			"id": "3bd810d20f5bec59250f05e5952e6a98",
+			"exchange": "pipelined"
+		}],
+		"optimizer_properties": {}
+	}]
+}

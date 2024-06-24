@@ -1,0 +1,211 @@
+{
+	"nodes": [
+
+	{
+		"id": 2,
+		"type": "source",
+		"pact": "Data Source",
+		"contents": "at testExecuteAfterGetExecutionPlanContextEnvironment(ExecutionEnvironmentTest.java:56) (org.apache.flink.api.java.io.CollectionInputFormat)",
+		"parallelism": "1",
+		"global_properties": [
+			{ "name": "Partitioning", "value": "RANDOM_PARTITIONED" },
+			{ "name": "Partitioning Order", "value": "(none)" },
+			{ "name": "Uniqueness", "value": "not unique" }
+		],
+		"local_properties": [
+			{ "name": "Order", "value": "(none)" },
+			{ "name": "Grouping", "value": "not grouped" },
+			{ "name": "Uniqueness", "value": "not unique" }
+		],
+		"estimates": [
+			{ "name": "Est. Output Size", "value": "(unknown)" },
+			{ "name": "Est. Cardinality", "value": "(unknown)" }		],
+		"costs": [
+			{ "name": "Network", "value": "0.0" },
+			{ "name": "Disk I/O", "value": "0.0" },
+			{ "name": "CPU", "value": "0.0" },
+			{ "name": "Cumulative Network", "value": "0.0" },
+			{ "name": "Cumulative Disk I/O", "value": "0.0" },
+			{ "name": "Cumulative CPU", "value": "0.0" }
+		],
+		"compiler_hints": [
+			{ "name": "Output Size (bytes)", "value": "(none)" },
+			{ "name": "Output Cardinality", "value": "(none)" },
+			{ "name": "Avg. Output Record Size (bytes)", "value": "(none)" },
+			{ "name": "Filter Factor", "value": "(none)" }		]
+	},
+	{
+		"id": 1,
+		"type": "pact",
+		"pact": "Map",
+		"contents": "Map at testExecuteAfterGetExecutionPlanContextEnvironment(ExecutionEnvironmentTest.java:58)",
+		"parallelism": "1",
+		"predecessors": [
+			{"id": 2, "ship_strategy": "Forward", "exchange_mode": "PIPELINED"}
+		],
+		"driver_strategy": "Map",
+		"global_properties": [
+			{ "name": "Partitioning", "value": "RANDOM_PARTITIONED" },
+			{ "name": "Partitioning Order", "value": "(none)" },
+			{ "name": "Uniqueness", "value": "not unique" }
+		],
+		"local_properties": [
+			{ "name": "Order", "value": "(none)" },
+			{ "name": "Grouping", "value": "not grouped" },
+			{ "name": "Uniqueness", "value": "not unique" }
+		],
+		"estimates": [
+			{ "name": "Est. Output Size", "value": "(unknown)" },
+			{ "name": "Est. Cardinality", "value": "(unknown)" }		],
+		"costs": [
+			{ "name": "Network", "value": "0.0" },
+			{ "name": "Disk I/O", "value": "0.0" },
+			{ "name": "CPU", "value": "0.0" },
+			{ "name": "Cumulative Network", "value": "0.0" },
+			{ "name": "Cumulative Disk I/O", "value": "0.0" },
+			{ "name": "Cumulative CPU", "value": "0.0" }
+		],
+		"compiler_hints": [
+			{ "name": "Output Size (bytes)", "value": "(none)" },
+			{ "name": "Output Cardinality", "value": "(none)" },
+			{ "name": "Avg. Output Record Size (bytes)", "value": "(none)" },
+			{ "name": "Filter Factor", "value": "(none)" }		]
+	},
+	{
+		"id": 0,
+		"type": "sink",
+		"pact": "Data Sink",
+		"contents": "org.apache.flink.api.java.io.DiscardingOutputFormat@15eb5ee5",
+		"parallelism": "1",
+		"predecessors": [
+			{"id": 1, "ship_strategy": "Forward", "exchange_mode": "PIPELINED"}
+		],
+		"global_properties": [
+			{ "name": "Partitioning", "value": "RANDOM_PARTITIONED" },
+			{ "name": "Partitioning Order", "value": "(none)" },
+			{ "name": "Uniqueness", "value": "not unique" }
+		],
+		"local_properties": [
+			{ "name": "Order", "value": "(none)" },
+			{ "name": "Grouping", "value": "not grouped" },
+			{ "name": "Uniqueness", "value": "not unique" }
+		],
+		"estimates": [
+			{ "name": "Est. Output Size", "value": "(unknown)" },
+			{ "name": "Est. Cardinality", "value": "(unknown)" }		],
+		"costs": [
+			{ "name": "Network", "value": "0.0" },
+			{ "name": "Disk I/O", "value": "0.0" },
+			{ "name": "CPU", "value": "0.0" },
+			{ "name": "Cumulative Network", "value": "0.0" },
+			{ "name": "Cumulative Disk I/O", "value": "0.0" },
+			{ "name": "Cumulative CPU", "value": "0.0" }
+		],
+		"compiler_hints": [
+			{ "name": "Output Size (bytes)", "value": "(none)" },
+			{ "name": "Output Cardinality", "value": "(none)" },
+			{ "name": "Avg. Output Record Size (bytes)", "value": "(none)" },
+			{ "name": "Filter Factor", "value": "(none)" }		]
+	}
+	]
+}
+
+
+
+
+{
+	"nodes" : [ {
+	  "id" : 1,
+	  "type" : "Source: Collection Source",
+	  "pact" : "Data Source",
+	  "contents" : "Source: Collection Source",
+	  "parallelism" : 1
+	}, {
+	  "id" : 2,
+	  "type" : "Map",
+	  "pact" : "Operator",
+	  "contents" : "Map",
+	  "parallelism" : 4,
+	  "predecessors" : [ {
+		"id" : 1,
+		"ship_strategy" : "REBALANCE",
+		"side" : "second"
+	  } ]
+	} ]
+  }
+
+
+
+
+
+{
+  "nodes" : [ {
+    "id" : 1,
+    "type" : "Source: Collection Source",
+    "pact" : "Data Source",
+    "contents" : "Source: Collection Source",
+    "parallelism" : 1
+  }, {
+    "id" : 2,
+    "type" : "Source: Collection Source",
+    "pact" : "Data Source",
+    "contents" : "Source: Collection Source",
+    "parallelism" : 1
+  }, {
+    "id" : 4,
+    "type" : "Filter",
+    "pact" : "Operator",
+    "contents" : "Filter",
+    "parallelism" : 4,
+    "predecessors" : [ {
+      "id" : 1,
+      "ship_strategy" : "REBALANCE",
+      "side" : "second"
+    }, {
+      "id" : 2,
+      "ship_strategy" : "REBALANCE",
+      "side" : "second"
+    } ]
+  }, {
+    "id" : 5,
+    "type" : "Filter",
+    "pact" : "Operator",
+    "contents" : "Filter",
+    "parallelism" : 4,
+    "predecessors" : [ {
+      "id" : 1,
+      "ship_strategy" : "REBALANCE",
+      "side" : "second"
+    }, {
+      "id" : 2,
+      "ship_strategy" : "REBALANCE",
+      "side" : "second"
+    } ]
+  }, {
+    "id" : 6,
+    "type" : "Sink: Print to Std. Out",
+    "pact" : "Data Sink",
+    "contents" : "Sink: Print to Std. Out",
+    "parallelism" : 4,
+    "predecessors" : [ {
+      "id" : 4,
+      "ship_strategy" : "FORWARD",
+      "side" : "second"
+    } ]
+  }, {
+    "id" : 7,
+    "type" : "Sink: Print to Std. Out",
+    "pact" : "Data Sink",
+    "contents" : "Sink: Print to Std. Out",
+    "parallelism" : 4,
+    "predecessors" : [ {
+      "id" : 5,
+      "ship_strategy" : "FORWARD",
+      "side" : "second"
+    } ]
+  } ]
+}
+Split Stream 1:2> A
+Split Stream 2:4> 1
+
+Process finished with exit code 0
