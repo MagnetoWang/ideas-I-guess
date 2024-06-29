@@ -31,6 +31,14 @@ flink + 公司项目
 
 ```
 
+### 核心问题
+1. flink为什么那么快
+   1. 内存复制
+      1. BufferEntry
+   2. 指针运用
+2. flink如何保证稳定性
+3. flink如何高效开发，测试，迭代和发布
+
 
 ### 参考资料
 ```
@@ -75,7 +83,7 @@ flink dag用法
 流批一体
 
 ```
-### Streaming System bookNote
+### Streaming System booknote
 
 
 Watermarked
@@ -93,6 +101,29 @@ Watermarked
    2. 启动taskManager
    3. 启动client
 2. 服务端
+3. flink-gelly
+   1. Gelly是Flink的图API库，它包含了一组旨在简化Flink中图形分析应用程序开发的方法和实用程序。在Gelly中，可以使用类似于批处理API提供的高级函数来转换和修改图。Gelly提供了创建、转换和修改图的方法，以及图算法库。
+   2. https://www.jianshu.com/p/95adbd5bdad7
+4. flink-cep
+5. api 层
+   1. java 单独实现
+   2. scala 单独实现 可不看
+6. stream 层
+   1. java 单独实现
+   2. scala 单独实现 可不看
+   3. 底层有op工厂 生成各种op并串起来执行层
+      1. SimpleOperatorFactory
+7. table 层
+   1. java 单独实现
+   2. scala 单独实现 可不看
+8. runtime 层
+   1. 
+9.  core 层
+   1.  function
+10. datastream 和 table 区别
+    1.  datastream 的输入和输出可以自定义，也需要自己维护一套schema流程
+    2.  table 内部有自己的rowdata 和 schema，同时严格遵循sql拼表语义
+
 
 
 
@@ -379,9 +410,498 @@ Watermarked
    4. TypePairComparator
    5. SameTypePairComparator
 
+## flink JOIN章节
+1. Interval Join
+   1. flink-table/flink-table-runtime-blink/src/main/java/org/apache/flink/table/runtime/operators/join/interval/TimeIntervalJoin.java
+2. Regular Join
+   1. flink-table/flink-table-runtime-blink/src/main/java/org/apache/flink/table/runtime/operators/join/stream/StreamingJoinOperator.java
+3. inner join
+   1. flink-table/flink-table-runtime-blink/src/main/java/org/apache/flink/table/runtime/operators/join/stream/state/JoinRecordStateViews.java
+4. outer join
+   1. flink-table/flink-table-runtime-blink/src/main/java/org/apache/flink/table/runtime/operators/join/stream/state/OuterJoinRecordStateViews.java
 
-### flink窗口章节
 
+### core层 Join OP
+1. org.apache.flink.api.common.operators.base
+2. OuterJoinOperatorBase
+   1. LEFT,
+   2. RIGHT,
+   3. FULL
+3. JoinOperatorBase <FlatJoinFunction> extends JoinOperatorBase extend DualInputOperator extend AbstractUdfOperator extend Operator implements Visitable<>
+4. JoinFunction
+5. FlatJoinFunction
+6. 优化层
+   1. OuterJoinNode src/main/java/org/apache/flink/optimizer/dag/OuterJoinNode.java
+   2. 
+7. 
+
+### runtime层 Join Driver
+1. org.apache.flink.runtime.operators
+2. FullOuterJoinDriver extends AbstractOuterJoinDriver implements <FlatJoinFunction>
+   1. JoinTaskIterator
+   2. HashJoinIteratorBase
+### join策略
+```
+
+// both inputs are merged, but materialized to the side for block-nested-loop-join among values
+INNER_MERGE：内连接，使用 JoinDriver 类执行连接操作，输入数据集的处理方式都是 MATERIALIZING。
+
+LEFT_OUTER_MERGE：左外连接，使用 LeftOuterJoinDriver 类执行连接操作，输入数据集的处理方式都是 MATERIALIZING。
+
+RIGHT_OUTER_MERGE：右外连接，使用 RightOuterJoinDriver 类执行连接操作，输入数据集的处理方式都是 MATERIALIZING。
+
+FULL_OUTER_MERGE：全外连接，使用 FullOuterJoinDriver 类执行连接操作，输入数据集的处理方式都是 MATERIALIZING。
+
+// the first input is build side, the second side is probe side of a hybrid hash table
+HYBRIDHASH_BUILD_FIRST：第一个输入数据集是构建侧（build side），第二个输入数据集是探测侧（probe side），使用混合哈希表进行连接。
+
+HYBRIDHASH_BUILD_SECOND：第二个输入数据集是构建侧（build side），第一个输入数据集是探测侧（probe side），使用混合哈希表进行连接。
+
+HYBRIDHASH_BUILD_FIRST_CACHED：HYBRIDHASH_BUILD_FIRST 的缓存版本，只能在迭代中使用。
+
+HYBRIDHASH_BUILD_SECOND_CACHED：HYBRIDHASH_BUILD_SECOND 的缓存版本，只能在迭代中使用。
+
+
+// right outer join, the first input is build side, the second input is probe side of a hybrid
+RIGHT_HYBRIDHASH_BUILD_FIRST：右外连接，第一个输入数据集是构建侧（build side），第二个输入数据集是探测侧（probe side），使用混合哈希表进行连接。
+
+RIGHT_HYBRIDHASH_BUILD_SECOND：右外连接，第一个输入数据集是探测侧（probe side），第二个输入数据集是构建侧（build side），使用混合哈希表进行连接。
+
+LEFT_HYBRIDHASH_BUILD_FIRST：左外连接，第一个输入数据集是构建侧（build side），第二个输入数据集是探测侧（probe side），使用混合哈希表进行连接。
+
+LEFT_HYBRIDHASH_BUILD_SECOND：左外连接，第一个输入数据集是探测侧（probe side），第二个输入数据集是构建侧（build side），使用混合哈希表进行连接。
+
+FULL_OUTER_HYBRIDHASH_BUILD_FIRST：全外连接，第一个输入数据集是构建侧（build side），第二个输入数据集是探测侧（probe side），使用混合哈希表进行连接。
+
+FULL_OUTER_HYBRIDHASH_BUILD_SECOND：全外连接，第一个输入数据集是探测侧（probe side），第二个输入数据集是构建侧（build side），使用混合哈希表进行连接。
+
+ // the second input is inner loop, the first input is outer loop and block-wise processed
+NESTEDLOOP_BLOCKED_OUTER_FIRST：第一个输入数据集作为外部循环（outer loop），第二个输入数据集作为内部循环（inner loop），采用块式处理方式。
+
+NESTEDLOOP_BLOCKED_OUTER_SECOND：第二个输入数据集作为外部循环（outer loop），第一个输入数据集作为内部循环（inner loop），采用块式处理方式。
+
+NESTEDLOOP_STREAMED_OUTER_FIRST：第一个输入数据集作为内部循环（inner loop），第二个输入数据集作为外部循环（outer loop），采用流式处理方式。
+
+NESTEDLOOP_STREAMED_OUTER_SECOND：第二个输入数据集作为内部循环（inner loop），第一个输入数据集作为外部循环（outer loop），采用流式处理方式。
+
+
+```
+
+### join 迭代器
+```
+import org.apache.flink.runtime.operators.hash.NonReusingBuildFirstHashJoinIterator;
+import org.apache.flink.runtime.operators.hash.NonReusingBuildSecondHashJoinIterator;
+import org.apache.flink.runtime.operators.hash.ReusingBuildFirstHashJoinIterator;
+import org.apache.flink.runtime.operators.hash.ReusingBuildSecondHashJoinIterator;
+import org.apache.flink.runtime.operators.sort.NonReusingMergeOuterJoinIterator;
+import org.apache.flink.runtime.operators.sort.ReusingMergeOuterJoinIterator;
+import org.apache.flink.runtime.operators.sort.NonReusingMergeInnerJoinIterator;
+import org.apache.flink.runtime.operators.sort.ReusingMergeInnerJoinIterator;
+
+join迭代父类
+import org.apache.flink.runtime.operators.sort.AbstractMergeOuterJoinIterator;
+import org.apache.flink.runtime.operators.sort.AbstractMergeInnerJoinIterator;
+↓
+import org.apache.flink.runtime.operators.sort.AbstractMergeIterator
+↓
+import org.apache.flink.runtime.operators.util.JoinTaskIterator;
+
+
+
+通用迭代器
+import org.apache.flink.runtime.util.KeyGroupedIterator;
+import org.apache.flink.runtime.util.ReusingKeyGroupedIterator;
+
+
+输入源迭代器
+import org.apache.flink.util.MutableObjectIterator;
+import org.apache.flink.runtime.operators.hash.MutableHashTable
+import org.apache.flink.runtime.operators.hash.InPlaceMutableHashTable
+
+
+输入源序列化和比较器
+import org.apache.flink.api.common.typeutils.TypeComparator;
+import org.apache.flink.api.common.typeutils.TypePairComparator;
+import org.apache.flink.api.common.typeutils.TypeSerializer;
+
+
+内存和磁盘管理
+import org.apache.flink.runtime.memory.MemoryManager;
+import org.apache.flink.runtime.io.disk.iomanager.IOManager;
+
+
+```
+
+#### NonReusingBuildFirstHashJoinIterator 拼表说明 找到 left 和 right 匹配的记录
+```java
+/**
+ * 将内部指针移动到下一个共享的键，并调用匹配函数进行连接操作。
+ *
+ * @param matchFunction 匹配函数，包含了连接操作的逻辑。
+ * @param collector 收集器，用于接收连接操作的结果。
+ * @return 如果存在下一个共享的键，则返回true；否则返回false。
+ * @throws Exception 用户代码可能抛出的异常。
+ */
+@Override
+    public final boolean callWithNextKey(
+            FlatJoinFunction<V1, V2, O> matchFunction, Collector<O> collector) throws Exception {
+        if (this.hashJoin.nextRecord()) {
+            // we have a next record, get the iterators to the probe and build side values
+            final MutableObjectIterator<V1> buildSideIterator =
+                    this.hashJoin.getBuildSideIterator();
+            final V2 probeRecord = this.hashJoin.getCurrentProbeRecord();
+            V1 nextBuildSideRecord = buildSideIterator.next();
+
+            // get the first build side value
+            if (probeRecord != null && nextBuildSideRecord != null) {
+                V1 tmpRec;
+
+                // check if there is another build-side value
+                if ((tmpRec = buildSideIterator.next()) != null) {
+                    // more than one build-side value --> copy the probe side
+                    V2 probeCopy;
+                    probeCopy = this.probeSideSerializer.copy(probeRecord);
+
+                    // call match on the first pair
+                    matchFunction.join(nextBuildSideRecord, probeCopy, collector);
+
+                    // call match on the second pair
+                    probeCopy = this.probeSideSerializer.copy(probeRecord);
+                    matchFunction.join(tmpRec, probeCopy, collector);
+
+                    while (this.running
+                            && ((nextBuildSideRecord = buildSideIterator.next()) != null)) {
+                        // call match on the next pair
+                        // make sure we restore the value of the probe side record
+                        probeCopy = this.probeSideSerializer.copy(probeRecord);
+                        matchFunction.join(nextBuildSideRecord, probeCopy, collector);
+                    }
+                } else {
+                    // only single pair matches
+                    matchFunction.join(nextBuildSideRecord, probeRecord, collector);
+                }
+            } else {
+                // while probe side outer join, join current probe record with null.
+                if (probeSideOuterJoin && probeRecord != null && nextBuildSideRecord == null) {
+                    matchFunction.join(null, probeRecord, collector);
+                }
+
+                // while build side outer join, iterate all build records which have not been probed
+                // before,
+                // and join with null.
+                if (buildSideOuterJoin && probeRecord == null && nextBuildSideRecord != null) {
+                    matchFunction.join(nextBuildSideRecord, null, collector);
+
+                    while (this.running
+                            && ((nextBuildSideRecord = buildSideIterator.next()) != null)) {
+                        matchFunction.join(nextBuildSideRecord, null, collector);
+                    }
+                }
+            }
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+首先，通过调用 this.hashJoin.nextRecord() 检查是否有下一个记录需要进行连接操作。
+
+如果有下一个记录，则获取用于连接的构建侧（build side）迭代器和探测侧（probe side）记录。
+
+在构建侧迭代器中获取第一个构建侧记录，并与探测侧记录进行连接。
+
+如果有多个构建侧记录与同一个探测侧记录匹配，则依次进行连接操作。
+
+如果只有一个构建侧记录与探测侧记录匹配，则直接进行连接操作。
+
+如果探测侧是外连接（probeSideOuterJoin）并且探测侧记录不为空，而构建侧记录为空，则将探测侧记录与空值进行连接。
+
+如果构建侧是外连接（buildSideOuterJoin）并且构建侧记录不为空，而探测侧记录为空，则将构建侧记录与空值进行连接，并依次连接剩余的构建侧记录。
+
+返回一个布尔值，表示是否还有下一个记录需要进行连接操作。
+
+```
+
+#### Join 匹配函数
+```
+两个记录合成一行
+matchFunction.join(nextBuildSideRecord, probeCopy, collector);
+
+匹配函数
+import org.apache.flink.api.common.functions.JoinFunction
+import org.apache.flink.api.common.functions.FlatJoinFunction
+
+
+join实现 
+输入 Row Row 输出 Row
+import org.apache.flink.table.runtime.FullOuterJoinRunner
+import org.apache.flink.table.runtime.LeftOuterJoinRunner
+
+
+```
+
+### stream层 join实现
+1. JoinedStreams ：org.apache.flink.streaming.api.datastream
+   1. 有java和scala两个版本实现，看java即可
+2. CoGroupedStreams
+3. process方式 进数据
+4. 匹配函数
+   1. JoinFunction
+   2. FlatJoinFunction 
+5. org.apache.flink.streaming.api.operators.co.IntervalJoinOperator
+   
+
+```
+JoinedStreams
+↓
+CoGroupedStreams
+↓
+WindowedStream
+↓
+构建 opName op
+
+    public <R> SingleOutputStreamOperator<R> apply(
+            WindowFunction<T, R, K, W> function, TypeInformation<R> resultType) {
+        function = input.getExecutionEnvironment().clean(function);
+
+        final String opName = builder.generateOperatorName(function, null);
+        OneInputStreamOperator<T, R> operator = builder.apply(function);
+
+        return input.transform(opName, resultType, operator);
+    }
+
+比如
+可参考 IntervalJoinOperator实现
+
+
+
+```
+
+#### IntervalJoinOperator实现
+```
+IntervalJoinOperator
+会把符合条件的左右记录，作为参数送到 processElement
+用户可以自己拼成字符串或者输出 StreamRecord
+
+输入 <StreamRecord, StreamRecord>
+userFunction 用户自定义函数 输出
+输出 自定义
+高效内存操作
+   遍历 MapState<Long, List<IntervalJoinOperator.BufferEntry<OTHER>>> otherBuffer
+   时间戳 timestamp < ourTimestamp + relativeLowerBound || timestamp > ourTimestamp + relativeUpperBound
+   addToBuffer
+   collect
+   processJoinFuntion 这里可以把 JoinFunction逻辑拿出来
+
+过期机制
+In order to avoid the element buffers to grow indefinitely a cleanup timer is registered per
+ * element. This timer indicates when an element is not considered for joining anymore and can be
+ * removed from the state.
+
+processJoinFuntion 参考
+ public void processElement(
+      Tuple2<String, Integer> left,
+      Tuple2<String, Integer> right,
+      Context ctx,
+      Collector<String> out)
+      throws Exception {
+   out.collect(left + ":" + right);
+}
+
+
+```
+
+### table层 join实现
+1. Flink 源码阅读笔记（19）- Flink SQL 中流表 Join 的实现：https://blog.jrwang.me/2020/2020-01-05-flink-sourcecode-sql-stream-join/
+2. TimeIntervalJoin：org.apache.flink.table.runtime.operators.join.interval
+   1. RowTimeIntervalJoin
+   2. ProcTimeIntervalJoin
+3. LookupJoinRunner
+   1. 
+```
+join type
+    INNER,
+    LEFT,
+    RIGHT,
+    FULL,
+    SEMI,
+    ANTI;
+
+join op
+    NestedLoopJoin,
+
+    ShuffleHashJoin,
+
+    BroadcastHashJoin,
+
+    SortMergeJoin,
+
+    HashAgg,
+
+    SortAgg
+
+
+
+Join op
+import org.apache.flink.table.runtime.operators.join.stream.state.JoinInputSideSpec
+import org.apache.flink.table.runtime.operators.join.stream.{StreamingJoinOperator, StreamingSemiAntiJoinOperator}
+
+
+import org.apache.flink.table.planner.plan.utils.{JoinUtil, KeySelectorUtil}
+
+执行层
+import org.apache.flink.table.planner.plan.nodes.exec.{ExecNode, StreamExecNode}
+
+join codeGen
+import org.apache.flink.table.planner.plan.utils.IntervalJoinUtil
+import org.apache.flink.table.planner.plan.utils.KeySelectorUtil
+
+StreamExecJoin
+↓
+StreamExecIntervalJoin
+   generateJoinFunction
+↓
+TwoInputTransformation
+↓
+TwoInputStreamOperator
+AbstractStreamOperator
+AbstractStreamingJoinOperator
+StreamingJoinOperator
+   processElement1
+   processElement2
+   processElement
+↓
+<RowData, RowData> -> output JoinedRowData
+   纯指针操作 高效join
+
+ 
+
+```
+
+### table层 timeinterval join
+1. L.time between R.time + X and R.time + Y" or "R.time between L.time - Y and L.time -
+ * X" X and Y might be negative or positive and X <= Y.
+2. TimeIntervalJoin
+3. ProcTimeIntervalJoin
+4. RowTimeIntervalJoin
+
+```
+
+```
+### table层 lookup join
+1. 最简单
+2. 查询维表的join
+3. 同步异步
+4. LookupJoinRunner
+5. LookupJoinWithCalcRunner
+
+### table层 join 回撤流设计
+```
+
+```
+### table层 join 视图设计
+```
+JoinRecordStateView
+   InputSideHasNoUniqueKey
+   InputSideHasUniqueKey
+   JoinKeyContainsUniqueKey
+
+```
+
+## flink 窗口章节
+1. 触发器
+2. process
+3. 高效聚合计算
+4. 窗口介绍：https://www.cnblogs.com/kunande/p/16660401.html
+5. WindowAssigner：https://www.cnblogs.com/doublexi/p/15727573.html
+6. ReduceFunction，AggregateFunction，FoldFunction以及ProcessWindowFunction
+7. 必看
+   1. UV PV计算：https://www.cnblogs.com/kunande/p/16660401.html
+
+### 滑动窗口
+```
+滚动聚合算子(增量聚合)
+
+
+```
+
+
+### 全量窗口
+```
+https://blog.csdn.net/AnameJL/article/details/133795190
+
+全窗口聚合算子(全量聚合)
+
+```
+
+## flink 流存储 章节
+1. StreamRecord
+2. StreamElement
+3. RowData
+
+## flink datastream章节
+### datastream介绍
+```
+AllWindowedStream.java：AllWindowedStream 是一个表示全局窗口操作的流类型。它提供了对整个数据流应用窗口操作的功能，例如全局窗口的聚合计算。
+
+BroadcastStream.java：BroadcastStream 是一个将数据流广播到其他流的流类型。它提供了广播操作，将一个流的数据复制到其他流中，以便进行联合处理或广播变量的使用。
+
+DataStream.java：DataStream 是最基本的流类型，表示一个不可变的数据流。它提供了一系列的转换操作，例如 map、filter、reduce 等，用于对流中的元素进行处理和转换。
+
+DataStreamUtils.java：DataStreamUtils 是一个用于操作 DataStream 的实用工具类。它提供了一些用于处理 DataStream 的实用方法，例如将 DataStream 转换为 Collection、将 DataStream 转换为迭代器等。
+
+KeyedStream.java：KeyedStream 是在 DataStream 的基础上进行分组操作得到的流类型。它提供了分组聚合操作，例如 sum、min、max 等，用于对分组后的数据流进行聚合计算。
+
+SingleOutputStreamOperator.java：SingleOutputStreamOperator 是表示单个输出流的流类型。它是对 DataStream 进行转换操作后得到的结果，可以继续进行后续的流处理操作。
+
+WindowedStream.java：WindowedStream 是在 KeyedStream 的基础上进行窗口操作得到的流类型。它提供了基于时间或者其他条件的窗口操作，例如滚动窗口、滑动窗口等，用于对窗口中的数据进行聚合或处理。
+
+AsyncDataStream.java：AsyncDataStream 是一个用于异步 IO 操作的流类型。它提供了异步处理数据流中的元素的功能，例如异步数据库查询、异步 HTTP 请求等。
+
+CoGroupedStreams.java：CoGroupedStreams 是用于对多个数据流进行合并连接操作的流类型。它提供了合并连接操作，将多个数据流中的元素按照连接键进行合并，并将连接结果作为一个新的数据流进行处理。
+
+```
+
+## flink Operator章节
+1. StreamOperator extends CheckpointListener, KeyContext, Disposable, Serializable
+2. OneInputStreamOperator
+### DriverStrategy
+1. Enumeration of all available operator strategies
+2. 
+
+
+### ChainingStrategy
+1. Defines the chaining scheme for the operator
+
+## flink 迭代器设计
+1. KeyGroupedIterator
+
+## flink Connect连接器章节
+1. DynamicTableSource
+2. LookupTableSource
+
+## flink Generated 章节
+1. GeneratedFunction
+2. GeneratedCollector
+
+## flink TimerService 章节
+1. org.apache.flink.streaming.api.operators
+2. InternalTimerService
+3. InternalTimerServiceImpl
+4. 参考案例
+   1. src/main/java/org/apache/flink/streaming/api/operators/co/IntervalJoinOperator.java
+      1. internalTimerService.registerEventTimeTimer(CLEANUP_NAMESPACE_RIGHT, cleanupTime);
+```
+
+
+```
+
+## flink 闭包检查
+1. 参考案例
+   1. src/main/java/org/apache/flink/streaming/api/datastream/CoGroupedStreams.java 
+      1. function = input1.getExecutionEnvironment().clean(function);
+   2. 
 
 ## 应用实现
 ### 代码示例拆解
@@ -897,6 +1417,24 @@ interval join计算
 https://zhuanlan.zhihu.com/p/694650448
 
 ```
+
+### 分桶策略方案
+
+### Partial-Update
+
+
+### 点查询能力
+
+### 离线表平滑迁移工具
+
+### Multi-Sink 性能问题优化
+
+## 回撤流
+
+## 乱序流
+1. 
+2. 
+
 
 ## 变更流
 ### flink核心类
