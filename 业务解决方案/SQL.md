@@ -359,16 +359,57 @@ from
 ```
 
 
-### 
+### SQL面试题挑战15：sql实现分钟级的趋势图
+```
+https://mp.weixin.qq.com/s/5_OYrDBomZdlIStIUnqepA
+
+
 ```
 
 
+### SQL 针对主键添加分桶ID
 ```
 
+https://mp.weixin.qq.com/s/ngSAilAnfkd_c1mAZd_Z3Q
 
-### 
-```
+1.第一步先对id做hash分桶，然后计算每个桶的大小，桶数量可以根据需要计算的id数量来评估，这里分100000个桶，然后计算出每个id在桶内的相对位置bucket_rel_index，同时计算出桶大小bucket_size；
+2.第二步根据桶大小计算每个桶的基址；
 
+3.第三步将桶基址+id在桶内的相对地址得到全局唯一的绝对地址id_index；
+
+--第一步
+WITH hash_bucket AS 
+(
+SELECT  id
+            ,ROW_NUMBER() OVER (PARTITION BY bucket_no ORDER BY id ASC ) AS bucket_rel_index
+            ,COUNT(1) OVER (PARTITION BY bucket_no ) AS bucket_size
+            ,bucket_no
+FROM    (
+SELECT  id
+                        ,ABS(HASH(id)) % 100000 AS bucket_no
+FROM    test_data
+            ) 
+)
+--第二步
+,bucket_base AS 
+(
+SELECT  bucket_no
+            ,SUM(bucket_size) OVER (ORDER BY bucket_no ASC ) - bucket_size AS bucket_base
+FROM    (
+SELECT  DISTINCT bucket_no
+                        ,bucket_size
+FROM    hash_bucket
+            ) 
+)
+--第三步
+INSERT OVERWRITE TABLE sort_data_result_1
+SELECT  /*+ MAPJOIN(t2) */
+        t1.id
+        ,t2.bucket_base + bucket_rel_index AS id_index
+FROM    hash_bucket t1
+JOIN    bucket_base t2
+ON      t1.bucket_no = t2.bucket_no
+;
 
 ```
 
