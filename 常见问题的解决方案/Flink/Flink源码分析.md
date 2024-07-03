@@ -83,7 +83,8 @@ flink dag用法
 流批一体
 
 ```
-### Streaming System booknote
+## 读书笔记
+### Streaming System 
 
 
 Watermarked
@@ -91,9 +92,101 @@ Watermarked
 - 正态分布的最左值，也就是最旧的事件时间戳，定义为 watermarked
 - 
 
+### Flink内核与实现
+1. Datastream
+   1. KeyedStream用来表示根据指定的key进行分组的数据流。一个KeyedStream可以通过调用DataStream.keyBy（）来获得。而在KeyedStream上进行任何Transformation都将转变回DataStream。在实现中，KeyedStream把key的信息写入了Transformation中。每条记录只能访问所属key的状态，其上的聚合函数可以方便地操作和保存对应key的状态。
+   2. WindowedStream代表了根据key分组且基于WindowAssigner切分窗口的数据流。所以WindowedStream都是从KeyedStream衍生而来的，在WindowedStream上进行任何Transformation也都将转变回DataStream。
+   3. Join是CoGroup的一种特例，JoinedStreams底层使用CoGroupedStreams来实现。两者的区别如下。CoGrouped侧重的是Group，对数据进行分组，是对同一个key上的两组集合进行操作，可以编写灵活的代码来实现特定的业务功能。Join侧重的是数据对，对同一个key的每一对元素进行操作。CoGroup更通用，但因为Join是数据库上常见的操作，所以在CoGroup基础上提供Join的特性。
+   4. join和owindow 底层均是window逻辑
+   5. ConnectedStreams表示两个数据流的组合，两个数据流可以类型一样，也可以类型不一样。ConnectedStreams适用于两个有关系的数据流的操作，共享State。一种典型的场景是动态规则数据处理。两个流中一个是数据流，一个是随着时间更新的业务规则，业务规则流中的规则保存在State中，规则会持续更新State。当数据流中的新数据到来时，使用保存在State中的规则进行数据处理。
+   6. BroadcastStream实际上是对一个普通DataStream的封装，提供了DataStream的广播行为。BroadcastConnectedStream一般由DataStream/KeyedDataStream与BroadcastStream连接而来，类似于ConnectedStream。
+2. 数据分区
+3. 时间推理工具 - 乱序问题
+4. 强一致性：MillWheel:Fault-Tolerant Stream Processing at InternetScale和Discretized Streams:Fault-Tolerant Streaming Computation at Scale
+5. 批处理本质是处理有限不变的数据集，流处理本质是处理无限持续产生的数据集，所以批本质上来说是流的一种特例，那么窗口就是流和批统一的桥梁，对流上的数据进行窗口切分，每一个窗口一旦到了计算的时刻，就可以被看成一个不可变的数据集，在触发计算之前，窗口的数据可能会持续地改变，因此对窗口的数据进行计算就是批处理。
+6. 窗口
+   1. 每个窗口只计算自己窗口内的数据
+   2. 重叠窗口，按照触发器的发送时间作为新值，不可避免有重复计算
+   3. 在Flink中窗口有两套实现，分别位于flink-streaming-java和flink-table-runtime-blink模块中
+   4. 1）窗口对象合并和清理。2）窗口State的合并和清理。3）窗口触发器的合并和清理。
+7. 水印
+   1. Source Function中生成Watermark
+   2. DataStream API中生成Watermark
+   3. Flink SQL Watermark生成
+   4. 作业中存在多个并行的Watermark
+   5. 所以对于多流Watermark的处理也就是双流Watermark的处理，无论是哪一个流的Watermark进入算子，都需要跟另一个流的当前算子进行比较，选择较小的Watermark
+8. TimeService
+   1. 名称、命名空间类型N（及其序列化器）、键类型K（及其序列化器）和Triggerable对象（支持延时计算的算子，继承了Triggerable接口来实现回调）。
+   2. 那么Timer到底是如何触发然后回调用户逻辑的呢?答案在InternalTimerServiceImpl中
+   3. 基于堆内存的优先级队列HeapPriorityQueueSet
+   4. 基于RocksDB的优先级队列：分为Cache+RocksDB量级，Cache中保存了前N个元素，其余的保存在RocksDB中。写入的时候采用Write-through策略，即写入Cache的同时要更新RocksDB中的数据，可能需要访问磁盘。
+9.  TypeInfomation类型系统
+   1. java 和 scala之间桥梁
+   2. Flink SQL使用TypeInfomation类型系统
+   3. 解决了DataStream类型系统在SQL中使用的问题
+   4. Flink Row
+      1. org.apache.flink.types.Row：在Flink Planner中使用，是1.9版本之前Flink SQL使用的Row结构，在SQL相关的算子、UDF函数、代码生成中都是使用该套Row结构。
+      2. org.apache.flink.table.dataformat.BaseRow及其子类：是在Blink Runtime和Blink Planner中使用的新的Row类型数据结构，在Blink算子、UDF函数和代码生成中使用此结构。
+      3. 在数据计算过程中，需要消耗大量的CPU来序列化/反序列化Row对象。 我一直就好奇这个问题怎么解
+      4. Flink Row本身不是强类型的，所以需要为Row提供RowTypeInfo来描述Row中的数据类型，在序列化/反序列化的时候使用。
+   5. Blink Row
+      1. BinaryRow：表数据的二进制行式存储，分为定长部分和不定长部分，定长部分只能在一个MemorySegment内。
+         1. 定长部分：定长部分包含3个内容:头信息区（Header）、空值索引（Null Bit Set）、字段值区（Field Values）。
+         2. 变长部分用来保存超过8个字节长度的字段的值，可能会保存跨越多个MemorySegment的字段
+         3. BinaryRow实际上是参照Spark的UnsafeRow来设计的，两者的区别在于Flink的BinaryRow不是保存在连续内存中，如果不定长部分足够小，可以保存在一个固定长度的内存中。
+      2. NestedRow：与BinaryRow的内存存储结构一样，区别在于NestedRow的定长部分可以跨MemorySegment
+      3. UpdatableRow：该类型的Row比较特别，其保存了该行所有字段的数据，更新字段数据的时候不修改原始数据，而是使用一个数组记录被修改字段的最新值。读取数据的时候，首先判断数据是否被更新过，如果更新过则读取最新值，如果没有则读取原始值。
+      4. ObjectArrayRow：使用对象数据保存数据，比二进制结构存储形式多了对象的序列化/反序列化
+      5. JoinedRow：表示Join或者关联运算中的两行数据的逻辑结构，如Row1、Row2，两行数据并没有进行物理上的合并，物理合并成本高。但是从使用者的角度来说，看起来就是一行数据，无须关注底层。
+      6. ColumnarRow：表数据的二进制列式存储，每一列是一个Vector向量。
+         1. 内存中的列式存储形式，目前在Flink中用来读取ORC类型的列式存储的数据。
+10. 内存管理
+   1.  Flink从一开始就选择了使用自主的内存管理，避开了JVM内存管理在大数据场景下的问题，提升了计算效率。
+   2.  Flink在计算中采用了DBMS的Sort和Join算法，直接操作二进制数据，避免数据反复序列化带来的开销。Flink的内部实现更像C/C++ 而非Java。
+   3.  MemorySegment
+11. 状态管理
+    1.  State是实现有状态计算下的Exactly-Once的基础。
+    2.  状态重分布
+    3.  状态过期
+12. CEP
+13. 容灾
+    1. 检查点在Flink中叫作Checkpoint，是Flink实现应用容错的核心机制，根据配置周期性通知Stream中各个算子的状态来生成检查点快照，从而将这些状态数据定期持久化存储下来，Flink程序一旦意外崩溃，重新运行程序时可以有选择地从这些快照进行恢复，将应用恢复到最后一次快照的状态，从此刻开始重新执行，避免数据的丢失、重复。
+    2. 保存点在Flink中叫作Savepoint，是基于Flink检查点机制的应用完整快照备份机制，用来保存状态，可以在另一个集群或者另一个时间点，从保存的状态中将作业恢复回来，适用于应用升级、集群迁移、Flink集群版本更新、A/B测试以及假定场景、暂停和重启、归档等场景
+    3. 两阶段提交协议，端到端严格一次
+       1. （1）数据源支持断点读取即能够记录上次读取的位置（offset或者其他可以标记的信息），失败之后能够从断点处继续读取。  
+       2. （2）外部存储支持回滚机制或者满足幂等性
+       3.  回滚机制：即当作业失败之后能够将部分写入的结果回滚到写入之前的状态。
+       4.  幂等性：即当作业失败之后，写入了部分结果，但是当重新写入全部结果的时候，不会带来负面作用，重复写入不会带来错误的结果。
+14. Flink SQL
+    1.  动态表
+    2.  连续查询
+    3.  更新和追加查询
+    4.  Table
+        1.  groupedTable
+        2.  groupWindowedTable
+        3.  windowedGroupTable
+        4.  OverWindowTable
+        5.  AggregatedTable
+        6.  FlatAggregateTable
+    5.  source
+        1.  FilterableTableSource：过滤不符合条件的记录。
+        2.  LimitableTableSource：限制记录条数。
+        3.  ProjectableTableSource：过滤不会被使用的字段。
+    6.  sink
+        1.  AppendStreamTableSink：追加模式的TableSink，支持追加写入，不支持更新。
+        2.  RetractStreamTableSink：支持召回模式的TableSink，召回模式其实就是流上的update的核心。
+        3.  UpsertStreamTableSink：Upsert，有则更新，无则插入。目前有ElasticSearch、HBase、JDBC 3种实现。
 
 
 
+## flink图解
+1. stream table core java scala 关系图
+2. task opchain op function window join  state 调用链路，构造到执行层
+3. time watermark
+
+
+
+## 源码目录
 ### 功能架构
 
 1. 客户端
@@ -810,14 +903,60 @@ JoinRecordStateView
 ```
 
 ## flink 窗口章节
-1. 触发器
-2. process
-3. 高效聚合计算
-4. 窗口介绍：https://www.cnblogs.com/kunande/p/16660401.html
-5. WindowAssigner：https://www.cnblogs.com/doublexi/p/15727573.html
-6. ReduceFunction，AggregateFunction，FoldFunction以及ProcessWindowFunction
-7. 必看
+1. 入口
+   1. src/main/java/org/apache/flink/streaming/api/windowing
+   2. src/main/java/org/apache/flink/streaming/runtime/operators/windowing/WindowOperator.java
+2. Stream层面 window
+   1. API 层 定义window和函数
+   2. runtime 层
+   3. GlobalWindow
+   4. TimeWindow
+   5. 真正执行计算是trigger
+      1. ReducingState
+      2. onEventTime
+      3. onElement
+      4. TriggerResult 判断触发器的状态
+   6. 对外提供算子能力
+      1. WindowOperator
+   7. 计算链路
+      1. 定义window，udf
+      2. 生成 op，触发器和windowfunction
+      3. windowfunction 做计算
+      4. 不管什么层面 function是最终执行层，执行层之外的都是填参数和搭建数据流，以及函数调用流
+3. Table层面 window
+   1. op
+      1. WindowAggregateQueryOperation
+      2. SqlGroupedWindowFunction
+      3. GroupWindow
+   2. API层
+      1. OverWindow
+   3. 物理层
+      1. StreamExecGroupWindowAggregate
+4. blink层面
+   1. ProcTimeRangeBoundedPrecedingFunction
+   2. OverWindowFrame
+   3. TableAggregateWindowOperator
+   4. AggregateWindowOperator
+5. Core层面 window
+6. 窗口数据发送性能
+7. 窗口内存如何优化呢
+8. 窗口中间状态 和 聚合函数配合调用
+   1. windowState
+   2. windowAggregator
+   3. windowFunction
+9.  触发器高频触发性能
+10. 高效聚合计算
+11. 窗口介绍：https://www.cnblogs.com/kunande/p/16660401.html
+12. WindowAssigner：https://www.cnblogs.com/doublexi/p/15727573.html
+13. ReduceFunction，AggregateFunction，FoldFunction以及ProcessWindowFunction
+14. 必看
    1. UV PV计算：https://www.cnblogs.com/kunande/p/16660401.html
+15. 窗口
+   1. 滚动时间窗口（Tumbling Window）、滑动时间窗口（Sliding Window）、会话窗口（Session Window）
+   2. 滚动计数窗口和滑动计数窗口
+16. 函数
+    1.  增量聚合函数
+    2.  全窗口函数
 
 ### 滑动窗口
 ```
@@ -834,6 +973,53 @@ https://blog.csdn.net/AnameJL/article/details/133795190
 全窗口聚合算子(全量聚合)
 
 ```
+
+## flink 算子章节
+### flink CopyingChainingOutput CountingOutput 类含义
+1. 算子内部报异常，这两个类高频出现，所以想搞清楚是干嘛的
+
+### flink高效实现 cast算子 设计序列化和反序列化
+
+
+### flink sink算子
+#### sink出现的地方
+1. org/apache/flink/streaming/runtime/operators/sink
+2. org/apache/flink/streaming/api/functions/sink
+####  flink async sink实现
+- 异步Sink比想的简单（一）：Flink AsyncSinkBase API解析 - 曾中铭的文章 - 知乎 https://zhuanlan.zhihu.com/p/615872927
+- Flink Sink中的Bulk Write实现小结 - 曾中铭的文章 - 知乎 https://zhuanlan.zhihu.com/p/607558243
+
+####  sink结合 filesystem
+1. 流式写入文件 org/apache/flink/streaming/api/functions/sink/filesystem/StreamingFileSink.java 
+2. bucket能力 BucketFactory 数据分区能力 org/apache/flink/streaming/api/functions/sink/filesystem/Bucket.java
+3. SinkContextUtil
+4. TwoPhaseCommitSinkFunction
+
+### flink window算子
+#### window出现的地方
+1. org/apache/flink/streaming/runtime/operators/windowing
+
+### runtime - operators模块
+1. chaining
+2. hash
+3. sort
+4. 分布式算子调度
+   1. AllGroupReduceDriver
+   2. AllGroupCombineDriver
+   3. AbstractOuterJoinDriver
+   4. AbstractCachedBuildSideJoinDriver
+
+### streaming-java - runtime模块
+1. runtime模块 和其他模块中子runtime有什么区别
+   1. 我感觉可能是一种runtime实现的补充，或者完全两个概念，但是重名极易弄混
+2. CopyingChainingOutput 切入口
+   1. 经常报错看到这个类，从这里开始了解
+3. StreamRecord extends StreamElement
+4. StreamStatus extends StreamElement
+5. Collector
+6. OperatorChain
+7. StreamTask
+
 
 ## flink 流存储 章节
 1. StreamRecord
@@ -1224,51 +1410,6 @@ FlinkUserCodeClassLoader
 9.  HttpRequestHandler
 10. WebSubmissionExtension 提交器扩展
 11. WebFrontendBootstrap 前端启动器
-## 算子章节
-### flink CopyingChainingOutput CountingOutput 类含义
-1. 算子内部报异常，这两个类高频出现，所以想搞清楚是干嘛的
-
-### flink高效实现 cast算子 设计序列化和反序列化
-
-
-### flink sink算子
-#### sink出现的地方
-1. org/apache/flink/streaming/runtime/operators/sink
-2. org/apache/flink/streaming/api/functions/sink
-####  flink async sink实现
-- 异步Sink比想的简单（一）：Flink AsyncSinkBase API解析 - 曾中铭的文章 - 知乎 https://zhuanlan.zhihu.com/p/615872927
-- Flink Sink中的Bulk Write实现小结 - 曾中铭的文章 - 知乎 https://zhuanlan.zhihu.com/p/607558243
-
-####  sink结合 filesystem
-1. 流式写入文件 org/apache/flink/streaming/api/functions/sink/filesystem/StreamingFileSink.java 
-2. bucket能力 BucketFactory 数据分区能力 org/apache/flink/streaming/api/functions/sink/filesystem/Bucket.java
-3. SinkContextUtil
-4. TwoPhaseCommitSinkFunction
-
-### flink window算子
-#### window出现的地方
-1. org/apache/flink/streaming/runtime/operators/windowing
-
-### runtime - operators模块
-1. chaining
-2. hash
-3. sort
-4. 分布式算子调度
-   1. AllGroupReduceDriver
-   2. AllGroupCombineDriver
-   3. AbstractOuterJoinDriver
-   4. AbstractCachedBuildSideJoinDriver
-
-### streaming-java - runtime模块
-1. runtime模块 和其他模块中子runtime有什么区别
-   1. 我感觉可能是一种runtime实现的补充，或者完全两个概念，但是重名极易弄混
-2. CopyingChainingOutput 切入口
-   1. 经常报错看到这个类，从这里开始了解
-3. StreamRecord extends StreamElement
-4. StreamStatus extends StreamElement
-5. Collector
-6. OperatorChain
-7. StreamTask
 
 ## 第三方集成章节
 ### flink不错的类
@@ -1428,6 +1569,104 @@ https://zhuanlan.zhihu.com/p/694650448
 ### 离线表平滑迁移工具
 
 ### Multi-Sink 性能问题优化
+
+
+### 流式样本训练
+
+
+### 实时任务平滑重启， 平滑迁移
+1. Dag图修改，任务重启后，无法从checkpoint中恢复
+```
+比较常见的问题
+2024-07-01 12:35:31,359 [INFO] Caused by: java.lang.IllegalStateException: Failed to rollback to checkpoint/savepoint viewfs://hadoop-meituan/user/hadoop-rt/copy-replicate/flink-bj/checkpoints/hadoop-rt/retained/1514975/fd15a4b34dbfd050e5c043dd46324fe5/chk-20305. Cannot map checkpoint/savepoint state for operator e70bbd798b564e0a50e10e343f1ac56b to the new program, because the operator is not available in the new program. If you want to allow to skip this, you can set the --allowNonRestoredState option on the CLI.
+
+```
+
+### 稳定性 - 确保不用半夜起来修复问题
+```
+
+
+```
+
+### rocksdb 改造 hbase 提升flink吞吐量
+1. SlimBase-更省 IO、嵌入式共享 state 存储
+2. 采用 Flink+Kudu 的方案主要思想是借鉴了 Kylin 的思路，Kylin 可以指定很多维度和指标进行离线的预计算然后将预计算结果存储到 Hbase 中；快手的方案是通过 Flink 实时计算指标，再实时地写到 Kudu 里面
+3. 该场景下展现以后20分钟的点击被认为是有效点击，实时 Join 逻辑则是点击数据 Join 过去20分钟内的展现。其中，展现流的数据量相对比较大，20分钟数据在 1TB 以上。检查点设置为五分钟，Backend 选择 RocksDB。
+4. 整体思路是在数据写入时直接落地到共享存储中，避免 Checkpoint 带来的数据拷贝问题
+```
+Flink 在快手实时多维分析场景的应用
+
+https://developer.aliyun.com/article/765320
+
+
+在这样的场景下，面临着磁盘 IO 开销70%，其中50%开销来自于 Compaction；在 Checkpoint 期间，磁盘 IO 开销达到了100%，耗时在1~5分钟，甚至会长于 Checkpoint 间隔，业务能明显感觉到反压。经过分析找出问题：
+
+首先，在 Checkpoint 期间会产生四倍的大规模数据拷贝，即：从 RocksDB 中全量读取出来然后以三副本形式写入到 HDFS 中；
+
+其次，对于大规模数据写入，RocksDB 的默认 Level Compaction 会有严重的 IO 放大开销。
+
+
+
+整体思路是在数据写入时直接落地到共享存储中，避免 Checkpoint 带来的数据拷贝问题。手段是尝试使用更省 IO 的 Compaction，例如使用 SizeTieredCompation 方式，或者利用时序数据的特点使用并改造 FIFOCompaction。综合比较共享存储、SizeTieredCompation、基于事件时间的 FIFOCompaction 以及技术栈四个方面得出共识：HBase 代替 RocksDB 方案。
+
+共享存储方面，HBase 支持， RocksDB 不支持
+
+SizeTieredCompation 方面，RocksDB 默认不支持，HBase 默认支持
+
+基于事件时间下推的 FIFOCompaction 方面，RocksDB 不支持，但 HBase 开发起来比较简单
+
+技术栈方面，RocksDB 使用 C++，HBase 使用 java，HBase 改造起来更方便
+
+
+
+
+hbase劣势
+HBase 是一个依赖 zookeeper、包含 Master 和 RegionServer 的重量级分布式系统；而 RocksDB 仅是一个嵌入式的 Lib 库，很轻量级。
+
+在资源隔离方面，HBase 比较困难，内存和 cpu 被多个 Container 共享；而 RocksDB 比较容易，内存和 cpu 伴随 Container 天生隔离。
+
+网络开销方面，因为 HBase 是分布式的，所有比嵌入式的 RocksDB 开销要大很多。
+
+
+一层是 SlimBase 本身，包含三层结构：Slim HBase、适配器以及接口层；
+另一层是 SlimBaseStateBackend，主要包含 ListState、MapState、ValueState 和 ReduceState。
+
+hbase优化瘦身
+先对 HBase 进行减裁，去除 client、zookeeper 和 master，仅保留 RegionServer
+
+再对 RegionServer 进行剪裁，去除 ZK Listener、Master Tracker、Rpc、WAL 和 MetaTable
+
+仅保留 RegionServer 中的 Cache、Memstore、Compaction、Fluster 和 Fs
+
+将原来 Master 上用于清理 Hfile 的 HFileCleaner 迁移到 RegionServer 上
+
+RocksDB 支持读放大写的 merge 接口，但是 SlimBase 是不支持的，所以要实现 merge 的接口
+
+
+优化目标
+Checkpoint 和 Restore 的时延从分钟级别降到秒级。
+
+磁盘 IO 下降了66%
+
+磁盘写吞吐下降50%
+
+CPU 开销下降了33%
+
+
+
+```
+
+###  Cube、GroupingSet 优化
+1.  方式维度组合来计算小时或者天累计的 UV ( Unique Visitor )，新增和留存等指标
+2.  UV 精确去重问题，前文有提到，使用 Bitmap 进行精确去重，通过字典服务将 String 类型数据转换成 Long 类型数据进而便于存储到 Bitmap 中，因为统计 UV 要统计历史的数据，比如说按天累计，随着时间的推移，Bitmap 会越来越大，在 Rocksdb 状态存储下，读写过大的 KV 会比较耗性能，所以内部自定义了一个 BitmapState，将 Bitmap 进行分块存储，一个 blockid 对应一个局部的 bitmap，这样在 RocksDB 中存储时，一个 KV 会比较小，更新的时候也只需要根据 blockid 更新局部的 bitmap 就可以而不需要全量更新。
+3.  在建模指标计算中，为了避免维度数据倾斜问题，通过预聚合 ( 相同维度 hash 打散 ) 和全量聚合 ( 相同维度打散后聚合 ) 两种方式来解决
+4.  全维计算分为两个步骤，为避免数据倾斜问题，首先是维度打散预聚合，将相同的维度值先哈希打散一下。因为 UV 指标需要做到精确去重，所以采用 Bitmap 进行去重操作，每分钟一个窗口计算出增量窗口内数据的 Bitmap 发送给第二步按维度全量聚合；在全量聚合中，将增量的 Bitmap 合并到全量 Bitmap 中最终得出准确的 UV 值。然而有人会有问题，针对用户 id 这种的数值类型的可以采用此种方案，但是对于 deviceid 这种字符类型的数据应该如何处理？实际上在源头，数据进行维度聚合之前，会通过字典服务将字符类型的变量转换为唯一的 Long 类型值，进而通过 Bitmap 进行去重计算 UV。
+5.  降维计算中，通过全维计算得出的结果进行预聚合然后进行全量聚合，最终将结果进行输出。
+6.  
+7.  
+
+
+### 磁盘 - compaction 优化，以及如何避免 compaction
 
 ## 回撤流
 
