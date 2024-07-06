@@ -87,6 +87,7 @@ Template <class或者也可以用typename T>
 - 函数返回参数，不能是指针和引用，必须是实体对象！！
   - Java似乎用某种方式实现返回对象的指针或者引用
 
+## c++ 基础
 ### 指针
 
 - 强弱应用：https://www.jianshu.com/p/4b047fc3b0be
@@ -1348,28 +1349,6 @@ using arrow_schema_ptr = std::shared_ptr<arrow::Schema>;
 - 传对象的值到函数里面，会发生构造一次对象，析构一次对象消耗。而且这是没有考虑到对象中可能还含有其他对象的情况，那么消耗将会更加多。
 - 规范：输入参数在前，输出结果在后
 
-### ifndef用法
-
-```
-防止头文件重复编译
-
-#ifndef LLVM_IR_IRBUILDER_H
-#define LLVM_IR_IRBUILDER_H
-
-#endif // LLVM_IR_IRBUILDER_H
-
-
-注意即使你用了，仍然可能会报重复定义
-multiple definition of `LogError(char const*)'
-
-因为#ifndef只能保证重复包含时，只包含一次。但在不同的C文件是分别进行编译的，所以另一个C语言里的#define对另一个C文件不起作用。也就是说正确的作法应该这样：
-
-1）在头文件里只声明不定义
-2）把定义定义在C文件里
-
-注意
-如果非要在头文件定义函数，建议添加static
-```
 
 
 
@@ -1444,23 +1423,7 @@ int isspace(int c);
 
 
 
-### C++的定义和声明
 
-```
-定义只能有一次，而声明可以用多次
-
-定义就是完整把一个变量或者函数具体形式，写出来
-比如
-static int64_t Discrete(int value) {
-    std::cout << "int Discrete (" << value << ")" << std::endl;
-    std::string value_name = std::to_string(value);
-    return hash64(value_name);
-}
-
-而声明只需要写出变量名字或者函数
-比如
-static int64_t Discrete(int value) ;
-```
 
 
 
@@ -2012,7 +1975,7 @@ std::cout << std::is_same<int, int64_t>::value << '\n';   // false
 
 - 静态变量
 - 类的成员变量
-
+## c++ 性能
 ### 性能优化
 
 - insert 对象的时候，其实是复制了一个对象，要想优化，最后insert一个指针或者引用
@@ -2036,13 +1999,103 @@ std::cout << std::is_same<int, int64_t>::value << '\n';   // false
 #### 教程
 
 - 共享数据：https://baptiste-wicht.com/posts/2012/03/cp11-concurrency-tutorial-part-2-protect-shared-data.html
-- 
 
-### inline使用
+
+## c++ 关键词
+### ifndef 用法
+
+```
+防止头文件重复编译
+
+#ifndef LLVM_IR_IRBUILDER_H
+#define LLVM_IR_IRBUILDER_H
+
+#endif // LLVM_IR_IRBUILDER_H
+
+
+注意即使你用了，仍然可能会报重复定义
+multiple definition of `LogError(char const*)'
+
+因为#ifndef只能保证重复包含时，只包含一次。但在不同的C文件是分别进行编译的，所以另一个C语言里的#define对另一个C文件不起作用。也就是说正确的作法应该这样：
+
+1）在头文件里只声明不定义
+2）把定义定义在C文件里
+
+注意
+如果非要在头文件定义函数，建议添加static
+```
+
+### inline 用法
 
 - 可以在任意函数前面加inline
 - 它的作用只是在调用该函数的时候，直接张开函数里面的内容，而不是真正的用栈调用
 - 减少函数切换的开销
+```
+比如 pytorch 函数接口大量使用inline
+
+inline Tensor feature_alpha_dropout(
+    Tensor input,
+    double p,
+    bool training,
+    bool inplace) {
+  if (p < 0. || p > 1.) {
+    TORCH_CHECK(
+        false, "dropout probability has to be between 0 and 1, but got ", p);
+  }
+  return inplace ? torch::feature_alpha_dropout_(input, p, training)
+                 : torch::feature_alpha_dropout(input, p, training);
+}
+
+```
+### define 用法
+```
+===================================================================================
+#if defined(__cpp_lib_logical_traits) && !(defined(_MSC_VER) && _MSC_VER < 1920)
+
+
+===================================================================================
+__HIP_PLATFORM_HCC__
+CUDA_HOST_DEVICE
+
+
+
+===================================================================================
+pytorch定义 多个dropout函数类型
+
+#define ALIAS_SPECIALIZATION(ALIAS_NAME, IS_FEATURE, IS_ALPHA)                      \
+template <bool inplace, typename... Args>                                           \
+Ctype<inplace> ALIAS_NAME(Args&&... args) {                                         \
+  return _dropout_impl<IS_FEATURE, IS_ALPHA, inplace>(std::forward<Args>(args)...); \
+}
+
+ALIAS_SPECIALIZATION(_dropout,               false, false)
+ALIAS_SPECIALIZATION(_feature_dropout,       true,  false)
+ALIAS_SPECIALIZATION(_alpha_dropout,         false, true )
+ALIAS_SPECIALIZATION(_feature_alpha_dropout, true,  true )
+
+
+===================================================================================
+
+
+```
+### 函数定义和声明
+```
+定义只能有一次，而声明可以用多次
+
+定义就是完整把一个变量或者函数具体形式，写出来
+比如
+static int64_t Discrete(int value) {
+    std::cout << "int Discrete (" << value << ")" << std::endl;
+    std::string value_name = std::to_string(value);
+    return hash64(value_name);
+}
+
+而声明只需要写出变量名字或者函数
+比如
+static int64_t Discrete(int value) ;
+```
+
+
 
 ### static_cast 和 reinterpret_cast
 
@@ -2776,133 +2829,6 @@ std::this_thread::yield
 ```
 
 
-### 编译环境define
-```
-===================================================================================
-#if defined(__cpp_lib_logical_traits) && !(defined(_MSC_VER) && _MSC_VER < 1920)
-
-
-===================================================================================
-__HIP_PLATFORM_HCC__
-CUDA_HOST_DEVICE
-
-
-
-===================================================================================
-
-
-
-
-===================================================================================
-
-
-
-===================================================================================
-
-
-
-===================================================================================
-
-
-
-===================================================================================
-
-
-===================================================================================
-
-
-
-
-
-===================================================================================
-
-
-
-===================================================================================
-
-
-
-===================================================================================
-
-
-
-===================================================================================
-
-
-
-
-===================================================================================
-
-
-
-
-===================================================================================
-
-
-
-
-===================================================================================
-
-
-
-===================================================================================
-
-
-===================================================================================
-
-
-
-
-
-===================================================================================
-
-
-
-===================================================================================
-
-
-
-===================================================================================
-
-
-
-===================================================================================
-
-
-===================================================================================
-
-
-
-
-
-===================================================================================
-
-
-
-===================================================================================
-
-
-
-===================================================================================
-
-
-
-===================================================================================
-
-
-
-
-===================================================================================
-
-
-
-
-===================================================================================
-
-
-
-
-```
 
 
 ### 注释
@@ -3688,6 +3614,34 @@ cv.notify_all(); // 唤醒所有线程.
 
 - https://stackoverflow.com/questions/27272525/what-does-collect2-error-ld-returned-1-exit-status-mean
 - ld 这个工具 返回了一个错误
+
+### a space is required between consecutive right angle brackets (use '> >')
+```
+语法问题
+请注意，这个问题只会在某些编译器和特定的编译选项下出现，因为 C++ 标准规定连续的右尖括号 >> 可能会被解释为右移运算符。为了避免这种歧义，我们需要在模板参数之间添加一个空格。
+    std::unordered_map<int, std::pair<int, std::list<int>::iterator>> cache;
+    改成
+        std::unordered_map<int, std::pair<int, std::list<int>::iterator> > cache;
+
+run.cpp:8:68: error: a space is required between consecutive right angle brackets (use '> >')
+    std::unordered_map<int, std::pair<int, std::list<int>::iterator>> cache;
+
+  
+                                   
+
+```
+
+###
+```
+这个编译错误是因为在 C++11 标准之前，不支持使用花括号 {} 进行直接初始化。为了解决这个问题，你可以使用传统的构造函数语法来初始化 cache[key] 的值。修改后的代码如下：
+
+run.cpp:46:26: error: expected expression
+            cache[key] = {value, lruList.begin()};
+                         ^
+1 error generated.
+
+
+```
 
 ## 教你C++怎么找bug
 
@@ -5205,6 +5159,12 @@ rm -rf $cpp_file
 
 
 # 新项目
+
+## Abseil 基础库
+1. 源码：https://github.com/abseil/abseil-cpp
+2. c++Tips：https://abseil.io/tips/
+
+### 模块介绍
 
 ## RocksDB
 
