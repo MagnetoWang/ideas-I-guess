@@ -42,31 +42,53 @@ tree -ACL 1
    5. 执行流程
    6. 函数调用
    7. 模块梳理
+4. 理解
+   1. 代码生成更多是解决通用型算子的虚函数调用开销 广泛的内存访问和无法利用流水线、预取、分支预测、SIMD、循环展开等能力。
+   2. 
 
 ### 参考资料
-```
-spark内部实现：https://github.com/JerryLead/SparkInternals
-steaming解析：https://github.com/lw-lin/CoolplaySpark
-mllib解析：https://github.com/endymecy/spark-ml-source-analysis
-sparkML应用示例：
-https://github.com/sunbow1/SparkMLlibDeepLearn/blob/master/src/CNN/CNN.scala
-https://github.com/susanli2016/PySpark-and-MLlib/blob/master/K-Means.ipynb
-https://github.com/linzhouzhi/SparkML/blob/master/%E5%9B%9E%E5%BD%92/%E4%BF%9D%E5%BA%8F%E5%9B%9E%E5%BD%92.ipynb
-https://github.com/xubo245/SparkLearning
-streaming + ml：https://github.com/freeman-lab/spark-ml-streaming/blob/master/python/mlstreaming/kmeans.py
-推荐场景：
-https://github.com/huangyueranbbc/Spark_ALS
+1. 原理
+   1. spark内部实现：https://github.com/JerryLead
+   2. SparkInternals
+   3. steaming解析：https://github.com/lw-lin/CoolplaySpark
+   4. mllib解析：https://github.com/endymecy/spark-ml-source-analysis
+2. 应用
+   1. sparkML应用示例：https://github.com/sunbow1/SparkMLlibDeepLearn/blob/master/src/CNN/CNN.scala
+   2. https://github.com/susanli2016/PySpark-and-MLlib/blob/master/K-Means.ipynb
+   3. https://github.com/linzhouzhi/SparkML/blob/master/%E5%9B%9E%E5%BD%92/%E4%BF%9D%E5%BA%8F%E5%9B%9E%E5%BD%92.ipynb
+   4. https://github.com/xubo245/SparkLearning
+   5. streaming + ml：https://github.com/freeman-lab/spark-ml-streaming/blob/master/python/mlstreaming/kmeans.py
+   6. 推荐场景：https://github.com/huangyueranbbc/Spark_ALS
+3. 面试
+   1. 谷歌苹果Spark面试题，搞懂这些绝对稳稳的 - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/679253575
+   2. spark常见事故：https://zhuanlan.zhihu.com/p/659056832
+   3. 
+4. 
 
-
-```
 
 
 ### 模块详解 - 横向拆解
 1. 数据结构
    1. ExternalAppendOnlyUnsafeRowArray
-2. 算子
+2. sql - core
+   1. 列读取
+      1. 源码解析Spark中的Parquet高性能向量化读 - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/673930340
+      2. 一文全面图解Parquet文件格式 - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/680143641
+3. catalyst
+   1. InternalRow
+      1. UnsafeRow UnsafeMapData UnsafeArrayData
+         1. org.apache.spark.unsafe
+         2. com.esotericsoftware.kryo
+      2. GenericInternalRow
+   2. JoinedRow
+   3. ColumnarRow
+   4. ColumnarBatchRow
+   5. ColumnVector
+      1. OnHeapColumnVector
+      2. OnHeapColumnVector
+4. 算子
    1. 注册：FunctionRegistryBase
-3. 表达式 src/main/scala/org/apache/spark/sql/catalyst/expressions
+5. 表达式 src/main/scala/org/apache/spark/sql/catalyst/expressions
    1. dsl 加减乘除均封装
    2. expressions
       1. Expression.scala 
@@ -78,13 +100,21 @@ https://github.com/huangyueranbbc/Spark_ALS
    5. 
    6. project
       1. InterpretedMutableProjection
-4. 聚合能力
+6. 聚合能力
    1. aggregate
-5. 代码生成
+7. 代码生成
    1. WholeStageCodeGeneration WSCG
    2. 
-6. SparkStrategy
+8. SparkStrategy
    1. 路由各个算子和计划能力
+9.  列向量
+10. 优化规则
+    1.  Spark3中的谓词下推VS投影下推 - Tim在路上的文章 - 知乎https://zhuanlan.zhihu.com/p/656673370
+    2.  
+
+### 横向拆解 core能力
+1. 
+
 
 ### 横向拆解 Row设计 + Schema设计 + dataframe + table
 1. sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/InternalRow.scala
@@ -112,13 +142,38 @@ https://github.com/huangyueranbbc/Spark_ALS
 1. sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/csv/CSVInferSchema.scala
 
 ### 横向拆解 shuffle
-1. 字节：https://www.infoq.cn/article/mar2oiscijee2czyqogn
-2. oppo：https://www.infoq.cn/article/pxmvcpffvtmjqsuiat0f
-3. Uber 的 RSS [5]：2020 年开源，底层存储基于本地磁盘，Shuffle Server 提供读写数据功能，对性能有一定的影响，另外，开源时间比较早，但维护较少
-4. 腾讯的 FireStorm [6]：2021 年 11 月开源，底层存储使用 HDFS，对稳定性以及性能优化设计考虑较少
-5. 阿里云 EMR-RSS [7]：2022 年 1 月开源，底层存储基于本地磁盘，对本地 IO 做了深入的优化，不过这种基于本地存储的 Shuffle Service，有着天然的限制
-6. LinkedIn MagNet [2]：MagNet 严格来说不算真正意义的 RSS，只能算是 Push Based  的 Shuffle。MagNet 在 Spark 原生 Shuffle 数据落盘的同时把数据 Push 到远端 NodeManager 的 ESS 上，同一份数据，会落盘两次，这样其实会增加集群的 IO 压力。不过，MagNet 已经合入到 Spark3.2 版本，鉴于此，MagNet 的 Shuffle 才做了这样的设计
-7. https://github.com/bytedance/CloudShuffleService
+1. [SPARK][CORE] 面试问题 之 Spark Shuffle概述 - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/524157404
+2. [SPARK][CORE] 面试问题之UnsafeShuffleWriter流程解析（上） - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/524160470
+3. [SPARK][CORE] 面试问题之UnsafeShuffleWriter流程解析（下） - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/524161757
+4. [SPARK][CORE] 面试问题之 SortShuffleWriter的实现详情 - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/524159361
+5. [SPARK][CORE] 面试问题之 BypassMergeSortShuffleWriter的细节 - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/524158783
+6. 字节：https://www.infoq.cn/article/mar2oiscijee2czyqogn
+7. oppo：https://www.infoq.cn/article/pxmvcpffvtmjqsuiat0f
+8. Uber 的 RSS [5]：2020 年开源，底层存储基于本地磁盘，Shuffle Server 提供读写数据功能，对性能有一定的影响，另外，开源时间比较早，但维护较少
+9. 腾讯的 FireStorm [6]：2021 年 11 月开源，底层存储使用 HDFS，对稳定性以及性能优化设计考虑较少
+10. 阿里云 EMR-RSS [7]：2022 年 1 月开源，底层存储基于本地磁盘，对本地 IO 做了深入的优化，不过这种基于本地存储的 Shuffle Service，有着天然的限制
+11. LinkedIn MagNet [2]：MagNet 严格来说不算真正意义的 RSS，只能算是 Push Based  的 Shuffle。MagNet 在 Spark 原生 Shuffle 数据落盘的同时把数据 Push 到远端 NodeManager 的 ESS 上，同一份数据，会落盘两次，这样其实会增加集群的 IO 压力。不过，MagNet 已经合入到 Spark3.2 版本，鉴于此，MagNet 的 Shuffle 才做了这样的设计
+12. https://github.com/bytedance/CloudShuffleService
+13. [SPARK][CORE] 面试问题之 3.2新的特性Push-based Shuffle源码解析 - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/528860023
+14. BypassMergeSortShuffleWriter和HashShuffle有什么区别？ - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/646831008
+15. Remote Shuffle Service 和 Push-based Shuffle 他们的优劣分别是什么？ - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/645382382
+16. [SPARK][CORE] 面试问题之谈一谈Push-based shuffle - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/527326885
+17. [SPARK][CORE] 面试问题之什么是external shuffle service？ - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/526685828
+18. [SPARK][CORE] 面试问题之 Shuffle reader 的细枝末节 （上） - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/524162595
+19. [SPARK][CORE] 面试问题之 Shuffle reader 的细枝末节 （下） - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/525122882
+```
+
+push-based shuffle是在shuffle write结束后追加了push与合并操作，那么是否只有在发生FetchFailed的情况下（导致stage重试）push-based shuffle的性能更好？
+
+为什么push-based shuffle性能会更加稳定，它的优势是？
+
+push-based shuffle 能否进行精简下？例如取消掉driver端的行为。
+
+
+
+
+
+```
 
 ### 横向拆解 KVStore
 1. common/kvstore/src/main/java/org/apache/spark/util/kvstore/RocksDB.java
@@ -128,7 +183,57 @@ https://github.com/huangyueranbbc/Spark_ALS
 ### 横向拆解 SparkUI前端
 1. sql/core/src/main/scala/org/apache/spark/sql/execution/ui
 
+### 横向拆解 内存管理
+1. Spark系统与架构系列：内存机制 - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/642722131
 
+### 横向拆解 代码生成
+1. SparkSql全代码生成规则梳理-CollapseCodegenStages - 小萝卜算子的文章 - 知乎https://zhuanlan.zhihu.com/p/567231268
+2.  [SPARK][SQL] Tungsten Codegen 全阶段代码生成，让代码更加"定制化" - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/563332917
+3.  spark目前针对cpu和内存的优化有那些? 有哪些调优手段？ - 天天来了的回答 - 知乎 https://www.zhihu.com/question/42924755/answer/2648123201
+4. [SPARK][SQL] Tungsten Codegen优势与表达式生成 - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/558510076
+5. 
+```
+全阶段代码生成是如何实现的？
+1. insertWholeStageCodegen
+2. CodegenSupport的还需判断其所有表达式是否都支持Codegen， 当前plan和其孩子plan的schema的字段个数是否超过了conf.wholeStageMaxNumFields（默认100）
+3. 需要注意的是whole-stage-codegen是基于row的，如果plan支持columnar， 则不能同时支持全阶段代码生成。
+
+1、全阶段代码生成是将一个Stage的代码进行“捏合”
+
+2、它在执行物理计划前会执行CollapseCodegenStages 规则，它的作用正是尝试为每一个 Stages 生成“手写代码”。
+
+3、每一个WholeStageCodegenExec执行时，首先获取输入inputRDDs，直接从叶子节点获取数据的输入。
+
+4、从父节点到子节点，递归调用 doProduce，生成代码框架，直到遇到 Shuffle Boundary 为止。
+
+5、从子节点到父节点，递归调用 doConsume，向框架填充每一个操作符的运算逻辑。
+
+
+算子模式函数调用
+open() - 初始化一个状态
+next() - 产生一个输出
+close() - 清理状态
+虚函数的调用；
+代码本地化能力差，需要保存复杂处理信息等。
+内存数据的随机存取。
+
+
+case说明
+select count(userid) from citizens where city = 'beijing'
+
+算子
+scan -> filter -> project -> agg
+
+代码
+ var count = 0;
+ for (citizen <- citizens) {
+   if (citizen.city == beijing) count += 1;
+ }
+
+```
+
+
+### 
 
 ### 初级模块
 ```
@@ -1663,7 +1768,18 @@ CoalescedRDDBenchmark-jdk11-results.txt  KryoSerializerBenchmark-jdk11-results.t
 CoalescedRDDBenchmark-jdk17-results.txt 
 
 ```
+### 纵向拆解 spark 数据结构
+1. ExternalAppendOnlyMap
+   1. 应用：src/main/scala/org/apache/spark/rdd/CoGroupedRDD.scala#createExternalMap
+   2. 需要实现combine
+   3. 需要实现spill
+2. ExternalSorter
+   1. 
+3. BytesToBytesMap
+4. 
+```
 
+```
 
 ### Calalog 注册 - 如何全方位感知外部元数据
 ```
@@ -1703,13 +1819,36 @@ ExternalCatalog
    4. sparksql比hivesql优化的点（窗口函数） - 小萝卜算子的文章 - 知乎 https://zhuanlan.zhihu.com/p/126594370
 
 
-### 代码生成
-1. SparkSql全代码生成规则梳理-CollapseCodegenStages - 小萝卜算子的文章 - 知乎https://zhuanlan.zhihu.com/p/567231268
-2. 
+
 
 ## 性能总结
+1. Tungsten
+   1. UnsafeRow 内存管理和二进制处理：利用应用程序语义显式管理内存并消除 JVM 对象模型和垃圾收集的开销
+   2. UnsafeExternalSorter UnsafeInMemorySorter 缓存感知计算：利用内存层次结构的算法和数据结构
+   3. WSCG 代码生成：使用代码生成来利用现代编译器和 CPU
+   4. 无虚函数分派：这减少了多次 CPU 调用，这在分派数十亿次时会对性能产生深远影响。
+   5. 内存中的中间数据与 CPU 寄存器：内存中的中间数据与 CPU 寄存器：Tungsten Phase 2 将中间数据放入 CPU 寄存器中。这是从 CPU 寄存器而不是从内存中获取数据的周期数减少了一个数量级
+   6. 循环展开和 SIMD：优化 Apache Spark 的执行引擎，以利用现代编译器和 CPU 高效编译和执行简单 for 循环（相对于复杂函数调用图）的能力。其中最主要的是内存管理和二进制处理，缓存感知计算以及代码生成。而无虚函数分派、内存中的中间数据与 CPU 寄存器和循环展开和 SIMD都包括在动态代码生成中。
+2. [SPARK][SQL] Tungsten优化带来的福报 - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/553731823
+
 ### AQE
+1. 目标：全局上消除数据倾斜、降低IO和提高资源利用率
+2. [SPARK][SQL] 一切梦的开始Spark AQE的源码初探 - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/535174818
+3. SPARK AQE 梳理 - 大数据孔乙己的文章 - 知乎 https://zhuanlan.zhihu.com/p/548331874
+4. [SPARK][SQL] 面试问题之Spark AQE新特性 - 天天来了的文章 - 知乎https://zhuanlan.zhihu.com/p/533982903
+5. spark3 AQE 源码解析一 - AQE 执行流程 - 终日而思一的文章 - 知乎 https://zhuanlan.zhihu.com/p/639537850
+6. 提效 7 倍，Apache Spark 自适应查询优化在网易的深度实践及改进 - 网易数帆的文章 - 知乎 https://zhuanlan.zhihu.com/p/313411006
 ```
+动态选择join策略、自动的分区合并和自动处理数据倾斜的join
+
+你知道AQE是如何处理数据倾斜的吗？如果倾斜的Task全部都集中到同一个Executor那么AQE还能处理吗？
+数据倾斜的方式针对的是Task级别的数据倾斜，主要是将同一个executor内的倾斜task进行拆分，而对于数据全集中在个别executor内的情况就无济于事了。
+
+
+我们知道，AQE 依赖的统计信息来源于 Shuffle Map 阶段输出的中间文件。你觉得，在运行时，AQE 还有其他渠道可以获得同样的统计信息吗？
+
+
+
 首先明确一个核心概念，AQE 的设计和优化完全围绕着 shuffle，也就是说如果执行计划里不包含 shuffle，那么 AQE 是无效的。常见的可能产生 shuffle 的算子比如 Aggregate(group by), Join, Repartition。
 
 一是动态修改执行计划；二是动态生成 shuffle reader
@@ -1764,17 +1903,6 @@ SPARK-35168，一些 Hive 转过来的同学可能会遇到的 issue，理论上
 
 SPARK-35214，使得 Join 倾斜优化在覆盖维度上得到了提升。
 
-参考
-SPARK AQE 梳理 - 大数据孔乙己的文章 - 知乎
-https://zhuanlan.zhihu.com/p/548331874
-[SPARK][SQL] 一切梦的开始Spark AQE的源码初探 - 天天来了的文章 - 知乎
-https://zhuanlan.zhihu.com/p/535174818
-[SPARK][SQL] 面试问题之Spark AQE新特性 - 天天来了的文章 - 知乎
-https://zhuanlan.zhihu.com/p/533982903
-spark3 AQE 源码解析一 - AQE 执行流程 - 终日而思一的文章 - 知乎
-https://zhuanlan.zhihu.com/p/639537850
-提效 7 倍，Apache Spark 自适应查询优化在网易的深度实践及改进 - 网易数帆的文章 - 知乎
-https://zhuanlan.zhihu.com/p/313411006
 
 kyuubi 和 aqe
 https://kyuubi.readthedocs.io/en/master/deployment/spark/aqe.html?highlight=aqe
@@ -1828,8 +1956,19 @@ Cost CostEvaluator
 SimpleCost
 
 
-### DPP 动态分区裁剪
+### 过滤优化技术 DPP 动态分区裁剪
+1. [SPARK][SQL] 聊一聊Spark 3.0中的DPP特性 - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/548757324
+2. [SPARK][SQL] 聊聊Spark 3.3 中的Runtime Filter Joins - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/542468151
+3. 基于min-max索引的Data-skiping技术：它指的是在元数据中都记录这数据文件中的每一列的最小值和最大值，通过查询中列上的谓词来决定当前的数据文件是否可能包含满足谓词的任何records，是否可以跳过读取当前数据文件。
+4. [Delta][SQL] 全面分析下Delta付费功能ZOrder的源码实现 - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/539656969
 ```
+运行时数据过滤策略
+动态分区修剪（dynamic partition pruning，DPP）
+动态文件修剪（dynamic file pruning，DFP）
+以适应动态文件跳过（dynamic file skipping）
+
+
+
 DynamicPruningSubquery
 PartitionPruning
 
@@ -1837,14 +1976,21 @@ PlanDynamicPruningFilters
 RowLevelOperationRuntimeGroupFiltering
 ```
 
-### codegen
+## codegen
 ```
-spark目前针对cpu和内存的优化有那些? 有哪些调优手段？ - 天天来了的回答 - 知乎
-https://www.zhihu.com/question/42924755/answer/2648123201
+codegen含义参考 横向拆解 代码生成
+
+```
+### 表达式生成
+1. 一部分是最基本表达式的代码生成
+2. 全阶段代码生成，即WSCG
+3. 向量化
+```
+
 
 ```
 
-### 调优
+## 机器调优
 ```
 并行度
 压缩
@@ -1865,13 +2011,24 @@ RDD 算子调优 (例如 RDD 复用、自定义 RDD)
 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
 
 ```
-### RBO
+## RBO 优化规则
 1. 核心类
 2. RuleExecutor 规则执行引擎 重试次数/策略/配置
 3. RuleIdCollection 所有的规则集合 分析 优化 执行计划等
+4. SparkOptimizer 
+5. [SPARK][SQL] 聊聊Spark 3.3 中的Runtime Filter Joins - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/542468151
+```
 
+
+```
 
 ### stage 如何并发执行
+
+### 高速读写优化点
+1. 读取数据湖数据时，尤其是在读取update的数据时，数据的有序性对读取的性能影响是非常大的。
+2. Sort策略时，Iceberg还支持在创建表插入数据前设置表的排序字段，提前优化数据的组织方式，提升了读取的效率，不过也影响了写入的速度。
+3. Zorder排序压缩策略使得多个排序字段时，每个字段的优先级是相等的。
+4. Zorder排序压缩策略优点是对于多个经常使用的字段可以提升读取的性能，缺点是合并压缩的时间较长。
 
 ## 经验总结
 1. 数据一致性
@@ -1989,6 +2146,13 @@ children: 子计划列表。
    1. src/main/scala/org/apache/spark/sql/execution/ui/SQLTab.scala
    2. src/main/scala/org/apache/spark/sql/execution/ui/ExecutionPage.scala
 
+
+
+
+### MAP - REDUCE原理
+1. 
+
+
 ## 后端架构 + Spark
 
 
@@ -1997,14 +2161,15 @@ children: 子计划列表。
 1. 使用Java创建一个Row：https://code-cookbook.readthedocs.io/zh-cn/main/Blog%20Here/[Spark]%E4%BD%BF%E7%94%A8Java%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AARow.html
 
 
-###
+### Blaze：SparkSQL Native算子优化在快手的深度优化及大规模应用实践
+```
+https://mp.weixin.qq.com/s/ne5FCgFDK29BWbLHjm0ZqA
+
 ```
 
 
-```
-
-
-###
+### 数据湖
+1. 核心能力：https://mp.weixin.qq.com/s/BKfB1ooYp6vdlDvMKQuccQ
 ```
 
 
