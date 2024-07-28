@@ -10,6 +10,9 @@
 - Typora 使用手册：https://baka943.coding.me/2018/02/08/2018-02-08-TyporaSimpleDoc/#%E5%9F%BA%E6%9C%AC%E7%9A%84%E4%B8%8D%E5%B8%A6%E5%BF%AB%E6%8D%B7%E9%94%AE%20Markdown%20%E4%B9%A6%E5%86%99%E6%BC%94%E7%A4%BA
 - markdown 官方语法：https://guo365.github.io/study/Markdown.html
 
+## 导出pdf
+1. obsidian 和 notion 可以将markdown导出pdf
+
 ## 添加目录树
 
 - [TOC]独占一行才行
