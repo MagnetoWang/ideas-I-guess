@@ -38,9 +38,12 @@ flink + 公司项目
    2. 指针运用
 2. flink如何保证稳定性
 3. flink如何高效开发，测试，迭代和发布
+4. 进一步高效深入理解flink，需要结合峰会主题分享，挖掘高价值问题
+   1. 带着高价值问题，再深入找重要技术细节
 
 
 ### 参考资料
+1. 官方分享：https://space.bilibili.com/33807709
 ```
 xiaogang shi相关paper
 
@@ -218,7 +221,10 @@ Watermarked
     2.  table 内部有自己的rowdata 和 schema，同时严格遵循sql拼表语义
 
 
-
+### 基础概念
+1. KeyGroup
+2. KeyGroupEntry
+3. KeyGroupRange：https://blog.csdn.net/hzymarine/article/details/129560550
 
 
 
@@ -418,7 +424,27 @@ Watermarked
    5. KeyGroup
    6. StateBackend
 
+#### 调度器
+1. ScheduledExecutor org.apache.flink.runtime.concurrent
 
+#### RuntimeContext
+1. org.apache.flink.streaming.api.operators.StreamingRuntimeContext
+#### 状态
+1. KeyedStateHandle
+2. OperatorStateHandle
+3. OperatorStreamStateHandle
+4. StreamStateHandle
+5. ResultSubpartitionStateHandle
+6. OperatorSubtaskState
+7. TaskStateSnapshot
+8. 
+
+#### 工具
+1. StateUtil
+2. LambdaUtil
+3. JarUtils
+
+#### InputChannelStateHandle
 
 ### Streaming Java flink-stream-jave
 1. api
@@ -441,19 +467,6 @@ Watermarked
 1. Optimizer 
 2. DataStatistics 统计能力用于cost
 
-### flink-state-backends + heap-spillable
-
-#### 模块详解
-1. RocksDBStateBackend
-2. RocksDBKeyedStateBackend
-3. AbstractKeyedStateBackend
-4. ColumnFamilyHandle
-   1. 封装抽象 list map各种结构
-   2. 直接调用rocksdb的接口
-5. 状态存储测试验证
-   1. RocksDBTestUtils
-   2. KVStateRequestSerializerRocksDBTest
-
 ### flink-table 进阶
 - Runtime
 - sql parser
@@ -472,28 +485,6 @@ Watermarked
   - https://nightlies.apache.org/flink/flink-docs-release-1.18/release-notes/flink-1.11/
 
 
-### flink磁盘章节
-1. runtime模块
-   1. BlockChannelWriter
-   2. BulkBlockChannelReader
-   3. FileIOChannel
-   4. IOManager
-2. 磁盘应用的类
-   1. ReOpenableHashPartition
-### flink内存章节
-1. flink-core
-   1. DataOutputView
-   2. SeekableDataOutputView
-   3. dataInputView
-   4. MemorySegment
-   5. MemorySegmentSource
-   6. AbstractPagedOutputView
-2. runtime模块
-   1. MemoryAllocationException
-   2. MemoryManager
-3. 应用内存模块的类
-   1. MutableHashTable
-   2. 
 
 ### flink序列化和反序列化章节
 1. flink-core
@@ -502,6 +493,9 @@ Watermarked
    3. TypeSerializer
    4. TypePairComparator
    5. SameTypePairComparator
+
+
+
 
 ## flink JOIN章节
 1. Interval Join
@@ -891,6 +885,8 @@ StreamingJoinOperator
 
 ### table层 join 回撤流设计
 ```
+参考 回撤流章节
+
 
 ```
 ### table层 join 视图设计
@@ -901,6 +897,22 @@ JoinRecordStateView
    JoinKeyContainsUniqueKey
 
 ```
+### table层 regular join
+1. https://cloud.tencent.com/developer/article/1969368
+```
+
+1. 支持INNER JOIN， LEFT JOIN， RIGHT JOIN， FULL OUTER JOIN
+
+2. 语法, 语义 均和传统批 SQL 一致
+
+3. 左右流都会触发结果更新
+
+4. 状态持续增长，一般结合 state TTL 使用
+
+5. 只支持相等联接，即至少有一个连接条件是相等谓词的联接。
+
+```
+
 
 ## flink 窗口章节
 1. 入口
@@ -975,6 +987,15 @@ https://blog.csdn.net/AnameJL/article/details/133795190
 ```
 
 ## flink 算子章节
+1. 重分区能力
+   1. keyBy
+   2. broadcast
+   3. rebalance
+   4. rescale
+   5. shuffle
+   6. global
+   7. partitionCustom
+2. 
 ### flink CopyingChainingOutput CountingOutput 类含义
 1. 算子内部报异常，这两个类高频出现，所以想搞清楚是干嘛的
 
@@ -1026,6 +1047,159 @@ https://blog.csdn.net/AnameJL/article/details/133795190
 2. StreamElement
 3. RowData
 
+## flink 数据交换 exchange
+1. RecordWriter面向的是StreamRecord
+2. ResultPatitionWriter面向的是Buffer，起到承上启下的作用
+3. RecordWriter类负责将StreamRecord进行序列化，调用SpaningRecordSerializer，再调用BufferBuilder写入MemorySegment中（每个Task都有自己的LocalBufferPool，LocalBufferPool中包含了多个MemorySegment
+4. 单播和广播 写入
+   1. 单播 ChannelSelector，对数据流中的每一条数据记录进行选路，有选择地写入一个输出通道的ResultSubPartition中，适用于非BroadcastPartition
+   2. 广播就是向下游所有的Task发送相同的数据，在所有的 ResultSubPartition 中写入N份相同数据。
+   3. 实际不会真的写入N份，而是从编号0的ResultSubPartition读数据
+5. 数据记录序列化器
+   1. SpanningRecordSerializer是一种支持跨内存段的序列化器，其实现借助于中间缓冲区来缓存序列化后的数据，然后再往真正的目标Buffer里写，在写的时候会维护两个“指针”​：
+   2. 一个是表示目标Buffer内存段长度的limit
+   3. 一个是表示其当前写入位置的position
+6. 两个结果子分区视图
+   1. PipelinedSubPartitionView：用来读取PipelinedSubPartition中的数据
+   2. BoundedBlockingSubPartitionReader：用来读取BoundedBlockingSubPartition中的数据
+7. 数据输出
+   1. WatermarkGaugeExposingOutput
+   2. RecordWriterOutput
+   3. ChainingOutput & CopyingChainingOutput
+   4. DirectedOutput & CopyingDirectedOutput
+   5. BroadcastingOutputCollector & CopyingBroadcastingOutputCollector
+   6. CountingOutpu
+8. 本地线程内的数据交换
+   1. 引用传递即可
+9.  本地线程之间的数据传递
+    1. 调用LocalInputChannel从LocalBuffer中读取数据
+    2. 有序列化和反序列化开销 
+10. 跨网络的数据交换
+
+## flink 内存章节
+1. flink-core
+   1. DataOutputView
+   2. SeekableDataOutputView
+   3. dataInputView
+   4. MemorySegment
+   5. MemorySegmentSource
+   6. AbstractPagedOutputView
+2. runtime模块
+   1. MemoryAllocationException
+   2. MemoryManager
+3. 应用内存模块的类
+   1. MutableHashTable
+4. java内存问题
+   1. 有效数据密度低
+   2. 垃圾回收
+   3. OOM问题影响稳定性
+   4. 缓存未命中问题
+5. 在Flink中，Java对象的有效信息被序列化为二进制数据流，在内存中连续存储，保存在预分配的内存块上，内存块叫作MemorySegment。
+6. 操作多块MemorySegment就像操作一块大的连续内存一样，Flink会使用逻辑视图（AbstractPagedInputView）以方便操作
+
+### TaskManager进程
+1. JVM堆上内存
+2. Task堆上内存Task Heap Memory。Task执行用户代码时所使用的堆上内存
+3. JVM堆外内存
+4. Task堆外内存Task Off-Heap Memory。Task执行用户代码时所使用的堆外内存
+
+
+### 内存计算
+1. Task的堆上内存和托管内存
+2. 总体Flink使用内存
+3. 总体进程使用内存
+
+### MemorySegment
+
+
+### 内存页
+1. DataInputView
+2. DataOutputView
+
+### Buffer & BufferPool
+1. 
+
+
+## flink 磁盘章节
+1. runtime模块
+   1. BlockChannelWriter
+   2. BulkBlockChannelReader
+   3. FileIOChannel
+   4. IOManager
+2. 磁盘应用的类
+   1. ReOpenableHashPartition
+
+
+## flink 状态章节
+1. 状态的分类 功能角度
+   1. KeyedState
+      1. Value
+      2. Reducing
+      3. Aggregation
+      4. Folding
+      5. Map
+   2. OperatorState ListState
+2. 状态的分类 存储角度
+   1. Managed State：由 Flink 管理的 state，刚才举例的所有 state 均是 managed state
+   2. Raw State：Flink 仅提供 stream 可以进行存储数据，对 Flink 而言 raw state 只是一些 bytes。开发者自己管理的，需要自己序列化。
+3. 底层介质角度
+   1. MemoryStateBackend
+   2. FsStateBackend
+   3. RocksDBStateBackend
+   4. HeapKeyedStateBackend
+      1. 支持异步 Checkpoint（默认）：存储格式 CopyOnWriteStateMap
+      2. 仅支持同步 Checkpoint：存储格式 NestedStateMap
+4. case
+   1. StreamGroupedReduce 如何运行state做聚合
+
+### 资料
+1. Flink State Rescale 性能优化：https://www.cnblogs.com/Aitozi/p/15834080.html
+2. A Deep Dive into Rescalable State in Apache Flink：https://flink.apache.org/2017/07/04/a-deep-dive-into-rescalable-state-in-apache-flink/
+3. 高效删除deleteRange：https://github.com/apache/flink/pull/14893/files
+4. sst ingest：https://github.com/apache/flink/pull/12345
+5. base db + delete Range + bulk load：https://github.com/apache/flink/pull/8790
+6. https://blog.csdn.net/Z_Stand/article/details/115799605 sst ingest 原理
+7. http://rocksdb.org/blog/2017/02/17/bulkoad-ingest-sst-file.html
+8. https://rocksdb.org/blog/2018/11/21/delete-range.html delete range原理
+
+### Rescale 问题
+1. 每个算子的并行实例数或算子子任务数发生了变化，应用需要关停或启动一些算子子任务，某份在原来某个算子子任务上的状态数据需要平滑更新到新的算子子任务上。
+2. 算子的本地状态将数据生成快照（snapshot），保存到分布式存储（如HDFS）上。横向伸缩后，算子子任务个数变化，子任务重启，相应的状态从分布式存储上重建（restore）。
+
+### SnapShot & Restore
+1. 无状态流
+   1. scale-in hash重分布
+   2. scale-out hash重分布
+2. 状态流
+   1. sink存放状态在DFS分布式文件系统
+   2. 在重建的时候，重新计算分配
+3. PartitionID, Offset 维护整个状态分片信息
+4. 
+
+
+
+### TTL State 设计和基础状态的应用
+
+### flink-state-backends + heap-spillable
+
+#### 模块详解
+1. RocksDBStateBackend
+2. RocksDBKeyedStateBackend
+3. AbstractKeyedStateBackend
+4. ColumnFamilyHandle
+   1. 封装抽象 list map各种结构
+   2. 直接调用rocksdb的接口
+5. 状态存储测试验证
+   1. RocksDBTestUtils
+   2. KVStateRequestSerializerRocksDBTest
+
+
+
+## flink 网络通信章节
+
+## flink plan章节
+
+## flink Transformation章节
 ## flink datastream章节
 ### datastream介绍
 ```
@@ -1052,6 +1226,8 @@ CoGroupedStreams.java：CoGroupedStreams 是用于对多个数据流进行合并
 ## flink Operator章节
 1. StreamOperator extends CheckpointListener, KeyContext, Disposable, Serializable
 2. OneInputStreamOperator
+3. StreamGroupedReduceOperator
+4. 
 ### DriverStrategy
 1. Enumeration of all available operator strategies
 2. 
@@ -1083,6 +1259,179 @@ CoGroupedStreams.java：CoGroupedStreams 是用于对多个数据流进行合并
 
 ```
 
+## flink checkpoint章节
+1. 可靠性
+   1. 最多一次
+   2. 最少一次
+   3. 引擎内严格一次
+   4. 端到端严格一次
+2. 作业恢复方式
+   1. 外部检查点
+   2. 保存点
+3. 自动恢复方式
+   1. 定期恢复策略
+   2. 失败比率策略
+   3. 直接失败策略
+4. 保存点恢复
+   1. 算子的顺序改变 如果对应的UID没变，则可以恢复，如果对应的UID变了则恢复失败
+   2. 作业中添加了新的算子 如果是无状态算子，没有影响，可以正常恢复，如果是有状态的算子，跟无状态的算子一样处理。
+   3. 从作业中删除了一个有状态的算子
+   4. 添加和删除无状态的算子 如果手动设置了UID，则可以恢复，保存点中不记录无状态的算子，如果是自动分配的UID，那么有状态算子的UID可能会变（Flink使用一个单调递增的计数器生成UID，DAG改版，计数器极有可能会变）​，很有可能恢复失败。
+   5. 恢复的时候调整并行度 Flink1.2.0及以上版本,如果没有使用作废的API，则没问题；1.2.0以下版本需要首先升级到1.2.0才可
+5. 如果需要进行恢复、升级，最好使用事件时间，而不是处理时间
+   1. 事件时间能保证计算一致性，处理时间不能，因为处理时间是在系统处理中的时间，无时无刻在变化
+6. 如何存检查点
+   1. state 其实就是 Checkpoint 所做的主要持久化备份的主要数据
+   2. 
+
+### 资料
+1. Checkpoint 原理剖析与应用实践：https://www.infoq.cn/article/wkgozmqqexq6xm5ejl1e
+2. Checkpoint 机制和状态恢复：https://blog.jrwang.me/2019/flink-source-code-checkpoint/#%E6%A6%82%E8%BF%B0
+3. Flink的Checkpoints机制详解 - 杨京京的文章 - 知乎 https://zhuanlan.zhihu.com/p/701656584
+4. checkpoint添加并发数：https://issues.apache.org/jira/browse/FLINK-6966
+5. barriers：https://nightlies.apache.org/flink/flink-docs-release-1.12/concepts/stateful-stream-processing.html#barriers
+6. Snapshotting Operator State：https://nightlies.apache.org/flink/flink-docs-release-1.12/concepts/stateful-stream-processing.html#snapshotting-operator-state
+7. Recovery：https://nightlies.apache.org/flink/flink-docs-release-1.12/concepts/stateful-stream-processing.html#recovery
+8. Checkpoint问题排查实用指南：https://developer.aliyun.com/article/718452?spm=a2c6h.14164896.0.0.2c1f660bOtzztl
+9. Flink 1.11 Unaligned Checkpoint 解析
+   1. https://developer.aliyun.com/article/768710?spm=a2c6h.14164896.0.0.2c1f660bOtzztl
+   2. https://cwiki.apache.org/confluence/display/FLINK/FLIP-76%3A+Unaligned+Checkpoints
+10. 
+
+### cp 制作
+1. JobGraph转换成ExecutionGraph，完成作业State和Checkpoint的配置、创建 CheckpointCoordinator对象，注册CheckpointCoordinatorDeActivator监听作业状态
+2. 当监听到JobState为RUNNING时，coordinator对象进行checkpoint的调度，定时调用ScheduledTrigger来实现定期触发制作。由Execution通过RPC传给TaskExecutor进行执行，具体执行Checkpoint制作操作的是各个task。由SourceStreamTask以广播的方式下发barrier给下游Task，barrier对齐后制作状态快照并上传，涉及同步和异步阶段，最终完成并上报
+3. Checkpoint制作成功后会通过RPC通知JobMaster和CheckpointCoordinator，并由CheckpointCoordinator向各task发送制作完成的消息，将PendingCheckpoint转换为CompletedCheckpoint
+4. 周期触发
+   1. JobMaster ExecutionGraph enableCheckpointing
+5. triggerCheckpoint
+6. startTriggeringCheckpoint
+7. Checkpoint制作
+   1. 触发source task制作
+      1. StreamTask#triggerCheckpointAsync
+      2. StreamTask#performCheckpoint
+   2. source task广播下发barrier
+      1. subtaskCheckpointCoordinator.checkpointState
+   3.  下游task接收到barrier对齐后制作
+       1. CheckpointBarrierTracker#processBarrier
+       2. CheckpointBarrierHandler#notifyCheckpoint
+       3. StreamTask#triggerCheckpointOnBarrier
+8. Checkpoint存储
+    1. TaskLocalStateStore：本地状态存储
+    2. StreamOperatorStateHandler：实现了StreamOperator封装的各种状态后端处理逻辑的类
+    3. DefaultOperatorStateBackendSnapshotStrategy
+9. Checkpoint制作成功后会通过RPC通知JobMaster和CheckpointCoordinator，并由CheckpointCoordinator向各task发送Checkpoint制作完成的消息，最终PendingCheckpoint会转换成CompletedCheckpoint。
+
+### 失败的可能原因
+1. 同步阶段失败 算子反压，导致barrier对齐失败
+2. 异步阶段失败
+   1. HDFS集群IO负载高，导致超时失败（现象：source、sink算子ack，但是join算子未ack）
+   2. HDFS集群容量不足，导致无法存储
+   3. HDFS集群配置错误、认证错误、路径错误
+   4. 传输过程中网络异常
+
+
+### cp 结构
+1. 检查点协调器 CheckpointCoordinator
+2. 检查点消息中有3个重要信息：该检查点所属的作业标识（JobID）、检查点编号、Task标识（ExecutionAttemptID）​。
+3. AcknowledgeCheckpoint消息 该消息从TaskExecutor发往JobMaster，告知算子的快照备份完成。
+4. DeclineCheckpoint消息 该消息从TaskExecutor发往JobMaster，告知算子无法执行快照备份，如Task了Running状态但是内部还没有准备好执行快照备份。
+
+### Barrier（屏障）
+1. Barrier（屏障）来切分数据流
+2. Barriers会严格保证顺序
+3. state 会保存 mq 的 offset
+4. Barrier对齐 当一个算子有多个上游输入的时候，为了达到引擎内严格一次、端到端严格一次两种保证语义，此时必须要Barrier对齐。
+5. 
+```
+Barrier会周期性地注入数据流中，作为数据流的一部分，从上游到下游被算子处理。Barriers会严格保证顺序，不会超过其前边的数据。Barrier将记录分割成记录集，两个Barrier之间的数据流中的数据隶属于同一个检查点。每一个Barrier都携带一个其所属快照的ID编号。Barrier随着数据向下流动，不会打断数据流，因此非常轻量。在一个数据流中，可能会存在多个隶属于不同快照的Barrier，并发异步地执行分布式快照
+
+
+
+
+```
+
+### barrier对齐
+1. 为了实现 EXACTLY ONCE 语义，Flink 通过一个 input buffer 将在对齐阶段收到的数据缓存起来，等对齐完成之后再进行处理
+2. 对于 AT LEAST ONCE 语义，无需缓存收集到的数据，会对后续直接处理，所以导致 restore 时，数据可能会被多次处理。
+3. 端到端的 EXACTLY ONCE 需要 source 和 sink 支持，Flink 的 Checkpoint 机制只能保证 Flink 的计算过程可以做到 EXACTLY ONCE
+
+### 两阶段提交
+
+### 反压 和 网络流控
+1. A Deep-Dive into Flink's Network Stack：https://flink.apache.org/2019/06/05/a-deep-dive-into-flinks-network-stack/
+2. 一文彻底搞懂 Flink 网络流控与反压机制：http://www.54tianzhisheng.cn/2019/08/26/flink-back-pressure/
+3. Flink - Network Buffer 的一些常见问题：https://www.liaojiayi.com/flink-network-buffer/
+4. Flink 数据传输及反压详解：https://blog.csdn.net/wangshuminjava/article/details/107311405
+5. 跨TM数据传输：https://zhuanlan.zhihu.com/p/711894698
+```
+【1】https://issues.apache.org/jira/browse/FLINK-16428    Fine-grained network buffer management for backpressure
+
+【2】https://issues.apache.org/jira/browse/FLINK-16404   Avoid caching buffers for blocked input channels before barrier alignment
+
+【3】https://issues.apache.org/jira/browse/FLINK-16012    Reduce the default number of exclusive buffers from 2 to 1 on receiver side
+
+【4】https://issues.apache.org/jira/browse/FLINK-16641    Announce sender's backlog to solve the deadlock issue without exclusive buffers
+
+【5】https://issues.apache.org/jira/browse/FLINK-17477    resumeConsumption call should happen as quickly as possible to minimise latency
+
+```
+
+### 非对齐Checkpoint
+1. https://km.sankuai.com/collabpage/1862348544
+### 自定义启动checkpoint
+
+
+### 增量checkpoint 
+
+
+### 恢复时候 lazyrestore
+
+### 制作成功后通知具体细节
+
+
+### checkpoint hdfs大小
+
+
+### CheckpointCoordinator
+1. 大量用到异步提交的设计
+2. 测试用例：CheckpointCoordinatorFailureTest
+
+### CheckpointBarrier
+
+
+### StateObject
+1. StateObject 接口是所有状态对象的顶层接口，用来封装具体的状态数据
+   1. 可以直接持有状态数据
+   2. 可以是一个存有状态数据的文件路径
+   3. 可以是访问存有状态数据的外部数据库的metadata（数据库地址和用户名之类的）
+2. StateObject 会在 JobManager 和 TaskManager 之间通过RPC传递，因此必须是可序列化的
+3. SubtaskState
+   1. OperatorStateHandle
+      1. StateMetaInfo
+   2. ChainedStateHandle
+   3. KeyedStateHandle
+4. OperatorStateBackend
+   1. OperatorStateStore
+   2. OperatorStateHandle
+5. KeyedStateBackend
+   1. 
+
+
+### Snapshot
+1. Snapshot 同步阶段所产生的资源集合，会在异步阶段被处理（写入文件、传给Jm、写到数据库等）
+2. SnapshotStrategy
+   1. 多种策略
+   2. RocksIncrementalSnapshotStrategy
+3. rocksdb checkpoint
+   1. https://github.com/facebook/rocksdb/wiki/Checkpoints
+   2. SnapshotResult
+
+
+## Flink TTL
+
+
+### CompactionFilter
 ## flink 闭包检查
 1. 参考案例
    1. src/main/java/org/apache/flink/streaming/api/datastream/CoGroupedStreams.java 
@@ -1551,6 +1900,8 @@ interval join计算
 
 ```
 
+### 多流join
+
 ### 维表方案
 ```
 
@@ -1563,6 +1914,24 @@ https://zhuanlan.zhihu.com/p/694650448
 
 ### Partial-Update
 
+### 增量存储具备批/流读写
+
+
+### Before/After 增量更新
+
+### 支持join长周期历史数据
+
+###  大状态快速恢复
+1. Flink具备1万slot/3层shuffle/50TB状态规模，从不支持到支持：1分钟级启动，5分钟级快照制作，10分钟级故障恢复
+2. 1k slot/2TB状态/3层shuffle规模内的Flink作业，可用性从99.95%提升到99.99%
+
+### 算子级别并发调整、TTL设置
+
+
+### FlinkSQL unique key 丢失导致数据乱序
+
+
+### Regular Join 算子开启mini-batch导致数据乱序问
 
 ### 点查询能力
 
@@ -1572,6 +1941,25 @@ https://zhuanlan.zhihu.com/p/694650448
 
 
 ### 流式样本训练
+```
+流式tfrecord格式样本生产flink任务
+
+流式特征抽取
+dense计算、fid算子计算、lisbvm格式
+
+```
+
+### 流式训练稳定性
+1. 外卖广告大规模深度学习模型工程实践：https://tech.meituan.com/2022/07/06/largescaledeeplearningmodel-engineeringpractice-in-mtwaimaiad.html
+2. 流式样本熔断、流式训练熔断功能
+3. 流式指标监控功能
+4. 训练回滚功能、serving回滚功能
+5. 流式训练支持模型HDFS存储功能
+
+### flatbuffers 序列化
+1. https://halfrost.com/flatbuffers_schema/
+2. https://flatbuffers.dev/
+3. 
 
 
 ### 实时任务平滑重启， 平滑迁移
@@ -1668,7 +2056,230 @@ CPU 开销下降了33%
 
 ### 磁盘 - compaction 优化，以及如何避免 compaction
 
+
+### 细粒度设置数据源ttl 和 分区数
+1. https://www.bilibili.com/video/BV1wD4y1Y7pB/?spm_id_from=333.337.search-card.all.click&vd_source=0f9d0e0a195e3352b97b5cb0ca3e57a2
+2. 场景一 对数据进行去重后进行关联聚合，去重ttl 3h，聚合ttl 3d
+3. 场景二 双流join，主表 ttl 2d，维表 30d
+4. 美团的解决方案
+   1. 执行计划 可编辑，可设置参数
+5. 可修改TTL
+   1. 为 ExecNode 增加 id 标识，并围绕创建 ExecNodeContext，每个 ExecNode 在翻译前将其加入到工作栈
+   2. 在获取 TTL 的时候从栈顶拿到当前正在处理的 ExecNode，得到对应的 TTL 配置
+   3. 当前 ExecNode 翻译结束后，将对应的 ExecNodeContext 出栈，记录 Transformation  id -> ExecNode id 的映射关系
+6. 可修改分区模式
+   1. 分区关系优化 rebalance 改成 rescala
+   2. 2000 -> 1000 共需 2000 * 1000 = 2000000 个连接
+   3. Rescale 只需 2000 个连接，大大降低了 Network buffer 内存
+7. 单独修改算子并发并从状态恢复
+8. 单独修改算子的  slotSharingGroup
+9. 修改 chain 逻辑并从状态恢复
+
+### SQL 变更支持从状态恢复
+1. SQL 层使用 AST 做业务逻辑兼容性校验
+2. 基于可编辑执行计划做拓扑逻辑兼容性校验
+3. 状态 Schema 兼容性校验
+4. 目的
+   1. 判断哪些任务的升级和变更不支持从状态恢复
+
+
+### Flink SQL Debug 能力
+1. Case1:Flink SQL 自身bug导致的正确性问题(丢数)
+2. Case2:Flink SQL 设计缺陷导致的正确性问题(乱序)
+3. Case3:Flink SQL 使用不当导致的正确性问题
+
+
+### SQL State 可查询 & 支持懒迁移
+
+### flink sql字段血缘
+1. https://cloud.tencent.com/developer/article/1969415
+
+
+### unique key 丢失引起的乱序性能问题 & SQL风险提示
+
+### 状态恢复条件严格
+
+### 流批存储层
+```
+KV层（Hbase）：基于Hbase改造，支持按主键插入，更新和删除；负责生成changlog（Before/After）数据。
+
+存储层（Hudi）：基于Hudi改造，集成成熟读写接口和设计，支持增量读写和批量读写。
+
+```
+
+
+
+### 中间表不可查、中间状态不可查
+
+## flink cpu分析
+1. ps + top + jstack 找热点进程和线程堆栈
+
+```
+	
+jstack 查找(打印5次至少3次)，并结合代码进行分析
+
+ps -ef | grep java  找到 Java 进程 id
+
+top -Hp pid  找到使用 CPU 最高的线程
+
+printf ‘0x%x’  tid  线程 id 转化 16 进制
+
+jstack pid | grep tid  找到线程堆栈
+
+因为cpu使用率是时间段内的统计值，jstack是一个瞬时堆栈只记录瞬时状态，两个根本不是一个维度的事，如果完全按照上面那一套步骤做的话碰到这种情况就傻眼了，冥思苦想半天却不得其解，根本不明白为什么这种代码会导致高cpu。针对可能出现的这种情况，实际排查问题的时候jstack建议打印5次至少3次，根据多次的堆栈内容，再结合相关代码进行分析，定位高cpu出现的原因，高cpu可能是代码段中某个bug导致的而不是堆栈打印出来的那几行导致的。
+
+
+load 高 & cpu高：
+
+   流量激增
+
+   gc频繁
+
+   代码问题（需要通过下面的3个方式根因定位）
+
+   查询占用CPU多的进程、线程，最终定位到代码
+
+load高但是cpu不高 - 进程队列长度大，但是cpu运行的进程很少，很多进程都在等待运行
+
+   大概率io高才是罪魁祸首，它导致的是任务一直在跑，迟迟处理不完，线程无法回归线程池中。io包含磁盘io和网络io，磁盘io高导致的load高是少数，更多的高io应当是在处理网络请求
+
+   排查重点：依赖方的响应时间RT
+
+   DB
+
+   redis
+
+   RPC/HTTP
+
+```
+
+## flink 内存泄露排查
+1. 必看 - jhat分析内存实例：https://blog.csdn.net/MrHamster/article/details/107723667
+2. 必看 - VisualVM分析内存实例
+   1. https://www.cnblogs.com/wade-xu/p/4369094.html
+   2. https://blog.csdn.net/MrHamster/article/details/107723850
+3. 必看 - 堆外内存分析
+   1. https://pdai.tech/md/java/jvm/java-jvm-oom-offheap.html
+4. Flink JVM 内存超限的分析方法总结 https://cloud.tencent.com/developer/article/1884177
+5. jemalloc 内存泄漏 https://github.com/jemalloc/jemalloc/wiki/Use-Case%3A-Leak-Checking
+6. jemalloc的heap profiling：https://www.yuanguohuo.com/2019/01/02/jemalloc-heap-profiling/
+7. 堆内
+   1. FinalReference 完全解读：https://www.infoq.cn/article/jvm-source-code-analysis-finalreference
+   2. 一次 Young GC 的优化实践：https://mp.weixin.qq.com/s/I3g-d1n7kdaAmmXb-dVNVg
+8.  案例
+   1. flink中引用drools引发oom：https://www.cnblogs.com/daoqidelv/p/7246624.html
+   2. 
+
+```
+堆内内存的分析
+观察full gc指标和jstat
+统计火焰图
+ jmap 来获取一份堆内存的 dump
+
+如果进程崩溃难以捕捉，可以在 Flink 配置的 JVM 启动参数中增加：
+env.java.opts.taskmanager: -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/taskmanager.hprof
+
+MAT对dump信息输出报表
+JProfiler 等更全面的工具可以进行堆内存的高级分析。
+
+这个出问题的作业的堆内存区域并没有用满，GC 日志看起来一切正常，堆内存泄漏的可能性排除。
+
+
+堆外内存的分析
+使用 Native Memory Tracking 查看 JVM 的各个内存区域用量
+-XX:+UnlockDiagnosticVMOptions -XX:+PrintNMTStatistics -XX:NativeMemoryTracking=summary
+
+jcmd 进程 VM.native_memory summary
+取此时此刻的 JVM 各区域的内存用量报表
+
+堆外 设计c++层
+gperftools
+Btrace
+Native Memory Tracking
+
+任务启动 strace去追踪系统调用
+
+gdp -pid pid
+dump memory mem.bin startAddress endAddressdump内存
+
+startAddress和endAddress可以从/proc/pid/smaps中查找。然后使用strings mem.bin查看dump的内容，如下：
+
+
+查看分析 hprof文件
+jhat Downloads/container_e06_1712817925707_4195906_01_000226-2024_07_19_12_29_50.hprof
+```
+
+### 堆外分析步骤
+1. 新增参数 -XX:+UnlockDiagnosticVMOptions -XX:+PrintNMTStatistics -XX:NativeMemoryTracking=summary
+2. 针对java进程获取内存报告 jcmd pid VM.native_memory detail
+3. pmap查看内存分布 pmap -x pid | sort -k 3 -n -r
+   1. 使用文档：https://www.cnblogs.com/yinghao-liu/p/7287941.html
+4. 系统层面排查 gperftools
+
+### jcmd结果
+```
+118361:
+
+Native Memory Tracking:
+
+Total: reserved=7628020KB, committed=6443532KB
+-                 Java Heap (reserved=4325376KB, committed=4325376KB)
+                            (mmap: reserved=4325376KB, committed=4325376KB) 
+ 
+-                     Class (reserved=1200866KB, committed=169390KB)
+                            (classes #23060)
+                            (malloc=27362KB #37283) 
+                            (mmap: reserved=1173504KB, committed=142028KB) 
+ 
+-                    Thread (reserved=505390KB, committed=505390KB)
+                            (thread #490)
+                            (stack: reserved=502528KB, committed=502528KB)
+                            (malloc=1664KB #2934) 
+                            (arena=1198KB #963)
+ 
+-                      Code (reserved=269393KB, committed=116385KB)
+                            (malloc=19793KB #24259) 
+                            (mmap: reserved=249600KB, committed=96592KB) 
+ 
+-                        GC (reserved=185728KB, committed=185728KB)
+                            (malloc=27696KB #563) 
+                            (mmap: reserved=158032KB, committed=158032KB) 
+ 
+-                  Compiler (reserved=1099KB, committed=1099KB)
+                            (malloc=954KB #2106) 
+                            (arena=145KB #18)
+ 
+-                  Internal (reserved=1104632KB, committed=1104628KB)
+                            (malloc=1104596KB #61574) 
+                            (mmap: reserved=36KB, committed=32KB) 
+ 
+-                    Symbol (reserved=29105KB, committed=29105KB)
+                            (malloc=26987KB #264752) 
+                            (arena=2118KB #1)
+ 
+-    Native Memory Tracking (reserved=6231KB, committed=6231KB)
+                            (malloc=57KB #626) 
+                            (tracking overhead=6175KB)
+ 
+-               Arena Chunk (reserved=200KB, committed=200KB)
+                            (malloc=200KB) 
+
+```
+
 ## 回撤流
+1. 回撤场景：http://blog.nemoface.com/views/backEnd/202112/20211226.html
+   1. group by会导致回撤
+   2. 输入 是非回撤流
+   3. 输入 是回撤流 输出结果都会不一样
+2. Flink-Table-的三种-Sink-模式：https://www.whitewood.me/2020/02/26/Flink-Table-%E7%9A%84%E4%B8%89%E7%A7%8D-Sink-%E6%A8%A1%E5%BC%8F/
+3. 代码生成：https://blog.51cto.com/u_9928699/10917371
+4. src/main/scala/org/apache/flink/table/runtime/aggregate/AggregateUtil.scala
+5. src/main/scala/org/apache/flink/table/codegen/AggregationCodeGenerator.scala
+```
+AggregateUtil
+
+```
+
 
 ## 乱序流
 1. 
@@ -1727,12 +2338,15 @@ CPU 开销下降了33%
 ```
 
 
+
 ## 行业实践参考
-```
-Flink 在风控场景实时特征落地实战 - 是咕咕鸡的文章 - 知乎
-https://zhuanlan.zhihu.com/p/477262244
-微信安全基于 Flink 实时特征开发平台实践 - Flink 中文社区的文章 - 知乎
+1. Flink 在蚂蚁实时特征平台的深度应用：https://blog.csdn.net/weixin_44904816/article/details/136204440   
+2. Flink 在风控场景实时特征落地实战 - 是咕咕鸡的文章 - 知乎 https://zhuanlan.zhihu.com/p/477262244
+3. 微信安全基于 Flink 实时特征开发平台实践 - Flink 中文社区的文章 - 知乎
 https://zhuanlan.zhihu.com/p/646114539
+```
+
+
 
 
 

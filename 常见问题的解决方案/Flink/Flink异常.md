@@ -2132,6 +2132,9 @@ Caused by: java.lang.InterruptedException
 ```
 不能从checkpoint 恢复。只能丢弃数据
 
+代码修改 operator 图有改动，所以原来的状态无法读取
+只能回溯消息，重新生成新的state
+
 
  ERROR org.apache.flink.shaded.curator4.org.apache.curator.ConnectionState  - Authentication failed
 2024-06-10 15:22:11,321 [INFO] INFO  com.meituan.flink.utils.haservices.leaderservice.MtLeaderRetrievalService  - Notify to org.apache.flink.runtime.webmonitor.retriever.LeaderRetriever directly with default leader information: leader id b67c68c7-f997-3070-a836-6f33076efbd2, leader address http://zf-data-hdp-dn-rtyarn2522.mt:13367, leader startTime 0
@@ -2238,8 +2241,24 @@ java.io.IOException: Insufficient number of network buffers: required 2, but onl
 ```
 
 
-##
+##  The launcher environment and the runtime environment are inconsistent.
 ```
+机器的jdk版本和jar包版本不兼容
+换个队列就解决了
+
+2024-06-26 22:13:40
+java.lang.RuntimeException: The launcher environment and the runtime environment are inconsistent.
+	at com.meituan.flink.streaming.connectors.mafka.FlinkMafkaConsumer.open(FlinkMafkaConsumer.java:134)
+	at org.apache.flink.api.common.functions.util.FunctionUtils.openFunction(FunctionUtils.java:34)
+	at org.apache.flink.streaming.api.operators.AbstractUdfStreamOperator.open(AbstractUdfStreamOperator.java:102)
+	at org.apache.flink.streaming.runtime.tasks.OperatorChain.initializeStateAndOpenOperators(OperatorChain.java:478)
+	at org.apache.flink.streaming.runtime.tasks.StreamTask.lambda$beforeInvoke$2(StreamTask.java:547)
+	at org.apache.flink.streaming.runtime.tasks.StreamTaskActionExecutor$SynchronizedStreamTaskActionExecutor.runThrowing(StreamTaskActionExecutor.java:93)
+	at org.apache.flink.streaming.runtime.tasks.StreamTask.beforeInvoke(StreamTask.java:537)
+	at org.apache.flink.streaming.runtime.tasks.StreamTask.invoke(StreamTask.java:577)
+	at org.apache.flink.runtime.taskmanager.Task.doRun(Task.java:767)
+	at org.apache.flink.runtime.taskmanager.Task.run(Task.java:578)
+	at java.lang.Thread.run(Thread.java:748)
 
 
 ```
