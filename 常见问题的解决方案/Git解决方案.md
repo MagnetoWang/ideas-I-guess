@@ -113,7 +113,12 @@ git checkout -b xxx
 一般来说这是在本地新建一个分支，远程并没有这个分支
 
 希望把xxx推到远程某个分支名上
- git push --set-upstream origin xxx
+git push --set-upstream origin xxx
+
+git push --set-upstream origin feature/PTYF-83105075/user-action-pb-spark3
+
+git push --set-upstream origin feature/PTYF-83389472/dp-content-for-search-v1
+
 ```
 
 ### 新建分支
@@ -222,10 +227,10 @@ https://docs.github.com/cn/pull-requests/committing-changes-to-your-project/crea
 
 ```
 
-### 撤销push远端的代码
+### 回滚 - 撤销push远端的代码
 
 ```
-git reset --hard <版本号>
+git reset --soft <版本号>
 git push origin <分支名> --force
 
 https://blog.csdn.net/xs20691718/article/details/51901161
@@ -374,6 +379,9 @@ https://rzrobert.github.io/2017/02/04/git%E7%BB%9F%E8%AE%A1%E9%A1%B9%E7%9B%AE%E4
 查看git上个人代码量
 
 git log --author="username" --pretty=tformat: --numstat | awk '{ add += $1; subs += $2; loc += $1 - $2 } END { printf "added lines: %s, removed lines: %s, total lines: %s\n", add, subs, loc }' -
+
+
+git log --author="jinpeng12" --pretty=tformat: --numstat | awk '{ add += $1; subs += $2; loc += $1 - $2 } END { printf "added lines: %s, removed lines: %s, total lines: %s\n", add, subs, loc }' -
 
 统计每个人的增删行数
 
@@ -751,7 +759,18 @@ git pull 会因为本地分支和远程分支有冲突自动生成一个commit
 
 
 
-
+## 掘金计划
+1. 程序员画图工具用什么？ - Github掘金计划的回答 - 知乎 https://www.zhihu.com/question/280734656/answer/3314352655
+2. SQLite
+3. rt-thread
+4. TDengine
+5. dperf
+6. tiny-gpu
+   1. A minimal GPU design in Verilog to learn how GPUs work from the ground up
+7. https://github.com/rhasspy/piper
+   1. A fast, local neural text to speech system
+8. 
+ 
 
 
 

@@ -36,6 +36,9 @@ flink + 公司项目
    1. 内存复制
       1. BufferEntry
    2. 指针运用
+   3. 单条数据处理的关键路径
+   4. 非常低的读写延迟（µs）
+   5. 轻量稳定的 Checkpointing 流程
 2. flink如何保证稳定性
 3. flink如何高效开发，测试，迭代和发布
 4. 进一步高效深入理解flink，需要结合峰会主题分享，挖掘高价值问题
@@ -45,7 +48,10 @@ flink + 公司项目
 ### 参考资料
 1. 官方分享：https://space.bilibili.com/33807709
 ```
-xiaogang shi相关paper
+xiaogang shi
+动态数据流上的实时迭代计算
+sunmengyao
+
 
 watermark内容
 watermark 原理：https://zhuanlan.zhihu.com/p/507776567
@@ -1149,8 +1155,45 @@ https://blog.csdn.net/AnameJL/article/details/133795190
    4. HeapKeyedStateBackend
       1. 支持异步 Checkpoint（默认）：存储格式 CopyOnWriteStateMap
       2. 仅支持同步 Checkpoint：存储格式 NestedStateMap
-4. case
+4. flink op -> state backend -> local disk
+   1. 本地盘大小限制 Vs. 云存储
+   2. 平稳可预估的 CPU 和网络资源消耗
+   3. 高可用/弹性伸缩/热更新
+5. 状态访问线程模型
+6. KV分离 存算分离
+   1. 随机读写性能
+   2. scan prefetch优化
+   3. 基于Learned-index O(1)的查询优化
+7. 痛点
+   1. 状态可查询
+   2. 状态可复用
+   3. No Unique Key Join
+   4. Union state restore
+      1. 基于FileStreamStateHandle模式恢复: DFS成为瓶颈, 长达半小时的恢复时长
+      2. 基于ByteStreamStateHandle模式恢复: JobManager成为瓶颈, 频繁OOMKilled
+      3. 
+   5. 小文件问题
+   6. state rescale
+   7. 大状态作业
+      1. 本地磁盘空间不足
+      2. 本地IO瓶颈
+      3. 检查点开销大
+      4. 作业恢复慢
+   8. Flink Key前缀排序
+   9.  状态文件懒加载
+      1. 
+   10. 文件粒度 合并裁剪 Rescaling
+      1. Compaction 时过滤
+   11. 基于时间分片冷热管理
+   12. 自适应KV分离
+   13. 同一实例多状态混存
+   14. 支持快照Mem Table
+   15. Binary Hash Mem Table
+   16. 本地远端统一文件管理
+8. case
    1. StreamGroupedReduce 如何运行state做聚合
+   2. 热更新 + 状态懒加载 时间从 200s 下降到 20s 512 并发，150 GB 总状态大小
+   3. 
 
 ### 资料
 1. Flink State Rescale 性能优化：https://www.cnblogs.com/Aitozi/p/15834080.html
@@ -1280,7 +1323,16 @@ CoGroupedStreams.java：CoGroupedStreams 是用于对多个数据流进行合并
    5. 恢复的时候调整并行度 Flink1.2.0及以上版本,如果没有使用作废的API，则没问题；1.2.0以下版本需要首先升级到1.2.0才可
 5. 如果需要进行恢复、升级，最好使用事件时间，而不是处理时间
    1. 事件时间能保证计算一致性，处理时间不能，因为处理时间是在系统处理中的时间，无时无刻在变化
-6. 如何存检查点
+6. 性能优化
+   1. 动态调节缓存数据量 FLIP 183: Buffer Debloating
+      1. Buffer 1 秒内需要处理的数据
+   2. 非对齐快照 FLIP 76: Unaligned Checkpoint
+      1. 对齐时间过长时自动切换瞬时推进 Barrier 进行快照
+   3. 通用增量快照 FLIP 158: Generalized Incremental Checkpoints
+      1. 解耦 Checkpoint 过程和状态物化过程
+      2. CLAIM 模式 vs NO_CLAIM 模式
+   4. 基于Segment增量Checkpoint方案
+7. 如何存检查点
    1. state 其实就是 Checkpoint 所做的主要持久化备份的主要数据
    2. 
 
@@ -1376,6 +1428,7 @@ Barrier会周期性地注入数据流中，作为数据流的一部分，从上�
 【5】https://issues.apache.org/jira/browse/FLINK-17477    resumeConsumption call should happen as quickly as possible to minimise latency
 
 ```
+### 动态调节缓存数据量
 
 ### 非对齐Checkpoint
 1. https://km.sankuai.com/collabpage/1862348544

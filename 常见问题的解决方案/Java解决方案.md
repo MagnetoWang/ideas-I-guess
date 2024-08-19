@@ -1,4 +1,4 @@
-
+****
 
 ## 说明
 
@@ -27,6 +27,7 @@ wget https://download.java.net/openjdk/jdk11/ri/openjdk-11+28_linux-x64_bin.tar.
 
 在.bashrc里面配置路径
 # Java配置
+ROOT=`pwd`
 export JAVA_HOME=$ROOT/j2sdk-bundle
 export JRE_HOME=$ROOT/j2sdk-bundle/jre
 export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib
@@ -35,6 +36,16 @@ export PATH=$PATH:$JAVA_HOME/bin
 
 
 
+## JAVA版本的区别
+```
+package javafx.util does not exist
+openJDK 没用这个包
+改成oracle1.8 201解决
+
+jdk11 以下不支持 repeat方法
+separator += "-".repeat(width) + "-+-";
+
+```
 ### 异常
 
 #### 异常介绍
@@ -171,7 +182,7 @@ wget mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/3.6.2/source/apache-maven
 
 unzip apache-maven-3.6.2-bin.zip
 
-
+wget mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/3.8.6/binaries/apache-maven-3.8.6-bin.zip
 
 
 在bashrc 和 bash_profiler添加配置
@@ -184,9 +195,11 @@ export PATH=${MAVEN_HOME}/bin:${PATH}
 
 
 自动式安装
-wget https://mirror.bit.edu.cn/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
-tar xvzf apache-maven-3.6.3-bin.tar.gz
-export MAVEN_HOME=`pwd`/apache-maven-3.6.3
+mvn_version=3.8.8
+wget https://mirror.bit.edu.cn/apache/maven/maven-3/$mvn_version/binaries/apache-maven-$mvn_version-bin.tar.gz
+mvn_version=3.8.8
+tar xvzf apache-maven-$mvn_version-bin.tar.gz
+export MAVEN_HOME=`pwd`/apache-maven-$mvn_version
 export PATH=${MAVEN_HOME}/bin:${PATH}
 
 
@@ -768,12 +781,61 @@ how to throw an exception 或者 如何传递异常
 ### slf4j注解
 
 ```
+先统一删除子依赖包
+[INFO] |  |  +- org.slf4j:slf4j-log4j12:jar:1.7.10:compile
+[INFO] |  +- org.slf4j:slf4j-api:jar:1.6.6:compile
+[INFO] |  |  +- org.apache.logging.log4j:log4j-slf4j-impl:jar:2.12.1:test
+[INFO] |  |  +- org.slf4j:slf4j-log4j12:jar:1.7.10:compile
+
+[INFO] |  |  +- org.apache.logging.log4j:log4j-slf4j-impl:jar:2.12.1:test
+[INFO] |  |  +- org.apache.logging.log4j:log4j-api:jar:2.12.1:compile
+[INFO] |  |  \- org.apache.logging.log4j:log4j-core:jar:2.12.1:compile
+[INFO] |  |  +- log4j:log4j:jar:1.2.17:compile
+[INFO] |  |  +- org.slf4j:slf4j-log4j12:jar:1.7.10:compile
+
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-slf4j-impl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+
 https://blog.csdn.net/HeatDeath/article/details/79833880
 
 <!--可以引入日志 @Slf4j注解-->
 <dependency>
     <groupId>org.projectlombok</groupId>
     <artifactId>lombok</artifactId>
+    <version>1.18.22</version>
+</dependency>
+<dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-log4j12</artifactId>
+    <version>1.7.25</version>
+    <scope>compile</scope>
+</dependency>
+<dependency>
+    <groupId>ch.qos.logback</groupId>
+    <artifactId>logback-classic</artifactId>
+    <version>1.2.12</version>
 </dependency>
 
 @Slf4j
@@ -809,14 +871,32 @@ log4j2.xml的配置
 </Configuration>
 
 log4j.properties
-# Root logger option
-log4j.rootLogger=INFO, stdout
+### 设置###
+log4j.rootLogger = info,stdout,D,E
 
-# Direct log messages to stdout
-log4j.appender.stdout=org.apache.log4j.ConsoleAppender
-log4j.appender.stdout.Target=System.out
-log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
-log4j.appender.stdout.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m
+### 输出信息到控制抬 ###
+log4j.appender.stdout = org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.Target = System.out
+log4j.appender.stdout.layout = org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern = [%-5p] %d{yyyy-MM-dd HH:mm:ss,SSS} method:%l %m%n
+
+### 输出DEBUG 级别以上的日志到=logs/error.log ###
+log4j.appender.D = org.apache.log4j.DailyRollingFileAppender
+log4j.appender.D.File = logs/log.log
+log4j.appender.D.Append = true
+log4j.appender.D.Threshold = DEBUG 
+log4j.appender.D.layout = org.apache.log4j.PatternLayout
+log4j.appender.D.layout.ConversionPattern = %-d{yyyy-MM-dd HH:mm:ss}  [ %t:%r ] - [ %p ]  %m%n
+
+### 输出ERROR 级别以上的日志到=logs/error.log ###
+log4j.appender.E = org.apache.log4j.DailyRollingFileAppender
+log4j.appender.E.File =logs/error.log 
+log4j.appender.E.Append = true
+log4j.appender.E.Threshold = ERROR 
+log4j.appender.E.layout = org.apache.log4j.PatternLayout
+log4j.appender.E.layout.ConversionPattern = %-d{yyyy-MM-dd HH:mm:ss}  [ %t:%r ] - [ %p ]  %m%n
+
+
 
 ```
 
@@ -1647,7 +1727,28 @@ https://blog.csdn.net/zengxiantao1994/article/details/73927754
 
 
 ==================================================================================================================
+示例反射 - 初始化私有类型的构造函数
+初始化hivecatalog测试类
 
+            Class<?> catalogClass = Class.forName("org.apache.flink.table.catalog.hive.HiveCatalog");
+            HiveCatalog hiveCatalog = null;
+            Constructor constructor =  catalogClass.getDeclaredConstructor(
+                    String.class,
+                    String.class,
+                    HiveConf.class,
+                    String.class,
+                    boolean.class);
+            constructor.setAccessible(true);
+            hiveCatalog = (HiveCatalog) constructor
+                    .newInstance(
+                            name,
+                            null,
+                            createHiveConf(),
+                            StringUtils.isNullOrWhitespaceOnly(hiveVersion)
+                                    ? HiveShimLoader.getHiveVersion()
+                                    : hiveVersion,
+                            true);
+            return hiveCatalog;
 
 
 
@@ -2943,6 +3044,113 @@ https://blog.csdn.net/Hello_World_QWP/article/details/82459915
 
 ================================================================================================
 
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-shade-plugin:3.4.1:shade (default) on project executor-spark-dataminig: Unable to parse configuration of mojo org.apache.maven.plugins:maven-shade-plugin:3.4.1:shade for parameter resource: Cannot find 'resource' in class org.apache.maven.plugins.shade.resource.ManifestResourceTransformer -> [Help 1]
+org.apache.maven.lifecycle.LifecycleExecutionException: Failed to execute goal org.apache.maven.plugins:maven-shade-plugin:3.4.1:shade (default) on project executor-spark-dataminig: Unable to parse configuration of mojo org.apache.maven.plugins:maven-shade-plugin:3.4.1:shade for parameter resource: Cannot find 'resource' in class org.apache.maven.plugins.shade.resource.ManifestResourceTransformer
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:215)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:156)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:148)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:117)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:81)
+    at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build (SingleThreadedBuilder.java:56)
+    at org.apache.maven.lifecycle.internal.LifecycleStarter.execute (LifecycleStarter.java:128)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:305)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:192)
+    at org.apache.maven.DefaultMaven.execute (DefaultMaven.java:105)
+    at org.apache.maven.cli.MavenCli.execute (MavenCli.java:957)
+    at org.apache.maven.cli.MavenCli.doMain (MavenCli.java:289)
+    at org.apache.maven.cli.MavenCli.main (MavenCli.java:193)
+    at sun.reflect.NativeMethodAccessorImpl.invoke0 (Native Method)
+    at sun.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:62)
+    at sun.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:43)
+    at java.lang.reflect.Method.invoke (Method.java:498)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced (Launcher.java:282)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launch (Launcher.java:225)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode (Launcher.java:406)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.main (Launcher.java:347)
+Caused by: org.apache.maven.plugin.PluginConfigurationException: Unable to parse configuration of mojo org.apache.maven.plugins:maven-shade-plugin:3.4.1:shade for parameter resource: Cannot find 'resource' in class org.apache.maven.plugins.shade.resource.ManifestResourceTransformer
+    at org.apache.maven.plugin.internal.DefaultMavenPluginManager.populatePluginFields (DefaultMavenPluginManager.java:665)
+    at org.apache.maven.plugin.internal.DefaultMavenPluginManager.getConfiguredMojo (DefaultMavenPluginManager.java:597)
+    at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo (DefaultBuildPluginManager.java:124)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:210)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:156)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:148)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:117)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:81)
+    at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build (SingleThreadedBuilder.java:56)
+    at org.apache.maven.lifecycle.internal.LifecycleStarter.execute (LifecycleStarter.java:128)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:305)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:192)
+    at org.apache.maven.DefaultMaven.execute (DefaultMaven.java:105)
+    at org.apache.maven.cli.MavenCli.execute (MavenCli.java:957)
+    at org.apache.maven.cli.MavenCli.doMain (MavenCli.java:289)
+    at org.apache.maven.cli.MavenCli.main (MavenCli.java:193)
+    at sun.reflect.NativeMethodAccessorImpl.invoke0 (Native Method)
+    at sun.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:62)
+    at sun.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:43)
+    at java.lang.reflect.Method.invoke (Method.java:498)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced (Launcher.java:282)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launch (Launcher.java:225)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode (Launcher.java:406)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.main (Launcher.java:347)
+Caused by: org.codehaus.plexus.component.configurator.ComponentConfigurationException: Cannot find 'resource' in class org.apache.maven.plugins.shade.resource.ManifestResourceTransformer
+    at org.eclipse.sisu.plexus.CompositeBeanHelper.setProperty (CompositeBeanHelper.java:252)
+    at org.codehaus.plexus.component.configurator.converters.composite.ObjectWithFieldsConverter.processConfiguration (ObjectWithFieldsConverter.java:101)
+    at org.codehaus.plexus.component.configurator.converters.composite.ObjectWithFieldsConverter.fromConfiguration (ObjectWithFieldsConverter.java:57)
+    at org.codehaus.plexus.component.configurator.converters.composite.AbstractCollectionConverter.fromChildren (AbstractCollectionConverter.java:54)
+    at org.codehaus.plexus.component.configurator.converters.composite.ArrayConverter.fromConfiguration (ArrayConverter.java:52)
+    at org.eclipse.sisu.plexus.CompositeBeanHelper.convertProperty (CompositeBeanHelper.java:273)
+    at org.eclipse.sisu.plexus.CompositeBeanHelper.setProperty (CompositeBeanHelper.java:210)
+    at org.codehaus.plexus.component.configurator.converters.composite.ObjectWithFieldsConverter.processConfiguration (ObjectWithFieldsConverter.java:101)
+    at org.codehaus.plexus.component.configurator.BasicComponentConfigurator.configureComponent (BasicComponentConfigurator.java:34)
+    at org.apache.maven.plugin.internal.DefaultMavenPluginManager.populatePluginFields (DefaultMavenPluginManager.java:635)
+    at org.apache.maven.plugin.internal.DefaultMavenPluginManager.getConfiguredMojo (DefaultMavenPluginManager.java:597)
+    at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo (DefaultBuildPluginManager.java:124)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:210)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:156)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:148)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:117)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:81)
+    at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build (SingleThreadedBuilder.java:56)
+    at org.apache.maven.lifecycle.internal.LifecycleStarter.execute (LifecycleStarter.java:128)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:305)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:192)
+    at org.apache.maven.DefaultMaven.execute (DefaultMaven.java:105)
+    at org.apache.maven.cli.MavenCli.execute (MavenCli.java:957)
+    at org.apache.maven.cli.MavenCli.doMain (MavenCli.java:289)
+    at org.apache.maven.cli.MavenCli.main (MavenCli.java:193)
+    at sun.reflect.NativeMethodAccessorImpl.invoke0 (Native Method)
+    at sun.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:62)
+    at sun.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:43)
+    at java.lang.reflect.Method.invoke (Method.java:498)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced (Launcher.java:282)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launch (Launcher.java:225)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode (Launcher.java:406)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.main (Launcher.java:347)
+
+shade插件打包异常
+注释相关行 transformer的标签
+                      <transformer-->
+<!--                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">-->
+<!--                                    <mainClass>-->
+<!--                                        com.meituan.service.mobile.offline.selector.indexgenerator.framework.IndexGeneratorService-->
+<!--                                    </mainClass>-->
+<!--                                </transformer>-->
+
+================================================================================================
+
+
+
+
+================================================================================================
+
+
+
+
+
+================================================================================================
+
+
+
 
 
 
@@ -3152,6 +3360,15 @@ if (withPretty) {
         } else {
             return jo.toString();
         }
+
+```
+
+### byte[] 和 string 互转 需要借助base64
+```
+byte[] userActionProtos = ua.toByteArray();
+Base64.getDecoder().decode(Base64.getEncoder().encodeToString(userActionProtos))
+
+
 
 ```
 

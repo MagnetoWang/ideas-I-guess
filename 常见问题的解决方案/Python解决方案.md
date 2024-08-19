@@ -14,6 +14,20 @@
 
 ### 常识
 
+#### python3.12 强制安装虚拟环境
+```
+× This environment is externally managed
+╰─> To install Python packages system-wide, try brew install
+    xyz, where xyz is the package you are trying to
+    install.
+
+python3 -m venv myenv
+source myenv/bin/activate
+python3 -m pip install requests
+
+```
+
+
 #### 安装
 
 ```
@@ -122,6 +136,9 @@ sh Anaconda3-5.3.0-Linux-x86_64.sh
 在内部需要指定安装路径
 最后配置好路径即可
 source ~/python/anaconda3/etc/profile.d/conda.sh
+
+
+
 ```
 
 
@@ -140,7 +157,7 @@ python3 pip3 install -r requirement.txt
 
 
 获取依赖
-pip freeze requirement.txt
+pip freeze > requirement.txt
 ```
 
 ### 代码规范
@@ -686,18 +703,29 @@ git clone https://github.com/pyenv/pyenv.git ~/.pyenv
 git clone https://gitee.com/mirrors/pyenv.git ~/.pyenv
 export PYTHON_BUILD_MIRROR_URL="https://npm.taobao.org/mirrors/python/"
 
+git clone https://github.com/pyenv/pyenv-virtualenv.git  ~/.pyenv/plugins/pyenv-virtualenv
+
+
 国内加速
 echo 'HOME=~' >> ~/.bash_profile
 echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bash_profile
 echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bash_profile
+
+
 
 export v=3.7.1; wget https://npm.taobao.org/mirrors/python/$v/Python-$v.tar.xz -P ~/.pyenv/cache/; pyenv install $v 
 
 
 bashrc
 
+HOME=~
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+
 安装某个python版本
-pyenv install 3.7.1
+pyenv install 3.9
+pyenv virtualenv 3.9.19 env39
+pyenv local env39
 
 pyenv virtualenv 2.7.1 env271
 
@@ -1661,13 +1689,30 @@ print outer()() # 输出3
 
 # 新项目
 
+## Python 替代 Linux 计划
+目的：解决linux上一些难用，不方便自动化的工具，转而用python实现
+### 解压工具
+```
+import zipfile
+from tqdm import tqdm
+
+# 定义 zip 文件路径和解压目录路径
+zip_file_path = "data/data229919/data.zip"
+extract_dir_path = "./"
+
+# 创建 ZipFile 对象
+with zipfile.ZipFile(zip_file_path, "r") as zip_file:
+    # 获取 zip 文件中的文件列表
+    file_list = zip_file.namelist()
+    # 使用 tqdm 创建进度条
+    for file in tqdm(iterable=file_list, desc="解压进度", total=len(file_list)):
+        # 解压单个文件到指定目录
+        zip_file.extract(file, extract_dir_path)
+print("解压完成")
+
+```
+
 ## 爬虫
-
-### 库
-
-```
-
-```
 
 ### 问题
 

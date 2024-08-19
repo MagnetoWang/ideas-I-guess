@@ -44,6 +44,9 @@ Pytorch + 公司项目
 
 ```
 
+### TODO - 必看必做
+1. 如何提高自己的代码能力以达到熟练使用pytorch? - pythonic生物人的回答 - 知乎 https://www.zhihu.com/question/352525266/answer/3356272708
+2. 
 
 ### 参考资料
 1. PyTorch 2.0 重磅发布：编译、编译、还是编译 https://hyper.ai/news/22891
@@ -60,6 +63,8 @@ Pytorch + 公司项目
     2.  DeepLearningForNLPInPytorch：https://github.com/rguthrie3/DeepLearningForNLPInPytorch
     3.  一个开放领域问答系统DrQA的PyTorch实现：https://github.com/facebookresearch/DrQA
 11. PyTorch Metric Learning Overview：https://github.com/KevinMusgrave/pytorch-metric-learning?tab=readme-ov-file
+12. 推理
+    1. 模型推理服务化框架Triton保姆式教程：https://juejin.cn/post/7232571353122177082
 
 
 
@@ -363,8 +368,6 @@ def embedding(
 torch.autograd.set_detect_anomaly(True)
 
 
-
-
 ```
 ## 横向结构 加减乘除根号平方
 1. github/pytorch/build/aten/src/ATen/core/TensorBody.h
@@ -399,6 +402,32 @@ torch.autograd.set_detect_anomaly(True)
 3. github/pytorch/torch/distributed/_tensor/op_schema.py
 ### torch.ops.fbgemm.asynchronous_complete_cumsum
 ```
+
+```
+
+## 横向结构 内存管理
+```
+
+
+```
+
+## 横向结构 网络通信
+```
+
+
+```
+
+
+## 横向结构 图结构
+```
+
+
+```
+
+
+## 横向结构 数据交换和存储
+```
+
 
 ```
 
@@ -1135,6 +1164,9 @@ graph(%self : __torch__.LinearMod,
 
 ### cuda
 
+## 横向拆解 - checkpoint
+1. 【pytorch】重计算checkpoint机制 - Joe.Zhao的文章 - 知乎 https://zhuanlan.zhihu.com/p/711615560
+
 
 ## 自定义网络结构和模型
 ### pytorch
@@ -1326,6 +1358,7 @@ PyTorch的ABI兼容性非常重要，因为它允许用户在不同的PyTorch版
 
 需要注意的是，虽然ABI保证了二进制兼容性，但在某些情况下，仍然可能需要重新编译代码以适应特定的PyTorch版本。例如，如果PyTorch库的API发生了重大变化，或者你的代码依赖于特定版本的PyTorch的新功能，那么可能需要进行重新编译以确保代码的正确性和性能。
 ```
+
 
 ## 基础模型结构示例
 1. https://github.com/yunjey/pytorch-tutorial/blob/master/tutorials/01-basics/pytorch_basics/main.py

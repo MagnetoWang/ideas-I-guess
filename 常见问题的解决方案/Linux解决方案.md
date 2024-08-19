@@ -68,7 +68,10 @@
   - 类似more。但是more只能往下看，不能往上看
   - less可以向上和向下卡n
 
-## 系统工具
+## Linux工具
+1. 采集系统指标：https://github.com/aristocratos/btop?tab=readme-ov-file
+2. 有哪些适合个人练手的中等规模的C++项目？ - Rocky0429的回答 - 知乎 https://www.zhihu.com/question/56579764/answer/3183916295
+3. c++ debug日志工具：https://github.com/sharkdp/dbg-macro
 
 - **系统**
 
@@ -653,7 +656,7 @@ python2
 python -m SimpleHTTPServer 1234
 
 python3
-python -m http.server 1234
+python3 -m http.server 1234
 
 在网页上 ip:1234 就可以访问服务器
 ```
@@ -1726,6 +1729,15 @@ https://www.cnblogs.com/EasonJim/p/9826681.html
 
 ## 文件
 
+### 统计大文件
+```
+sudo find /docker -type f -size +100M -exec ls -lh {} \; | awk '{ print $9 ": " $5 }'
+```
+### 统计大文件夹
+```
+sudo du -h /docker | grep '^[0-9\.]\+G' | sort -hr
+```
+
 ### 对比两个文件内容
 
 ```
@@ -2422,8 +2434,36 @@ $JAVABIN \
 -cp $CLASSPATH \
 com.tencent.hybris.engine.crawler.hive.HbaseCrawlerTest
 
+```
 
+### 统计子文件夹磁盘占用并排序
+```
+➜  project du -h --max-depth=1 | sort -rh            
+20G     .
+8.4G    ./2023大模型知识库
+6.4G    ./2023IKCEST
+3.3G    ./chatglm
+1.1G    ./doc_query
+263M    ./lab
+153M    ./speech_en
+75M     ./runjava
+42M     ./run_last
+3.1M    ./2023数学建模C题
 
+```
+
+### 文件查找常用命令
+```
+
+关键词搜索
+find . -maxdepth 2 -type d -name "confu-deps"
+
+```
+
+## HDFS
+### 递归打印文件路径
+```
+hdfs dfs -ls -R viewfs://hadoop-meituan/user/hadoop-search > search_paths.txt
 
 
 ```

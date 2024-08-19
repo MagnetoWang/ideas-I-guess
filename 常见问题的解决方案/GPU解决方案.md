@@ -1,8 +1,30 @@
 ## GPU解决方案
 
 ### 资料
-
 ```
+
+[CUDA 学习笔记] GEMM 优化: 双缓冲 (Prefetch) 和 Bank Conflict 解决 - PeakCrosser的文章 - 知乎
+https://zhuanlan.zhihu.com/p/696844342
+
+
+如何系统地学习CUDA？ - Kedreamix的回答 - 知乎
+https://www.zhihu.com/question/263832290/answer/3322864217
+https://github.com/Kedreamix/pytorch-cppcuda-tutorial
+
+
+cuda编程示例
+https://face2ai.com/program-blog/#GPU%E7%BC%96%E7%A8%8B%EF%BC%88CUDA%EF%BC%89
+
+
+
+CUDA还能走多远？ - 王振邦的回答 - 知乎
+https://www.zhihu.com/question/30597217/answer/3024851394
+
+
+如何系统学习GPU架构？ - Bruce 仗剑走天涯的回答 - 知乎
+https://www.zhihu.com/question/319355296/answer/3374307130
+
+
 gpu计算：https://www.bilibili.com/video/BV1hE41187Mb?p=3
 
 
@@ -225,6 +247,9 @@ volatile 可以防止编译器提前优化代码，因为共享内存的方面�
 
 ## 算子优化
 ```
+
+
+
 [CUDA 学习笔记] Reduce 算子优化 - PeakCrosser的文章 - 知乎
 https://zhuanlan.zhihu.com/p/688610091
 
@@ -270,6 +295,14 @@ https://zhuanlan.zhihu.com/p/686225377
 
 有没有大模型推理加速引擎FasterTransformer入门级教程？ - 进击的Killua的回答 - 知乎
 https://www.zhihu.com/question/602468960/answer/3315182172
+
+
+flash-attention快速实现
+https://github.com/tspeterkim/flash-attention-minimal
+
+
+ops(2)：SoftMax 算子的 CUDA 实现与优化 - 紫气东来的文章 - 知乎
+https://zhuanlan.zhihu.com/p/695307283
 
 ```
 
@@ -317,6 +350,10 @@ https://zhuanlan.zhihu.com/p/686232369
 
 ### 
 
+
+## TensorRT
+1. 如何自学TensorRT? - chamber的回答 - 知乎 https://www.zhihu.com/question/567947309/answer/3184968930
+2. onnx：https://onnx.ai/
 
 ## 面试
 1. 推理部署工程师面试题库 - 进击的Killua的文章 - 知乎 https://zhuanlan.zhihu.com/p/673046520

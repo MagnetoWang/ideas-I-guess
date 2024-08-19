@@ -322,25 +322,134 @@ It is possible the underlying files have been updated. You can explicitly invali
 ```
 
 
-##
+## FileFormatWriter算子不能写入null，需要过滤 row == null
+```
+Caused by: java.lang.NullPointerException
+24/07/29 14:47:30 ERROR Driver ApplicationMaster: User class threw exception: org.apache.spark.SparkException: Job aborted.
+org.apache.spark.SparkException: Job aborted.
+	at org.apache.spark.sql.execution.datasources.FileFormatWriter$$anonfun$write$1.apply(FileFormatWriter.scala:274)
+	at org.apache.spark.sql.execution.datasources.FileFormatWriter$$anonfun$write$1.apply(FileFormatWriter.scala:209)
+	at org.apache.spark.sql.execution.SQLExecution$.withNewQueryId(SQLExecution.scala:57)
+	at org.apache.spark.sql.execution.SQLExecution$.withNewExecutionId(SQLExecution.scala:101)
+	at org.apache.spark.sql.execution.datasources.FileFormatWriter$.write(FileFormatWriter.scala:209)
+	at org.apache.spark.sql.execution.datasources.InsertIntoHadoopFsRelationCommand.run(InsertIntoHadoopFsRelationCommand.scala:152)
+	at org.apache.spark.sql.execution.command.ExecutedCommandExec.sideEffectResult$lzycompute(commands.scala:58)
+	at org.apache.spark.sql.execution.command.ExecutedCommandExec.sideEffectResult(commands.scala:56)
+	at org.apache.spark.sql.execution.command.ExecutedCommandExec.doExecute(commands.scala:74)
+	at org.apache.spark.sql.execution.SparkPlan$$anonfun$execute$1.apply(SparkPlan.scala:117)
+	at org.apache.spark.sql.execution.SparkPlan$$anonfun$execute$1.apply(SparkPlan.scala:117)
+	at org.apache.spark.sql.execution.SparkPlan$$anonfun$executeQuery$1.apply(SparkPlan.scala:138)
+	at org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:151)
+	at org.apache.spark.sql.execution.SparkPlan.executeQuery(SparkPlan.scala:135)
+	at org.apache.spark.sql.execution.SparkPlan.execute(SparkPlan.scala:116)
+	at org.apache.spark.sql.execution.QueryExecution.toRdd$lzycompute(QueryExecution.scala:102)
+	at org.apache.spark.sql.execution.QueryExecution.toRdd(QueryExecution.scala:98)
+	at org.apache.spark.sql.execution.datasources.DataSource.writeInFileFormat(DataSource.scala:438)
+	at org.apache.spark.sql.execution.datasources.DataSource.writeAndRead(DataSource.scala:454)
+	at org.apache.spark.sql.execution.command.CreateDataSourceTableAsSelectCommand.saveDataIntoTable(createDataSourceTables.scala:198)
+	at org.apache.spark.sql.execution.command.CreateDataSourceTableAsSelectCommand.run(createDataSourceTables.scala:158)
+	at org.apache.spark.sql.execution.command.ExecutedCommandExec.sideEffectResult$lzycompute(commands.scala:58)
+	at org.apache.spark.sql.execution.command.ExecutedCommandExec.sideEffectResult(commands.scala:56)
+	at org.apache.spark.sql.execution.command.ExecutedCommandExec.doExecute(commands.scala:74)
+	at org.apache.spark.sql.execution.SparkPlan$$anonfun$execute$1.apply(SparkPlan.scala:117)
+	at org.apache.spark.sql.execution.SparkPlan$$anonfun$execute$1.apply(SparkPlan.scala:117)
+	at org.apache.spark.sql.execution.SparkPlan$$anonfun$executeQuery$1.apply(SparkPlan.scala:138)
+	at org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:151)
+	at org.apache.spark.sql.execution.SparkPlan.executeQuery(SparkPlan.scala:135)
+	at org.apache.spark.sql.execution.SparkPlan.execute(SparkPlan.scala:116)
+	at org.apache.spark.sql.execution.QueryExecution.toRdd$lzycompute(QueryExecution.scala:102)
+	at org.apache.spark.sql.execution.QueryExecution.toRdd(QueryExecution.scala:98)
+	at org.apache.spark.sql.DataFrameWriter.runCommand(DataFrameWriter.scala:610)
+	at org.apache.spark.sql.DataFrameWriter.createTable(DataFrameWriter.scala:420)
+	at org.apache.spark.sql.DataFrameWriter.saveAsTable(DataFrameWriter.scala:399)
+	at org.apache.spark.sql.DataFrameWriter.saveAsTable(DataFrameWriter.scala:354)
+	at com.meituan.supply.offline.biz.dmx.DumpHive$.main(DumpHive.scala:108)
+	at com.meituan.supply.offline.biz.dmx.DumpHive.main(DumpHive.scala)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.apache.spark.deploy.yarn.ApplicationMaster$$anon$2.run(ApplicationMaster.scala:688)
+Caused by: org.apache.spark.SparkException: Job aborted due to stage failure: Task 1 in stage 1.0 failed 4 times, most recent failure: Lost task 1.3 in stage 1.0 (TID 7, zw06-data-hdp-dn06559.mt, executor 1): java.lang.NullPointerException
+
+Driver stacktrace:
+	at org.apache.spark.scheduler.DAGScheduler.org$apache$spark$scheduler$DAGScheduler$$failJobAndIndependentStages(DAGScheduler.scala:1667)
+	at org.apache.spark.scheduler.DAGScheduler$$anonfun$abortStage$1.apply(DAGScheduler.scala:1655)
+	at org.apache.spark.scheduler.DAGScheduler$$anonfun$abortStage$1.apply(DAGScheduler.scala:1654)
+	at scala.collection.mutable.ResizableArray$class.foreach(ResizableArray.scala:59)
+	at scala.collection.mutable.ArrayBuffer.foreach(ArrayBuffer.scala:48)
+	at org.apache.spark.scheduler.DAGScheduler.abortStage(DAGScheduler.scala:1654)
+	at org.apache.spark.scheduler.DAGScheduler$$anonfun$handleTaskSetFailed$1.apply(DAGScheduler.scala:842)
+	at org.apache.spark.scheduler.DAGScheduler$$anonfun$handleTaskSetFailed$1.apply(DAGScheduler.scala:842)
+	at scala.Option.foreach(Option.scala:257)
+	at org.apache.spark.scheduler.DAGScheduler.handleTaskSetFailed(DAGScheduler.scala:842)
+	at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.doOnReceive(DAGScheduler.scala:1884)
+	at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.onReceive(DAGScheduler.scala:1833)
+	at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.onReceive(DAGScheduler.scala:1822)
+	at org.apache.spark.util.EventLoop$$anon$1.run(EventLoop.scala:48)
+	at org.apache.spark.scheduler.DAGScheduler.runJob(DAGScheduler.scala:650)
+	at org.apache.spark.SparkContext.runJob(SparkContext.scala:2070)
+	at org.apache.spark.sql.execution.datasources.FileFormatWriter$$anonfun$write$1.apply(Fil
+
+```
+
+## executor心跳超时
+```
+作业失败直接原因是这个，executor心跳超时
+
+Job aborted due to stage failure: Task 507 in stage 19.0 failed 4 times, most recent failure: Lost task 507.3 in stage 19.0 (TID 5104, yg-data-hdp-dn00350.mt, executor 298): ExecutorLostFailure (executor 298 exited caused by one of the running tasks) Reason: Executor heartbeat timed out after 137713 ms
+
+2024-08-04 17:07:06 GCTime(ms): 114
+2024-08-04 17:17:27 GCTime(ms): 503379
+2024-08-04 17:27:42  GCTime(ms): 1109147
+
+executor内存严重不足， 根据日志看，每隔10分钟统计的gc时间，分别为8分钟和10分钟
+
 ```
 
 
+## File does not exist
 ```
+24/08/07 12:24:55 INFO task-result-getter-0 TaskSetManager: Lost task 5637.1 in stage 21.0 (TID 27557) on zw01-data-hdp-dn05225.mt, executor 2280: java.io.FileNotFoundException (File does not exist: /zw02nn93/warehouse/mart_aiosupply.db/supply_selection_tag_relation_v2/dt=20240807/item_type=PoiNormal/part-00399-44c0ee32-1288-4d8e-8bb0-bcbc522c79a9.c000
+	at org.apache.hadoop.hdfs.server.namenode.INodeFile.valueOf(INodeFile.java:88)
+	at org.apache.hadoop.hdfs.server.namenode.INodeFile.valueOf(INodeFile.java:78)
+	at org.apache.hadoop.hdfs.server.namenode.FSNamesystem.getBlockLocationsInt(FSNamesystem.java:2571)
+	at org.apache.hadoop.hdfs.server.namenode.FSNamesystem.getBlockLocations(FSNamesystem.java:2544)
+	at org.apache.hadoop.hdfs.server.namenode.FSNamesystem.getBlockLocations(FSNamesystem.java:2409)
+	at org.apache.hadoop.hdfs.server.namenode.NameNodeRpcServer.getBlockLocations(NameNodeRpcServer.java:780)
+	at org.apache.hadoop.hdfs.protocolPB.ClientNamenodeProtocolServerSideTranslatorPB.getBlockLocations(ClientNamenodeProtocolServerSideTranslatorPB.java:448)
+	at org.apache.hadoop.ipc.ProtobufRpcEngine$Server$ProtoBufRpcInvoker.call(ProtobufRpcEngine.java:713)
+	at org.apache.hadoop.ipc.RPC$Server.call(RPC.java:975)
+	at org.apache.hadoop.ipc.Server$RpcCall.run(Server.java:1002)
+	at org.apache.hadoop.ipc.Server$RpcCall.run(Server.java:923)
+	at javax.security.auth.Subject.doAs(Subject.java:422)
+	at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1726)
+	at org.apache.hadoop.ipc.Server$Handler.run(Server.java:2786)
+Caused by: org.apache.hadoop.ipc.RemoteException(java.io.FileNotFoundException): File does not exist: /xx/warehouse/xx.db/xx/dt=xx
+	at org.apache.hadoop.hdfs.server.namenode.INodeFile.valueOf(INodeFile.java:88)
+	at org.apache.hadoop.hdfs.server.namenode.INodeFile.valueOf(INodeFile.java:78)
+	at org.apache.hadoop.hdfs.server.namenode.FSNamesystem.getBlockLocationsInt(FSNamesystem.java:2571)
+	at org.apache.hadoop.hdfs.server.namenode.FSNamesystem.getBlockLocations(FSNamesystem.java:2544)
+	at org.apache.hadoop.hdfs.server.namenode.FSNamesystem.getBlockLocations(FSNamesystem.java:2409)
+	at org.apache.hadoop.hdfs.server.namenode.NameNodeRpcServer.getBlockLocations(NameNodeRpcServer.java:780)
+	at org.apache.hadoop.hdfs.protocolPB.ClientNamenodeProtocolServerSideTranslatorPB.getBlockLocations(ClientNamenodeProtocolServerSideTranslatorPB.java:448)
+	at org.apache.hadoop.hdfs.protocol.proto.ClientNamenodeProtocolProtos$ClientNamenodeProtocol$2.callBlockingMethod(ClientNamenodeProtocolProtos.java)
+	at org.apache.hadoop.ipc.ProtobufRpcEngine$Server$ProtoBufRpcInvoker.call(ProtobufRpcEngine.java:713)
+	at org.apache.hadoop.ipc.RPC$Server.call(RPC.java:975)
+	at org.apache.hadoop.ipc.Server$RpcCall.run(Server.java:1002)
+	at org.apache.hadoop.ipc.Server$RpcCall.run(Server.java:923)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at javax.security.auth.Subject.doAs(Subject.java:422)
+	at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1726)
+	at org.apache.hadoop.ipc.Server$Handler.run(Server.java:2786)
 
-
-
-
-
-##
-```
-
-
-```
-
-
-##
-```
+	at org.apache.hadoop.ipc.Client.extractCallException(Client.java:2059)
+	at org.apache.hadoop.ipc.Client.access$3500(Client.java:120)
+	at org.apache.hadoop.ipc.Client$Connection.lambda$receiveRpcResponse$6(Client.java:1647)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+	at java.lang.Thread.run(Thread.java:745)
 
 
 ```

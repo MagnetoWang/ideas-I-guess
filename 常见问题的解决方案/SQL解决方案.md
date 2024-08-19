@@ -5,7 +5,7 @@
 ### 资料
 
 - SQL 语法教程：https://www.w3schools.com/sql/default.asp
-
+- 开窗函数总结：https://baispace.cn/article/hive-knowledge-window-function.html
 
 
 ### 语法问题
@@ -38,3 +38,4 @@
 - 两张表要保证对应的字段是1：1。而不能出现1：N，或者 N：1
   - https://blog.csdn.net/fdipzone/article/details/45119551
 - 问题发现来源：https://mapr.com/community/s/question/0D50L00006BItfbSAD/null-pointer-error-at-spark-count
+

@@ -63,7 +63,7 @@ tree -ACL 1
    1. 谷歌苹果Spark面试题，搞懂这些绝对稳稳的 - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/679253575
    2. spark常见事故：https://zhuanlan.zhihu.com/p/659056832
    3. 
-4. 
+4. Spark性能调优实战 极客时间课程
 
 
 
@@ -129,7 +129,55 @@ tree -ACL 1
 
 ### 横向拆解 Join设计
 1. sql/core/src/main/scala/org/apache/spark/sql/execution/joins
+   
+#### 大表Join小表
+1. Join Key远大于Payload
+2. 过滤条件的Selectivity较高
 
+#### 大表Join大表
+```
+“大表Join大表”的第一种调优思路是“分而治之”，我们要重点掌握它的调优思路以及两个关键环节的优化处理。
+
+“分而治之”的核心思想是通过均匀拆分内表的方式 ，把一个复杂而又庞大的Shuffle Join转化为多个Broadcast Joins，它的目的是，消除原有Shuffle Join中两张大表所引入的海量数据分发，大幅削减磁盘与网络开销的同时，从整体上提升作业端到端的执行性能。
+
+在“分而治之”的调优过程中，内表的拆分最为关键，因为它肩负着Shuffle Join能否成功转化为Broadcast Joins的重要作用。而拆分的关键在于拆分列的选取。为了兼顾执行性能与开发效率，拆分列的基数要足够大，这样才能让子表小到足以放进广播变量，但同时，拆分列的基数也不宜过大，否则实现“分而治之”的开发成本就会陡然上升。通常来说，日期列往往是个不错的选择。
+
+为了避免在调优的过程中引入额外的计算开销，我们要特别注意外表的重复扫描问题。针对外表的重复扫描，我们至少有两种应对方法。第一种是将外表全量缓存到内存，不过这种方法对于内存空间的要求较高，不具备普适性。第二种是利用Spark 3.0版本推出的DPP特性，在数仓设计之初，就以Join Key作为分区键，对外表做分区存储。
+
+当我们做好了内表拆分，同时也避免了外表的重复扫描，我们就可以把原始的Shuffle Join转化为多个Broadcast Joins，在消除海量数据在全网分发的同时，避免引入额外的性能开销。那么毫无疑问，查询经过“分而治之”的调优过后，作业端到端的执行性能一定会得到大幅提升。
+
+```
+
+#### 数据倾斜
+```
+以Task为粒度解决数据倾斜
+
+学过AQE之后，要应对数据倾斜，想必你很快就会想到AQE的特性：自动倾斜处理。给定如下配置项参数，Spark SQL在运行时可以将策略OptimizeSkewedJoin插入到物理计划中，自动完成Join过程中对于数据倾斜的处理。
+
+spark.sql.adaptive.skewJoin.skewedPartitionFactor，判定倾斜的膨胀系数。
+spark.sql.adaptive.skewJoin.skewedPartitionThresholdInBytes，判定倾斜的最低阈值。
+spark.sql.adaptive.advisoryPartitionSizeInBytes，以字节为单位定义拆分粒度。
+
+
+
+以Executor为粒度解决数据倾斜
+“分而治之”和“两阶段Shuffle”
+这里的分而治之与上一讲的分而治之在思想上是一致的，都是以任务分解的方式来解决复杂问题。区别在于我们今天要讲的，是以Join Key是否倾斜为依据来拆解子任务。具体来说，对于外表中所有的Join Keys，我们先按照是否存在倾斜把它们分为两组。一组是存在倾斜问题的Join Keys，另一组是分布均匀的Join Keys。因为给定两组不同的Join Keys，相应地我们把内表的数据也分为两份。
+
+
+今天这一讲，你需要掌握以Shuffle Join的方式去应对“大表Join大表”的计算场景。数据分布不同，应对方法也不尽相同。
+
+当参与Join的两张表数据分布比较均匀，而且内表的数据分片能够完全放入内存，Shuffle Hash Join的计算效率往往高于Shuffle Sort Merge Join，后者是Spark SQL默认的关联机制。你可以使用关键字“shuffle_hash”的Join Hints，强制Spark SQL在运行时选择Shuffle Hash Join实现机制。对于内表数据分片不能放入内存的情况，你可以结合“三足鼎立”的调优技巧，调整并行度、并发度与执行内存这三类参数，来满足这一前提条件。
+
+当参与Join的两张表存在数据倾斜时，如果倾斜的情况在集群内的Executors之间较为均衡，那么最佳的处理方法就是，利用AQE提供的自动倾斜处理机制。你只需要设置好以下三个参数，剩下的事情交给AQE就好了。
+
+spark.sql.adaptive.skewJoin.skewedPartitionFactor，判定倾斜的膨胀系数。
+spark.sql.adaptive.skewJoin.skewedPartitionThresholdInBytes，判定倾斜的最低阈值。
+spark.sql.adaptive.advisoryPartitionSizeInBytes，以字节为单位，定义拆分粒度。
+但是，如果倾斜问题仅集中在少数的几个Executors中，而且这些负载过高的Executors已然成为性能瓶颈，我们就需要采用“分而治之”外加“两阶段Shuffle”的调优技巧去应对。“分而治之”指的是根据Join Keys的倾斜与否，将内外表的数据分为两部分分别处理。其中，均匀的部分可以使用Shuffle Hash Join来完成计算，倾斜的部分需要用“两阶段Shuffle”进行处理。
+
+两阶段Shuffle的关键在于加盐和去盐化。加盐的目的是打散数据分布、平衡Executors之间的计算负载，从而消除Executors单点瓶颈。去盐化的目的是还原原始的关联逻辑。尽管两阶段Shuffle的开发成本较高，但只要获得的性能收益足够显著，我们的投入就是值得的。
+```
 
 
 ### 横向拆解 过滤器设计
@@ -233,7 +281,85 @@ scan -> filter -> project -> agg
 ```
 
 
-### 
+### 横向拆解 Tungsten
+1. Unsafe Row：二进制数据结构
+   1. 字节数组的存储方式在消除存储开销的同时，仅用一个数组对象就能轻松完成一条数据的封装，显著降低GC压力
+   2. JVM至少需要6个对象才能存储一条用户数据。其中，GenericMutableRow用于封装一条数据，Array用于存储实际的数据值。Array中的每个元素都是一个对象，如承载整型的BoxedInteger、承载字符串的String等等。
+2. 内存页管理
+   1. 优化GC，提升内存利用率
+3. WSCG
+   1. WSCG指的是基于同一Stage内操作符之间的调用关系，生成一份“手写代码”，真正把所有计算融合为一个统一的函数。
+   2. 火山迭代模型：原因在于，迭代器嵌套的计算模式会涉及两种操作，一个是内存数据的随机存取，另一个是虚函数调用（next）。这两种操作都会降低CPU的缓存命中率，影响CPU的工作效率。
+   3. 
+```
+Schema为（userID，name，age，gender）
+jvm 内存对象
+首先，存储开销大。我们拿类型是String的name来举例，如果一个用户的名字叫做“Mike”，它本应该只占用4个字节，但在JVM的对象存储中，“Mike”会消耗总共48个字节，其中包括12个字节的对象头信息、8字节的哈希编码、8字节的字段值存储和另外20个字节的其他开销。从4个字节到48个字节，存储开销可见一斑。
+
+其次，在JVM堆内内存中，对象数越多垃圾回收效率越低。因此，一条数据记录用一个对象来封装是最好的。但是，我们从下图中可以看到，JVM需要至少6个对象才能存储一条数据记录。如果你的样本数是1千亿的话，这意味着JVM需要管理6千亿的对象，GC的压力就会陡然上升。
+
+基于内存页的内存管理
+为了统一管理Off Heap和On Heap内存空间，Tungsten定义了统一的128位内存地址，简称Tungsten地址。Tungsten地址分为两部分：前64位预留给Java Object，后64位是偏移地址Offset。但是，同样是128位的Tungsten地址，Off Heap和On Heap两块内存空间在寻址方式上截然不同。
+
+对于On Heap空间的Tungsten地址来说，前64位存储的是JVM堆内对象的引用或者说指针，后64位Offset存储的是数据在该对象内的偏移地址。而Off Heap空间则完全不同，在堆外的空间中，由于Spark是通过Java Unsafe API直接管理操作系统内存，不存在内存对象的概念，因此前64位存储的是null值，后64位则用于在堆外空间中直接寻址操作系统的内存空间。
+
+显然，在Tungsten模式下，管理On Heap会比Off Heap更加复杂。这是因为，在On Heap内存空间寻址堆内数据必须经过两步：第一步，通过前64位的Object引用来定位JVM对象；第二步，结合Offset提供的偏移地址在堆内内存空间中找到所需的数据。
+
+JVM对象地址与偏移地址的关系，就好比是数组的起始地址与数组元素偏移地址之间的关系。给定起始地址和偏移地址之后，系统就可以迅速地寻址到数据元素。因此，在上面的两个步骤中，如何通过Object引用来定位JVM对象就是关键了。接下来，我们就重点解释这个环节。
+
+
+Tungsten使用一种叫做页表（Page Table）的数据结构，来记录从Object引用到JVM对象地址的映射。页表中记录的是一个又一个内存页（Memory Page），内存页实际上就是一个JVM对象而已。只要给定64位的Object引用，Tungsten就能通过页表轻松拿到JVM对象地址，从而完成寻址。
+
+收益
+那么，Tungsten使用这种方式来管理内存有什么收益呢？我们不妨以常用的HashMap数据结构为例，来对比Java标准库（java.util.HashMap）和Tungsten模式下的HashMap。
+java hashmap问题首先是存储开销和GC负担比较大。结合上面的示意图我们不难发现，存储数据的对象值只占整个HashMap一半的存储空间，另外一半的存储空间用来存储引用和指针，这50%的存储开销还是蛮大的。而且我们发现，图中每一个Key、Value和链表元素都是JVM对象。假设，我们用HashMap来存储一百万条数据条目，那么JVM对象的数量至少是三百万。由于JVM的GC效率与对象数量成反比，因此java.util.HashMap的实现方式对于GC并不友好。
+
+其次，在数据访问的过程中，标准库实现的HashMap容易降低CPU缓存命中率，进而降低CPU利用率。链表这种数据结构的特点是，对写入友好，但访问低效。用链表存储数据的方式确实很灵活，这让JVM可以充分利用零散的内存区域，提升内存利用率。但是，在对链表进行全量扫描的时候，这种零散的存储方式会引入大量的随机内存访问（Random Memory Access）。相比顺序访问，随机内存访问会大幅降低CPU cache命中率。
+
+Tungsten 如何实现自己的hashmap
+首先，Tungsten放弃了链表的实现方式，使用数组加内存页的方式来实现HashMap。数组中存储的元素是Hash code和Tungsten内存地址，也就是Object引用外加Offset的128位地址。Tungsten HashMap使用128位地址来寻址数据元素，相比java.util.HashMap大量的链表指针，在存储开销上更低。
+
+其次，Tungsten HashMap的存储单元是内存页，内存页本质上是Java Object，一个内存页可以存储多个数据条目。因此，相比标准库中的HashMap，使用内存页大幅缩减了存储所需的对象数量。比如说，我们需要存储一百万条数据记录，标准库的HashMap至少需要三百万的JVM对象才能存下，而Tungsten HashMap可能只需要几个或是十几个内存页就能存下。对比下来，它们所需的JVM对象数量可以说是天壤之别，显然，Tungsten的实现方式对于GC更加友好。
+
+再者，内存页本质上是JVM对象，其内部使用连续空间来存储数据，内存页加偏移量可以精准地定位到每一个数据元素。因此，在需要扫描HashMap全量数据的时候，得益于内存页中连续存储的方式，内存的访问方式从原来的随机访问变成了顺序读取（Sequential Access）。顺序内存访问会大幅提升CPU cache利用率，减少CPU中断，显著提升CPU利用率
+
+
+
+```
+
+#### WSCG
+```
+火山迭代模型（Volcano Iteration Model，以下简称VI模型）。
+
+从内存中读取父操作符的输出结果作为输入数据
+调用hasNext、next方法，以操作符逻辑处理数据，如过滤、投影、聚合等等
+将处理后的结果以统一的标准形式输出到内存，供下游算子消费
+
+
+```
+
+### 横向拆解 容错机制
+1. Batch mode容错
+2. 在Batch mode下，Structured Streaming利用Checkpoint机制来实现容错。在实际处理数据流中的Micro-batch之前，Checkpoint机制会把该Micro-batch的元信息全部存储到开发者指定的文件系统路径，比如HDFS或是Amazon S3。这样一来，当出现作业或是任务失败时，引擎只需要读取这些事先记录好的元信息，就可以恢复数据流的“断点续传”。
+3. 在Checkpoint存储目录下，有几个子目录，分别是offsets、sources、commits和state，它们所存储的内容，就是各个Micro-batch的元信息日志。对于不同子目录所记录的实际内容，我把它们整理到了下面的图解中，供你随时参考。
+4. Continuous mode容错
+5. 在Continuous mode下，Structured Streaming利用Epoch Marker机制，来实现容错。
+```
+在Batch mode下，Structured Streaming会将数据流切割为一个个的Micro-batch。对于每一个Micro-batch，引擎都会创建一个与之对应的作业，并将作业交付给Spark SQL与Spark Core付诸优化与执行。
+
+Batch mode的特点是吞吐量大，但是端到端的延迟也比较高，延迟往往维持在秒的量级。Batch mode的高延迟，一方面来自作业调度本身，一方面来自它的容错机制，也就是Checkpoint机制需要预写WAL（Write Ahead Log）日志。
+
+要想获得更低的处理延迟，你可以采用Structured Streaming的Continuous mode计算模型。在Continuous mode下，引擎会创建一个Long running job，来负责消费并服务来自Source的所有消息。
+
+在这种情况下，Continuous mode天然地避开了频繁生成、调度作业而引入的计算开销。与此同时，利用Epoch Marker，通过先处理数据、后记录日志的方式，Continuous mode进一步消除了容错带来的延迟影响。
+
+尺有所短、寸有所长，Batch mode在吞吐量上更胜一筹，而Continuous mode在延迟性方面则能达到毫秒级。
+
+不过，需要特别指出的是，到目前为止，在Continuous mode下，Structured Streaming仅支持非聚合（Aggregation）类操作，比如map、filter、flatMap，等等。而聚合类的操作，比如“流动的Word Count”中的分组计数，Continuous mode暂时是不支持的，这一点难免会限制Continuous mode的应用范围，需要你特别注意。
+
+```
+
+
 
 ### 初级模块
 ```
@@ -1747,8 +1873,71 @@ SortMergeJoinExec
 
 
 ```
+### 极客学习总结
+1. RDD的4大属性又可以划分为两类，横向属性和纵向属性。其中，横向属性锚定数据分片实体，并规定了数据分片在分布式集群中如何分布；纵向属性用于在纵深方向构建DAG，通过提供重构RDD的容错能力保障内存计算的稳定性
+2. 第一层含义就是众所周知的分布式数据缓存，第二层含义是Stage内的流水线式计算模式。
+
+### 纵向拆解 优化规则
+1. Catalyst总共有81条优化规则（Rules），这81条规则会分成27组（Batches）
+2. 谓词下推（Predicate Pushdown）
+   1. “谓词”指代的是像用户表上“age < 30”这样的过滤条件，“下推”指代的是把这些谓词沿着执行计划向下，推到离数据源最近的地方，从而在源头就减少数据扫描量
+3. 列剪裁（Column Pruning）
+   1. 列剪裁就是扫描数据源的时候，只读取那些与查询相关的字段
+4. 常量替换 （Constant Folding）
+   1. “age < 12 + 18”，Catalyst会使用ConstantFolding规则，自动帮我们把条件变成“age < 30”
+5. Cache Manager优化
+6. 为了让查询计划（Query Plan）变得可操作、可执行，Catalyst的物理优化阶段（Physical Planning）可以分为两个环节：优化Spark Plan和生成Physical Plan。
+   1. 在优化Spark Plan的过程中，Catalyst基于既定的优化策略（Strategies），把逻辑计划中的关系操作符一一映射成物理操作符，生成Spark Plan
+   2. 在生成Physical Plan过程中，Catalyst再基于事先定义的Preparation Rules，对Spark Plan做进一步的完善、生成可执行的Physical Plan。
+7. 从数量上来说，Catalyst有14类优化策略，其中有6类和流计算有关，剩下的8类适用于所有的计算场景，如批处理、数据分析、机器学习和图计算，当然也包括流计算。因此，我们只需了解这8类优化策略。
+8. 结合Joins的实现机制和数据的分发方式，Catalyst在运行时总共支持5种Join策略，分别是Broadcast Hash Join（BHJ）、Shuffle Sort Merge Join（SMJ）、Shuffle Hash Join（SHJ）、Broadcast Nested Loop Join（BNLJ）和Shuffle Cartesian Product Join（CPJ）。
+9. 这些信息分为两大类，第一类是“条件型”信息，用来判决5大Join策略的先决条件。第二类是“指令型”信息，也就是开发者提供的Join Hints。
+10. 第一种是Join类型，也就是是否等值、连接形式等，这种信息的来源是查询语句本身。第二种是内表尺寸，这些信息的来源就比较广泛了，可以是Hive表之上的ANALYZE TABLE语句，也可以是Spark对于Parquet、ORC、CSV等源文件的尺寸预估，甚至是来自AQE的动态统计信息。
+11. Preparation Rules有6组规则，这些规则作用到Spark Plan之上就会生成Physical Plan，而Physical Plan最终会由Tungsten转化为用于计算RDD的分布式任务。
+12. ER原则
+    1.  子节点的输出数据要满足父节点的输入要求
+13. BHJ > SMJ > SHJ > BNLJ > CPJ
+14. 在生成Physical Plan这个环节，Catalyst基于既定的几组Preparation Rules，把优化过后的Spark Plan转换成可以交付执行的物理计划，也就是Physical Plan。在这些既定的Preparation Rules当中，你需要重点掌握EnsureRequirements规则。
+15. EnsureRequirements用来确保每一个操作符的输入条件都能够得到满足，在必要的时候，会把必需的操作符强行插入到Physical Plan中。比如对于Shuffle Sort Merge Join来说，这个操作符对于子节点的数据分布和顺序都是有明确要求的，因此，在子节点之上，EnsureRequirements会引入新的操作符如Exchange和Sort。
+
+
+
+```
+
+```
 
 ### 纵向拆解 AQE
+1. AQE既定的规则和策略主要有4个，分为1个逻辑优化规则和3个物理优化策略
+2. Join策略调整：如果某张表在过滤之后，尺寸小于广播变量阈值，这张表参与的数据关联就会从Shuffle Sort Merge Join降级（Demote）为执行效率更高的Broadcast Hash Join。
+   1. DemoteBroadcastHashJoin规则的作用，是把Shuffle Joins降级为Broadcast Joins。需要注意的是，这个规则仅适用于Shuffle Sort Merge Join这种关联机制，其他机制如Shuffle Hash Join、Shuffle Nested Loop Join都不支持
+   2. 中间文件尺寸总和小于广播阈值spark.sql.autoBroadcastJoinThreshold
+   3. 空文件占比小于配置项spark.sql.adaptive.nonEmptyPartitionRatioForBroadcastJoin
+   4. 在这样的背景下，OptimizeLocalShuffleReader物理策略就非常重要了。既然大表已经完成Shuffle Map阶段的计算，这些计算可不能白白浪费掉。采取OptimizeLocalShuffleReader策略可以省去Shuffle常规步骤中的网络分发，Reduce Task可以就地读取本地节点（Local）的中间文件，完成与广播小表的关联操作。
+   5. 不过，需要我们特别注意的是，OptimizeLocalShuffleReader物理策略的生效与否由一个配置项决定。这个配置项是spark.sql.adaptive.localShuffleReader.enabled，尽管它的默认值是True，但是你千万不要把它的值改为False
+3. 自动分区合并：在Shuffle过后，Reduce Task数据分布参差不齐，AQE将自动合并过小的数据分区。
+   1. 在Reduce阶段，当Reduce Task从全网把数据分片拉回，AQE按照分区编号的顺序，依次把小于目标尺寸的分区合并在一起。
+   2. spark.sql.adaptive.advisoryPartitionSizeInBytes，由开发者指定分区合并后的推荐尺寸。
+   3. spark.sql.adaptive.coalescePartitions.minPartitionNum，分区合并后，分区数不能低于该值。
+4. 自动倾斜处理：结合配置项，AQE自动拆分Reduce阶段过大的数据分区，降低单个Reduce Task的工作负载。
+   1. spark.sql.adaptive.skewJoin.skewedPartitionFactor，判定倾斜的膨胀系数
+   2. spark.sql.adaptive.skewJoin.skewedPartitionThresholdInBytes，判定倾斜的最低阈值
+   3. spark.sql.adaptive.advisoryPartitionSizeInBytes，以字节为单位，定义拆分粒度
+
+```
+总的来说，当应用场景中的数据倾斜比较简单，比如虽然有倾斜但数据分布相对均匀，或是关联计算中只有一边倾斜，我们完全可以依赖AQE的自动倾斜处理机制。但是，当我们的场景中数据倾斜变得复杂，比如数据中不同Key的分布悬殊，或是参与关联的两表都存在大量的倾斜，我们就需要衡量AQE的自动化机制与手工处理倾斜之间的利害得失
+
+如果用一句话来概括AQE的定义，就是每当Shuffle Map阶段执行完毕，它都会结合这个阶段的统计信息，根据既定的规则和策略动态地调整、修正尚未执行的逻辑计划和物理计划，从而完成对原始查询语句的运行时优化。也因此，只有当你的查询语句会引入Shuffle操作的时候，Spark SQL才会触发AQE。
+
+AQE支持的三种优化特性分别是Join策略调整、自动分区合并和自动倾斜处理。
+
+关于Join策略调整，我们首先要知道DemoteBroadcastHashJoin规则仅仅适用于Shuffle Sort Merge Join这种关联机制，对于其他Shuffle Joins类型，AQE暂不支持把它们转化为Broadcast Joins。其次，为了确保AQE的Join策略调整正常运行，我们要确保spark.sql.adaptive.localShuffleReader.enabled配置项始终为开启状态。
+
+关于自动分区合并，我们要知道，在Shuffle Map阶段完成之后，结合分区推荐尺寸与分区数量限制，AQE会自动帮我们完成分区合并的计算过程。
+
+关于AQE的自动倾斜处理我们要知道，它只能以Task为粒度缓解数据倾斜，并不能解决不同Executors之间的负载均衡问题。针对场景较为简单的倾斜问题，比如关联计算中只涉及单边倾斜，我们完全可以依赖AQE的自动倾斜处理机制。但是，当数据倾斜问题变得复杂的时候，我们需要衡量AQE的自动化机制与手工处理倾斜之间的利害得失。
+
+
+```
 
 ### 纵向拆解 ShuffleWriteProcessor
 1. 一次shuffle异常入口：https://github.com/apache/spark/pull/33721/files
@@ -1758,6 +1947,33 @@ SortMergeJoinExec
 
 
 ```
+
+### 纵向拆解 Sort shuffle manager
+1. Map阶段是如何输出中间文件的？
+   1. Map阶段最终生产的数据会以中间文件的形式物化到磁盘中，这些中间文件就存储在spark.local.dir设置的文件目录里。中间文件包含两种类型：一类是后缀为data的数据文件，存储的内容是Map阶段生产的待分发数据；另一类是后缀为index的索引文件，它记录的是数据文件中不同分区的偏移地址。这里的分区是指Reduce阶段的分区，因此，分区数量与Reduce阶段的并行度保持一致。
+   2. 因此，中间文件的数量与Map阶段的并行度保持一致。换句话说，有多少个Task，Map阶段就会生产相应数量的数据文件和索引文件。
+2. 目标分区计算好之后，Map Task会把每条数据记录和它的目标分区，放到一个特殊的数据结构里，这个数据结构叫做“PartitionedPairBuffer”，它本质上就是一种数组形式的缓存结构。它是怎么存储数据记录的呢？
+3. Spark需要一种计算机制，来保障在数据总量超出可用内存的情况下，依然能够完成计算。这种机制就是：排序、溢出、归并。
+   1. 对于分片中的数据记录，逐一计算其目标分区，并将其填充到PartitionedPairBuffer；
+   2. PartitionedPairBuffer填满后，如果分片中还有未处理的数据记录，就对Buffer中的数据记录按（目标分区ID，Key）进行排序，将所有数据溢出到临时文件，同时清空缓存；
+   3. 重复步骤1、2，直到分片中所有的数据记录都被处理；
+   4. 对所有临时文件和PartitionedPairBuffer归并排序，最终生成数据文件和索引文件。
+4. reduceByKey采用一种叫做PartitionedAppendOnlyMap的数据结构来填充数据记录。这个数据结构是一种Map，而Map的Value值是可累加、可更新的
+5. 依靠高效的内存数据结构、更少的磁盘文件、更小的文件尺寸，我们就能大幅降低了Shuffle过程中的磁盘和网络开销。
+6. Reduce Task通过网络拉取中间文件的过程，实际上就是不同Stages之间数据分发的过程
+   
+
+```
+对于分片中的数据记录，逐一计算其目标分区，然后填充内存数据结构（PartitionedPairBuffer或PartitionedAppendOnlyMap）；
+当数据结构填满后，如果分片中还有未处理的数据记录，就对结构中的数据记录按（目标分区ID，Key）排序，将所有数据溢出到临时文件，同时清空数据结构；
+重复前2个步骤，直到分片中所有的数据记录都被处理；
+对所有临时文件和内存数据结构中剩余的数据记录做归并排序，最终生成数据文件和索引文件。
+
+
+
+```
+
+### 纵向拆解 push based shuffle
 
 ### 纵向拆解 spark 压测
 1. spark/core/benchmarks
@@ -1780,6 +1996,13 @@ CoalescedRDDBenchmark-jdk17-results.txt
 ```
 
 ```
+
+
+### 纵向拆解 window
+1. Tumbling Window划分出来的时间窗口“不重不漏”，而Sliding Window划分出来的窗口，可能会重叠、也可能会有遗漏
+2. 由于有Late data的存在，流处理引擎就需要一个机制，来判定Late data的有效性，从而决定是否让晚到的消息，参与到之前窗口的计算。
+3. 为了解决Late data的问题，Structured Streaming采用了一种叫作Watermark的机制来应对。为了让你能够更容易地理解Watermark机制的原理，在去探讨它之前，我们先来澄清两个极其相似但是又完全不同的概念：水印和水位线。
+4. 延迟容忍度T是Watermark机制中的决定性因素
 
 ### Calalog 注册 - 如何全方位感知外部元数据
 ```
@@ -1974,6 +2197,69 @@ PartitionPruning
 
 PlanDynamicPruningFilters
 RowLevelOperationRuntimeGroupFiltering
+
+分区剪裁往往能更好地提升磁盘访问的I/O效率。
+
+这是因为，谓词下推操作往往是根据文件注脚中的统计信息完成对文件的过滤，过滤效果取决于文件中内容的“纯度”。分区剪裁则不同，它的分区表可以把包含不同内容的文件，隔离到不同的文件系统目录下。这样一来，包含分区键的过滤条件能够以文件系统目录为粒度对磁盘文件进行过滤，从而大幅提升磁盘访问的I/O效率。
+
+而动态分区剪裁这个功能主要用在星型模型数仓的数据关联场景中，它指的是在运行的时候，Spark SQL利用维度表提供的过滤信息，来减少事实表中数据的扫描量、降低I/O开销，从而提升执行性能。
+
+动态分区剪裁运作的背后逻辑，是把维度表中的过滤条件，通过关联关系传导到事实表，来完成事实表的优化。在数据关联的场景中，开发者要想利用好动态分区剪裁特性，需要注意3点：
+
+事实表必须是分区表，并且分区字段必须包含Join Key
+动态分区剪裁只支持等值Joins，不支持大于、小于这种不等值关联关系
+维度表过滤之后的数据集，必须要小于广播阈值，因此，开发者要注意调整配置项spark.sql.autoBroadcastJoinThreshold
+
+```
+
+### 向量化计算
+1. https://engineering.fb.com/2024/02/20/developer-tools/velox-apache-arrow-15-composable-data-management/
+```
+查看指令集
+cat /proc/cpuinfo | grep --color -wE "bmi|bmi2|f16c|avx|avx2|sse"
+
+
+聚合时Shuffle阶段OOM
+SIMD指令crash
+
+
+支持ORC并优化读写性能
+Native HDFS客户端优化
+Shuffle重构
+适配HBO
+
+
+```
+
+### CPU
+```
+首先，在一个Executor中，每个CPU线程能够申请到的内存比例是有上下限的，最高不超过1/N，最低不少于1/N/2，其中N代表线程池大小。
+
+其次，在给定线程池大小和执行内存的时候，并行度较低、数据分片较大容易导致CPU线程挂起，线程频繁挂起不利于提升CPU利用率，而并行度过高、数据过于分散会让调度开销更显著，也利于提升CPU利用率。
+
+最后，在给定执行内存M、线程池大小N和数据总量D的时候，想要有效地提升CPU利用率，我们就要计算出最佳并行度P，计算方法是让数据分片的平均大小D/P坐落在（M/N/2, M/N）区间。这样，在运行时，我们的CPU利用率往往不会太差。
+
+
+
+```
+
+### 内存
+```
+
+第一步是预估内存占用。
+
+求出User Memory区域的内存消耗，公式为：#User=#size乘以Executor线程池的大小。
+求出每个Executor中Storage Memory区域的内存消耗，公式为：#Storage = #bc + #cache / #E。
+求出执行内存区域的内存消耗，公式为：#Execution = #threads * #dataset / #N。
+第二步是调整内存配置项：根据公式得到的3个内存区域的预估大小#User、#Storage、#Execution，去调整（spark.executor.memory – 300MB）* spark.memory.fraction * spark.memory.storageFraction公式中涉及的所有配置项。
+
+spark.memory.fraction可以由公式（#Storage + #Execution）/（#User + #Storage + #Execution）计算得到。
+spark.memory.storageFraction的数值应该参考（#Storage）/（#Storage + #Execution）。
+spark.executor.memory的设置，可以通过公式300MB + #User + #Storage + #Execution得到。
+这里，我还想多说几句，内存规划两步走终归只是手段，它最终要达到的效果和目的，是确保不同内存区域的占比与不同类型的数据消耗保持一致，从而实现内存利用率的最大化。
+
+
+
 ```
 
 ## codegen
@@ -1989,6 +2275,8 @@ codegen含义参考 横向拆解 代码生成
 
 
 ```
+
+
 
 ## 机器调优
 ```
@@ -2018,7 +2306,7 @@ RDD 算子调优 (例如 RDD 复用、自定义 RDD)
 4. SparkOptimizer 
 5. [SPARK][SQL] 聊聊Spark 3.3 中的Runtime Filter Joins - Tim在路上的文章 - 知乎 https://zhuanlan.zhihu.com/p/542468151
 ```
-
+参考 纵向拆解 优化规则
 
 ```
 
@@ -2055,9 +2343,23 @@ https://www.jianshu.com/p/d42b4defc71c
 
 ### 笛卡尔积性能
 
+### push-based shuffle架构
+1. shuffle read阶段存在大量小block随机读和磁盘热点问题，而单节点HDD盘的IOPS非常有限
+2. 
+
+
+### ORC读数据优化
+
+
+### 向量化执行
+
+### HBO二期
 
 ### count distinct性能优化
 1. sparksql源码系列 | 一文搞懂with one count distinct 执行原理 - 小萝卜算子的文章 - 知乎 https://zhuanlan.zhihu.com/p/529695118
+
+
+### 
 
 ## 设计
 ### schema 优良设计
@@ -2152,6 +2454,8 @@ children: 子计划列表。
 ### MAP - REDUCE原理
 1. 
 
+
+### 分布式累加器如何实现
 
 ## 后端架构 + Spark
 

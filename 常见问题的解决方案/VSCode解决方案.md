@@ -60,7 +60,7 @@ systemctl restart sshd
 - 输入命令fileheader即可
 
 ### c++ clangd集成高效开发
-1. 机器安装clangd 和 cmkae
+1. 机器安装clangd 和 cmake
 2. 项目能源码编译 cmake命令
 3. vscode安装插件，然后配置clangd cmake 和 项目源码路径
 4. 最终实现跳转功能
@@ -76,8 +76,17 @@ export PATH="$cur_dir/lib:$cur_dir/bin:$PATH"
 
 
 # 项目源码需要生成 compile_commands.json
-cmake DCMAKE_EXPORT_COMPILE_COMMANDS=1 xxxxxx
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 xxxxxx
 
+# 也可以在cmakelist中添加
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+# set(CMAKE_EXPORT_COMPILE_COMMANDS "/docker/root/projects/demo/github/Paddle2ONNX/compile_commands.json")
+
+
+['/tmp/build-env-a8ndnare/bin/cmake', '-DPYTHON_INCLUDE_DIR=/usr/include/python3.8', '-DPYTHON_EXECUTABLE=/tmp/build-env-a8ndnare/bin/python', '-DBUILD_PADDLE2ONNX_PYTHON=ON', '-DCMAKE_EXPORT_COMPILE_COMMANDS=ON', '-DONNX_NAMESPACE=paddle2onnx', '-DPY_EXT_SUFFIX=.cpython-38-x86_64-linux-gnu.so', '-DCMAKE_BUILD_TYPE=Release', '/tmp/build-via-sdist-wc_x9_nz/paddle2onnx-1.2.1']
+
+# 查看cmake所有变量
+cmake -LAH
 
 VSCODE操作
 # 下载插件 clangd
@@ -218,3 +227,67 @@ mac：`shift` + `option` + 单击
 win：alt+shift+鼠标拖动
 ```
 
+## 参考配置
+```json
+{
+    "files.autoSave": "onFocusChange",
+    "workbench.colorTheme": "Visual Studio Dark",
+    "remote.SSH.showLoginTerminal": true,
+    "editor.largeFileOptimizations": false,
+    "workbench.editorAssociations": [
+        {
+            "viewType": "jupyter-notebook",
+            "filenamePattern": "*.ipynb"
+        }
+    ],
+    "diffEditor.ignoreTrimWhitespace": false,
+    "remote.SSH.remotePlatform": {
+        "我的开发机器": "linux",
+        "coding云主机": "linux"
+    },
+    
+    "editor.suggestSelection": "first",
+    "editor.smoothScrolling": true,
+    "editor.cursorBlinking": "expand",
+    "editor.cursorSmoothCaretAnimation": "on",
+    "workbench.list.smoothScrolling": true,
+    "editor.mouseWheelZoom": true,
+    "editor.guides.bracketPairs": true,
+    "editor.bracketPairColorization.enabled": true,
+    "editor.autoClosingBrackets": "beforeWhitespace",
+    "editor.autoClosingDelete": "always",
+    "editor.autoClosingOvertype": "always",
+    "editor.autoClosingQuotes": "beforeWhitespace",
+    "window.dialogStyle": "custom",
+    // 自动换行和行高
+    "editor.wordWrap": "on",
+    "editor.lineHeight": 1.5,
+     // 文件夹紧凑模式
+     "explorer.compactFolders": true,
+     "notebook.compactView": true,
+     // 保存自动删除末尾空格
+     "files.trimTrailingWhitespace": false,
+     // 搜索吸附目录
+     "search.searchEditor.singleClickBehaviour": "peekDefinition",
+
+    "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+    "editor.multiCursorModifier": "ctrlCmd",
+    "remote.SSH.configFile": "/Users/wangzixian/.ssh/config",
+    "comments.openView": "never",
+    "python.autoComplete.extraPaths": [
+        "/Users/wangzixian/Documents/meituan/工作文件/业务/storm任务迁移/dmx平台工具"
+    ],
+    "mcopilot.enabled": true,
+    "mcopilot.systemPrompt": "",
+    "mcopilot.selectionEnabled": true,
+    "mcopilot.unitTestFramework": "Junit4",
+    "mcopilot.unitTestMockFramework": "Mockito2",
+    "mcopilot.inlayEnabled": true,
+    "mcopilot.inlineSuggestionEnabled": false,
+    "mcopilot.promptSetting": {},
+    "mcopilot.cppUnitTestMockFramework": "GMock version < 1.10.0",
+    "mcopilot.unitTestCppVersion": "C++11",
+    "mcopilot.cppUnitTestFramework": "GTest version < 1.10.0",
+    "mcopilot.jsUnitTestFramework": "Jest"
+}
+```
