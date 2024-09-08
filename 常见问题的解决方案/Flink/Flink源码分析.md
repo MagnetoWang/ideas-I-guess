@@ -40,6 +40,10 @@ flink + 公司项目
    4. 非常低的读写延迟（µs）
    5. 轻量稳定的 Checkpointing 流程
 2. flink如何保证稳定性
+   1. 回滚机制
+   2. 资源申请与释放
+   3. 机器节点故障排查
+   4. 状态恢复机制
 3. flink如何高效开发，测试，迭代和发布
 4. 进一步高效深入理解flink，需要结合峰会主题分享，挖掘高价值问题
    1. 带着高价值问题，再深入找重要技术细节
@@ -1103,6 +1107,10 @@ https://blog.csdn.net/AnameJL/article/details/133795190
 5. 在Flink中，Java对象的有效信息被序列化为二进制数据流，在内存中连续存储，保存在预分配的内存块上，内存块叫作MemorySegment。
 6. 操作多块MemorySegment就像操作一块大的连续内存一样，Flink会使用逻辑视图（AbstractPagedInputView）以方便操作
 
+### Slot资源申请与分配
+1. SlotPoolImpl
+2. 1000slot 3层shuffle基准测试
+3. 
 ### TaskManager进程
 1. JVM堆上内存
 2. Task堆上内存Task Heap Memory。Task执行用户代码时所使用的堆上内存
@@ -1428,6 +1436,10 @@ Barrier会周期性地注入数据流中，作为数据流的一部分，从上�
 【5】https://issues.apache.org/jira/browse/FLINK-17477    resumeConsumption call should happen as quickly as possible to minimise latency
 
 ```
+
+### Buffer Debloating（缓冲消胀）机制调研
+
+
 ### 动态调节缓存数据量
 
 ### 非对齐Checkpoint
@@ -2163,6 +2175,11 @@ KV层（Hbase）：基于Hbase改造，支持按主键插入，更新和删除�
 
 
 ### 中间表不可查、中间状态不可查
+
+### 黑名单机制
+1. https://cwiki.apache.org/confluence/display/FLINK/FLIP-224%3A+Blocklist+Mechanism
+
+### 
 
 ## flink cpu分析
 1. ps + top + jstack 找热点进程和线程堆栈

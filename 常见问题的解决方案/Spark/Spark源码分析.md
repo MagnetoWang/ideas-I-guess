@@ -34,7 +34,7 @@ tree -ACL 1
    7. 收集典型任务日志
    8. 异常信息总结
    9. 收集经典优化case
-3. 源码阶段
+3. 源码初阶
    1. 算子实现
    2. 拼表实现
    3. 版本迭代
@@ -42,7 +42,9 @@ tree -ACL 1
    5. 执行流程
    6. 函数调用
    7. 模块梳理
-4. 理解
+4. 源码高阶
+   1. 代码生成
+5. 理解
    1. 代码生成更多是解决通用型算子的虚函数调用开销 广泛的内存访问和无法利用流水线、预取、分支预测、SIMD、循环展开等能力。
    2. 
 
@@ -64,6 +66,8 @@ tree -ACL 1
    2. spark常见事故：https://zhuanlan.zhihu.com/p/659056832
    3. 
 4. Spark性能调优实战 极客时间课程
+
+
 
 
 
@@ -279,6 +283,13 @@ scan -> filter -> project -> agg
  }
 
 ```
+
+
+#### org.apache.spark.sql.catalyst.expressions.codegen
+1. 整体设计
+2. 工具类，封装生成javacode，比如异常，类型转换，方法私有，代码格式化等等
+3. 定制类，比如生成排序，裁剪，join和unsafe交互代码逻辑
+4. 测试类，从测试代码可以看到具体如何使用快速理解
 
 
 ### 横向拆解 Tungsten
@@ -2359,6 +2370,11 @@ https://www.jianshu.com/p/d42b4defc71c
 1. sparksql源码系列 | 一文搞懂with one count distinct 执行原理 - 小萝卜算子的文章 - 知乎 https://zhuanlan.zhihu.com/p/529695118
 
 
+### MR VS spark VS Presto
+1. spark为什么比mapreduce快？ - 京东云的文章 - 知乎 https://zhuanlan.zhihu.com/p/683022142
+2. Presto为什么比Spark SQL快？ - 大数据小百科的回答 - 知乎 https://www.zhihu.com/question/461560750/answer/3614305124
+
+
 ### 
 
 ## 设计
@@ -2456,6 +2472,9 @@ children: 子计划列表。
 
 
 ### 分布式累加器如何实现
+
+
+### 如何实现一个广播类，可以用于任意系统
 
 ## 后端架构 + Spark
 
