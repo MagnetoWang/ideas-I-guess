@@ -51,6 +51,7 @@ flink + 公司项目
 
 ### 参考资料
 1. 官方分享：https://space.bilibili.com/33807709
+2. [源码分析] 带你梳理 Flink SQL / Table API内部执行流程：https://www.cnblogs.com/rossiXYZ/p/12770436.html
 ```
 xiaogang shi
 动态数据流上的实时迭代计算
@@ -96,7 +97,7 @@ flink dag用法
 流批一体
 
 ```
-## 笔记
+## 阅读笔记
 ### Streaming System 
 
 
@@ -192,11 +193,126 @@ Watermarked
 
 
 
-## flink图解
+## flink必画图解 & 流图
 1. stream table core java scala 关系图
 2. task opchain op function window join  state 调用链路，构造到执行层
 3. time watermark
 
+### 数据流图
+1. 实时数据流 - 移动到flink源码解析文档
+   1. flink计算图
+   2. 所有算子区别
+      1. FilterOperator 
+      2. 
+   3. 每一层 graph区别
+   4. shuffle
+   5. 内存管理
+   6. join能力
+      1. Tumbling Window Join
+      2. Sliding Window Join
+      3. Session Window Join
+      4. Interval Join
+   7. window能力
+      1. 
+   8. 流类型区别
+      1. DataStreamSink DataStreamSink BroadcastStream CoGroupedStreams ConnectedStreams
+      2. DataStream
+         1. union
+         2. map
+         3. flatMap
+         4. filter
+         5. project
+         6. process
+         7. 区别
+            1. connect
+            2. coGroup
+            3. join
+         8. transform
+         9. keyBy
+         10. partitionCustom
+         11. broadcast
+         12. shuffle
+         13. forward
+         14. rebalance
+         15. iterate
+   9.  Transformation
+       1.  ChainingStrategy
+       2.  KeySelector
+       3.  KeyTypeInfo
+       4.  
+   10. Operator
+       1.  SingleOutputStreamOperator
+       2.  
+   11. 状态
+   12. checkpoint
+   13. 代码生成
+   14. 优化规则
+   15. 表达式设计
+
+
+### Flink SQL 流图
+1. SqlClient 纯sql提交器和基础正则解析拆分SQL
+   1. parse 包含Environment 表元信息
+   2. 元信息 entry
+      1. CatalogEntry TableEntry ViewEntry TemporalTableEntry FunctionEntry 
+   3. 解析能力scope
+      1. SqlCommandParser 正则实现
+      2. SqlMultiLineParser 
+2. SqlParse
+   1. 词法分析
+      1. Parse.tdd 关键词能力
+      2. parseimpl.ftl 语法
+      3. 生成 parse.jj
+      4. 实现类 FlinkSqlParserImpl
+      5. sql2SqlNode
+      6. SqlNode.toSqlString
+3. Planner Blink 计划层
+   1. sql -> sqlNode -> (SqlToOperationConverter)operation 
+      1. 可以转 TableImpl(Table) 只有元信息，遍历oplist
+      2. 可以转 RelNode 
+      3. 可以转 Transformation 
+      4. 可以转 DataStream<>(executionEnvironment, transformation);
+   2. 优化规则集合
+      1. FlinkStreamRuleSets
+      2. FlinkBatchRuleSets
+   3. 优化规则注册
+      1. PlannerBase 
+         1. parse 
+         2. translate 
+         3. optimize 
+         4. translateToExecNodePlan ExecNodePlanDumper
+      2. ExecNode
+   4. 在scala包 实现ExecCalc2runtime层的OP
+      1. FlinkConvention
+      2. FlinkRelNode
+4. Runtime Blink 执行层
+   1. 数据格式优化
+   2. 文件读写优化
+   3. 网络传输优化
+   4. 分区
+   5. key分发
+   6. 执行算子
+5. 底层
+   1. Planner
+      1. plan各种范式和接口，方便上游模块继承和实现
+   2. API Java
+      1. Table sqlQuery 可以执行sql，同时也能封装where 和 select等等
+   3. Common
+      1. 进一步封装core能力
+6. Flink Table的数据结构
+   1. 
+
+
+### Flink DataStream 流图
+1. 热知识
+   1. stream其实和state是解耦开的
+   2. 只在flinkSql中两者会完全结合一起
+   3. stream scala模块强依赖stream java，所以java是最底层基础能力
+   4. 可以任意定制化Row
+
+
+### Flink Core 图（最小的集合flink能力）
+1. flink client包含core的基本使用方法
 
 
 ## 源码目录

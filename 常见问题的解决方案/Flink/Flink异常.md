@@ -2264,9 +2264,60 @@ java.lang.RuntimeException: The launcher environment and the runtime environment
 ```
 
 
-##
+## Failed to find name hashes for org.apache.calcite.sql.validate.SqlValidatorImpl.OrderExpressionExpander
 ```
+idea问题，用命令行就没有问题
 
+
+scala: done compiling
+scala: ## Exception when compiling 593 sources to /home/clouddev/kwai-flink/flink-table/flink-table-planner-blink/target/classes
+java.lang.RuntimeException: Failed to find name hashes for org.apache.calcite.sql.validate.SqlValidatorImpl.OrderExpressionExpander
+scala.sys.package$.error(package.scala:27)
+sbt.internal.inc.AnalysisCallback.nameHashesForCompanions(Incremental.scala:987)
+sbt.internal.inc.AnalysisCallback.analyzeClass(Incremental.scala:994)
+sbt.internal.inc.AnalysisCallback.$anonfun$addProductsAndDeps$4(Incremental.scala:1017)
+scala.collection.StrictOptimizedIterableOps.map(StrictOptimizedIterableOps.scala:100)
+scala.collection.StrictOptimizedIterableOps.map$(StrictOptimizedIterableOps.scala:87)
+scala.collection.mutable.HashSet.map(HashSet.scala:31)
+sbt.internal.inc.AnalysisCallback.$anonfun$addProductsAndDeps$1(Incremental.scala:1017)
+scala.collection.IterableOnceOps.foldLeft(IterableOnce.scala:676)
+scala.collection.IterableOnceOps.foldLeft$(IterableOnce.scala:670)
+scala.collection.AbstractIterable.foldLeft(Iterable.scala:933)
+sbt.internal.inc.AnalysisCallback.addProductsAndDeps(Incremental.scala:1010)
+sbt.internal.inc.AnalysisCallback.getAnalysis(Incremental.scala:944)
+sbt.internal.inc.AnalysisCallback.getCycleResultOnce(Incremental.scala:935)
+sbt.internal.inc.Incremental$$anon$2.run(Incremental.scala:465)
+sbt.internal.inc.IncrementalCommon$CycleState.next(IncrementalCommon.scala:116)
+sbt.internal.inc.IncrementalCommon$$anon$1.next(IncrementalCommon.scala:56)
+sbt.internal.inc.IncrementalCommon$$anon$1.next(IncrementalCommon.scala:52)
+sbt.internal.inc.IncrementalCommon.cycle(IncrementalCommon.scala:263)
+sbt.internal.inc.Incremental$.$anonfun$incrementalCompile$8(Incremental.scala:419)
+sbt.internal.inc.Incremental$.withClassfileManager(Incremental.scala:506)
+sbt.internal.inc.Incremental$.incrementalCompile(Incremental.scala:406)
+sbt.internal.inc.Incremental$.apply(Incremental.scala:172)
+sbt.internal.inc.IncrementalCompilerImpl.compileInternal(IncrementalCompilerImpl.scala:534)
+sbt.internal.inc.IncrementalCompilerImpl.$anonfun$compileIncrementally$1(IncrementalCompilerImpl.scala:488)
+sbt.internal.inc.IncrementalCompilerImpl.handleCompilationError(IncrementalCompilerImpl.scala:332)
+sbt.internal.inc.IncrementalCompilerImpl.compileIncrementally(IncrementalCompilerImpl.scala:425)
+sbt.internal.inc.IncrementalCompilerImpl.compile(IncrementalCompilerImpl.scala:137)
+org.jetbrains.jps.incremental.scala.local.SbtCompiler.$anonfun$doCompile$4(SbtCompiler.scala:92)
+scala.util.Try$.apply(Try.scala:210)
+org.jetbrains.jps.incremental.scala.local.SbtCompiler.doCompile(SbtCompiler.scala:90)
+org.jetbrains.jps.incremental.scala.local.SbtCompiler.compile(SbtCompiler.scala:20)
+org.jetbrains.jps.incremental.scala.local.LocalServer.doCompile(LocalServer.scala:47)
+org.jetbrains.jps.incremental.scala.local.LocalServer.compile(LocalServer.scala:25)
+org.jetbrains.jps.incremental.scala.remote.Main$.compileLogic(Main.scala:208)
+org.jetbrains.jps.incremental.scala.remote.Main$.$anonfun$handleCommand$1(Main.scala:193)
+org.jetbrains.jps.incremental.scala.remote.Main$.decorated$1(Main.scala:180)
+org.jetbrains.jps.incremental.scala.remote.Main$.handleCommand(Main.scala:190)
+org.jetbrains.jps.incremental.scala.remote.Main$.serverLogic(Main.scala:163)
+org.jetbrains.jps.incremental.scala.remote.Main$.nailMain(Main.scala:103)
+org.jetbrains.jps.incremental.scala.remote.Main.nailMain(Main.scala)
+sun.reflect.GeneratedMethodAccessor11.invoke(Unknown Source)
+sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+java.lang.reflect.Method.invoke(Method.java:498)
+com.facebook.nailgun.NGSession.runImpl(NGSession.java:312)
+com.facebook.nailgun.NGSession.run(NGSession.java:198)
 
 ```
 
