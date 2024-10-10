@@ -13,11 +13,12 @@
 12. 性能总结
 13. 设计总结
 14. 经验总结
-15. 第三方依赖
-16. 应用场景
-17. 业务通点
-18. 行业实践
-19. case代码
+15. 相同框架能力对比
+16. 第三方依赖
+17. 应用场景
+18. 业务通点
+19. 行业实践
+20. case代码
 
 ## calcite源码解析
 
@@ -71,11 +72,16 @@ calcite + 公司项目
 
 ```
 
+### 核心思考
+1. calcite为什么那么难用：https://shenzhu.github.io/calcite-user-perspective/
+
 
 
 ### 入门概念
-1. RelOptRule：根据传递给它的 RelOptRuleOperand 来对目标 RelNode 树进行 规则匹配，匹配成功后，会再次调用 matches() 方法进行进一步检查。如果 mathes结果为真，则调用 onMatch() 进行转换。
-2. 物化视图-数据格框架(Lattice Framework)：https://cloud.tencent.com/developer/article/2450528
+1. 概念图解：https://www.cnblogs.com/wcgstudy/p/11795886.html
+2. RelOptRule：根据传递给它的 RelOptRuleOperand 来对目标 RelNode 树进行 规则匹配，匹配成功后，会再次调用 matches() 方法进行进一步检查。如果 mathes结果为真，则调用 onMatch() 进行转换。
+3. 物化视图-数据格框架(Lattice Framework)：https://cloud.tencent.com/developer/article/2450528
+4. 
 ```
 
 
@@ -104,19 +110,32 @@ RelOptCost： 优化器成本模型会依赖。
 6. Calcite原理和代码讲解(一)：https://blog.csdn.net/qq_35494772/article/details/118887267
 7. What is cost based optimization：https://www.programmerinterview.com/database-sql/what-is-cost-based-optimization/
 8. Apache Calcite：https://arxiv.org/pdf/1802.10233.pdf
-9. Hadoop 中新型大数据查询引擎：https://www.infoq.cn/article/new-big-data-hadoop-query-engine-apache-calcite/
+9.  Hadoop 中新型大数据查询引擎：https://www.infoq.cn/article/new-big-data-hadoop-query-engine-apache-calcite/
 10. calcite物化视图详解：https://zhuanlan.zhihu.com/p/484146629
 11. Lattices概念：https://calcite.apache.org/docs/lattice.html
 12. 一文详解物化视图改写：https://zhuanlan.zhihu.com/p/366658996
 13. 一条 SQL 的查询优化之旅【下】：https://juejin.cn/post/7174735770572292157
 14. paper推荐
     1.  《Optimizing Queries Using Materialized Views: A Practical, Scalable Solution》
-15. Apache Calcite简介：https://km.woa.com/articles/show/383477?kmref=search&from_page=1&no=5
-16. 【天穹】SuperSQL技术系列之八：Calcite规则体系与算子优化：https://km.woa.com/group/supersql/articles/show/413307
-17. Oceanus团队对Apache Calcite的定制开发介绍：https://km.woa.com/group/36209/articles/show/358664?kmref=search&from_page=1&no=10
-18. 灵渊实时计算系统—实现篇：SQL强化模块介绍：https://km.woa.com/group/22680/articles/show/444399?kmref=search&from_page=1&no=2
-19. 【Calcite源码解析】SqlNode方言转换：https://km.woa.com/group/51922/articles/show/511978?kmref=search&from_page=1&no=9
+15. calcite教程
+    1. 2021：https://github.com/zabetak/calcite-tutorial/tree/boss21?tab=readme-ov-file
+16. Apache Calcite简介：https://km.woa.com/articles/show/383477?kmref=search&from_page=1&no=5
+17. 【天穹】SuperSQL技术系列之八：Calcite规则体系与算子优化：https://km.woa.com/group/supersql/articles/show/413307
+18. Oceanus团队对Apache Calcite的定制开发介绍：https://km.woa.com/group/36209/articles/show/358664?kmref=search&from_page=1&no=10
+19. 灵渊实时计算系统—实现篇：SQL强化模块介绍：https://km.woa.com/group/22680/articles/show/444399?kmref=search&from_page=1&no=2
+20. 【Calcite源码解析】SqlNode方言转换：https://km.woa.com/group/51922/articles/show/511978?kmref=search&from_page=1&no=9
+21. blog
+    1. Julian Hyde
+        1.  项目作者解答：https://stackoverflow.com/users/172836/julian-hyde
+        2.  语法扩展插件：https://stackoverflow.com/questions/44382826/how-to-change-calcites-default-sql-grammar/44467850#44467850
+    2. tsangpo：https://www.zhihu.com/column/tsangpo
+    3. dafei1288：http://dafei1288.com/
+    4. https://www.zhihu.com/people/yu-qi-30-65
+    5. wuyiwen：https://cloud.tencent.com/developer/user/1350579
 
+
+### 技术流图
+1. hivesql 转mapreduce：https://tech.meituan.com/2014/02/12/hive-sql-to-mapreduce.html
 
 ### calcite介绍
 ```
@@ -150,6 +169,7 @@ https://github.com/apache/calcite/tree/calcite-1.20.0
 ```
 
 ### 编译顺序
+1. core是核心模块
 ```
 [INFO] Reactor Summary for Calcite 1.20.0:
 [INFO] 
@@ -184,7 +204,352 @@ calcite只有 core和linq4j是核心代码
 
 
 ```
+## 横向拆解
+1. parser
+2. validate
+3. optimize
+4. execute
+5. adapter
+6. 必看源码
+   1. flink自定义createTable：https://github.com/apache/flink/pull/8548#discussion_r287703560
+   2. flink添加水位线：https://github.com/apache/flink/pull/9952
 
+## 横向拆解 - parser
+1. 实现一个upload jar语法：https://issues.apache.org/jira/browse/CALCITE-1384
+   1. https://github.com/apache/calcite/pull/322
+2. 实现一个CREATE MATERIALIZED VIEW语法：https://juejin.cn/post/7209862607975546917
+   1. 编写 parserImpls.ftl
+   2. 编写 config.fmpp
+   3. FreeMarker 生成 parser.jj
+   4. JavaCC 解析jj文件 生成 最终java代码
+   5. 最终demo：https://github.com/chunyiKit/shared/blob/main/calcite_demo/pom.xml
+3. 配置文件说明：https://www.cnblogs.com/rongfengliang/p/16985715.html
+
+### 配置文件
+```
+├── pom.xml
+└── src
+    └── main
+        ├── codegen  // 模版代码
+        │   ├── config.fmpp
+        │   ├── data
+        │   │   ├── app.json
+        │   │   └── style.tdd
+        │   ├── includes
+        │   │   ├── footer.html
+        │   │   ├── func
+        │   │   │   └── agg.ftl
+        │   │   └── macros
+        │   │       └── login.ftl
+        │   └── templates
+        │       ├── app.jj
+        │       └── index.html
+        ├── java
+        └── resources
+
+
+
+```
+
+### 如何基于Calcite的Select语法，扩展新关键词比如distributed和sorted，不改动calcite的parser.jj
+#### 原始参考
+```
+/**
+ * Parses a leaf SELECT expression without ORDER BY.
+ */
+SqlSelect SqlSelect() :
+{
+    final List<SqlLiteral> keywords = new ArrayList<SqlLiteral>();
+    final SqlLiteral keyword;
+    final SqlNodeList keywordList;
+    final List<SqlNode> selectList = new ArrayList<SqlNode>();
+    final SqlNode fromClause;
+    final SqlNode where;
+    final SqlNodeList groupBy;
+    final SqlNode having;
+    final SqlNodeList windowDecls;
+    final SqlNode qualify;
+    final List<SqlNode> hints = new ArrayList<SqlNode>();
+    final Span s;
+}
+{
+    <SELECT> { s = span(); }
+    [ <HINT_BEG> AddHint(hints) ( <COMMA> AddHint(hints) )* <COMMENT_END> ]
+    SqlSelectKeywords(keywords)
+    (
+        <STREAM> {
+            keywords.add(SqlSelectKeyword.STREAM.symbol(getPos()));
+        }
+    )?
+    (
+        keyword = AllOrDistinct() { keywords.add(keyword); }
+    )?
+    {
+        keywordList = new SqlNodeList(keywords, s.addAll(keywords).pos());
+    }
+    AddSelectItem(selectList)
+    ( <COMMA> AddSelectItem(selectList) )*
+    (
+        <FROM> fromClause = FromClause()
+        ( where = Where() | { where = null; } )
+        ( groupBy = GroupBy() | { groupBy = null; } )
+        ( having = Having() | { having = null; } )
+        ( windowDecls = Window() | { windowDecls = null; } )
+        ( qualify = Qualify() | { qualify = null; } )
+    |
+        E() {
+            fromClause = null;
+            where = null;
+            groupBy = null;
+            having = null;
+            windowDecls = null;
+            qualify = null;
+        }
+    )
+    {
+        return new SqlSelect(s.end(this), keywordList,
+            new SqlNodeList(selectList, Span.of(selectList).pos()),
+            fromClause, where, groupBy, having, windowDecls, qualify,
+            null, null, null, new SqlNodeList(hints, getPos()));
+    }
+}
+
+
+
+<#if (parser.createStatementParserMethods!default.parser.createStatementParserMethods)?size != 0>
+/**
+ * Parses a CREATE statement.
+ */
+SqlCreate SqlCreate() :
+{
+    final Span s;
+    boolean replace = false;
+    final SqlCreate create;
+}
+{
+    <CREATE> { s = span(); }
+    [
+        <OR> <REPLACE> {
+            replace = true;
+        }
+    ]
+    (
+<#-- additional literal parser methods are included here -->
+<#list (parser.createStatementParserMethods!default.parser.createStatementParserMethods) as method>
+        create = ${method}(s, replace)
+        <#sep>| LOOKAHEAD(2) </#sep>
+</#list>
+    )
+    {
+        return create;
+    }
+}
+</#if>
+
+
+```
+
+#### flink在SqlCreate基础上，新增 SqlCreateTable
+```
+
+SqlCreate SqlCreateTable(Span s, boolean replace) :
+{
+    final SqlParserPos startPos = s.pos();
+    SqlIdentifier tableName;
+    SqlNodeList primaryKeyList = SqlNodeList.EMPTY;
+    List<SqlNodeList> uniqueKeysList = new ArrayList<SqlNodeList>();
+    SqlWatermark watermark = null;
+    SqlNodeList columnList = SqlNodeList.EMPTY;
+	SqlCharStringLiteral comment = null;
+
+    SqlNodeList propertyList = SqlNodeList.EMPTY;
+    SqlNodeList partitionColumns = SqlNodeList.EMPTY;
+    SqlParserPos pos = startPos;
+}
+{
+    <TABLE>
+
+    tableName = CompoundIdentifier()
+    [
+        <LPAREN> { pos = getPos(); TableCreationContext ctx = new TableCreationContext();}
+        TableColumn(ctx)
+        (
+            <COMMA> TableColumn(ctx)
+        )*
+        {
+            pos = pos.plus(getPos());
+            columnList = new SqlNodeList(ctx.columnList, pos);
+            primaryKeyList = ctx.primaryKeyList;
+            uniqueKeysList = ctx.uniqueKeysList;
+            watermark = ctx.watermark;
+        }
+        <RPAREN>
+    ]
+    [ <COMMENT> <QUOTED_STRING> {
+        String p = SqlParserUtil.parseString(token.image);
+        comment = SqlLiteral.createCharString(p, getPos());
+    }]
+    [
+        <PARTITIONED> <BY>
+        partitionColumns = ParenthesizedSimpleIdentifierList() {
+            if (!((FlinkSqlConformance) this.conformance).allowCreatePartitionedTable()) {
+                throw SqlUtil.newContextException(getPos(),
+                    ParserResource.RESOURCE.createPartitionedTableIsOnlyAllowedForHive());
+            }
+        }
+    ]
+    [
+        <WITH>
+        propertyList = TableProperties()
+    ]
+    {
+        return new SqlCreateTable(startPos.plus(getPos()),
+                tableName,
+                columnList,
+                primaryKeyList,
+                uniqueKeysList,
+                propertyList,
+                partitionColumns,
+                watermark,
+                comment);
+    }
+}
+
+
+```
+
+#### 可行方案
+1. 新增一个SqlTableDistributed
+2. 参入进select中
+3. 比较耗时间，需要验证
+
+
+## 横向拆解 - validate
+1. 必看
+   1. https://shenzhu.github.io/calcite-user-perspective/
+2. Calcite SQL验证流程：https://liebing.org.cn/apache-calcite-sql-validator.html
+3. catalog 原理：https://strongduanmu.com/blog/explore-apache-calcite-system-catalog-implementation.html
+4. 校验器整体设计：https://strongduanmu.com/blog/in-depth-exploration-of-implementation-principle-of-apache-calcite-sql-validator.html
+5. Calcite系列(七)：执行流程-合法性校验：https://cloud.tencent.com/developer/article/2410893
+6. 校验流程：https://github.com/Mulavar/note_selina/blob/38533dade5f30ca29a83ef490b2bb88d2658310c/%E6%BA%90%E7%A0%81%E7%AC%94%E8%AE%B0/Calcite/Calcite%E6%A0%A1%E9%AA%8C%E6%B5%81%E7%A8%8B.md
+7. drill自定义的校验器：https://github.com/hboutemy/drill/blob/3bbef5d961fe568f9797abbea0c785ee2eedaaad/exec/java-exec/src/main/java/org/apache/drill/exec/planner/sql/conversion/DrillValidator.java#L24
+8. 校验处理可简化为:  validate = Namespace#validate + Scope#validateExpr + 额外校验
+   1. 表是否存在
+   2. 字段类型是否匹配
+   3. Function校验
+   4. 隐式转换
+   5. DQL校验：SqlValidator#deriveType
+   6. DML校验：SqlValidator#checkTypeAssignment
+9.  源码case
+   1. SqlValidatorTest
+   2. core/src/test/java/org/apache/calcite/test/MaterializedViewTester.java
+      1. toRel 测试
+   3. SqlParserTest
+10. 概念
+   1. SqlValidatorCatalogReader：元数据读取器
+   2. SqlValidatorNamespace：描述了 SQL 查询返回的关系，一个 SQL 查询可以拆分为多个部分，查询的列组合，表名等等，当中每个部分都有一个对应的 SqlValidatorNamespace
+   3. SqlValidatorScope：可以认为是校验流程中每个 SqlNode 的工作上下文，当校验表达式时，通过 SqlValidatorScope 的 resolve 方法进行解析，如果成功的话会返回对应的 SqlValidatorNamespace 描述结果类型
+
+```
+相关类
+import org.apache.calcite.sql.validate.SqlValidator;
+import org.apache.calcite.sql.validate.SqlValidatorCatalogReader;
+import org.apache.calcite.sql.validate.SqlValidatorImpl;
+import org.apache.calcite.sql.validate.SqlValidatorScope;
+import org.apache.calcite.sql.validate.SqlValidatorUtil;
+
+SqlValidatorUtil
+
+
+```
+
+### calcite 测试用例如何执行元数据和校验
+
+
+
+### flink如何元数据注册
+1. FlinkCalciteCatalogReaderTest 初始化元数据
+2. planner模块
+   1. class CatalogReader extends CalciteCatalogReader 
+3. blink模块
+   1. class FlinkCalciteCatalogReader extends CalciteCatalogReader
+```
+
+```
+
+
+### flink如何复用validator能力
+1. FlinkCalciteSqlValidator
+
+## 横向拆解 - optimize
+
+### calcite 规则集
+1. RelOptRulesTest
+2. CoreRules
+
+
+## 横向拆解 - execute
+
+
+## 横向拆解 - adapter
+### 学习路径
+1. 自定义数据库
+   1. 编写 model.json
+   2. 自定义 SchemaFactory
+   3. 自定义 Schema（像一个“没有存储层的databse”一样，Calcite不会去了解任何文件格式）
+   4. 自定义Table
+   5. 自定义 Enumerator
+2. demo参考
+   1. 用sql查询csv文件：https://github.com/objcoding/calcite-demo
+   2. 双表查询+打印执行计划：http://dafei1288.com/2023/06/22/1001_calcite-sql-parser-demo/
+
+### adapter - ScannableTable FilterableTable TranslatableTable
+1. 概念说明：https://objcoding.com/2021/01/17/calcite/
+
+
+### adapter - spark
+1. 核心类：SparkHandlerImpl
+
+
+### adapter - csv
+1. 源码位置：example/csv/src/test/java/org/apache/calcite/test/CsvTest.java
+2. 如何新增csv格式的SQL解析：https://strongduanmu.com/wiki/calcite/tutorial.html
+3. CsvTable：csv表定义
+4. CsvTableFactory： model.json文件定义表
+5. Flavor：calcite表含义
+
+
+### adapter - csv文件读取流程
+1. ModelHandler.ExtraOperand.BASE_DIRECTORY.camelName
+2. File
+3. org.apache.calcite.util.Sources -> Source
+   1. reader 支持解析gz文件
+4. CsvScannableTable
+
+### adapter - csv文件Schema解析流程
+1. 个人代码截图：https://d7pii8p7gc.feishu.cn/wiki/EIZYw7c9di4hdWkJSEJcdC6nnKh
+2. schema介绍：https://github.com/quxiucheng/apache-calcite-tutorial/tree/master/calcite-tutorial-3-schema
+3. schmea发现：https://dongzl.github.io/2020/11/10/35-Apache-Calcite-Overview-Tutorial/index.html
+4. schema是延迟解析，可以从json文件解析字段类型，也可以在第一次执行sql的时候，再解析出字段类型
+   1. 关键代码 calciteConnection.prepareStatement(sql)
+5. 具体实现流程
+   1. 继承父类： CsvSchema extends AbstractSchema
+   2. 实现方法：getTableMap 和 createTableMap
+   3. 解析字段：getFieldTypes —> CsvEnumerator.deduceRowType
+
+
+
+
+
+
+## 纵向拆解
+1. javacc
+2. 规则集
+   1. RuleSetBuilder
+   2. SparkHandler
+   3. RelOptRule
+
+## 纵向拆解 - JavaCC
 ### JAVACC文件结构
 ```
 javacc_input ::= javacc_options
@@ -219,240 +584,45 @@ production ::= javacode_production
              | token_manager_decls
 
 ```
+## 纵向拆解 - 方言互转
+1. 介绍：https://blog.csdn.net/skyyws/article/details/124828049
+2. SparkSqlDialect
+3. 
 
 
-### calcite优化入口
+
+## 纵向拆解 - calcite 元数据机制 schema
+1. calaog原理：https://strongduanmu.com/blog/explore-apache-calcite-system-catalog-implementation.html
+2. presto注册catalog：https://github.com/baibaichen/Blog2/blob/0c23b6a3636b6fc46fed7f4a231d9db959186615/Optimizer/Inside%20Presto%20Optimizer.md
+
+### Schema实现
 ```
-SQL -> SQLNode -> RelRoot(AbstractRelNode) -> RelOptCluster -> RelOptPlanner
-
-RelOptPlanner
-  HepPlanner
-  VolcanoPlanner
-
-主调用图
-org.apache.calcite.prepare.CalcitePrepareImpl
-  prepare2_
-  sqlNode = parser.parseStmt(); 解析
-  getPreparedResult 执行计划优化
-  rePreparedResult
-  CalcitePreparingStmt.prepareQueryable
-  CalcitePreparingStmt.prepareRel
-  CalcitePreparingStmt.prepareSql
-
-
-
-CalcitePreparingStmt.prepareSql extends Prepare
-sql 转 关系表达式
-物化视图优化
-plann优化
-关系表达式 转 sql(最优引擎方言)
-  SqlToRelConverter.convertQuery
-  reloadSqlMVs
-  Hook.CONVERTED.run(root.rel);
-  Hook.TRIMMED.run(root.rel);
-  autoOptimize
-  PreparedResult preparedResult = implement(root)
-  prepareSql
-
-
-Prepare.autoOptimize
-  simpleOptimize
-  mixedOptimize
-  optimize
-
-
-Program.getMixedProgram
-
-
-415865011558656e60d84811fbb314d1c8982959
---story=863341291 支持tHive语法with语句
-
-
-f85d271e5158222de86a9ae705aacd44c0e63e3c
--story=855592155 Calcite规则集切分优化
-```
-
-
-
-### RelNode结构拆解
-```
-核心类
-RelOptTable：a relational dataset关系数据集
-RelOptSchema：所有RelOptTable的集合
-RelOptPlanner：a query optimizer 查询优化计划
-RelOptNode：Node in a planner 执行计划中的节点
-RelNode：Relational expression 关系表达式，如Sort, Join, Project, Filter, Scan, Sample
-RexNode：Row expression 原始表达式
-RelTrait：the manifestation of a relational expression trait within a trait definition 关系表达式的性质
-RelTraitDef：表示RelTrait的定义或者声明
-RelRoot：Root of a tree RelNode
-RelDataType：the type of a scalar expression or entire row returned from a relational expression.
-SqlKind：
-
-RelOptCluster：An environment for related relational expressions during the optimization of a query
-RelOptCost：计算row cost，CPU cost, and I/O cost
-RelCollation：Description of the physical ordering of a relational expression
-RelShuttle
-RelDecorrelator
-RelBuilder：栈结构，存放relnode
-
-BiRel
-
-外部类
-Convention：Calling convention trait
-
-VolcanoCost：implements RelOptCost
-SqlOperatorBinding
-
-
-Trait
-RelMultipleTrait
-RelCompositeTrait
-RelTraitSet
-
-RexCorrelVariable
-RelOptLattice
-
-
-Enumerable
-EnumerableConvention
-EnumerableRel
-
-
-Jdbc
-JdbcRel
-
-RelWriter
-RelJsonWriter
-RelXmlWriter
-RelDigestWriter
-
-
-Converts a trait to canonical form
-将特征转换为规范形式
-
-
-
-
-第一阶段
-SQL如何转换为RelNode
-SqlToRelConverter
-convertQuery
-
-SqlImplementor
-
-第一阶段不同算子的实现
-DDL
-calcite-server
-        Table View Materialized Column Function
-Create
-Alter
-Drop
-
-第二阶段
-SqlNodeToRexConverter
-
+TranslatableTable 、ProjectableFilterableTable 和 FilterableTable extends AbstractTable
 
 
 ```
 
-### SQL2Rel拆解
+### Table实现
 ```
-
-核心类
-SqlToRelConverter
-RexToLixTranslator
-
-Of 的意思 root of something
-创建某物的root
-
-
-  /** Creates a simple RelRoot. */
-  public static RelRoot of(RelNode rel, RelDataType rowType, SqlKind kind) {
-    final ImmutableIntList refs =
-        ImmutableIntList.identity(rowType.getFieldCount());
-    final List<String> names = rowType.getFieldNames();
-    return new RelRoot(rel, rowType, kind, Pair.zip(refs, names),
-        RelCollations.EMPTY);
-  }
-
-
-
-执行SQL的回调接口
-
-  /** API to put a result set into a statement, being careful to enforce
-   * thread-safety and not to overwrite existing open result sets. */
-  interface PrepareCallback {
-    Object getMonitor();
-    void clear() throws SQLException;
-    void assign(Signature signature, Frame firstFrame, long updateCount)
-        throws SQLException;
-    void execute() throws SQLException;
-  }
-
-
-
-
-优化SQL
-
-基本数据结构
-RexFieldAccess
-Blackboard 保存全局信息
-nameToNodeMap
-scope
-SqlNameMatcher
-subQueryList
-
-基本架构
-register Registers a relational expression.
-lookupExp Returns an expression with which to reference a from-list item.
-
-
-SqlNode to RelRoot
-核心方法：convertQuery
-    validate
-    convertQueryRecursive
-    checkConvertedType
-    getHboCols
-
-
-convertQueryRecursive
-
-
-
-
+CalciteSchema extends SchemaPlus extends Schema
 
 
 ```
 
+## 纵向拆解 - 规则重写
+1. 如何使用calcite rule做SQL重写（上）：http://dafei1288.com/2023/08/10/1003-calcite-sql-rule/
 
 
-### 物化视图
-```
-lattices 是 Calcite 针对星型模型和雪花模型推出的一种物化视图框架，主要可以物化星型模型中部分 cube ，能够智能收集信息并智能决定物化哪些维度等。有点类似 kylin 的思路。
 
-Materialized Views：https://calcite.apache.org/docs/materialized_views.html
-
-
-0058bbd6cc2f6aa680e490d0c4bc30b0d5671b39
---story=874303897 修复跨源MV使用ImprovedOptimizer时无法自动改写的问题
-```
-### 非重要类
-```
-Holder
-A mutable slot that can contain one object.
-A holder is useful for implementing OUT or IN-OUT parameters
-It is possible to sub-class to receive events on get or set.
-
-Dummy 虚拟类
-Namespace that allows us to define non-abstract methods inside an interface
-THREAD_CONTEXT_STACK 
+## 竞品对比
+### anltr 和 javacc 区别
+1. anltr场景：
+   1. coral：https://github.com/linkedin/coral/blob/b50776111910a9a3857dd516651b611f39ddc33a/coral-hive/src/main/antlr/roots/com/linkedin/coral/hive/hive2rel/parsetree/parser/HiveParser.g
+   2. hiveSQL：https://github.com/apache/hive/blob/master/hplsql/src/main/antlr4/org/apache/hive/hplsql/Hplsql.g4
+   3. 
 
 
-condenseMini
-压缩字符串
-  public static String condenseMini(String sql) {
-    return sql == null ? null : sql.replaceAll(WHITE_SPACE_PAT_S, BLANK).trim();
-  }
-
-```
+### flink兼容hive语法
+1. 比如Sort/Cluster/Distributed by Clause 暂不支持
+   1. The Hive dialect is mainly used in batch mode. Some Hive’s syntax (Sort/Cluster/Distributed BY, Transform, etc.) haven’t been supported in streaming mode yet.
+2. flinkSQL是没有的，hiveSQL 2 FlinkSQL 通过calcite
