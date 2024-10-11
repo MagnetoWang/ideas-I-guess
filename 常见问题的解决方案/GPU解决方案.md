@@ -1,19 +1,22 @@
 ## GPU解决方案
 
 ### 资料
+1. 入门
+   1. CUDATutorial：https://github.com/PaddleJitLab/CUDATutorial?tab=readme-ov-file
+   2. 如何系统地学习CUDA？ - Kedreamix的回答 - 知乎 https://www.zhihu.com/question/263832290/answer/3322864217
+   3. https://github.com/Kedreamix/pytorch-cppcuda-tutorial
+   4. cuda编程示例：https://face2ai.com/program-blog/#GPU%E7%BC%96%E7%A8%8B%EF%BC%88CUDA%EF%BC%89
+2. 优化
+   1. [CUDA 学习笔记] GEMM 优化: 双缓冲 (Prefetch) 和 Bank Conflict 解决 - PeakCrosser的文章 - 知乎 https://zhuanlan.zhihu.com/p/696844342
 ```
 
-[CUDA 学习笔记] GEMM 优化: 双缓冲 (Prefetch) 和 Bank Conflict 解决 - PeakCrosser的文章 - 知乎
-https://zhuanlan.zhihu.com/p/696844342
 
 
-如何系统地学习CUDA？ - Kedreamix的回答 - 知乎
-https://www.zhihu.com/question/263832290/answer/3322864217
-https://github.com/Kedreamix/pytorch-cppcuda-tutorial
 
 
-cuda编程示例
-https://face2ai.com/program-blog/#GPU%E7%BC%96%E7%A8%8B%EF%BC%88CUDA%EF%BC%89
+
+
+
 
 
 
@@ -843,7 +846,7 @@ ASIC 部署：如图所示，相比 GPU，ASIC 一般可以根据负载特点设
 
 ## MLOps
 ```
-
+    
 
 ```
 

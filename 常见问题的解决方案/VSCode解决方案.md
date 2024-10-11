@@ -20,6 +20,11 @@ pip freeze > requirements.txt
 查询文件的结构
 command + p
 ```
+### 如何写论文
+1. 图像：ppt, visio, draw.io
+2. 标签自动化工具：https://github.com/microsoft/AI-System/blob/main/Textbook/%E4%B9%A6%E5%86%99%E8%A7%84%E8%8C%83.md
+3. 参考
+   1. https://github.com/microsoft/AI-System
 
 
 ### 登录远程服务器失败
@@ -215,6 +220,9 @@ https://code.visualstudio.com/docs/cpp/faq-cpp
 第三方库只需要在配置中添加incluede路径即可
 插件还可以配置需要索引的目录，叫brower.path
 ```
+
+### 修改行首和行尾快捷键
+1. https://blog.csdn.net/Cordinate_cra/article/details/137251948
 
 ## 超级好用
 

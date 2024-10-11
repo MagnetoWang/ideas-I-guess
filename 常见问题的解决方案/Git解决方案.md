@@ -23,6 +23,16 @@ git config --global core.quotepath false
 
 ```
 
+### 彻底解决git pull失败问题
+1. https://www.cnblogs.com/nebie/p/10830838.html
+```
+git stash
+git pull
+git stash pop 如果没有冲突，会自动merge
+
+
+```
+
 ### Git rebase 合并commit
 
 ```
