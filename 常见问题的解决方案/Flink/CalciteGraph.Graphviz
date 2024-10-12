@@ -1,0 +1,76 @@
+
+https://dreampuf.github.io/GraphvizOnline/#digraph%20G%20%7B%0A%20%20%20%20%09root%20%5Bstyle%3Dfilled%2Clabel%3D%22Root%22%5D%3B%0A%20%20%20%20%09subgraph%20cluster0%7B%0A%20%20%20%20%09%09label%3D%22Set%200%20RecordType(JavaType(int)%20empid%2C%20JavaType(int)%20deptno%2C%20JavaType(class%20java.lang.String)%20name%2C%20JavaType(int)%20salary%2C%20JavaType(class%20java.lang.Integer)%20commission)%22%3B%0A%20%20%20%20%09%09rel99%20%5Blabel%3D%22rel%2399%3ALogicalTableScan%5Cntable%3D%5Bhr%2C%20emps%5D%5Cnrows%3D4.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel120%20%5Blabel%3D%22rel%23120%3AEnumerableTableScan%5Cntable%3D%5Bhr%2C%20emps%5D%5Cnrows%3D4.0%2C%20cost%3D%7B4.0%20rows%2C%205.0%20cpu%2C%200.0%20io%7D%22%2Ccolor%3Dblue%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset106%20%5Blabel%3D%22rel%23106%3ARelSubset%230.NONE.%5B0%5D%22%5D%0A%20%20%20%20%09%09subset121%20%5Blabel%3D%22rel%23121%3ARelSubset%230.ENUMERABLE.%5B0%5D%22%5D%0A%20%20%20%20%09%7D%0A%20%20%20%20%09subgraph%20cluster1%7B%0A%20%20%20%20%09%09label%3D%22Set%201%20RecordType(JavaType(int)%20deptno%2C%20JavaType(class%20java.lang.String)%20name)%22%3B%0A%20%20%20%20%09%09rel100%20%5Blabel%3D%22rel%23100%3ALogicalTableScan%5Cntable%3D%5Bhr%2C%20depts%5D%5Cnrows%3D3.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel122%20%5Blabel%3D%22rel%23122%3AEnumerableTableScan%5Cntable%3D%5Bhr%2C%20depts%5D%5Cnrows%3D3.0%2C%20cost%3D%7B3.0%20rows%2C%204.0%20cpu%2C%200.0%20io%7D%22%2Ccolor%3Dblue%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset107%20%5Blabel%3D%22rel%23107%3ARelSubset%231.NONE.%5B0%5D%22%5D%0A%20%20%20%20%09%09subset123%20%5Blabel%3D%22rel%23123%3ARelSubset%231.ENUMERABLE.%5B0%5D%22%5D%0A%20%20%20%20%09%7D%0A%20%20%20%20%09subgraph%20cluster2%7B%0A%20%20%20%20%09%09label%3D%22Set%202%20RecordType(JavaType(int)%20deptno)%22%3B%0A%20%20%20%20%09%09rel108%20%5Blabel%3D%22rel%23108%3ALogicalProject%5Cninput%3DRelSubset%23107%2Cinputs%3D0%5Cnrows%3D3.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset109%20%5Blabel%3D%22rel%23109%3ARelSubset%232.NONE.%5B0%5D%22%5D%0A%20%20%20%20%09%7D%0A%20%20%20%20%09subgraph%20cluster3%7B%0A%20%20%20%20%09%09label%3D%22Set%203%20RecordType(JavaType(int)%20deptno)%22%3B%0A%20%20%20%20%09%09rel110%20%5Blabel%3D%22rel%23110%3ALogicalAggregate%5Cninput%3DRelSubset%23109%2Cgroup%3D%7B0%7D%5Cnrows%3D3.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset111%20%5Blabel%3D%22rel%23111%3ARelSubset%233.NONE.%5B%5D%22%5D%0A%20%20%20%20%09%7D%0A%20%20%20%20%09subgraph%20cluster4%7B%0A%20%20%20%20%09%09label%3D%22Set%204%20RecordType(JavaType(int)%20empid%2C%20JavaType(int)%20deptno%2C%20JavaType(class%20java.lang.String)%20name%2C%20JavaType(int)%20salary%2C%20JavaType(class%20java.lang.Integer)%20commission%2C%20JavaType(int)%20deptno0)%22%3B%0A%20%20%20%20%09%09rel112%20%5Blabel%3D%22rel%23112%3ALogicalJoin%5Cnleft%3DRelSubset%23106%2Cright%3DRelSubset%23111%2Ccondition%3D%3D(%241%2C%20%245)%2CjoinType%3Dinner%5Cnrows%3D1.7999999999999998%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel129%20%5Blabel%3D%22rel%23129%3ALogicalSort%5Cninput%3DRelSubset%23113%2Csort0%3D%240%2Cdir0%3DASC%5Cnrows%3D1.7999999999999998%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset113%20%5Blabel%3D%22rel%23113%3ARelSubset%234.NONE.%5B%5D%22%5D%0A%20%20%20%20%09%09subset131%20%5Blabel%3D%22rel%23131%3ARelSubset%234.NONE.%5B0%5D%22%5D%0A%20%20%20%20%09%09subset113%20-%3E%20subset131%3B%09%7D%0A%20%20%20%20%09subgraph%20cluster5%7B%0A%20%20%20%20%09%09label%3D%22Set%205%20RecordType(JavaType(int)%20deptno%2C%20JavaType(int)%20empid)%22%3B%0A%20%20%20%20%09%09rel114%20%5Blabel%3D%22rel%23114%3ALogicalProject%5Cninput%3DRelSubset%23113%2Cexprs%3D%5B%241%2C%20%240%5D%5Cnrows%3D1.7999999999999998%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel128%20%5Blabel%3D%22rel%23128%3ALogicalProject%5Cninput%3DRelSubset%23127%2Cexprs%3D%5B%241%2C%20%240%5D%5Cnrows%3D4.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset115%20%5Blabel%3D%22rel%23115%3ARelSubset%235.NONE.%5B%5D%22%5D%0A%20%20%20%20%09%7D%0A%20%20%20%20%09subgraph%20cluster6%7B%0A%20%20%20%20%09%09label%3D%22Set%206%20RecordType(JavaType(int)%20deptno%2C%20JavaType(int)%20empid)%22%3B%0A%20%20%20%20%09%09rel116%20%5Blabel%3D%22rel%23116%3ALogicalSort%5Cninput%3DRelSubset%23115%2Csort0%3D%241%2Cdir0%3DASC%5Cnrows%3D1.7999999999999998%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel119%20%5Blabel%3D%22rel%23119%3AAbstractConverter%5Cninput%3DRelSubset%23117%2Cconvention%3DENUMERABLE%2Csort%3D%5B1%5D%5Cnrows%3D1.7999999999999998%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel132%20%5Blabel%3D%22rel%23132%3ALogicalProject%5Cninput%3DRelSubset%23131%2Cexprs%3D%5B%241%2C%20%240%5D%5Cnrows%3D1.7999999999999998%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel136%20%5Blabel%3D%22rel%23136%3ALogicalProject%5Cninput%3DRelSubset%23135%2Cexprs%3D%5B%241%2C%20%240%5D%5Cnrows%3D4.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset117%20%5Blabel%3D%22rel%23117%3ARelSubset%236.NONE.%5B1%5D%22%5D%0A%20%20%20%20%09%09subset118%20%5Blabel%3D%22rel%23118%3ARelSubset%236.ENUMERABLE.%5B1%5D%22%2Ccolor%3Dred%5D%0A%20%20%20%20%09%7D%0A%20%20%20%20%09subgraph%20cluster7%7B%0A%20%20%20%20%09%09label%3D%22Set%207%20RecordType(JavaType(int)%20empid%2C%20JavaType(int)%20deptno%2C%20JavaType(class%20java.lang.String)%20name%2C%20JavaType(int)%20salary%2C%20JavaType(class%20java.lang.Integer)%20commission)%22%3B%0A%20%20%20%20%09%09rel126%20%5Blabel%3D%22rel%23126%3ALogicalJoin%5Cnleft%3DRelSubset%23106%2Cright%3DRelSubset%23109%2Ccondition%3D%3D(%241%2C%20%245)%2CjoinType%3Dsemi%5Cnrows%3D4.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel133%20%5Blabel%3D%22rel%23133%3ALogicalSort%5Cninput%3DRelSubset%23127%2Csort0%3D%240%2Cdir0%3DASC%5Cnrows%3D4.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset127%20%5Blabel%3D%22rel%23127%3ARelSubset%237.NONE.%5B%5D%22%5D%0A%20%20%20%20%09%09subset135%20%5Blabel%3D%22rel%23135%3ARelSubset%237.NONE.%5B0%5D%22%5D%0A%20%20%20%20%09%09subset127%20-%3E%20subset135%3B%09%7D%0A%20%20%20%20%09root%20-%3E%20subset118%3B%0A%20%20%20%20%09subset106%20-%3E%20rel99%3B%0A%20%20%20%20%09subset121%20-%3E%20rel120%5Bcolor%3Dblue%5D%3B%0A%20%20%20%20%09subset107%20-%3E%20rel100%3B%0A%20%20%20%20%09subset123%20-%3E%20rel122%5Bcolor%3Dblue%5D%3B%0A%20%20%20%20%09subset109%20-%3E%20rel108%3B%20rel108%20-%3E%20subset107%3B%0A%20%20%20%20%09subset111%20-%3E%20rel110%3B%20rel110%20-%3E%20subset109%3B%0A%20%20%20%20%09subset113%20-%3E%20rel112%3B%20rel112%20-%3E%20subset106%5Blabel%3D%220%22%5D%3B%20rel112%20-%3E%20subset111%5Blabel%3D%221%22%5D%3B%0A%20%20%20%20%09subset131%20-%3E%20rel129%3B%20rel129%20-%3E%20subset113%3B%0A%20%20%20%20%09subset115%20-%3E%20rel114%3B%20rel114%20-%3E%20subset113%3B%0A%20%20%20%20%09subset115%20-%3E%20rel128%3B%20rel128%20-%3E%20subset127%3B%0A%20%20%20%20%09subset117%20-%3E%20rel116%3B%20rel116%20-%3E%20subset115%3B%0A%20%20%20%20%09subset118%20-%3E%20rel119%3B%20rel119%20-%3E%20subset117%3B%0A%20%20%20%20%09subset117%20-%3E%20rel132%3B%20rel132%20-%3E%20subset131%3B%0A%20%20%20%20%09subset117%20-%3E%20rel136%3B%20rel136%20-%3E%20subset135%3B%0A%20%20%20%20%09subset127%20-%3E%20rel126%3B%20rel126%20-%3E%20subset106%5Blabel%3D%220%22%5D%3B%20rel126%20-%3E%20subset109%5Blabel%3D%221%22%5D%3B%0A%20%20%20%20%09subset135%20-%3E%20rel133%3B%20rel133%20-%3E%20subset127%3B%0A%20%20%20%20%7D
+
+digraph G {
+    root [style=filled,label="Root"];
+    subgraph cluster0{
+        label="Set 0 RecordType(JavaType(int) empid, JavaType(int) deptno, JavaType(class java.lang.String) name, JavaType(int) salary, JavaType(class java.lang.Integer) commission)";
+        rel99 [label="rel#99:LogicalTableScan\ntable=[hr, emps]\nrows=4.0, cost={inf}",shape=box]
+        rel120 [label="rel#120:EnumerableTableScan\ntable=[hr, emps]\nrows=4.0, cost={4.0 rows, 5.0 cpu, 0.0 io}",color=blue,shape=box]
+        subset106 [label="rel#106:RelSubset#0.NONE.[0]"]
+        subset121 [label="rel#121:RelSubset#0.ENUMERABLE.[0]"]
+    }
+    subgraph cluster1{
+        label="Set 1 RecordType(JavaType(int) deptno, JavaType(class java.lang.String) name)";
+        rel100 [label="rel#100:LogicalTableScan\ntable=[hr, depts]\nrows=3.0, cost={inf}",shape=box]
+        rel122 [label="rel#122:EnumerableTableScan\ntable=[hr, depts]\nrows=3.0, cost={3.0 rows, 4.0 cpu, 0.0 io}",color=blue,shape=box]
+        subset107 [label="rel#107:RelSubset#1.NONE.[0]"]
+        subset123 [label="rel#123:RelSubset#1.ENUMERABLE.[0]"]
+    }
+    subgraph cluster2{
+        label="Set 2 RecordType(JavaType(int) deptno)";
+        rel108 [label="rel#108:LogicalProject\ninput=RelSubset#107,inputs=0\nrows=3.0, cost={inf}",shape=box]
+        subset109 [label="rel#109:RelSubset#2.NONE.[0]"]
+    }
+    subgraph cluster3{
+        label="Set 3 RecordType(JavaType(int) deptno)";
+        rel110 [label="rel#110:LogicalAggregate\ninput=RelSubset#109,group={0}\nrows=3.0, cost={inf}",shape=box]
+        subset111 [label="rel#111:RelSubset#3.NONE.[]"]
+    }
+    subgraph cluster4{
+        label="Set 4 RecordType(JavaType(int) empid, JavaType(int) deptno, JavaType(class java.lang.String) name, JavaType(int) salary, JavaType(class java.lang.Integer) commission, JavaType(int) deptno0)";
+        rel112 [label="rel#112:LogicalJoin\nleft=RelSubset#106,right=RelSubset#111,condition==($1, $5),joinType=inner\nrows=1.7999999999999998, cost={inf}",shape=box]
+        rel129 [label="rel#129:LogicalSort\ninput=RelSubset#113,sort0=$0,dir0=ASC\nrows=1.7999999999999998, cost={inf}",shape=box]
+        subset113 [label="rel#113:RelSubset#4.NONE.[]"]
+        subset131 [label="rel#131:RelSubset#4.NONE.[0]"]
+        subset113 -> subset131;	}
+    subgraph cluster5{
+        label="Set 5 RecordType(JavaType(int) deptno, JavaType(int) empid)";
+        rel114 [label="rel#114:LogicalProject\ninput=RelSubset#113,exprs=[$1, $0]\nrows=1.7999999999999998, cost={inf}",shape=box]
+        rel128 [label="rel#128:LogicalProject\ninput=RelSubset#127,exprs=[$1, $0]\nrows=4.0, cost={inf}",shape=box]
+        subset115 [label="rel#115:RelSubset#5.NONE.[]"]
+    }
+    subgraph cluster6{
+        label="Set 6 RecordType(JavaType(int) deptno, JavaType(int) empid)";
+        rel116 [label="rel#116:LogicalSort\ninput=RelSubset#115,sort0=$1,dir0=ASC\nrows=1.7999999999999998, cost={inf}",shape=box]
+        rel119 [label="rel#119:AbstractConverter\ninput=RelSubset#117,convention=ENUMERABLE,sort=[1]\nrows=1.7999999999999998, cost={inf}",shape=box]
+        rel132 [label="rel#132:LogicalProject\ninput=RelSubset#131,exprs=[$1, $0]\nrows=1.7999999999999998, cost={inf}",shape=box]
+        rel136 [label="rel#136:LogicalProject\ninput=RelSubset#135,exprs=[$1, $0]\nrows=4.0, cost={inf}",shape=box]
+        subset117 [label="rel#117:RelSubset#6.NONE.[1]"]
+        subset118 [label="rel#118:RelSubset#6.ENUMERABLE.[1]",color=red]
+    }
+    subgraph cluster7{
+        label="Set 7 RecordType(JavaType(int) empid, JavaType(int) deptno, JavaType(class java.lang.String) name, JavaType(int) salary, JavaType(class java.lang.Integer) commission)";
+        rel126 [label="rel#126:LogicalJoin\nleft=RelSubset#106,right=RelSubset#109,condition==($1, $5),joinType=semi\nrows=4.0, cost={inf}",shape=box]
+        rel133 [label="rel#133:LogicalSort\ninput=RelSubset#127,sort0=$0,dir0=ASC\nrows=4.0, cost={inf}",shape=box]
+        subset127 [label="rel#127:RelSubset#7.NONE.[]"]
+        subset135 [label="rel#135:RelSubset#7.NONE.[0]"]
+        subset127 -> subset135;	}
+    root -> subset118;
+    subset106 -> rel99;
+    subset121 -> rel120[color=blue];
+    subset107 -> rel100;
+    subset123 -> rel122[color=blue];
+    subset109 -> rel108; rel108 -> subset107;
+    subset111 -> rel110; rel110 -> subset109;
+    subset113 -> rel112; rel112 -> subset106[label="0"]; rel112 -> subset111[label="1"];
+    subset131 -> rel129; rel129 -> subset113;
+    subset115 -> rel114; rel114 -> subset113;
+    subset115 -> rel128; rel128 -> subset127;
+    subset117 -> rel116; rel116 -> subset115;
+    subset118 -> rel119; rel119 -> subset117;
+    subset117 -> rel132; rel132 -> subset131;
+    subset117 -> rel136; rel136 -> subset135;
+    subset127 -> rel126; rel126 -> subset106[label="0"]; rel126 -> subset109[label="1"];
+    subset135 -> rel133; rel133 -> subset127;
+}

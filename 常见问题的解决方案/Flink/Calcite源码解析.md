@@ -79,9 +79,8 @@ calcite + 公司项目
 
 ### 入门概念
 1. 概念图解：https://www.cnblogs.com/wcgstudy/p/11795886.html
-2. RelOptRule：根据传递给它的 RelOptRuleOperand 来对目标 RelNode 树进行 规则匹配，匹配成功后，会再次调用 matches() 方法进行进一步检查。如果 mathes结果为真，则调用 onMatch() 进行转换。
-3. 物化视图-数据格框架(Lattice Framework)：https://cloud.tencent.com/developer/article/2450528
-4. 
+2. 物化视图-数据格框架(Lattice Framework)：https://cloud.tencent.com/developer/article/2450528
+3. 
 ```
 
 
@@ -425,7 +424,7 @@ SqlCreate SqlCreateTable(Span s, boolean replace) :
 
 
 ## 横向拆解 - validate
-1. 必看
+1. 文章必看
    1. https://shenzhu.github.io/calcite-user-perspective/
 2. Calcite SQL验证流程：https://liebing.org.cn/apache-calcite-sql-validator.html
 3. catalog 原理：https://strongduanmu.com/blog/explore-apache-calcite-system-catalog-implementation.html
@@ -440,15 +439,38 @@ SqlCreate SqlCreateTable(Span s, boolean replace) :
    4. 隐式转换
    5. DQL校验：SqlValidator#deriveType
    6. DML校验：SqlValidator#checkTypeAssignment
-9.  源码case
+9.  源码必看
    1. SqlValidatorTest
    2. core/src/test/java/org/apache/calcite/test/MaterializedViewTester.java
       1. toRel 测试
    3. SqlParserTest
 10. 概念
-   1. SqlValidatorCatalogReader：元数据读取器
-   2. SqlValidatorNamespace：描述了 SQL 查询返回的关系，一个 SQL 查询可以拆分为多个部分，查询的列组合，表名等等，当中每个部分都有一个对应的 SqlValidatorNamespace
-   3. SqlValidatorScope：可以认为是校验流程中每个 SqlNode 的工作上下文，当校验表达式时，通过 SqlValidatorScope 的 resolve 方法进行解析，如果成功的话会返回对应的 SqlValidatorNamespace 描述结果类型
+   1. SchemaPlus：元数据描述
+   2. Frameworks： 可独立调用calcite模块的工具框架
+      1. 创建元数据
+      2. 获取计划图
+   3. FrameworkConfig
+      1. 框架基础配置
+   4. AbstractTable
+      1. 注册元数据的抽象表定义
+   5. RelDataType
+      1. 注册calcite元数据的数据类型 - 行级
+   6.  RelDataTypeFactory
+       1. 通过工厂定义calcite的数据类型 - 行级
+   7.  BasicSqlType
+       1.  calcite对应的SQL数据类型 - 字段级
+   8. SqlTypeFactoryImpl
+       1.  通过工厂定义calcite的数据类型 - 字段级
+   9. CalciteConnectionConfig  
+   10. CalciteCatalogReader
+       1.  
+   11. SqlValidator
+       1. SQL校验器
+   12. SqlValidatorUtil
+       1. 校验工具
+   13. SqlValidatorCatalogReader：元数据读取器
+   14. SqlValidatorNamespace：描述了 SQL 查询返回的关系，一个 SQL 查询可以拆分为多个部分，查询的列组合，表名等等，当中每个部分都有一个对应的 SqlValidatorNamespace
+   15. SqlValidatorScope：可以认为是校验流程中每个 SqlNode 的工作上下文，当校验表达式时，通过 SqlValidatorScope 的 resolve 方法进行解析，如果成功的话会返回对应的 SqlValidatorNamespace 描述结果类型
 
 ```
 相关类
@@ -462,6 +484,53 @@ SqlValidatorUtil
 
 
 ```
+
+### calcite 定义一个schema 示例
+1. 源码参考
+   1. core/src/test/java/org/apache/calcite/schemas/HrClusteredSchema.java
+```
+ public HrClusteredSchema() {
+    tables = ImmutableMap.<String, Table>builder()
+        .put("emps",
+            new PkClusteredTable(
+                factory ->
+                    new RelDataTypeFactory.Builder(factory)
+                        .add("empid", factory.createJavaType(int.class))
+                        .add("deptno", factory.createJavaType(int.class))
+                        .add("name", factory.createJavaType(String.class))
+                        .add("salary", factory.createJavaType(int.class))
+                        .add("commission", factory.createJavaType(Integer.class))
+                        .build(),
+                ImmutableBitSet.of(0),
+                Arrays.asList(
+                    new Object[]{100, 10, "Bill", 10000, 1000},
+                    new Object[]{110, 10, "Theodore", 11500, 250},
+                    new Object[]{150, 10, "Sebastian", 7000, null},
+                    new Object[]{200, 20, "Eric", 8000, 500})))
+        .put("depts",
+            new PkClusteredTable(
+                factory ->
+                    new RelDataTypeFactory.Builder(factory)
+                        .add("deptno", factory.createJavaType(int.class))
+                        .add("name", factory.createJavaType(String.class))
+                        .build(),
+                ImmutableBitSet.of(0),
+                Arrays.asList(
+                    new Object[]{10, "Sales"},
+                    new Object[]{30, "Marketing"},
+                    new Object[]{40, "HR"})))
+        .build();
+  }
+
+```
+
+### calcite 
+```
+
+
+```
+
+
 
 ### calcite 测试用例如何执行元数据和校验
 
@@ -481,12 +550,161 @@ SqlValidatorUtil
 ### flink如何复用validator能力
 1. FlinkCalciteSqlValidator
 
-## 横向拆解 - optimize
+## 横向拆解 - plan optimize
+1. 必看
+   1. 优化器概念介绍：https://guimy.tech/calcite/2021/01/02/introduction-to-apache-calcite.html
+2. rbo介绍：https://strongduanmu.com/blog/deep-understand-of-apache-calcite-hep-planner.html
+3. 优化器详解：https://matt33.com/2019/03/17/apache-calcite-planner/
+4. Rel概念介绍：https://www.cnblogs.com/wcgstudy/p/11795886.html
+5. 启发式planner：https://zhuanlan.zhihu.com/p/61661909
+6. HepRelVertex 启发式图顶点：https://liebing.org.cn/apache-calcite-hepplanner.html
+7. 基础概念
+   1. SqlToRelConverter：将SqlNode转换为RelNode
+   2. RelOptCluster：优化器上下文
+   3. ConventionTraitDef：表示由何种数据处理引擎处理，对应的 RelTrait 类型为 Convention
+   4. RelCollationTraitDef：表示排序规则的定义，对应的 RelTrait 为 RelCollation。比如对于排序表达式（也称算子） org.apache.calcite.rel.core.Sort，就存在一个 RelCollation 类型的属性 collation。
+   5. RelDistributionTraitDef，表示数据在物理存储上的分布方式，对应的 RelTrait 为 RelDistribution。
+   6. Programs：
+   7. Planner：
+   8. RelRoot：RelNode根节点
+   9. RelNode：代表了对数据的一个处理操作，常见的操作有 Sort、Join、Project、Filter、Scan 等。它蕴含的是对整个 Relation 的操作，而不是对具体数据的处理逻辑。
+   10. RelTrait：用来定义逻辑表的物理相关属性（physical property），三种主要的 trait 类型是：Convention、RelCollation、RelDistribution；
+   11. Convention：继承自 RelTrait，类型很少，代表一个单一的数据源，一个 relational expression 必须在同一个 convention 中；
+   12. RelTraitSet：RelTrait集合
+   13. RelOptRule：根据传递给它的 RelOptRuleOperand 来对目标 RelNode 树进行 规则匹配，匹配成功后，会再次调用 matches() 方法进行进一步检查。如果 mathes结果为真，则调用 onMatch() 进行转换。
+8. 进阶概念
+   1. VolcanoPlanner
+   2. Dumpers
+   3. Holder
+   4. HepProgram
+   5. RelFieldTrimmer
+   6. RelHint
+9. 规则集
+   1. RuleSet：rbo优化规则集
+   2. CoreRules：核心规则集
+   3. EnumerableRules：插件式加入规则集
+   4. Fixture：测试Rule框架，快速验证规则正确性和是否生效
+   5. RelOptUtil：工具类，方便对rule操作和导出，静态方法
+10. 源码必看
+   1. core/src/test/java/org/apache/calcite/rel/rules/SortRemoveRuleTest.java
+
+
+### rbo概念
+```
+BeginGroup, EndGroup: 开始和结束一组指令组
+CommonRelSubExprRels: 寻找公共子关系表达式的指令
+ConverterRules: 
+MatchLimit: 修改当前 Program 匹配 limit 的指令
+MatchOrder: 修改当前 Program 匹配次序的指令
+Placeholder: 
+RuleClass: 执行 rules 中符合指定规则类型 allRules 的规则的指令(对 allRules 的过滤)
+RuleCollection: 执行多个 rules 的指令(不必在 allRules 中)
+RuleInstance: 执行一个 rule 的指令(不必在 allRules 中)
+RuleLookup: 
+SubProgram: 用来执行子 HepProgram 的指令
+
+
+```
+
+
+###  SQL -> RelNode 代码示例
+1. 核心
+   1. Planner planner = Frameworks.getPlanner(config);
+   2. 有了planner就能任意介入到oaser validate 和 optimize阶段了
+```
+
+    /**
+     * The default schema that is used in these tests provides tables sorted on the primary key. Due
+     * to this scan operators always come with a {@link org.apache.calcite.rel.RelCollation} trait.
+     */
+    RelNode plan() throws Exception {
+      final SchemaPlus rootSchema = Frameworks.createRootSchema(true);
+      final SchemaPlus defSchema = rootSchema.add("hr", new HrClusteredSchema());
+      final FrameworkConfig config = Frameworks.newConfigBuilder()
+          .parserConfig(SqlParser.Config.DEFAULT)
+          .sqlToRelConverterConfig(
+              sqlToRelConfigTransform.apply(SqlToRelConverter.config()))
+          .defaultSchema(defSchema)
+          .traitDefs(ConventionTraitDef.INSTANCE, RelCollationTraitDef.INSTANCE)
+          .programs(
+              Programs.of(prepareRules),
+              Programs.ofRules(CoreRules.SORT_REMOVE))
+          .build();
+      Planner planner = Frameworks.getPlanner(config);
+      SqlNode parse = planner.parse(sql);
+      SqlNode validate = planner.validate(parse);
+      RelRoot planRoot = planner.rel(validate);
+      RelNode planBefore = planRoot.rel;
+      RelTraitSet desiredTraits = planBefore.getTraitSet()
+          .replace(EnumerableConvention.INSTANCE);
+      RelNode planAfter = planner.transform(0, desiredTraits, planBefore);
+      return planner.transform(1, desiredTraits, planAfter);
+    }
+
+```
+
+
+### RexNode 语法测试
+1. core/src/test/java/org/apache/calcite/rel/rules/DateRangeRulesTest.java
+```
+  
+  @Test void testExtractYearFromDateColumn() {
+    final Fixture2 f = new Fixture2();
+
+    final RexNode e = f.eq(f.literal(2014), f.exYearD);
+    assertThat(DateRangeRules.extractTimeUnits(e),
+        is(set(TimeUnitRange.YEAR)));
+    assertThat(DateRangeRules.extractTimeUnits(f.dec), is(set()));
+    assertThat(DateRangeRules.extractTimeUnits(f.literal(1)), is(set()));
+
+    // extract YEAR from a DATE column
+    checkDateRange(f, e, is("AND(>=($8, 2014-01-01), <($8, 2015-01-01))"));
+    checkDateRange(f, f.eq(f.exYearD, f.literal(2014)),
+        is("AND(>=($8, 2014-01-01), <($8, 2015-01-01))"));
+    checkDateRange(f, f.ge(f.exYearD, f.literal(2014)),
+        is(">=($8, 2014-01-01)"));
+    checkDateRange(f, f.gt(f.exYearD, f.literal(2014)),
+        is(">=($8, 2015-01-01)"));
+    checkDateRange(f, f.lt(f.exYearD, f.literal(2014)),
+        is("<($8, 2014-01-01)"));
+    checkDateRange(f, f.le(f.exYearD, f.literal(2014)),
+        is("<($8, 2015-01-01)"));
+    checkDateRange(f, f.ne(f.exYearD, f.literal(2014)),
+        is("<>(EXTRACT(FLAG(YEAR), $8), 2014)"));
+  }
+
+
+```
+
+
+### 计划图变化
+```
+
+Root: rel#118:RelSubset#6.ENUMERABLE.[1]
+Original rel:
+LogicalSort(subset=[rel#118:RelSubset#6.ENUMERABLE.[1]], sort0=[$1], dir0=[ASC]): rowcount = 1.7999999999999998, cumulative cost = {1.7999999999999998 rows, 36.0 cpu, 0.0 io}, id = 116
+  LogicalProject(subset=[rel#115:RelSubset#5.NONE.[]], deptno=[$1], empid=[$0]): rowcount = 1.7999999999999998, cumulative cost = {1.7999999999999998 rows, 3.5999999999999996 cpu, 0.0 io}, id = 114
+    LogicalJoin(subset=[rel#113:RelSubset#4.NONE.[]], condition=[=($1, $5)], joinType=[inner]): rowcount = 1.7999999999999998, cumulative cost = {1.7999999999999998 rows, 0.0 cpu, 0.0 io}, id = 112
+      LogicalTableScan(subset=[rel#106:RelSubset#0.NONE.[0]], table=[[hr, emps]]): rowcount = 4.0, cumulative cost = {4.0 rows, 5.0 cpu, 0.0 io}, id = 99
+      LogicalAggregate(subset=[rel#111:RelSubset#3.NONE.[]], group=[{0}]): rowcount = 3.0, cumulative cost = {3.0 rows, 0.0 cpu, 0.0 io}, id = 110
+        LogicalProject(subset=[rel#109:RelSubset#2.NONE.[0]], deptno=[$0]): rowcount = 3.0, cumulative cost = {3.0 rows, 3.0 cpu, 0.0 io}, id = 108
+          LogicalTableScan(subset=[rel#107:RelSubset#1.NONE.[0]], table=[[hr, depts]]): rowcount = 3.0, cumulative cost = {3.0 rows, 4.0 cpu, 0.0 io}, id = 100
+
+```
 
 ### calcite 规则集
 1. RelOptRulesTest
 2. CoreRules
 
+### calcite 可视化
+1. 静态方法：core/src/main/java/org/apache/calcite/plan/volcano/Dumpers.java#dumpGraphviz
+2. Graphviz 格式
+```
+示例链接
+
+https://dreampuf.github.io/GraphvizOnline/#digraph%20G%20%7B%0A%20%20%20%20%09root%20%5Bstyle%3Dfilled%2Clabel%3D%22Root%22%5D%3B%0A%20%20%20%20%09subgraph%20cluster0%7B%0A%20%20%20%20%09%09label%3D%22Set%200%20RecordType(JavaType(int)%20empid%2C%20JavaType(int)%20deptno%2C%20JavaType(class%20java.lang.String)%20name%2C%20JavaType(int)%20salary%2C%20JavaType(class%20java.lang.Integer)%20commission)%22%3B%0A%20%20%20%20%09%09rel99%20%5Blabel%3D%22rel%2399%3ALogicalTableScan%5Cntable%3D%5Bhr%2C%20emps%5D%5Cnrows%3D4.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel120%20%5Blabel%3D%22rel%23120%3AEnumerableTableScan%5Cntable%3D%5Bhr%2C%20emps%5D%5Cnrows%3D4.0%2C%20cost%3D%7B4.0%20rows%2C%205.0%20cpu%2C%200.0%20io%7D%22%2Ccolor%3Dblue%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset106%20%5Blabel%3D%22rel%23106%3ARelSubset%230.NONE.%5B0%5D%22%5D%0A%20%20%20%20%09%09subset121%20%5Blabel%3D%22rel%23121%3ARelSubset%230.ENUMERABLE.%5B0%5D%22%5D%0A%20%20%20%20%09%7D%0A%20%20%20%20%09subgraph%20cluster1%7B%0A%20%20%20%20%09%09label%3D%22Set%201%20RecordType(JavaType(int)%20deptno%2C%20JavaType(class%20java.lang.String)%20name)%22%3B%0A%20%20%20%20%09%09rel100%20%5Blabel%3D%22rel%23100%3ALogicalTableScan%5Cntable%3D%5Bhr%2C%20depts%5D%5Cnrows%3D3.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel122%20%5Blabel%3D%22rel%23122%3AEnumerableTableScan%5Cntable%3D%5Bhr%2C%20depts%5D%5Cnrows%3D3.0%2C%20cost%3D%7B3.0%20rows%2C%204.0%20cpu%2C%200.0%20io%7D%22%2Ccolor%3Dblue%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset107%20%5Blabel%3D%22rel%23107%3ARelSubset%231.NONE.%5B0%5D%22%5D%0A%20%20%20%20%09%09subset123%20%5Blabel%3D%22rel%23123%3ARelSubset%231.ENUMERABLE.%5B0%5D%22%5D%0A%20%20%20%20%09%7D%0A%20%20%20%20%09subgraph%20cluster2%7B%0A%20%20%20%20%09%09label%3D%22Set%202%20RecordType(JavaType(int)%20deptno)%22%3B%0A%20%20%20%20%09%09rel108%20%5Blabel%3D%22rel%23108%3ALogicalProject%5Cninput%3DRelSubset%23107%2Cinputs%3D0%5Cnrows%3D3.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset109%20%5Blabel%3D%22rel%23109%3ARelSubset%232.NONE.%5B0%5D%22%5D%0A%20%20%20%20%09%7D%0A%20%20%20%20%09subgraph%20cluster3%7B%0A%20%20%20%20%09%09label%3D%22Set%203%20RecordType(JavaType(int)%20deptno)%22%3B%0A%20%20%20%20%09%09rel110%20%5Blabel%3D%22rel%23110%3ALogicalAggregate%5Cninput%3DRelSubset%23109%2Cgroup%3D%7B0%7D%5Cnrows%3D3.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset111%20%5Blabel%3D%22rel%23111%3ARelSubset%233.NONE.%5B%5D%22%5D%0A%20%20%20%20%09%7D%0A%20%20%20%20%09subgraph%20cluster4%7B%0A%20%20%20%20%09%09label%3D%22Set%204%20RecordType(JavaType(int)%20empid%2C%20JavaType(int)%20deptno%2C%20JavaType(class%20java.lang.String)%20name%2C%20JavaType(int)%20salary%2C%20JavaType(class%20java.lang.Integer)%20commission%2C%20JavaType(int)%20deptno0)%22%3B%0A%20%20%20%20%09%09rel112%20%5Blabel%3D%22rel%23112%3ALogicalJoin%5Cnleft%3DRelSubset%23106%2Cright%3DRelSubset%23111%2Ccondition%3D%3D(%241%2C%20%245)%2CjoinType%3Dinner%5Cnrows%3D1.7999999999999998%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel129%20%5Blabel%3D%22rel%23129%3ALogicalSort%5Cninput%3DRelSubset%23113%2Csort0%3D%240%2Cdir0%3DASC%5Cnrows%3D1.7999999999999998%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset113%20%5Blabel%3D%22rel%23113%3ARelSubset%234.NONE.%5B%5D%22%5D%0A%20%20%20%20%09%09subset131%20%5Blabel%3D%22rel%23131%3ARelSubset%234.NONE.%5B0%5D%22%5D%0A%20%20%20%20%09%09subset113%20-%3E%20subset131%3B%09%7D%0A%20%20%20%20%09subgraph%20cluster5%7B%0A%20%20%20%20%09%09label%3D%22Set%205%20RecordType(JavaType(int)%20deptno%2C%20JavaType(int)%20empid)%22%3B%0A%20%20%20%20%09%09rel114%20%5Blabel%3D%22rel%23114%3ALogicalProject%5Cninput%3DRelSubset%23113%2Cexprs%3D%5B%241%2C%20%240%5D%5Cnrows%3D1.7999999999999998%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel128%20%5Blabel%3D%22rel%23128%3ALogicalProject%5Cninput%3DRelSubset%23127%2Cexprs%3D%5B%241%2C%20%240%5D%5Cnrows%3D4.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset115%20%5Blabel%3D%22rel%23115%3ARelSubset%235.NONE.%5B%5D%22%5D%0A%20%20%20%20%09%7D%0A%20%20%20%20%09subgraph%20cluster6%7B%0A%20%20%20%20%09%09label%3D%22Set%206%20RecordType(JavaType(int)%20deptno%2C%20JavaType(int)%20empid)%22%3B%0A%20%20%20%20%09%09rel116%20%5Blabel%3D%22rel%23116%3ALogicalSort%5Cninput%3DRelSubset%23115%2Csort0%3D%241%2Cdir0%3DASC%5Cnrows%3D1.7999999999999998%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel119%20%5Blabel%3D%22rel%23119%3AAbstractConverter%5Cninput%3DRelSubset%23117%2Cconvention%3DENUMERABLE%2Csort%3D%5B1%5D%5Cnrows%3D1.7999999999999998%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel132%20%5Blabel%3D%22rel%23132%3ALogicalProject%5Cninput%3DRelSubset%23131%2Cexprs%3D%5B%241%2C%20%240%5D%5Cnrows%3D1.7999999999999998%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel136%20%5Blabel%3D%22rel%23136%3ALogicalProject%5Cninput%3DRelSubset%23135%2Cexprs%3D%5B%241%2C%20%240%5D%5Cnrows%3D4.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset117%20%5Blabel%3D%22rel%23117%3ARelSubset%236.NONE.%5B1%5D%22%5D%0A%20%20%20%20%09%09subset118%20%5Blabel%3D%22rel%23118%3ARelSubset%236.ENUMERABLE.%5B1%5D%22%2Ccolor%3Dred%5D%0A%20%20%20%20%09%7D%0A%20%20%20%20%09subgraph%20cluster7%7B%0A%20%20%20%20%09%09label%3D%22Set%207%20RecordType(JavaType(int)%20empid%2C%20JavaType(int)%20deptno%2C%20JavaType(class%20java.lang.String)%20name%2C%20JavaType(int)%20salary%2C%20JavaType(class%20java.lang.Integer)%20commission)%22%3B%0A%20%20%20%20%09%09rel126%20%5Blabel%3D%22rel%23126%3ALogicalJoin%5Cnleft%3DRelSubset%23106%2Cright%3DRelSubset%23109%2Ccondition%3D%3D(%241%2C%20%245)%2CjoinType%3Dsemi%5Cnrows%3D4.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel133%20%5Blabel%3D%22rel%23133%3ALogicalSort%5Cninput%3DRelSubset%23127%2Csort0%3D%240%2Cdir0%3DASC%5Cnrows%3D4.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset127%20%5Blabel%3D%22rel%23127%3ARelSubset%237.NONE.%5B%5D%22%5D%0A%20%20%20%20%09%09subset135%20%5Blabel%3D%22rel%23135%3ARelSubset%237.NONE.%5B0%5D%22%5D%0A%20%20%20%20%09%09subset127%20-%3E%20subset135%3B%09%7D%0A%20%20%20%20%09root%20-%3E%20subset118%3B%0A%20%20%20%20%09subset106%20-%3E%20rel99%3B%0A%20%20%20%20%09subset121%20-%3E%20rel120%5Bcolor%3Dblue%5D%3B%0A%20%20%20%20%09subset107%20-%3E%20rel100%3B%0A%20%20%20%20%09subset123%20-%3E%20rel122%5Bcolor%3Dblue%5D%3B%0A%20%20%20%20%09subset109%20-%3E%20rel108%3B%20rel108%20-%3E%20subset107%3B%0A%20%20%20%20%09subset111%20-%3E%20rel110%3B%20rel110%20-%3E%20subset109%3B%0A%20%20%20%20%09subset113%20-%3E%20rel112%3B%20rel112%20-%3E%20subset106%5Blabel%3D%220%22%5D%3B%20rel112%20-%3E%20subset111%5Blabel%3D%221%22%5D%3B%0A%20%20%20%20%09subset131%20-%3E%20rel129%3B%20rel129%20-%3E%20subset113%3B%0A%20%20%20%20%09subset115%20-%3E%20rel114%3B%20rel114%20-%3E%20subset113%3B%0A%20%20%20%20%09subset115%20-%3E%20rel128%3B%20rel128%20-%3E%20subset127%3B%0A%20%20%20%20%09subset117%20-%3E%20rel116%3B%20rel116%20-%3E%20subset115%3B%0A%20%20%20%20%09subset118%20-%3E%20rel119%3B%20rel119%20-%3E%20subset117%3B%0A%20%20%20%20%09subset117%20-%3E%20rel132%3B%20rel132%20-%3E%20subset131%3B%0A%20%20%20%20%09subset117%20-%3E%20rel136%3B%20rel136%20-%3E%20subset135%3B%0A%20%20%20%20%09subset127%20-%3E%20rel126%3B%20rel126%20-%3E%20subset106%5Blabel%3D%220%22%5D%3B%20rel126%20-%3E%20subset109%5Blabel%3D%221%22%5D%3B%0A%20%20%20%20%09subset135%20-%3E%20rel133%3B%20rel133%20-%3E%20subset127%3B%0A%20%20%20%20%7D
+
+```
 
 ## 横向拆解 - execute
 
@@ -586,8 +804,84 @@ production ::= javacode_production
 ```
 ## 纵向拆解 - 方言互转
 1. 介绍：https://blog.csdn.net/skyyws/article/details/124828049
-2. SparkSqlDialect
-3. 
+2. SqlNode方言转换：https://cloud.tencent.com/developer/article/2007781
+3. 方言互转图：https://blog.csdn.net/it_dx/article/details/115904782
+4. 核心思路
+   1. rel2sql
+   2. rel -> sqlnode -> dialect sqlnode -> sql unparse 
+   3. 每一个sqlnode只需要实现一个unparse即可
+   4. dialect 调用unparseCall 这里需要对特殊的sqlnode进行翻译和转换
+  
+### presto的unparseCall 对特殊语法的处理
+```
+  @Override public void unparseCall(SqlWriter writer, SqlCall call,
+      int leftPrec, int rightPrec) {
+    if (call.getOperator() == SqlStdOperatorTable.SUBSTRING) {
+      RelToSqlConverterUtil.specialOperatorByName("SUBSTR")
+          .unparse(writer, call, 0, 0);
+    } else if (call.getOperator() == SqlStdOperatorTable.APPROX_COUNT_DISTINCT) {
+      RelToSqlConverterUtil.specialOperatorByName("APPROX_DISTINCT")
+          .unparse(writer, call, 0, 0);
+    } else {
+      switch (call.getKind()) {
+      case MAP_VALUE_CONSTRUCTOR:
+        unparseMapValue(writer, call, leftPrec, rightPrec);
+        break;
+      default:
+        // Current impl is same with Postgresql.
+        PostgresqlSqlDialect.DEFAULT.unparseCall(writer, call, leftPrec, rightPrec);
+      }
+    }
+  }
+
+```
+
+
+### starrocks的unparseCall 对特殊语法的处理
+```
+@Override public void unparseCall(SqlWriter writer, SqlCall call, int leftPrec, int rightPrec) {
+    switch (call.getKind()) {
+    case ARRAY_VALUE_CONSTRUCTOR:
+      final SqlWriter.Frame arrayFrame = writer.startList("[", "]");
+      for (SqlNode operand : call.getOperandList()) {
+        writer.sep(",");
+        operand.unparse(writer, leftPrec, rightPrec);
+      }
+      writer.endList(arrayFrame);
+      break;
+    case MAP_VALUE_CONSTRUCTOR:
+      writer.keyword(call.getOperator().getName());
+      final SqlWriter.Frame mapFrame = writer.startList("{", "}");
+      for (int i = 0; i < call.operandCount(); i++) {
+        String sep = i % 2 == 0 ? "," : ":";
+        writer.sep(sep);
+        call.operand(i).unparse(writer, leftPrec, rightPrec);
+      }
+      writer.endList(mapFrame);
+      break;
+    case TRIM:
+      unparseHiveTrim(writer, call, leftPrec, rightPrec);
+      break;
+    case FLOOR:
+      if (call.operandCount() != 2) {
+        super.unparseCall(writer, call, leftPrec, rightPrec);
+        return;
+      }
+      final SqlLiteral timeUnitNode = call.operand(1);
+      final TimeUnitRange timeUnit = timeUnitNode.getValueAs(TimeUnitRange.class);
+      SqlCall newCall =
+          SqlFloorFunction.replaceTimeUnitOperand(call, timeUnit.name(),
+              timeUnitNode.getParserPosition());
+      SqlFloorFunction.unparseDatetimeFunction(writer, newCall, "DATE_TRUNC", false);
+      break;
+    default:
+      super.unparseCall(writer, call, leftPrec, rightPrec);
+      break;
+    }
+  }
+
+
+```
 
 
 
@@ -610,7 +904,199 @@ CalciteSchema extends SchemaPlus extends Schema
 ```
 
 ## 纵向拆解 - 规则重写
-1. 如何使用calcite rule做SQL重写（上）：http://dafei1288.com/2023/08/10/1003-calcite-sql-rule/
+1. 必看
+   1. 如何使用calcite rule做SQL重写（上）：http://dafei1288.com/2023/08/10/1003-calcite-sql-rule/
+   2. 如何使用calcite rule做SQL重写（下）：http://dafei1288.com/2023/08/18/1004-calcite-sql-custom-rule/
+
+
+## 纵向拆解 - 关系代数
+1. Calcite关系代数：https://liebing.org.cn/apache-calcite-relational-algebra.html
+2. RelBuilder介绍：https://izualzhy.cn/calcite-example
+### 概念
+1. RelNode：Calcite中的IR
+2. SingleRel：一元算子Project, Filter, Aggregate
+3. SetOp：集合算子Union, Intersect, Minus.
+4. EnumerableRel：物理算子
+5. BindableRel：物理算子
+6. 核心
+   1. RelBuilder：是Calcite中的关系算子生成器，生成RelNode和RexNode
+   2. 示例：https://github.com/apache/calcite/blob/main/core/src/test/java/org/apache/calcite/examples/RelBuilderExample.java
+   3. https://github.com/LB-Yu/data-systems-learning/blob/master/sql/calcite-learning/calcite-parser/src/test/java/org/apache/calcite/example/rel/RelBuilderTest.java
+
+
+### 构建计划图 示例
+```
+
+  /**
+   * Sometimes the stack becomes so deeply nested it gets confusing. To keep
+   * things straight, you can remove expressions from the stack. For example,
+   * here we are building a bushy join:
+   *
+   * <blockquote><pre>
+   *                join
+   *              /      \
+   *         join          join
+   *       /      \      /      \
+   *     EMP     DEPT  EMP    BONUS
+   * </pre></blockquote>
+   *
+   * <p>We build it in three stages. Store the intermediate results in variables
+   * `left` and `right`, and use `push()` to put them back on the stack when it
+   * is time to create the final `Join`.
+   */
+  private RelBuilder example4(RelBuilder builder) {
+    final RelNode left = builder
+        .scan("EMP")
+        .scan("DEPT")
+        .join(JoinRelType.INNER, "DEPTNO")
+        .build();
+
+    final RelNode right = builder
+        .scan("EMP")
+        .scan("BONUS")
+        .join(JoinRelType.INNER, "ENAME")
+        .build();
+
+    return builder
+        .push(left)
+        .push(right)
+        .join(JoinRelType.INNER, "ENAME");
+  }
+
+```
+
+### RelBuilder 新建scan算子
+```
+  public RelBuilder scan(Iterable<String> tableNames) {
+    final List<String> names = ImmutableList.copyOf(tableNames);
+    requireNonNull(relOptSchema, "relOptSchema");
+    final RelOptTable relOptTable = relOptSchema.getTableForMember(names);
+    if (relOptTable == null) {
+      throw RESOURCE.tableNotFound(String.join(".", names)).ex();
+    }
+    final RelNode scan =
+        struct.scanFactory.createScan(
+            ViewExpanders.toRelContext(viewExpander, cluster),
+            relOptTable);
+    push(scan);
+    rename(relOptTable.getRowType().getFieldNames());
+
+    // When the node is not a TableScan but from expansion,
+    // we need to explicitly add the alias.
+    if (!(scan instanceof TableScan)) {
+      as(Util.last(ImmutableList.copyOf(tableNames)));
+    }
+    return this;
+  }
+
+```
+
+### RelBuilder 新建join算子
+```
+public RelBuilder join(JoinRelType joinType, RexNode condition,
+      Set<CorrelationId> variablesSet) {
+    Frame right = stack.pop();
+    final Frame left = stack.pop();
+    final RelNode join;
+    final boolean correlate = checkIfCorrelated(variablesSet, joinType, left.rel, right.rel);
+    RexNode postCondition = literal(true);
+    if (config.simplify()) {
+      // Normalize expanded versions IS NOT DISTINCT FROM so that simplifier does not
+      // transform the expression to something unrecognizable
+      if (condition instanceof RexCall) {
+        condition =
+            RelOptUtil.collapseExpandedIsNotDistinctFromExpr((RexCall) condition,
+                getRexBuilder());
+      }
+      condition = simplifier.simplifyUnknownAsFalse(condition);
+    }
+    if (correlate) {
+      final CorrelationId id = Iterables.getOnlyElement(variablesSet);
+      // Correlate does not have an ON clause.
+      switch (joinType) {
+      case LEFT:
+      case SEMI:
+      case ANTI:
+        // For a LEFT/SEMI/ANTI, predicate must be evaluated first.
+        stack.push(right);
+        filter(condition.accept(new Shifter(left.rel, id, right.rel)));
+        right = stack.pop();
+        break;
+      case INNER:
+        // For INNER, we can defer.
+        postCondition = condition;
+        break;
+      default:
+        throw new IllegalArgumentException("Correlated " + joinType + " join is not supported");
+      }
+      final ImmutableBitSet requiredColumns = RelOptUtil.correlationColumns(id, right.rel);
+      join =
+          struct.correlateFactory.createCorrelate(left.rel, right.rel, ImmutableList.of(), id,
+              requiredColumns, joinType);
+    } else {
+      RelNode join0 =
+          struct.joinFactory.createJoin(left.rel, right.rel,
+              ImmutableList.of(), condition, variablesSet, joinType, false);
+
+      if (join0 instanceof Join && config.pushJoinCondition()) {
+        join = RelOptUtil.pushDownJoinConditions((Join) join0, this);
+      } else {
+        join = join0;
+      }
+    }
+    final PairList<ImmutableSet<String>, RelDataTypeField> fields =
+        PairList.of();
+    fields.addAll(left.fields);
+    fields.addAll(right.fields);
+    stack.push(new Frame(join, fields));
+    filter(postCondition);
+    return this;
+  }
+
+```
+
+### RelBuilder 模块初始化，测试和修改
+1. core/src/test/java/org/apache/calcite/sql2rel/CorrelateProjectExtractorTest.java
+```
+@Test void testSingleCorrelationCallOverVariableInFilter() {
+    final RelBuilder builder = RelBuilder.create(config().build());
+    final Holder<@Nullable RexCorrelVariable> v = Holder.empty();
+    RelNode before = builder.scan("EMP")
+        .variable(v::set)
+        .scan("DEPT")
+        .filter(
+            builder.equals(builder.field(0),
+                builder.call(
+                    SqlStdOperatorTable.PLUS,
+                    builder.literal(10),
+                    builder.field(v.get(), "DEPTNO"))))
+        .correlate(JoinRelType.LEFT, v.get().id, builder.field(2, 0, "DEPTNO"))
+        .build();
+
+    final String planBefore = ""
+        + "LogicalCorrelate(correlation=[$cor0], joinType=[left], requiredColumns=[{7}])\n"
+        + "  LogicalTableScan(table=[[scott, EMP]])\n"
+        + "  LogicalFilter(condition=[=($0, +(10, $cor0.DEPTNO))])\n"
+        + "    LogicalTableScan(table=[[scott, DEPT]])\n";
+    assertThat(before, hasTree(planBefore));
+
+    RelNode after = before.accept(new CorrelateProjectExtractor(RelFactories.LOGICAL_BUILDER));
+    final String planAfter = ""
+        + "LogicalProject(EMPNO=[$0], ENAME=[$1], JOB=[$2], MGR=[$3], HIREDATE=[$4], SAL=[$5], COMM=[$6], DEPTNO=[$7], DEPTNO0=[$9], DNAME=[$10], LOC=[$11])\n"
+        + "  LogicalCorrelate(correlation=[$cor0], joinType=[left], requiredColumns=[{8}])\n"
+        + "    LogicalProject(EMPNO=[$0], ENAME=[$1], JOB=[$2], MGR=[$3], HIREDATE=[$4], SAL=[$5], COMM=[$6], DEPTNO=[$7], $f8=[+(10, $7)])\n"
+        + "      LogicalTableScan(table=[[scott, EMP]])\n"
+        + "    LogicalFilter(condition=[=($0, $cor0.$f8)])\n"
+        + "      LogicalTableScan(table=[[scott, DEPT]])\n";
+    assertThat(after, hasTree(planAfter));
+  }
+
+```
+
+## 纵向拆解 - 物化视图
+
+
+## 纵向拆解 - lattice
 
 
 
