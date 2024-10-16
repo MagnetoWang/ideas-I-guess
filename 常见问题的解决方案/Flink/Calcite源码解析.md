@@ -74,6 +74,17 @@ calcite + 公司项目
 
 ### 核心思考
 1. calcite为什么那么难用：https://shenzhu.github.io/calcite-user-perspective/
+2. 必看代码
+   1. core/src/test/java/org/apache/calcite/sql/parser/SqlParserTest.java
+   2. core/src/test/java/org/apache/calcite/test/SqlValidatorTest.java
+   3. core/src/test/java/org/apache/calcite/rel/rules/SortRemoveRuleTest.java
+   4. core/src/test/java/org/apache/calcite/tools/PlannerTest.java
+   5. core/src/test/java/org/apache/calcite/test/HepPlannerTest.java
+   6. core/src/test/java/org/apache/calcite/test/MutableRelTest.java
+   7. core/src/test/java/org/apache/calcite/test/RelBuilderTest.java
+   8. core/src/test/java/org/apache/calcite/test/RelOptRulesTest.java
+   9. core/src/test/java/org/apache/calcite/rel/rel2sql/RelToSqlConverterTest.java
+   10. core/src/test/java/org/apache/calcite/test/SqlToRelConverterTest.java
 
 
 
@@ -223,6 +234,9 @@ calcite只有 core和linq4j是核心代码
    4. JavaCC 解析jj文件 生成 最终java代码
    5. 最终demo：https://github.com/chunyiKit/shared/blob/main/calcite_demo/pom.xml
 3. 配置文件说明：https://www.cnblogs.com/rongfengliang/p/16985715.html
+4. 概念
+   1. SqlConformance：用来判断不同SQL的兼容模式，比如mySQL oracle，对groupby limit是否是支持
+   2. 
 
 ### 配置文件
 ```
@@ -249,6 +263,9 @@ calcite只有 core和linq4j是核心代码
 
 
 ```
+
+### coral扩展示例
+1. https://github.com/linkedin/coral
 
 ### 如何基于Calcite的Select语法，扩展新关键词比如distributed和sorted，不改动calcite的parser.jj
 #### 原始参考
@@ -419,8 +436,12 @@ SqlCreate SqlCreateTable(Span s, boolean replace) :
 
 #### 可行方案
 1. 新增一个SqlTableDistributed
-2. 参入进select中
+2. 掺入进select中
 3. 比较耗时间，需要验证
+
+
+
+
 
 
 ## 横向拆解 - validate
@@ -470,7 +491,10 @@ SqlCreate SqlCreateTable(Span s, boolean replace) :
        1. 校验工具
    13. SqlValidatorCatalogReader：元数据读取器
    14. SqlValidatorNamespace：描述了 SQL 查询返回的关系，一个 SQL 查询可以拆分为多个部分，查询的列组合，表名等等，当中每个部分都有一个对应的 SqlValidatorNamespace
-   15. SqlValidatorScope：可以认为是校验流程中每个 SqlNode 的工作上下文，当校验表达式时，通过 SqlValidatorScope 的 resolve 方法进行解析，如果成功的话会返回对应的 SqlValidatorNamespace 描述结果类型
+   15. 
+11. 进阶概念
+    1. SqlValidatorScope：可以认为是校验流程中每个 SqlNode 的工作上下文，当校验表达式时，通过 SqlValidatorScope 的 resolve 方法进行解析，如果成功的话会返回对应的 SqlValidatorNamespace 描述结果类型
+    2. CatalogScope：
 
 ```
 相关类
@@ -524,15 +548,64 @@ SqlValidatorUtil
 
 ```
 
-### calcite 
-```
-
-
-```
-
-
+### validate流程
+1. validate
+2. validateScopedExpression
+   1. SqlSelect.validate
+      1. validateQuery -> validateNamespace -> AbstractNamespace.validate
+      2. validateSelect -> validateFrom -> validateQuery -> IdentifierNamespace.validateImpl -> resolveImpl -> newValidationError
+3. validateQuery
+   1. validateNamespace
+   2. validateModality
+   3. validateAccess
+4. validateSelect
+   1. validateFrom
+   2. validateWhereClause
+   3. validateGroupClause
+   4. validateHavingClause
+   5. validateWindowClause
 
 ### calcite 测试用例如何执行元数据和校验
+1. 元数据相当于 namespaceScope
+2. 从 SqlNode 中提取 table和列，然后进行lookup查询，来进行最基础的校验逻辑
+
+
+### 新增校验逻辑
+
+
+### 新增函数和算子
+1. 参考calcite源码：core/src/test/java/org/apache/calcite/tools/PlannerTest.java#testValidateUserDefinedAggregate
+```
+比如注册 MyCountAggFunction
+
+final SqlStdOperatorTable stdOpTab = SqlStdOperatorTable.instance();
+    SqlOperatorTable opTab =
+        ChainedSqlOperatorTable.of(stdOpTab,
+            new ListSqlOperatorTable(
+                ImmutableList.of(new MyCountAggFunction())));
+
+```
+
+### 新增RelTraitDef
+1. 参考flink源码：flink-table/flink-table-planner-blink/src/test/java/org/apache/flink/table/planner/expressions/converter/ExpressionConverterTest.java
+
+```
+Arrays.asList(
+					ConventionTraitDef.INSTANCE,
+					FlinkRelDistributionTraitDef.INSTANCE(),
+					RelCollationTraitDef.INSTANCE
+			)
+
+
+FlinkRelDistributionTraitDef 并没有过多扩展这方面能力
+```
+
+### 新增元数据connnect
+1. csv：https://github.com/zzzzming95/calcite-demo/tree/master/src/main/java/pers/shezm/calcite/csv
+2. schema 以及 schemaFactory
+3. table 以及 tableFactory
+   1. 多个table类型，用于scan filter或者更负责的操作
+4. metaFile：元数据文件，可以是json格式，用于初始化Connection，相当于注册了元数据
 
 
 
@@ -543,6 +616,17 @@ SqlValidatorUtil
 3. blink模块
    1. class FlinkCalciteCatalogReader extends CalciteCatalogReader
 ```
+public void init() {
+		rootSchemaPlus = CalciteSchema.createRootSchema(true, false).plus();
+		Properties prop = new Properties();
+		prop.setProperty(CalciteConnectionProperty.CASE_SENSITIVE.camelName(), "false");
+		CalciteConnectionConfigImpl calciteConnConfig = new CalciteConnectionConfigImpl(prop);
+		catalogReader = new FlinkCalciteCatalogReader(
+			CalciteSchema.from(rootSchemaPlus),
+			Collections.emptyList(),
+			typeFactory,
+			calciteConnConfig);
+	}
 
 ```
 
@@ -642,6 +726,8 @@ SubProgram: 用来执行子 HepProgram 的指令
     }
 
 ```
+
+### 新增Rule流程
 
 
 ### RexNode 语法测试
@@ -907,6 +993,12 @@ CalciteSchema extends SchemaPlus extends Schema
 1. 必看
    1. 如何使用calcite rule做SQL重写（上）：http://dafei1288.com/2023/08/10/1003-calcite-sql-rule/
    2. 如何使用calcite rule做SQL重写（下）：http://dafei1288.com/2023/08/18/1004-calcite-sql-custom-rule/
+   3. RBO和CBO应用：https://www.cnblogs.com/listenfwind/p/13192259.html
+2. 源码示例
+   1. filter下推：https://github.com/zzzzming95/calcite-demo/blob/master/src/main/java/pers/shezm/calcite/test/Test5.java
+   2. 自定义一个新的project并替换：
+      1. 添加规则：https://github.com/zzzzming95/calcite-demo/blob/db9883fa37ae8ffe396f48980a4c21dcb9bc592a/src/main/java/pers/shezm/calcite/test/Test6.java#L79
+      2. onmatch：https://github.com/zzzzming95/calcite-demo/blob/db9883fa37ae8ffe396f48980a4c21dcb9bc592a/src/main/java/pers/shezm/calcite/optimizer/converter/CSVNewProjectRule.java#L40
 
 
 ## 纵向拆解 - 关系代数
@@ -1099,6 +1191,46 @@ public RelBuilder join(JoinRelType joinType, RexNode condition,
 ## 纵向拆解 - lattice
 
 
+## 纵向拆解 - 血缘解析
+1. 通过relNode解析血缘：https://github.com/HamaWhiteGG/flink-sql-lineage/blob/main/lineage-flink1.16.x/src/main/java/com/hw/lineage/flink/LineageServiceImpl.java#L163
+2. 技术难点
+   1. SqlNode是没有物理和逻辑属性，只有关键词和语法，所以区分数表名和列名是需要很多加工逻辑
+   2. 但是calcite的校验器确能做到校验表和列能力，意味着有一段代码是可以解析出血缘的
+3. registerQuery：Registers a query in a parent scope.
+4. node.getKind()：用于SqlNode分类
+```
+能识别出表和列，找这个思路改即可
+
+
+Caused by: org.apache.calcite.runtime.CalciteContextException: From line 2, column 6 to line 2, column 17: Object 'ad' not found
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:423)
+	at org.apache.calcite.runtime.Resources$ExInstWithCause.ex(Resources.java:463)
+	at org.apache.calcite.sql.SqlUtil.newContextException(SqlUtil.java:787)
+	at org.apache.calcite.sql.SqlUtil.newContextException(SqlUtil.java:772)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl.newValidationError(SqlValidatorImpl.java:4825)
+	at org.apache.calcite.sql.validate.IdentifierNamespace.resolveImpl(IdentifierNamespace.java:172)
+	at org.apache.calcite.sql.validate.IdentifierNamespace.validateImpl(IdentifierNamespace.java:177)
+	at org.apache.calcite.sql.validate.AbstractNamespace.validate(AbstractNamespace.java:84)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl.validateNamespace(SqlValidatorImpl.java:994)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl.validateQuery(SqlValidatorImpl.java:954)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl.validateFrom(SqlValidatorImpl.java:3087)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl.validateFrom(SqlValidatorImpl.java:3069)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl.validateSelect(SqlValidatorImpl.java:3339)
+	at org.apache.calcite.sql.validate.SelectNamespace.validateImpl(SelectNamespace.java:60)
+	at org.apache.calcite.sql.validate.AbstractNamespace.validate(AbstractNamespace.java:84)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl.validateNamespace(SqlValidatorImpl.java:994)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl.validateQuery(SqlValidatorImpl.java:954)
+	at org.apache.calcite.sql.SqlSelect.validate(SqlSelect.java:242)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl.validateScopedExpression(SqlValidatorImpl.java:929)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl.validate(SqlValidatorImpl.java:633)
+	at org.apache.calcite.prepare.PlannerImpl.validate(PlannerImpl.java:188)
+	... 26 more
+
+```
+
 
 ## 竞品对比
 ### anltr 和 javacc 区别
@@ -1112,3 +1244,30 @@ public RelBuilder join(JoinRelType joinType, RexNode condition,
 1. 比如Sort/Cluster/Distributed by Clause 暂不支持
    1. The Hive dialect is mainly used in batch mode. Some Hive’s syntax (Sort/Cluster/Distributed BY, Transform, etc.) haven’t been supported in streaming mode yet.
 2. flinkSQL是没有的，hiveSQL 2 FlinkSQL 通过calcite
+
+## 应用场景
+### Flink使用Calcite
+1. PlannerContext：封装calcite planner能力 
+2. FlinkSqlParserImpl：Flink解析器
+3. FlinkSqlConformance：Flink SQL部分语法兼容情况
+4. FlinkCostFactory：用于CBO，计算cpu和network带宽成本，使用较少，但是依然实现了简单的类，方便修改扩展
+5. FlinkTypeSystem：自定义数据类型系统，基于calcite扩展
+6. FlinkTypeFactory：基于JavaTypeFactoryImpl 扩展生成数据类型
+   1. 贡献者
+      1. Jingsong Lee https://github.com/JingsongLi
+      2. wuchong：https://github.com/wuchong
+7. SqlToRelConverter.Config：
+8. SqlExprToRexConverter：
+9. SqlOperatorTable：查询算子和函数的全局表
+   1. ChainedSqlOperatorTable
+   2. SqlStdOperatorTable：比如union join group等等
+   3. ListSqlOperatorTable：比如count udf等等
+10. ExpressionReducer：常量表达式代码生成，扩展RexExecutor
+   1. godfreyhe：https://github.com/godfreyhe
+11. FlinkContext：
+12. PlannerContext
+    1.  CatalogManager
+    2.  FunctionCatalog
+    3.  TableConfig
+13. RelTraitDef：物理属性，比如FlinkRelDistribution
+14. FlinkRelFactories：基于RelBuilderFactory扩展，新建RelNode类，比如RankRel 和 SinkRel
