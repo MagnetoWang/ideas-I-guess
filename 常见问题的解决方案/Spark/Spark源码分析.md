@@ -54,6 +54,7 @@ tree -ACL 1
    2. SparkInternals
    3. steaming解析：https://github.com/lw-lin/CoolplaySpark
    4. mllib解析：https://github.com/endymecy/spark-ml-source-analysis
+   5. hivesql 转mapreduce：https://tech.meituan.com/2014/02/12/hive-sql-to-mapreduce.html
 2. 应用
    1. sparkML应用示例：https://github.com/sunbow1/SparkMLlibDeepLearn/blob/master/src/CNN/CNN.scala
    2. https://github.com/susanli2016/PySpark-and-MLlib/blob/master/K-Means.ipynb
@@ -66,6 +67,10 @@ tree -ACL 1
    2. spark常见事故：https://zhuanlan.zhihu.com/p/659056832
    3. 
 4. Spark性能调优实战 极客时间课程
+```
+
+```
+
 
 
 
@@ -2376,6 +2381,529 @@ https://www.jianshu.com/p/d42b4defc71c
 
 
 ### 
+
+
+### 为什么hive mapreduce比spark快好几倍
+```
+目的：搞清楚hive mapreduce数据执行逻辑和spark stage执行逻辑的区别
+
+select
+  imp_date,
+  ftime,
+  share_link,
+  ftrack_name,
+  fsinger_name,
+  ftrack_mid,
+  ftrack_id,
+  web_from,
+  fsinger_id1,
+  fnote,
+  fon_time,
+  fon_time_1,
+  fis_first_month,
+  fis_only,
+  fcopyright_to,
+  fcopyright_from,
+  fexclusive_duration,
+  fgrade,
+  grade_name,
+  fis_truly_only,
+  fis_nofree,
+  is_cover,
+  fcp_id,
+  fcp_name,
+  is_has_banquan,
+  wm_concat(frule_id, ',') as frule_id
+from
+  (
+    select
+      20230101 as imp_date,
+      t1.*,
+      t2.fsinger_id1,
+      t2.fnote,
+      t3.fon_time,
+      t3.fon_time_1,
+      if(
+        substring(t3.fon_time_1, 0, 6) = substr(t1.ftime, 0, 6),
+        1,
+        0
+      ) as fis_first_month,
+      if(
+        t2.fnote in (0, 4009)
+        and t4.fsinger = 1,
+        t4.fis_only,
+        null
+      ) as fis_only,
+      if(
+        t2.fnote in (0, 4009)
+        and t4.fsinger = 1,
+        t4.fcopyright_to,
+        null
+      ) as fcopyright_to,
+      if(
+        t2.fnote in (0, 4009)
+        and t4.fsinger = 1,
+        t4.fcopyright_from,
+        null
+      ) as fcopyright_from,
+      if(
+        t2.fnote in (0, 4009)
+        and t4.fsinger = 1,
+        t5.fexclusive_duration,
+        null
+      ) as fexclusive_duration,
+      t6.fgrade,
+      case
+        when fgrade = '0' then '未定义'
+        when fgrade = '1' then 'S'
+        when fgrade = '2' then 'A'
+        when fgrade = '3' then 'B'
+        when fgrade = '4' then 'C'
+        when fgrade = '5' then 'D'
+        when fgrade = '6' then 'E'
+        else '未知'
+      end as grade_name,
+      if(
+        (
+          if(
+            t2.fnote in (0, 4009)
+            and t4.fsinger = 1,
+            t4.fis_only,
+            null
+          ) = 1
+        )
+        and (
+          if(
+            t2.fnote in (0, 4009)
+            and t4.fsinger = 1,
+            t5.fexclusive_duration,
+            null
+          )
+        ) in (0, -1),
+        1,
+        0
+      ) as fis_truly_only,
+      if(
+        t2.fnote in (0, 4009)
+        and t4.fsinger = 1,
+        t7.fis_nofree,
+        null
+      ) as fis_nofree,
+      t8.is_cover,
+      t8.fcp_id,
+      t8.fcp_name,
+      t8.is_has_banquan,
+      t9.frule_id,
+      case
+        when frule_id = 3 then '说唱'
+        when frule_id = 2 then '电子'
+        when frule_id = 327 then '古典'
+        when frule_id = 96 then '欧美'
+        when frule_id = 94 then 'KPOP'
+        when frule_id = 95 then 'JPOP'
+        when frule_id = 68 then '影视'
+        when frule_id = 71 then '综艺'
+        when frule_id = 66 then '动漫'
+        when frule_id = 67 then '游戏'
+        when frule_id = 19 then '国风'
+        when frule_id = 134 then '跨界音乐_国潮'
+        when frule_id = 4025 then 'Q音运营_古典跨界'
+        when frule_id = 359 then '传统国乐（中国传统音乐）'
+        when frule_id = 378 then '国乐'
+        when frule_id = 360 then 'Q音运营_二次元_广播剧'
+        when frule_id = 361 then 'Q音运营_二次元_虚拟偶像'
+        when frule_id = 362 then 'Q音运营_二次元_日漫'
+        when frule_id = 363 then 'Q音运营_二次元_国漫'
+        when frule_id = 365 then 'Q音运营_二次元_动漫'
+        when frule_id = 366 then 'Q音运营_二次元_游戏'
+        when frule_id = 367 then 'Q音运营_二次元'
+        when frule_id = 368 then 'Q音运营_二次元（不含游戏）'
+        when frule_id = 72 then '社交媒体'
+        when frule_id = 98 then '抖音热歌'
+        when frule_id = 358 then '抖音近30天热歌'
+        when frule_id = 8 then '民谣'
+        else frule_id
+      end as frule_cn
+    from
+      (
+        select
+          ftime,
+          share_link,
+          ftrack_name,
+          fsinger_name,
+          ftrack_mid,
+          ftrack_id,
+          web_from
+        from
+          qqmusic_rec:: r_qm_weibo_crawling_list
+        where
+          ftime = 20230101
+          and web_from = 'kg'
+      ) t1
+      left join (
+        select
+          ftrack_id,
+          fsinger_id1,
+          fnote
+        from
+          sng_qqmusic_basedata:: quku_qm_song_info_d
+        where
+          ftime = 20230101
+      ) t2 on t1.ftrack_id = t2.ftrack_id
+      left join (
+        select
+          *,
+          to_char(fon_time, 'yyyymmdd') fon_time_1
+        from
+          sng_qqmusic_log:: cdb_quku_music_t_track_first_fnote
+        where
+          tdbank_imp_date = 20221201
+      ) t3 on t1.ftrack_id = t3.ftrack_id
+      left join (
+        select
+          ftrack_id,
+          fsinger,
+          fis_only,
+          fcopyright_to,
+          fcopyright_from
+        from
+          sng_qqmusic_basedata:: quku_qm_song_info_copyright_d
+        where
+          ftime = 20221201
+      ) t4 on t1.ftrack_id = t4.ftrack_id
+      left join (
+        select
+          ftrack_id,
+          fexclusive_duration
+        from
+          sng_qqmusic_log:: cdb_quku_music_t_track_cp_info_extern
+        where
+          tdbank_imp_date = 20221201
+        group by
+          ftrack_id,
+          fexclusive_duration
+      ) t5 on t1.ftrack_id = t5.ftrack_id
+      left join (
+        select
+          fsinger_id,
+          fsinger_name,
+          fgrade
+        from
+          sng_qqmusic_log:: cdb_quku_music_t_singer
+        where
+          tdbank_imp_date = 20221201
+      ) t6 on t2.fsinger_id1 = t6.fsinger_id
+      left join (
+        select
+          ftrack_id,
+          fis_nofree
+        from
+          sng_qqmusic_basedata:: quku_qm_song_info_payment_d
+        where
+          ftime = 20221201
+      ) t7 on t1.ftrack_id = t7.ftrack_id
+      left join (
+        select
+          ftrack_id,
+          is_cover,
+          fcp_id,
+          fcp_name,
+          is_has_banquan
+        from
+          qqmusic_rec:: qm_kaiping_zhongyao_song
+        where
+          ftime = 20230111
+        group by
+          ftrack_id,
+          is_cover,
+          fcp_id,
+          fcp_name,
+          is_has_banquan
+      ) t8 on t1.ftrack_id = t8.ftrack_id
+      left join (
+        select
+          *
+        from
+          quku_output_db:: qq_ptcp_customer_search_868687697
+        where
+          imp_date = 20230215
+      ) t9 on t1.ftrack_id = t9.media_id
+  )
+group by
+  imp_date,
+  ftime,
+  share_link,
+  ftrack_name,
+  fsinger_name,
+  ftrack_mid,
+  ftrack_id,
+  web_from,
+  fsinger_id1,
+  fnote,
+  fon_time,
+  fon_time_1,
+  fis_first_month,
+  fis_only,
+  fcopyright_to,
+  fcopyright_from,
+  fexclusive_duration,
+  fgrade,
+  grade_name,
+  fis_truly_only,
+  fis_nofree,
+  is_cover,
+  fcp_id,
+  fcp_name,
+  is_has_banquan
+
+```
+
+### 数据库排查问题流程
+```
+火焰图性能排查：https://zhuanlan.zhihu.com/p/445201899
+
+```
+
+### Buffer Pool设计
+```
+B+- Tree
+Record Manager
+
+MiniOB框架简介：https://developer.aliyun.com/learning/course/1083/detail/16100?spm=a2c6h.21258778.0.0.56546857hhFaIR
+
+
+LSM-Tree
+•LSM-Tree ，全称 Log Structured Merge Tree ，结构化合并树
+•最早在1996年 Patrick O'Neil, Edward Cheng 等人在论文《The Log-Structured Merge-Tree》中提出
+•OceanBase 采用的也是 LSM-Tree 架构
+
+B+树与LSM-Tree
+•B+ 树是平衡搜索树的一种，是为了磁盘搜索而诞生的
+•B+ 树查询/插入/删除的时间复杂度都是 O(logN)
+•随机读写的场景，磁盘寻址定位的时间太长，不能发挥出磁盘的最佳性能
+
+LSM-Tree 架构
+LSM –Tree 的核心思想就是将离散的随机写请求都转换成批量的顺序写请求
+
+
+
+Compaction
+•数据的重新整合，实质是多路归并排序
+•减少 SSTable 数量，提升查询性能
+•资源消耗高
+•I/O ： SSTable 的读取与写入
+•CPU：涉及数据的压缩和解压、checksum 计算、密集的 key 比较
+•性能抖动
+
+
+Compaction – Amplification
+不同的 Compaction 策略是对读放大、写放大、空间放大的一个权衡
+•写放大(Write Amplification) = 磁盘写入的数据量 / 实际的数据量 
+•空间放大(Space Amplification) = 存储的数据量 / 实际的数据量
+•读放大(Read Amplification) = 本次扫描的数据量/ 实际返回的数据量
+
+Classic Leveled Compaction
+•LSM-Tree 划分为N个 Level
+•每个 Level 仅包含一个 SSTable
+
+Classic Leveled Compaction
+•Compaction 触发的条件：某个 Level 的存储数据量达到阈值
+•L(n) + L(n+1) = new L(n+1)
+•rowkey range 有交集的部分进行 Compaction
+•雪崩效应
+
+
+
+Size-Tiered Compaction
+•LSM-Tree 划分为 N 个 Level
+•每个 Level 包含多个 SSTable
+•several L(n+1) = new L(n+1)
+
+
+
+Tiered & Leveled Compaction
+•对于层级较小的 Level ，使用 Size-Tiered 模式减少写放大问题
+•对于层级较大的 Level ，使用 Leveled 模式减少空间放大问题 
+
+
+FIFO Compaction
+•LSM-Tree 只有一个 Level
+•SSTable 以时间序排列，每次淘汰生成时间最早的 SSTable
+•适合时序数据库这类有时间属性和时间效用的数据
+
+
+墓碑问题
+•随着 Compaction 的执行，相同 Rowkey 所有行会进行从新往旧地 compact ，以此减少空间放大
+•INSERT + UPDATE -> INSERT
+
+墓碑问题
+•INSERT/UPDATE + DELETE -> DELETE
+•直到这个 Delete 行与最底层 Level N 进行 compaction ， Delete 行才可以被删去
+
+
+Compaction in OceanBase – Mini Compaction
+•内存中的 Frozen Memtable 通过 Mini Compaction 变成磁盘上的 Mini SSTable ，是数据日志的一个 checkpoint
+•Mini Compaction 结束后，其对应的 Frozen Memtable 和数据 log 可以被释放
+ Mini Compaction 可以通过手动触发和自动触发:
+•手动触发 
+    ALTER SYSTEM MINOR FREEZE;
+•租户使用内存超过阈值自动触发 
+
+
+Compaction in OceanBase – Minor Compaction
+•针对 L0 和 L1 层的 SSTable
+•Minor Compaction 就是将多个 Mini SSTable 合成一个
+•主要目的是减少 SSTable 的数量、减少读放大问题
+•当 Mini SSTable 的数量超过阈值时自动触发 Minor Compaction
+
+
+
+Compaction in OceanBase – Major Compaction
+整个集群选择统一的 Major 位点，每个分区都使用该 Major 位点做快照查询，并将查询结果进行持久化生成 Major 
+SSTable
+合并触发有三种触发方式：自动触发、定时触发与手动触发
+•自动触发：当集群中任一租户的 Minor Freeze 次数超过阈值时，就会自动触发整个集群的合并；
+    ALTER SYSTEM SET MINOR_FREEZE_TIMES = 100;
+•定时触发：通过设置参数来在每天的业务低峰期定时触发合并； 
+    ALTER SYSTEM SET MAJOR_FREEZE_DUTY_TIME = '02:00’;
+•手动触发：使用命令触发 
+    ALTER SYST
+
+
+Compaction in OceanBase – 全量合并
+•和 HBase 与 Rocksdb 的 Major Compaction 过程是类似
+•在全量合并过程中，会把当前的 Major SSTable 数据都读取出来，和所有的 Mini / Minor SSTable 合并后，再写到
+磁盘上去作为新的 Major SSTable
+
+
+Compaction in OceanBase – 增量合并
+•增量合并是相对于全量合并而言
+•增量合并只重写发生了修改的宏块 / 微块，未修改的直接放入新 Major SSTable 中
+•宏块和微块的重用省去了解析行、编码以及计算列 Checksum 等操作
+•改善写放大问题
+
+
+
+Compaction in OceanBase – 渐进合并
+•在执行某些 DDL 操作时，例如执行表的加列、减列、修改压缩算法等操作后，可能需要将数据重写一遍
+• OceanBase 数据库并不会立即对数据执行重写操作，而是将重写动作延迟到合并时进行
+•渐进合并的核心是把数据的重写分散到多次合并中去做，在一次合并中只进行部分数据的重写
+
+
+Compaction in OceanBase – 轮转合并
+•轮转合并的诞生是为了规避合并对业务的影响
+•多副本轮流执行合并操作
+•将用户操作的流量导向没执行合并的副本
+
+
+Compaction in OceanBase – 并行合并
+•当合并参与的 SSTable 数据量特别大时，整个合并的过程会非常耗时
+•将整个完成的 Rowkey 值域按照当前 tablet_size 划分为若干个子任务，子任务之间可以并发执行
+•当所有子任务执行结束之后本次合并才算结束
+•并行合并默认开启，对于数据量大的 Compaction 后台自动划分并行任务
+
+
+https://developer.aliyun.com/learning/course/1083/detail/16139?spm=a2c6h.21258778.0.0.56546857hhFaIR
+索引结构
+B+tree 散列表
+
+
+https://developer.aliyun.com/learning/course/1083/detail/17318?spm=a2c6h.21258778.0.0.56546857hhFaIR
+查询优化器
+
+
+内存泄漏排查：https://developer.aliyun.com/learning/course/1083/detail/18157?spm=a2c6h.21258778.0.0.56546857hhFaIR
+
+
+
+
+Sqllancer 工具
+SQLancer 主要验证 Sql 逻辑错误的正确性，核心思想是基于 Manuel Rigger 的3篇论文实现；
+3篇论文
+PQS 算法：
+Testing Database Engines via Pivoted Query Synthesis 
+NoREC 算法：
+Detecting Optimization Bugs in Database Engines via Non-Optimizing Reference Engine Construction
+TLP 算法 
+Ternary Logic Partitioning: Detecting Logic Bugs in Database Management Systems
+源码 Github：
+
+
+
+
+MiniOB GDB 调试
+基本操作
+•Gdb 启动进程
+•Attach 进程
+•查看 core 文件
+•断点
+•查看变量
+GDB 断点原理
+暂停其它线程 set scheduler-locking on
+硬断点  watch value
+```
+
+### 物化视图如何改写
+```
+
+
+```
+
+### 编写分布式数据库的难易程度和如何量化 
+```
+
+
+```
+
+### spark如何剪枝
+```
+
+https://www.slideshare.net/databricks/dynamic-partition-pruning-in-apache-spark
+
+```
+
+### 
+```
+
+
+```
+
+### 
+```
+
+
+```
+
+
+### 
+```
+
+
+```
+
+### 
+```
+
+
+```
+
+### 
+```
+
+
+```
+
+### 优化器
+```
+RBO 和 CBO
+
+启发式优化器（HepPlanner-heuristic implementation）
+火山式优化器（VolcanoPlanner）
+
+```
+
+
+
 
 ## 设计
 ### schema 优良设计
