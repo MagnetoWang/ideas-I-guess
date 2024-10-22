@@ -112,29 +112,30 @@ RelOptCost： 优化器成本模型会依赖。
 
 
 ### 参考资料
-1. javaCC官网；https://javacc.github.io/javacc/#introduction
-2. javaCC文档：https://javacc.github.io/javacc/documentation/
-3. javaCC语法：https://github.com/javacc/javacc/blob/master/docs/documentation/grammar.md
-4. calcite官网：https://calcite.apache.org/
-5. Apache Calcite 学习文档：https://github.com/quxiucheng/apache-calcite-tutorial
-6. Calcite原理和代码讲解(一)：https://blog.csdn.net/qq_35494772/article/details/118887267
-7. What is cost based optimization：https://www.programmerinterview.com/database-sql/what-is-cost-based-optimization/
-8. Apache Calcite：https://arxiv.org/pdf/1802.10233.pdf
-9.  Hadoop 中新型大数据查询引擎：https://www.infoq.cn/article/new-big-data-hadoop-query-engine-apache-calcite/
-10. calcite物化视图详解：https://zhuanlan.zhihu.com/p/484146629
-11. Lattices概念：https://calcite.apache.org/docs/lattice.html
-12. 一文详解物化视图改写：https://zhuanlan.zhihu.com/p/366658996
-13. 一条 SQL 的查询优化之旅【下】：https://juejin.cn/post/7174735770572292157
-14. paper推荐
+1. 工业应用：https://www.victorchu.info/posts/121d8993/#%E5%B7%A5%E4%B8%9A%E5%92%8C%E5%AD%A6%E6%9C%AF%E9%87%87%E7%94%A8
+2. javaCC官网；https://javacc.github.io/javacc/#introduction
+3. javaCC文档：https://javacc.github.io/javacc/documentation/
+4. javaCC语法：https://github.com/javacc/javacc/blob/master/docs/documentation/grammar.md
+5. calcite官网：https://calcite.apache.org/
+6. Apache Calcite 学习文档：https://github.com/quxiucheng/apache-calcite-tutorial
+7. Calcite原理和代码讲解(一)：https://blog.csdn.net/qq_35494772/article/details/118887267
+8. What is cost based optimization：https://www.programmerinterview.com/database-sql/what-is-cost-based-optimization/
+9. Apache Calcite：https://arxiv.org/pdf/1802.10233.pdf
+10. Hadoop 中新型大数据查询引擎：https://www.infoq.cn/article/new-big-data-hadoop-query-engine-apache-calcite/
+11. calcite物化视图详解：https://zhuanlan.zhihu.com/p/484146629
+12. Lattices概念：https://calcite.apache.org/docs/lattice.html
+13. 一文详解物化视图改写：https://zhuanlan.zhihu.com/p/366658996
+14. 一条 SQL 的查询优化之旅【下】：https://juejin.cn/post/7174735770572292157
+15. paper推荐
     1.  《Optimizing Queries Using Materialized Views: A Practical, Scalable Solution》
-15. calcite教程
+16. calcite教程
     1. 2021：https://github.com/zabetak/calcite-tutorial/tree/boss21?tab=readme-ov-file
-16. Apache Calcite简介：https://km.woa.com/articles/show/383477?kmref=search&from_page=1&no=5
-17. 【天穹】SuperSQL技术系列之八：Calcite规则体系与算子优化：https://km.woa.com/group/supersql/articles/show/413307
-18. Oceanus团队对Apache Calcite的定制开发介绍：https://km.woa.com/group/36209/articles/show/358664?kmref=search&from_page=1&no=10
-19. 灵渊实时计算系统—实现篇：SQL强化模块介绍：https://km.woa.com/group/22680/articles/show/444399?kmref=search&from_page=1&no=2
-20. 【Calcite源码解析】SqlNode方言转换：https://km.woa.com/group/51922/articles/show/511978?kmref=search&from_page=1&no=9
-21. blog
+17. Apache Calcite简介：https://km.woa.com/articles/show/383477?kmref=search&from_page=1&no=5
+18. 【天穹】SuperSQL技术系列之八：Calcite规则体系与算子优化：https://km.woa.com/group/supersql/articles/show/413307
+19. Oceanus团队对Apache Calcite的定制开发介绍：https://km.woa.com/group/36209/articles/show/358664?kmref=search&from_page=1&no=10
+20. 灵渊实时计算系统—实现篇：SQL强化模块介绍：https://km.woa.com/group/22680/articles/show/444399?kmref=search&from_page=1&no=2
+21. 【Calcite源码解析】SqlNode方言转换：https://km.woa.com/group/51922/articles/show/511978?kmref=search&from_page=1&no=9
+22. blog
     1. Julian Hyde
         1.  项目作者解答：https://stackoverflow.com/users/172836/julian-hyde
         2.  语法扩展插件：https://stackoverflow.com/questions/44382826/how-to-change-calcites-default-sql-grammar/44467850#44467850
@@ -570,21 +571,105 @@ SqlValidatorUtil
 2. 从 SqlNode 中提取 table和列，然后进行lookup查询，来进行最基础的校验逻辑
 
 
-### 新增校验逻辑
+### calcite新增一个数据类型
+
+### 新增校验逻辑规则
 
 
 ### 新增函数和算子
 1. 参考calcite源码：core/src/test/java/org/apache/calcite/tools/PlannerTest.java#testValidateUserDefinedAggregate
+2. core/src/test/java/org/apache/calcite/test/UdfTest.java
+3. SqlStdOperatorTable：所有内置函数表
 ```
 比如注册 MyCountAggFunction
-
+初始化函数表
 final SqlStdOperatorTable stdOpTab = SqlStdOperatorTable.instance();
     SqlOperatorTable opTab =
         ChainedSqlOperatorTable.of(stdOpTab,
             new ListSqlOperatorTable(
                 ImmutableList.of(new MyCountAggFunction())));
 
+
+第二种注册
+  /**
+   * String concatenation operator, '<code>||</code>'.
+   */
+  public static final SqlBinaryOperator CONCAT =
+      new SqlBinaryOperator(
+          "||",
+          SqlKind.OTHER,
+          60,
+          true,
+          ReturnTypes.DYADIC_STRING_SUM_PRECISION_NULLABLE,
+          null,
+          OperandTypes.STRING_SAME_SAME);
+
+
+public class SqlSumEmptyIsZeroAggFunction extends SqlAggFunction {
+  //~ Constructors -----------------------------------------------------------
+
+  public SqlSumEmptyIsZeroAggFunction() {
+    super("$SUM0",
+        null,
+        SqlKind.SUM0,
+        ReturnTypes.AGG_SUM_EMPTY_IS_ZERO,
+        null,
+        OperandTypes.NUMERIC,
+        SqlFunctionCategory.NUMERIC,
+        false,
+        false,
+        Optionality.FORBIDDEN);
+  }
+
+
+
+自定义
+  /** User-defined aggregate function. */
+  public static class MyCountAggFunction extends SqlAggFunction {
+    public MyCountAggFunction() {
+      super("MY_COUNT", null, SqlKind.OTHER_FUNCTION, ReturnTypes.BIGINT, null,
+          OperandTypes.ANY, SqlFunctionCategory.NUMERIC, false, false,
+          Optionality.FORBIDDEN);
+    }
+
+    @SuppressWarnings("deprecation")
+    public List<RelDataType> getParameterTypes(RelDataTypeFactory typeFactory) {
+      return ImmutableList.of(typeFactory.createSqlType(SqlTypeName.ANY));
+    }
+
+    @SuppressWarnings("deprecation")
+    public RelDataType getReturnType(RelDataTypeFactory typeFactory) {
+      return typeFactory.createSqlType(SqlTypeName.BIGINT);
+    }
+
+    public RelDataType deriveType(SqlValidator validator,
+        SqlValidatorScope scope, SqlCall call) {
+      // Check for COUNT(*) function.  If it is we don't
+      // want to try and derive the "*"
+      if (call.isCountStar()) {
+        return validator.getTypeFactory().createSqlType(SqlTypeName.BIGINT);
+      }
+      return super.deriveType(validator, scope, call);
+    }
+  }
+
+
+注册
+return Frameworks.newConfigBuilder()
+                .defaultSchema(rootSchema.plus())
+                .parserConfig(sqlParserConfig)
+//                .costFactory(new FlinkCostFactory())
+                .typeSystem(typeSystem)
+                .sqlToRelConverterConfig(getSqlToRelConverterConfig())
+                .operatorTable(getSqlOperatorTable())
+                // set the executor to evaluate constant expressions
+//                .executor(new ExpressionReducer(tableConfig, false))
+//                .context(context)
+                .traitDefs(traitDefs)
+                .build();
 ```
+
+
 
 ### 新增RelTraitDef
 1. 参考flink源码：flink-table/flink-table-planner-blink/src/test/java/org/apache/flink/table/planner/expressions/converter/ExpressionConverterTest.java
@@ -600,7 +685,7 @@ Arrays.asList(
 FlinkRelDistributionTraitDef 并没有过多扩展这方面能力
 ```
 
-### 新增元数据connnect
+### 新增元数据connnect 和 adapt
 1. csv：https://github.com/zzzzming95/calcite-demo/tree/master/src/main/java/pers/shezm/calcite/csv
 2. schema 以及 schemaFactory
 3. table 以及 tableFactory
@@ -608,9 +693,23 @@ FlinkRelDistributionTraitDef 并没有过多扩展这方面能力
 4. metaFile：元数据文件，可以是json格式，用于初始化Connection，相当于注册了元数据
 
 
+### 业务数据类型 和 Calcite数据类型
+1. 业务自定义类型都需要映射成 SqlType
+2. 参考源码
+   1. JavaTypeFactoryImpl.toSql
+
+
+### SqlNameMatcher 表名匹配器
+
+
+
+。
 
 ### flink如何元数据注册
 1. FlinkCalciteCatalogReaderTest 初始化元数据
+   1. 初始化 CalciteConnectionConfigImpl
+   2. 初始化 FlinkTypeFactory
+   3. 初始化 SchemaPlus
 2. planner模块
    1. class CatalogReader extends CalciteCatalogReader 
 3. blink模块
@@ -633,6 +732,17 @@ public void init() {
 
 ### flink如何复用validator能力
 1. FlinkCalciteSqlValidator
+
+
+### flink如何处理复杂类型，如array<int>
+1. 参考源码
+   1. flink-table/flink-sql-parser/src/test/java/org/apache/flink/sql/parser/FlinkSqlParserImplTest.java#testCreateTableWithNestedComplexType
+   2. FlinkDDLDataTypeTest
+2. FlinkTypeFactory：flink数据类型工程
+3. RelDataTypeSystem：calcite relnode数据类型系统
+
+
+
 
 ## 横向拆解 - plan optimize
 1. 必看
@@ -1230,6 +1340,136 @@ Caused by: org.apache.calcite.runtime.CalciteContextException: From line 2, colu
 	... 26 more
 
 ```
+
+
+## 纵向拆解 - 灵活的数据类型系统
+1. SqlTypeUtil：Contains utility methods used during SQL validation or type derivation.
+2. SqlTypeName：所有sql类型字面值
+3. SqlTypeFactoryImpl：sql类型工厂，基础类型创建和复杂类型创建
+4. JavaTypeFactoryImpl：java类型工厂，基础类型创建和复杂类型创建，可以转SQL类型 
+   1. 方法：getJavaClass 和 toSql
+5. RelOptUtil：rel工具，判断类型是否匹配，类型转换
+6. RelCollationImpl
+   1. addCharsetAndCollation createTypeWithCharsetAndCollation 
+7. RelDataType
+   1. getCharset 默认字符集 DEFAULT_CHARSET
+   2. getCollation 默认排序规则
+8. 参考源码
+   1. core/src/test/java/org/apache/calcite/test/CollectionTypeTest.java#getRowType
+### 创建复杂类型
+```
+初始化 类型工厂
+final RelDataTypeFactory typeFactory =
+        new SqlTypeFactoryImpl(org.apache.calcite.rel.type.RelDataTypeSystem.DEFAULT);
+
+
+
+初始化 array<int>
+RelDataType nullableIntegerType = typeFactory
+          .createTypeWithNullability(typeFactory.createSqlType(SqlTypeName.INTEGER), true);
+  typeFactory.createArrayType(nullableIntegerType, -1L)
+
+初始化 array<string> 可null值
+typeFactory.createTypeWithNullability(
+                  typeFactory.createArrayType(nullableVarcharType, -1L), true)
+
+
+初始化 map<string, int>
+typeFactory.createMapType(nullableVarcharType, nullableIntegerType)
+
+
+
+
+
+```
+
+## 纵向拆解 - RelBuilder 和 Rexbuilder
+
+
+
+## 纵向拆解 - 视图的validate 和 计划图优化
+1. calcite 不支持DDL 包括创建view。但是有测试用例，从relnode层，扩展视图语法树
+2. 参考源码
+   1. ServerParserTest：Tests SQL parser extensions for DDL. 视图的测试用例
+   2. core/src/test/java/org/apache/calcite/test/CalciteAssert.java
+   3. testUserDefinedFunctionInView
+   4. testModelWithModifiableView
+   5. MaterializationTest#checkMaterialize
+   6. ReflectiveSchemaTest#testView
+   7. ReflectiveSchemaTest#testViewPath
+3. 核心类
+   1. ViewTable
+   2. PlannerImpl.expandView 视图注册
+   3. 
+
+### 视图注册
+```
+final SchemaPlus post =
+          rootSchema.add(schema.schemaName, new AbstractSchema());
+      post.add("EMP",
+          ViewTable.viewMacro(post,
+              "select * from (values\n"
+                  + "    ('Jane', 10, 'F'),\n"
+                  + "    ('Bob', 10, 'M'),\n"
+                  + "    ('Eric', 20, 'M'),\n"
+                  + "    ('Susan', 30, 'F'),\n"
+                  + "    ('Alice', 30, 'F'),\n"
+                  + "    ('Adam', 50, 'M'),\n"
+                  + "    ('Eve', 50, 'F'),\n"
+                  + "    ('Grace', 60, 'F'),\n"
+                  + "    ('Wilma', cast(null as integer), 'F'))\n"
+                  + "  as t(ename, deptno, gender)",
+              ImmutableList.of(), ImmutableList.of("POST", "EMP"),
+              null));
+      post.add("DEPT",
+          ViewTable.viewMacro(post,
+              "select * from (values\n"
+                  + "    (10, 'Sales'),\n"
+                  + "    (20, 'Marketing'),\n"
+                  + "    (30, 'Engineering'),\n"
+                  + "    (40, 'Empty')) as t(deptno, dname)",
+              ImmutableList.of(), ImmutableList.of("POST", "DEPT"),
+              null));
+      post.add("DEPT30",
+          ViewTable.viewMacro(post,
+              "select * from dept where deptno = 30",
+              ImmutableList.of("POST"), ImmutableList.of("POST", "DEPT30"),
+              null));
+      post.add("EMPS",
+          ViewTable.viewMacro(post,
+              "select * from (values\n"
+                  + "    (100, 'Fred',  10, CAST(NULL AS CHAR(1)), CAST(NULL AS VARCHAR(20)), 40,               25, TRUE,    FALSE, DATE '1996-08-03'),\n"
+                  + "    (110, 'Eric',  20, 'M',                   'San Francisco',           3,                80, UNKNOWN, FALSE, DATE '2001-01-01'),\n"
+                  + "    (110, 'John',  40, 'M',                   'Vancouver',               2, CAST(NULL AS INT), FALSE,   TRUE,  DATE '2002-05-03'),\n"
+                  + "    (120, 'Wilma', 20, 'F',                   CAST(NULL AS VARCHAR(20)), 1,                 5, UNKNOWN, TRUE,  DATE '2005-09-07'),\n"
+                  + "    (130, 'Alice', 40, 'F',                   'Vancouver',               2, CAST(NULL AS INT), FALSE,   TRUE,  DATE '2007-01-01'))\n"
+                  + " as t(empno, name, deptno, gender, city, empid, age, slacker, manager, joinedat)",
+              ImmutableList.of(), ImmutableList.of("POST", "EMPS"),
+              null));
+
+
+调用SQL示例
+
+post.add("V_EMP",
+        ViewTable.viewMacro(post, viewSql, ImmutableList.of(),
+            ImmutableList.of("POST", "V_EMP"), null));
+
+ResultSet viewResultSet =
+        statement.executeQuery("select * from \"POST\".\"V_EMP\"");
+
+```
+
+
+### 视图 是以function维度 注册到schema
+1. 校验过程中，会临时调用 function.apply，返回复杂的TranslatableTable
+```
+
+String viewSql = "select * from CUBE2L_IB00040010_CN000";
+ViewTableMacro vtm = ViewTable.viewMacro(rootSchema, viewSql, ImmutableList.of(), ImmutableList.of("ad_inner_loop_live_order_fg_channel_view_table"), null);
+  rootSchema.add("vtm_view_name", vtm);
+
+```
+
 
 
 ## 竞品对比
