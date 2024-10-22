@@ -40,6 +40,73 @@ mvn clean package -DskipTests -Dcheckstyle.skip=true -Dmaven.enforcer.skip=true
 
 ```
 
+
+
+### 造数
+```
+    public List<Row> fakeRows() {
+        // 创建虚拟行列表
+        List<Row> rows = new ArrayList<>();
+        rows.add(Row.of("15030140049", "wangzixian", 18));
+        rows.add(Row.of("5030140049", "wangzixian", 19));
+        rows.add(Row.of("15030140049", "wangzixian", 20));
+        return rows;
+    }
+
+    public RowTypeInfo rowTypeInfo() {
+        TypeInformation<?>[] types = {
+                BasicTypeInfo.STRING_TYPE_INFO,
+                BasicTypeInfo.STRING_TYPE_INFO,
+                BasicTypeInfo.INT_TYPE_INFO
+        };
+        String[] names = {"a", "b", "c"};
+        RowTypeInfo typeInfo = new RowTypeInfo(types, names);
+        return typeInfo;
+    }
+
+private static final List<Row> testData = new ArrayList<>();
+    private static final RowTypeInfo testTypeInfo =
+            new RowTypeInfo(
+                    new TypeInformation[] {Types.INT, Types.LONG, Types.STRING},
+                    new String[] {"a", "b", "c"});
+
+    static {
+        testData.add(Row.of(1, 1L, "Hi"));
+        testData.add(Row.of(2, 2L, "Hello"));
+        testData.add(Row.of(3, 2L, "Hello world"));
+        testData.add(Row.of(3, 3L, "Hello world!"));
+    }
+
+
+
+
+```
+
+
+### WordCount 实现
+```
+public class WordCount {
+   public static void main(String[] args) throws Exception {
+      // StreamExecutionEnvironment初始化
+      final StreamExecutionEnvironment env = StreamExecutionEnvironment.
+         getExecutionEnvironment();
+      // 业务逻辑转换代码
+      DataStream<String> text = env.readTextFile("the_path_for_input");
+      DataStream<Tuple2<String, Integer>> counts =
+         text.flatMap(new Tokenizer())
+         .keyBy(0).sum(1);
+      counts.writeAsText("the_path_for_output");
+      // 执行应用程序
+      env.execute("Streaming WordCount");
+   }
+}
+
+核心类
+StreamExecutionEnvironment
+DataStream
+```
+
+
 ## 扩展SQL语法能力
 1. 作者推荐方式，修改config.fmpp：https://github.com/apache/calcite/blob/master/core/src/test/codegen/config.fmpp
 2. Flink语法扩展--SqlRichExplain为例：https://blog.csdn.net/blackjjcat/article/details/124226170

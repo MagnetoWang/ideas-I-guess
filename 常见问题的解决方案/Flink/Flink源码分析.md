@@ -1,4 +1,27 @@
 ## Flink
+
+## 目录参考
+1. 理解时间
+2. 背景介绍
+3. 参考资料
+4. 核心思考问题
+5. 入门概念
+6. 阅读笔记
+7. 项目工作流
+8. 技术流图和图解
+9.  源码目录
+10. 模块拆解-横向
+11. 模块拆解-纵向
+12. 性能总结
+13. 设计总结
+14. 经验总结
+15. 第三方依赖
+16. 应用场景
+17. 业务通点
+18. 行业实践
+19. case代码
+
+
 ### 理解时间
 ```
 2023年7月10号启动
@@ -51,7 +74,21 @@ flink + 公司项目
 
 ### 参考资料
 1. 官方分享：https://space.bilibili.com/33807709
-2. [源码分析] 带你梳理 Flink SQL / Table API内部执行流程：https://www.cnblogs.com/rossiXYZ/p/12770436.html
+2. Calcite剖析：https://cloud.tencent.com/developer/column/102596?from_column=20421&from=20421
+3. [源码分析] 带你梳理 Flink SQL / Table API内部执行流程：https://www.cnblogs.com/rossiXYZ/p/12770436.html
+4. Flink专家blog
+   1. https://liebing.org.cn/
+   2. https://cloud.tencent.com/developer/user/1350579
+   3. https://cloud.tencent.com/developer/user/1207538
+5. OLAP
+   1. 多维分析概念：https://cloud.tencent.com/developer/article/2434642
+   2. 解读Implementing data cubes efficiently：https://cloud.tencent.com/developer/article/2450528
+6. SQL解析组件大对比：https://cloud.tencent.com/developer/article/2416358
+7. 行业应用
+   1. Flink 在蚂蚁实时特征平台的深度应用：https://blog.csdn.net/weixin_44904816/article/details/136204440   
+   2. Flink 在风控场景实时特征落地实战 - 是咕咕鸡的文章 - 知乎 https://zhuanlan.zhihu.com/p/477262244
+   3.  微信安全基于 Flink 实时特征开发平台实践 - Flink 中文社区的文章 - 知乎https://zhuanlan.zhihu.com/p/646114539
+   4.  腾讯基于 Flink SQL 的功能扩展与深度优化实践：https://juejin.cn/post/6924868645537792008
 ```
 xiaogang shi
 动态数据流上的实时迭代计算
@@ -612,7 +649,851 @@ Watermarked
 
 
 
-### flink序列化和反序列化章节
+## 横向拆解 - Core
+
+
+## 横向拆解 - Java API
+
+
+## 横向拆解 - Scala API 基于Java封装，可以不细看
+
+## 横向拆解 - 查询服务和客户端 Queryable state server/client
+
+
+
+
+
+## 横向拆解 - Runtime 运行层
+
+### Runtime 和 querable-state之间关系
+
+
+
+## 横向拆解 - Optimizer 优化层
+### Optimizer 和 Runtime 关系
+
+
+
+## 横向拆解 - Streaming 流计算层 Java/Scala 
+1. Scala基于Java封装
+2. Streaming 只调用了optimizer 模块的 org.apache.flink.optimizer.plantranslate.JobGraphGenerator
+3. 大部分是直接调用runtime 和 core
+
+
+## 横向拆解 - Client 对外的stream客户端和plan构造器
+
+
+## 横向拆解 - Table 集成flink底层能力 + 外部存储rocksdb
+1. api java
+2. sql parser
+3. sql planner
+4. sql runtime
+5. sql blink
+6. sql client
+
+
+## 纵向拆解 - 外部文件系统 like connector with file level 
+1. 是一个挂载插件-文件级别
+2. 类似spark的connector 和 calcite的adapter
+
+## 纵向拆解 - Connector 数据源对接系统
+
+## 纵向拆解 - State
+
+
+## 纵向拆解 - Formats
+
+
+## 纵向拆解 - ML
+
+## 纵向拆解 - Flink TTL
+
+
+### CompactionFilter
+
+
+
+## 纵向拆解 - 回撤流
+1. 回撤场景：http://blog.nemoface.com/views/backEnd/202112/20211226.html
+   1. group by会导致回撤
+   2. 输入 是非回撤流
+   3. 输入 是回撤流 输出结果都会不一样
+2. Flink-Table-的三种-Sink-模式：https://www.whitewood.me/2020/02/26/Flink-Table-%E7%9A%84%E4%B8%89%E7%A7%8D-Sink-%E6%A8%A1%E5%BC%8F/
+3. 代码生成：https://blog.51cto.com/u_9928699/10917371
+4. src/main/scala/org/apache/flink/table/runtime/aggregate/AggregateUtil.scala
+5. src/main/scala/org/apache/flink/table/codegen/AggregationCodeGenerator.scala
+```
+AggregateUtil
+
+```
+
+
+## 纵向拆解 - 乱序流
+1. 
+2. 
+
+
+## 纵向拆解 - 变更流
+### flink核心类
+1. DebeziumJsonFormatFactory
+2. CanalJsonFormatFactory
+### Debezium vs Canal vs Maxwell
+1. 数据同步工具之FlinkCDC/Canal/Debezium对比 - 王知无的文章 - 知乎 https://zhuanlan.zhihu.com/p/426489574
+2. Debezium监控数据库时，它会将数据库的变更操作（如插入、更新、删除）转换为JSON格式的消息
+3. 这些消息包含了变更前的旧值和变更后的新值，以及其他与变更相关的元数据信息
+4. Cancel
+   1. 阿里巴巴因为杭州和美国双机房部署
+   2. 索引构建和实时维护(拆分异构索引、倒排索引等)
+   3. 数据库镜像
+   4. 数据库实时备份
+   5. 业务 cache 刷新
+   6. 带业务逻辑的增量数据处理
+   7. 
+```
+
+{
+  "before": {
+    "id": 1,
+    "name": "John Doe",
+    "age": 30
+  },
+  "after": {
+    "id": 1,
+    "name": "John Doe",
+    "age": 31
+  },
+  "source": {
+    "version": "1.5.0.Final",
+    "connector": "mysql",
+    "name": "dbserver1",
+    "ts_ms": 1642658415000,
+    "snapshot": "false",
+    "db": "mydb",
+    "table": "users",
+    "server_id": 1,
+    "gtid": null,
+    "file": "mysql-bin.000003",
+    "pos": 123456,
+    "row": 0,
+    "thread": 1,
+    "query": null
+  },
+  "op": "u"
+}
+
+
+```
+
+
+
+
+## 纵向拆解 - flink 闭包检查
+1. 参考案例
+   1. src/main/java/org/apache/flink/streaming/api/datastream/CoGroupedStreams.java 
+      1. function = input1.getExecutionEnvironment().clean(function);
+   2. 
+
+
+
+### StreamTableEnvironment
+```
+Flink SQL 系列 | 5 个 TableEnvironment 我该用哪个
+https://developer.aliyun.com/article/719760
+
+
+datastream -> table
+https://github.com/BigDataScholar/TheKingOfBigData/blob/e13c122858756b68807526a4714931a92e2f0776/note/flink/%5B%E5%B9%B2%E8%B4%A7%5D%20%E4%BA%94%E5%8D%83%E5%AD%97%E9%95%BF%E6%96%87%E5%B8%A6%E4%BD%A0%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8FlinkSQL.md
+
+
+
+org/apache/flink/table/api/TableEnvironment.java
+org/apache/flink/table/api/java/BatchTableEnvironment.java
+org/apache/flink/table/api/scala/BatchTableEnvironment.scala
+org/apache/flink/table/api/java/StreamTableEnvironment.java
+org/apache/flink/table/api/scala/StreamTableEnvironment.scala
+
+TableEnvironment 是顶级接口，是所有 TableEnvironment 的基类 ，BatchTableEnvironment 和 StreamTableEnvironment 都提供了 Java 实现和 Scala 实现 ，分别有两个接口。
+
+TableEnvironment 目前还不支持注册 UDTF 和 UDAF，用户有注册 UDTF 和 UDAF 的需求时，可以选择使用其他 TableEnvironment。
+
+可能大家会疑惑为什么在 API 需要区分 Java 和 Scala 的两个 StreamTableEnvironment（或BatchTableEnvironment ），使用的 DataStream也分为 Java DataStream 和 Scala DataStream。
+
+原因主要是 TableEnvironment 的 registerTableFunction方法（用于注册UDTF） 和 registerAggregateFunction 方法（用户注册UDAF） 需要抽取泛型，而现有的 Java 泛型抽取和 Scala 的泛型抽取机制是不一样的，Java 的抽取是通过反射机制 实现，而 Scala 是通过 Scala macro 实现。此外，由于抽取泛型机制的不一致，作为统一入口的 TableEnvironment 现阶段也不支持注册 UDTF 和 UDAF。针对这个问题，社区已经在计划引入一套新的类型抽取机制来统一 Java 和 Scala 的类型抽取，实现 Java API 和 Scala API 的统一。
+
+
+
+```
+
+### TableEnvironment 和 TableEnvironmentImpl 初始化
+1. 入口函数：tableEnv = TableEnvironment.create(settings);
+2. TableFactoryService 表工厂加载
+
+### 水位线
+```
+https://juejin.cn/post/6844904195120693262#heading-5
+
+Watermark 定义
+完整性（Completeness）：一旦 Watermark 大于某个时间戳 T，那么就代表这个时间戳及之前的数据不会再被处理
+可见性（Visibility）：如果一个消息阻塞，那么 Watermark 也会被阻塞（无法递增）
+
+watermark creation
+perfect watermark creation 
+永远不会出现延迟数据，被丢没有计算的情况
+实际上，现实系统不会实现这一要求
+
+Heuristic watermark creation
+部分延迟数据可能会丢，导致计算不准
+但是可实现，并且尽可能精确
+
+
+
+watermark propagation
+水位线传播，也就是把水位线信息传输到下游算子，这里会涉及诸多问题
+聚合状态和非聚合状态下，非常复杂
+
+
+Percentile watermark
+统计数据分布情况，帮助我们更好选择水位线时间
+
+
+processing-time watermarks
+
+
+
+
+```
+
+### Left join实现
+
+
+### Group by实现
+- Flink SQL 知其所以然（二十六）：Group 聚合操作 - 大数据羊说的文章 - 知乎https://zhuanlan.zhihu.com/p/531006901
+- 
+
+
+
+
+### 动态表
+```
+大量的工厂类，就是为了解耦多样化数据源，文件格式和多种读写模式
+
+fromDataStream 也可以转table，然后运行sql
+
+核心类 flink-connectors模块
+DynamicTableSourceFactory
+ScanTableSource
+RichSourceFunction
+Options 配置
+
+类型转换 flink-formats模块
+JsonToRowDataConverters
+RowDataToJsonConverters
+
+
+整体类型
+StreamTableEnvironment
+BatchTableEnvironment
+
+
+参考示例类
+KafkaDynamicTableFactory
+DataFormatConverters
+
+测试可运行的示例
+createTemporaryView
+FlinkStreamPythonUdfSqlJob
+JsonRowDataSerDeSchemaTest
+HiveTableSinkITCase
+
+
+
+
+
+Flink 框架是如何设计的？ - 大数据技术与数仓的回答 - 知乎
+https://www.zhihu.com/question/575875502/answer/3436054933
+
+
+```
+
+### 时态表 Join
+1. 官方解释：https://nightlies.apache.org/flink/flink-docs-master/zh/docs/dev/table/concepts/versioned_tables/
+2. 时态表join：https://nightlies.apache.org/flink/flink-docs-release-1.16/zh/docs/dev/table/sql/queries/joins/#temporal-joins
+
+
+
+
+### 深入理解字段类型
+```
+示例代码
+DataStream<Row> rowDataStream = source.map(msg -> {
+            JsonNode jsonNode = JacksonUtil.readValue(msg, JsonNode.class);
+            RowData rowData = (RowData)(runtimeConverter.convert(jsonNode));
+            Row actual = convertToExternal(rowData, dataType);
+            return actual;
+        });
+
+
+核心类
+DataTypes
+DataType
+RowType
+RowType.RowField
+
+类型转换
+TypeInfoToSerializerConverter
+canSafelyCast
+TypeInformation schemaToTypeInfo(TypeDescription schema)
+
+
+
+核心方法
+DataTypes类中
+public static DataType ROW(Field... fields) {
+        final List<RowField> logicalFields =
+                Stream.of(fields)
+                        .map(
+                                f ->
+                                        Preconditions.checkNotNull(
+                                                f, "Field definition must not be null."))
+                        .map(f -> new RowField(f.name, f.dataType.getLogicalType(), f.description))
+                        .collect(Collectors.toList());
+        final List<DataType> fieldDataTypes =
+                Stream.of(fields).map(f -> f.dataType).collect(Collectors.toList());
+        return new FieldsDataType(new RowType(logicalFields), fieldDataTypes);
+    }
+
+
+```
+
+### schema & 反射的设计 & 自动推断能力
+RowTypeInfo
+PojoTypeInfo
+TypeInformation
+TypeExtractor
+
+
+### flink data结构
+1. RowData  JoinedRowData table模块
+   1. Base interface for an internal data structure   
+   2. org/apache/flink/table/data/RowData.java
+2. RowKind Row
+   1. A row is a fixed-length, null-aware composite type
+   2. Lists all kinds of changes that a row can describe in a changelog
+   3. org/apache/flink/types/Row.java
+3. GenericRowData GenericArrayData GenericMapData
+4. BinaryRowData BinaryArrayData BinaryMapData
+5. TimestampData 
+6. 类型
+   1. DataType
+   2. RowType
+   3. DistinctType
+   4. LogicalType
+   5. StructuredType
+7.  
+8. 
+#### data memory设计
+1. 参考 flink内存章节
+
+
+
+### flink自定义类加载器
+```
+核心类
+FlinkUserCodeClassLoader
+
+```
+
+### flink plan 计划设计
+1. 可视化网站
+   2. https://wints.github.io/flink-web//visualizer/
+3. plan结构设计
+   1. org.apache.flink.api.common
+   2. Plan
+   3. Operator
+4. plan工具
+   1. org.apache.flink.optimizer.plandump
+   2. org.apache.flink.optimizer.plantranslate
+   3. ExecutionPlanUtil 转json工具
+   4. 
+### flink图设计
+1. 入口函数
+   1. 参考case：testGeneratorWithoutAnyAttachements
+   2. FlinkPipelineTranslationUtil.getJobGraph
+   3. treamGraphTranslator.translateToJobGraph
+   4. StreamGraph.getJobGraph
+   5. StreamingJobGraphGenerator.createJobGraph
+   6. StreamGraphHasherV2.generateNodeHash
+2. 图类型
+   1. https://blog.csdn.net/u011047968/article/details/133921646
+   2. StreamGraph（数据流图）：是根据用户通过 Stream API 编写的代码生成的最初的图。用来表示程序的拓扑结构。
+   3. JobGraph（作业图）：StreamGraph经过优化后生成了 JobGraph，提交给 JobManager 的数据结构。主要的优化为，将多个符合条件的节点 chain 在一起作为一个节点，这样可以减少数据在节点之间流动所需要的序列化/反序列化/传输消耗。
+   4. ExecutionGraph（执行图）：JobManager 根据 JobGraph 生成 ExecutionGraph。ExecutionGraph 是 JobGraph 的并行化版本，是调度层最核心的数据结构。
+   5. Physical Graph（物理图）：JobManager 根据 ExecutionGraph 对 Job 进行调度后，在各个TaskManager 上部署 Task 后形成的 “图”，并不是一个具体的数据结构。
+3. 图结构设计
+   1. org.apache.flink.runtime.jobgraph
+   2. JobEdge JobGraph JobVertex
+   3. JsonPlanGenerator json配置计划生成
+   4. node结构
+      1. parallelism
+      2. trace
+   5. ProgramDesc 主图
+   6. BlockDesc 子图
+
+### flink ExecutionGraph 执行计划
+
+### flink udf设计
+1. UserCodeWrapper
+2. InputOutputFormatContainer
+3. DistributedRuntimeUDFContext
+4. createTemporarySystemFunction 注册函数入口
+   1. UserDefinedFunction 可以查到所有继承的udf函数
+   2. AddressNormalizer 示例udf
+
+### flink CoProcessFunction & coGroupFunction 设计
+
+
+
+## 纵向拆解 - 性能优化
+
+### flink cpu分析
+1. ps + top + jstack 找热点进程和线程堆栈
+
+```
+	
+jstack 查找(打印5次至少3次)，并结合代码进行分析
+
+ps -ef | grep java  找到 Java 进程 id
+
+top -Hp pid  找到使用 CPU 最高的线程
+
+printf ‘0x%x’  tid  线程 id 转化 16 进制
+
+jstack pid | grep tid  找到线程堆栈
+
+因为cpu使用率是时间段内的统计值，jstack是一个瞬时堆栈只记录瞬时状态，两个根本不是一个维度的事，如果完全按照上面那一套步骤做的话碰到这种情况就傻眼了，冥思苦想半天却不得其解，根本不明白为什么这种代码会导致高cpu。针对可能出现的这种情况，实际排查问题的时候jstack建议打印5次至少3次，根据多次的堆栈内容，再结合相关代码进行分析，定位高cpu出现的原因，高cpu可能是代码段中某个bug导致的而不是堆栈打印出来的那几行导致的。
+
+
+load 高 & cpu高：
+
+   流量激增
+
+   gc频繁
+
+   代码问题（需要通过下面的3个方式根因定位）
+
+   查询占用CPU多的进程、线程，最终定位到代码
+
+load高但是cpu不高 - 进程队列长度大，但是cpu运行的进程很少，很多进程都在等待运行
+
+   大概率io高才是罪魁祸首，它导致的是任务一直在跑，迟迟处理不完，线程无法回归线程池中。io包含磁盘io和网络io，磁盘io高导致的load高是少数，更多的高io应当是在处理网络请求
+
+   排查重点：依赖方的响应时间RT
+
+   DB
+
+   redis
+
+   RPC/HTTP
+
+```
+
+### flink 内存泄露排查
+1. 必看 - jhat分析内存实例：https://blog.csdn.net/MrHamster/article/details/107723667
+2. 必看 - VisualVM分析内存实例
+   1. https://www.cnblogs.com/wade-xu/p/4369094.html
+   2. https://blog.csdn.net/MrHamster/article/details/107723850
+3. 必看 - 堆外内存分析
+   1. https://pdai.tech/md/java/jvm/java-jvm-oom-offheap.html
+4. Flink JVM 内存超限的分析方法总结 https://cloud.tencent.com/developer/article/1884177
+5. jemalloc 内存泄漏 https://github.com/jemalloc/jemalloc/wiki/Use-Case%3A-Leak-Checking
+6. jemalloc的heap profiling：https://www.yuanguohuo.com/2019/01/02/jemalloc-heap-profiling/
+7. 堆内
+   1. FinalReference 完全解读：https://www.infoq.cn/article/jvm-source-code-analysis-finalreference
+   2. 一次 Young GC 的优化实践：https://mp.weixin.qq.com/s/I3g-d1n7kdaAmmXb-dVNVg
+8.  案例
+   1. flink中引用drools引发oom：https://www.cnblogs.com/daoqidelv/p/7246624.html
+   2. 
+
+```
+堆内内存的分析
+观察full gc指标和jstat
+统计火焰图
+ jmap 来获取一份堆内存的 dump
+
+如果进程崩溃难以捕捉，可以在 Flink 配置的 JVM 启动参数中增加：
+env.java.opts.taskmanager: -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/taskmanager.hprof
+
+MAT对dump信息输出报表
+JProfiler 等更全面的工具可以进行堆内存的高级分析。
+
+这个出问题的作业的堆内存区域并没有用满，GC 日志看起来一切正常，堆内存泄漏的可能性排除。
+
+
+堆外内存的分析
+使用 Native Memory Tracking 查看 JVM 的各个内存区域用量
+-XX:+UnlockDiagnosticVMOptions -XX:+PrintNMTStatistics -XX:NativeMemoryTracking=summary
+
+jcmd 进程 VM.native_memory summary
+取此时此刻的 JVM 各区域的内存用量报表
+
+堆外 设计c++层
+gperftools
+Btrace
+Native Memory Tracking
+
+任务启动 strace去追踪系统调用
+
+gdp -pid pid
+dump memory mem.bin startAddress endAddressdump内存
+
+startAddress和endAddress可以从/proc/pid/smaps中查找。然后使用strings mem.bin查看dump的内容，如下：
+
+
+查看分析 hprof文件
+jhat Downloads/container_e06_1712817925707_4195906_01_000226-2024_07_19_12_29_50.hprof
+```
+
+### 堆外分析步骤
+1. 新增参数 -XX:+UnlockDiagnosticVMOptions -XX:+PrintNMTStatistics -XX:NativeMemoryTracking=summary
+2. 针对java进程获取内存报告 jcmd pid VM.native_memory detail
+3. pmap查看内存分布 pmap -x pid | sort -k 3 -n -r
+   1. 使用文档：https://www.cnblogs.com/yinghao-liu/p/7287941.html
+4. 系统层面排查 gperftools
+
+### jcmd结果
+```
+118361:
+
+Native Memory Tracking:
+
+Total: reserved=7628020KB, committed=6443532KB
+-                 Java Heap (reserved=4325376KB, committed=4325376KB)
+                            (mmap: reserved=4325376KB, committed=4325376KB) 
+ 
+-                     Class (reserved=1200866KB, committed=169390KB)
+                            (classes #23060)
+                            (malloc=27362KB #37283) 
+                            (mmap: reserved=1173504KB, committed=142028KB) 
+ 
+-                    Thread (reserved=505390KB, committed=505390KB)
+                            (thread #490)
+                            (stack: reserved=502528KB, committed=502528KB)
+                            (malloc=1664KB #2934) 
+                            (arena=1198KB #963)
+ 
+-                      Code (reserved=269393KB, committed=116385KB)
+                            (malloc=19793KB #24259) 
+                            (mmap: reserved=249600KB, committed=96592KB) 
+ 
+-                        GC (reserved=185728KB, committed=185728KB)
+                            (malloc=27696KB #563) 
+                            (mmap: reserved=158032KB, committed=158032KB) 
+ 
+-                  Compiler (reserved=1099KB, committed=1099KB)
+                            (malloc=954KB #2106) 
+                            (arena=145KB #18)
+ 
+-                  Internal (reserved=1104632KB, committed=1104628KB)
+                            (malloc=1104596KB #61574) 
+                            (mmap: reserved=36KB, committed=32KB) 
+ 
+-                    Symbol (reserved=29105KB, committed=29105KB)
+                            (malloc=26987KB #264752) 
+                            (arena=2118KB #1)
+ 
+-    Native Memory Tracking (reserved=6231KB, committed=6231KB)
+                            (malloc=57KB #626) 
+                            (tracking overhead=6175KB)
+ 
+-               Arena Chunk (reserved=200KB, committed=200KB)
+                            (malloc=200KB) 
+
+```
+
+
+
+## 痛点
+```
+低延时
+超大规模实时
+多维度高并发
+准确性
+动态可变
+快速响应
+
+
+71 篇 Flink 实战及原理解析文章（面试必备！） - 大数据羊说的文章 - 知乎
+https://zhuanlan.zhihu.com/p/467433350
+Flink企业级优化全面总结（3万字长文，15张图） - 大数据老哥的文章 - 知乎
+https://zhuanlan.zhihu.com/p/428923187
+Flink 使用大状态时的一点优化 - Flink 中文社区的文章 - 知乎
+https://zhuanlan.zhihu.com/p/164409354
+Flink_state 的优化与 remote_state 的探索 - Flink 中文社区的文章 - 知乎
+https://zhuanlan.zhihu.com/p/652100408
+
+```
+### 去重
+```
+
+
+```
+### 双流join
+```
+Flink 中极其重要的 Time 与 Window 详细解析
+https://cloud.tencent.com/developer/article/1779302
+
+万字详述 Flink SQL 4 种时间窗口语义
+https://cloud.tencent.com/developer/article/2043021
+
+Flink SQL 知其所以然（二十六）：2w 字详述 Join 操作
+https://cloud.tencent.com/developer/article/2043025
+
+原理与实战：AggregateFunction
+https://blog.csdn.net/duxu24/article/details/105746110
+
+
+水位线 
+
+窗口计算
+
+窗口join计算
+
+interval join计算
+
+
+
+
+
+```
+
+### 多流join
+
+### 维表方案
+```
+
+技术实践｜Flink维度表关联方案解析 - 中电金信研究院的文章 - 知乎
+https://zhuanlan.zhihu.com/p/694650448
+
+```
+
+### 分桶策略方案
+
+### Partial-Update
+
+### 增量存储具备批/流读写
+
+
+### Before/After 增量更新
+
+### 支持join长周期历史数据
+
+###  大状态快速恢复
+1. Flink具备1万slot/3层shuffle/50TB状态规模，从不支持到支持：1分钟级启动，5分钟级快照制作，10分钟级故障恢复
+2. 1k slot/2TB状态/3层shuffle规模内的Flink作业，可用性从99.95%提升到99.99%
+
+### 算子级别并发调整、TTL设置
+
+
+### FlinkSQL unique key 丢失导致数据乱序
+
+
+### Regular Join 算子开启mini-batch导致数据乱序问
+
+### 点查询能力
+
+### 离线表平滑迁移工具
+
+### Multi-Sink 性能问题优化
+
+
+### 流式样本训练
+```
+流式tfrecord格式样本生产flink任务
+
+流式特征抽取
+dense计算、fid算子计算、lisbvm格式
+
+```
+
+### 流式训练稳定性
+1. 外卖广告大规模深度学习模型工程实践：https://tech.meituan.com/2022/07/06/largescaledeeplearningmodel-engineeringpractice-in-mtwaimaiad.html
+2. 流式样本熔断、流式训练熔断功能
+3. 流式指标监控功能
+4. 训练回滚功能、serving回滚功能
+5. 流式训练支持模型HDFS存储功能
+
+### flatbuffers 序列化
+1. https://halfrost.com/flatbuffers_schema/
+2. https://flatbuffers.dev/
+3. 
+
+
+### 实时任务平滑重启， 平滑迁移
+1. Dag图修改，任务重启后，无法从checkpoint中恢复
+```
+比较常见的问题
+2024-07-01 12:35:31,359 [INFO] Caused by: java.lang.IllegalStateException: Failed to rollback to checkpoint/savepoint viewfs://hadoop-meituan/user/hadoop-rt/copy-replicate/flink-bj/checkpoints/hadoop-rt/retained/1514975/fd15a4b34dbfd050e5c043dd46324fe5/chk-20305. Cannot map checkpoint/savepoint state for operator e70bbd798b564e0a50e10e343f1ac56b to the new program, because the operator is not available in the new program. If you want to allow to skip this, you can set the --allowNonRestoredState option on the CLI.
+
+```
+
+### 稳定性 - 确保不用半夜起来修复问题
+```
+
+
+```
+
+### rocksdb 改造 hbase 提升flink吞吐量
+1. SlimBase-更省 IO、嵌入式共享 state 存储
+2. 采用 Flink+Kudu 的方案主要思想是借鉴了 Kylin 的思路，Kylin 可以指定很多维度和指标进行离线的预计算然后将预计算结果存储到 Hbase 中；快手的方案是通过 Flink 实时计算指标，再实时地写到 Kudu 里面
+3. 该场景下展现以后20分钟的点击被认为是有效点击，实时 Join 逻辑则是点击数据 Join 过去20分钟内的展现。其中，展现流的数据量相对比较大，20分钟数据在 1TB 以上。检查点设置为五分钟，Backend 选择 RocksDB。
+4. 整体思路是在数据写入时直接落地到共享存储中，避免 Checkpoint 带来的数据拷贝问题
+```
+Flink 在快手实时多维分析场景的应用
+
+https://developer.aliyun.com/article/765320
+
+
+在这样的场景下，面临着磁盘 IO 开销70%，其中50%开销来自于 Compaction；在 Checkpoint 期间，磁盘 IO 开销达到了100%，耗时在1~5分钟，甚至会长于 Checkpoint 间隔，业务能明显感觉到反压。经过分析找出问题：
+
+首先，在 Checkpoint 期间会产生四倍的大规模数据拷贝，即：从 RocksDB 中全量读取出来然后以三副本形式写入到 HDFS 中；
+
+其次，对于大规模数据写入，RocksDB 的默认 Level Compaction 会有严重的 IO 放大开销。
+
+
+
+整体思路是在数据写入时直接落地到共享存储中，避免 Checkpoint 带来的数据拷贝问题。手段是尝试使用更省 IO 的 Compaction，例如使用 SizeTieredCompation 方式，或者利用时序数据的特点使用并改造 FIFOCompaction。综合比较共享存储、SizeTieredCompation、基于事件时间的 FIFOCompaction 以及技术栈四个方面得出共识：HBase 代替 RocksDB 方案。
+
+共享存储方面，HBase 支持， RocksDB 不支持
+
+SizeTieredCompation 方面，RocksDB 默认不支持，HBase 默认支持
+
+基于事件时间下推的 FIFOCompaction 方面，RocksDB 不支持，但 HBase 开发起来比较简单
+
+技术栈方面，RocksDB 使用 C++，HBase 使用 java，HBase 改造起来更方便
+
+
+
+
+hbase劣势
+HBase 是一个依赖 zookeeper、包含 Master 和 RegionServer 的重量级分布式系统；而 RocksDB 仅是一个嵌入式的 Lib 库，很轻量级。
+
+在资源隔离方面，HBase 比较困难，内存和 cpu 被多个 Container 共享；而 RocksDB 比较容易，内存和 cpu 伴随 Container 天生隔离。
+
+网络开销方面，因为 HBase 是分布式的，所有比嵌入式的 RocksDB 开销要大很多。
+
+
+一层是 SlimBase 本身，包含三层结构：Slim HBase、适配器以及接口层；
+另一层是 SlimBaseStateBackend，主要包含 ListState、MapState、ValueState 和 ReduceState。
+
+hbase优化瘦身
+先对 HBase 进行减裁，去除 client、zookeeper 和 master，仅保留 RegionServer
+
+再对 RegionServer 进行剪裁，去除 ZK Listener、Master Tracker、Rpc、WAL 和 MetaTable
+
+仅保留 RegionServer 中的 Cache、Memstore、Compaction、Fluster 和 Fs
+
+将原来 Master 上用于清理 Hfile 的 HFileCleaner 迁移到 RegionServer 上
+
+RocksDB 支持读放大写的 merge 接口，但是 SlimBase 是不支持的，所以要实现 merge 的接口
+
+
+优化目标
+Checkpoint 和 Restore 的时延从分钟级别降到秒级。
+
+磁盘 IO 下降了66%
+
+磁盘写吞吐下降50%
+
+CPU 开销下降了33%
+
+
+
+```
+
+###  Cube、GroupingSet 优化
+1.  方式维度组合来计算小时或者天累计的 UV ( Unique Visitor )，新增和留存等指标
+2.  UV 精确去重问题，前文有提到，使用 Bitmap 进行精确去重，通过字典服务将 String 类型数据转换成 Long 类型数据进而便于存储到 Bitmap 中，因为统计 UV 要统计历史的数据，比如说按天累计，随着时间的推移，Bitmap 会越来越大，在 Rocksdb 状态存储下，读写过大的 KV 会比较耗性能，所以内部自定义了一个 BitmapState，将 Bitmap 进行分块存储，一个 blockid 对应一个局部的 bitmap，这样在 RocksDB 中存储时，一个 KV 会比较小，更新的时候也只需要根据 blockid 更新局部的 bitmap 就可以而不需要全量更新。
+3.  在建模指标计算中，为了避免维度数据倾斜问题，通过预聚合 ( 相同维度 hash 打散 ) 和全量聚合 ( 相同维度打散后聚合 ) 两种方式来解决
+4.  全维计算分为两个步骤，为避免数据倾斜问题，首先是维度打散预聚合，将相同的维度值先哈希打散一下。因为 UV 指标需要做到精确去重，所以采用 Bitmap 进行去重操作，每分钟一个窗口计算出增量窗口内数据的 Bitmap 发送给第二步按维度全量聚合；在全量聚合中，将增量的 Bitmap 合并到全量 Bitmap 中最终得出准确的 UV 值。然而有人会有问题，针对用户 id 这种的数值类型的可以采用此种方案，但是对于 deviceid 这种字符类型的数据应该如何处理？实际上在源头，数据进行维度聚合之前，会通过字典服务将字符类型的变量转换为唯一的 Long 类型值，进而通过 Bitmap 进行去重计算 UV。
+5.  降维计算中，通过全维计算得出的结果进行预聚合然后进行全量聚合，最终将结果进行输出。
+6.  
+7.  
+
+
+### 磁盘 - compaction 优化，以及如何避免 compaction
+
+
+### 细粒度设置数据源ttl 和 分区数
+1. https://www.bilibili.com/video/BV1wD4y1Y7pB/?spm_id_from=333.337.search-card.all.click&vd_source=0f9d0e0a195e3352b97b5cb0ca3e57a2
+2. 场景一 对数据进行去重后进行关联聚合，去重ttl 3h，聚合ttl 3d
+3. 场景二 双流join，主表 ttl 2d，维表 30d
+4. 美团的解决方案
+   1. 执行计划 可编辑，可设置参数
+5. 可修改TTL
+   1. 为 ExecNode 增加 id 标识，并围绕创建 ExecNodeContext，每个 ExecNode 在翻译前将其加入到工作栈
+   2. 在获取 TTL 的时候从栈顶拿到当前正在处理的 ExecNode，得到对应的 TTL 配置
+   3. 当前 ExecNode 翻译结束后，将对应的 ExecNodeContext 出栈，记录 Transformation  id -> ExecNode id 的映射关系
+6. 可修改分区模式
+   1. 分区关系优化 rebalance 改成 rescala
+   2. 2000 -> 1000 共需 2000 * 1000 = 2000000 个连接
+   3. Rescale 只需 2000 个连接，大大降低了 Network buffer 内存
+7. 单独修改算子并发并从状态恢复
+8. 单独修改算子的  slotSharingGroup
+9. 修改 chain 逻辑并从状态恢复
+
+### SQL 变更支持从状态恢复
+1. SQL 层使用 AST 做业务逻辑兼容性校验
+2. 基于可编辑执行计划做拓扑逻辑兼容性校验
+3. 状态 Schema 兼容性校验
+4. 目的
+   1. 判断哪些任务的升级和变更不支持从状态恢复
+
+
+### Flink SQL Debug 能力
+1. Case1:Flink SQL 自身bug导致的正确性问题(丢数)
+2. Case2:Flink SQL 设计缺陷导致的正确性问题(乱序)
+3. Case3:Flink SQL 使用不当导致的正确性问题
+
+
+### SQL State 可查询 & 支持懒迁移
+
+### flink sql字段血缘
+1. https://cloud.tencent.com/developer/article/1969415
+
+
+### unique key 丢失引起的乱序性能问题 & SQL风险提示
+
+### 状态恢复条件严格
+
+### 流批存储层
+```
+KV层（Hbase）：基于Hbase改造，支持按主键插入，更新和删除；负责生成changlog（Before/After）数据。
+
+存储层（Hudi）：基于Hudi改造，集成成熟读写接口和设计，支持增量读写和批量读写。
+
+```
+
+
+
+### 中间表不可查、中间状态不可查
+
+### 黑名单机制
+1. https://cwiki.apache.org/confluence/display/FLINK/FLIP-224%3A+Blocklist+Mechanism
+
+
+
+
+
+### 极客挑战赛
+```
+第三届 Apache Flink 极客挑战赛暨AAIG CUP——电商推荐“抱大腿”攻击识别亚军代码方案
+https://github.com/rickyxume/TianChi_RecSys_AntiSpam
+
+```
+
+
+## flink 功能维度分析
+## flink序列化和反序列化章节
 1. flink-core
    1. org.apache.flink.api.common.typeutils TypeSerializer
    2. TypeComparator
@@ -1609,296 +2490,6 @@ Barrier会周期性地注入数据流中，作为数据流的一部分，从上�
    2. SnapshotResult
 
 
-## Flink TTL
-
-
-### CompactionFilter
-## flink 闭包检查
-1. 参考案例
-   1. src/main/java/org/apache/flink/streaming/api/datastream/CoGroupedStreams.java 
-      1. function = input1.getExecutionEnvironment().clean(function);
-   2. 
-
-## 应用实现
-### 代码示例拆解
-```
-public class WordCount {
-   public static void main(String[] args) throws Exception {
-      // StreamExecutionEnvironment初始化
-      final StreamExecutionEnvironment env = StreamExecutionEnvironment.
-         getExecutionEnvironment();
-      // 业务逻辑转换代码
-      DataStream<String> text = env.readTextFile("the_path_for_input");
-      DataStream<Tuple2<String, Integer>> counts =
-         text.flatMap(new Tokenizer())
-         .keyBy(0).sum(1);
-      counts.writeAsText("the_path_for_output");
-      // 执行应用程序
-      env.execute("Streaming WordCount");
-   }
-}
-
-核心类
-StreamExecutionEnvironment
-DataStream
-```
-
-### StreamTableEnvironment
-```
-Flink SQL 系列 | 5 个 TableEnvironment 我该用哪个
-https://developer.aliyun.com/article/719760
-
-
-datastream -> table
-https://github.com/BigDataScholar/TheKingOfBigData/blob/e13c122858756b68807526a4714931a92e2f0776/note/flink/%5B%E5%B9%B2%E8%B4%A7%5D%20%E4%BA%94%E5%8D%83%E5%AD%97%E9%95%BF%E6%96%87%E5%B8%A6%E4%BD%A0%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8FlinkSQL.md
-
-
-
-org/apache/flink/table/api/TableEnvironment.java
-org/apache/flink/table/api/java/BatchTableEnvironment.java
-org/apache/flink/table/api/scala/BatchTableEnvironment.scala
-org/apache/flink/table/api/java/StreamTableEnvironment.java
-org/apache/flink/table/api/scala/StreamTableEnvironment.scala
-
-TableEnvironment 是顶级接口，是所有 TableEnvironment 的基类 ，BatchTableEnvironment 和 StreamTableEnvironment 都提供了 Java 实现和 Scala 实现 ，分别有两个接口。
-
-TableEnvironment 目前还不支持注册 UDTF 和 UDAF，用户有注册 UDTF 和 UDAF 的需求时，可以选择使用其他 TableEnvironment。
-
-可能大家会疑惑为什么在 API 需要区分 Java 和 Scala 的两个 StreamTableEnvironment（或BatchTableEnvironment ），使用的 DataStream也分为 Java DataStream 和 Scala DataStream。
-
-原因主要是 TableEnvironment 的 registerTableFunction方法（用于注册UDTF） 和 registerAggregateFunction 方法（用户注册UDAF） 需要抽取泛型，而现有的 Java 泛型抽取和 Scala 的泛型抽取机制是不一样的，Java 的抽取是通过反射机制 实现，而 Scala 是通过 Scala macro 实现。此外，由于抽取泛型机制的不一致，作为统一入口的 TableEnvironment 现阶段也不支持注册 UDTF 和 UDAF。针对这个问题，社区已经在计划引入一套新的类型抽取机制来统一 Java 和 Scala 的类型抽取，实现 Java API 和 Scala API 的统一。
-
-
-
-```
-
-### TableEnvironment 和 TableEnvironmentImpl 初始化
-1. 入口函数：tableEnv = TableEnvironment.create(settings);
-2. TableFactoryService 表工厂加载
-
-### 水位线
-```
-https://juejin.cn/post/6844904195120693262#heading-5
-
-Watermark 定义
-完整性（Completeness）：一旦 Watermark 大于某个时间戳 T，那么就代表这个时间戳及之前的数据不会再被处理
-可见性（Visibility）：如果一个消息阻塞，那么 Watermark 也会被阻塞（无法递增）
-
-watermark creation
-perfect watermark creation 
-永远不会出现延迟数据，被丢没有计算的情况
-实际上，现实系统不会实现这一要求
-
-Heuristic watermark creation
-部分延迟数据可能会丢，导致计算不准
-但是可实现，并且尽可能精确
-
-
-
-watermark propagation
-水位线传播，也就是把水位线信息传输到下游算子，这里会涉及诸多问题
-聚合状态和非聚合状态下，非常复杂
-
-
-Percentile watermark
-统计数据分布情况，帮助我们更好选择水位线时间
-
-
-processing-time watermarks
-
-
-
-
-```
-
-### Left join实现
-
-
-### Group by实现
-- Flink SQL 知其所以然（二十六）：Group 聚合操作 - 大数据羊说的文章 - 知乎https://zhuanlan.zhihu.com/p/531006901
-- 
-
-
-
-
-### 动态表
-```
-大量的工厂类，就是为了解耦多样化数据源，文件格式和多种读写模式
-
-fromDataStream 也可以转table，然后运行sql
-
-核心类 flink-connectors模块
-DynamicTableSourceFactory
-ScanTableSource
-RichSourceFunction
-Options 配置
-
-类型转换 flink-formats模块
-JsonToRowDataConverters
-RowDataToJsonConverters
-
-
-整体类型
-StreamTableEnvironment
-BatchTableEnvironment
-
-
-参考示例类
-KafkaDynamicTableFactory
-DataFormatConverters
-
-测试可运行的示例
-createTemporaryView
-FlinkStreamPythonUdfSqlJob
-JsonRowDataSerDeSchemaTest
-HiveTableSinkITCase
-
-
-
-
-
-Flink 框架是如何设计的？ - 大数据技术与数仓的回答 - 知乎
-https://www.zhihu.com/question/575875502/answer/3436054933
-
-
-```
-
-### 时态表 Join
-1. 官方解释：https://nightlies.apache.org/flink/flink-docs-master/zh/docs/dev/table/concepts/versioned_tables/
-2. 时态表join：https://nightlies.apache.org/flink/flink-docs-release-1.16/zh/docs/dev/table/sql/queries/joins/#temporal-joins
-
-
-
-
-### 深入理解字段类型
-```
-示例代码
-DataStream<Row> rowDataStream = source.map(msg -> {
-            JsonNode jsonNode = JacksonUtil.readValue(msg, JsonNode.class);
-            RowData rowData = (RowData)(runtimeConverter.convert(jsonNode));
-            Row actual = convertToExternal(rowData, dataType);
-            return actual;
-        });
-
-
-核心类
-DataTypes
-DataType
-RowType
-RowType.RowField
-
-类型转换
-TypeInfoToSerializerConverter
-canSafelyCast
-TypeInformation schemaToTypeInfo(TypeDescription schema)
-
-
-
-核心方法
-DataTypes类中
-public static DataType ROW(Field... fields) {
-        final List<RowField> logicalFields =
-                Stream.of(fields)
-                        .map(
-                                f ->
-                                        Preconditions.checkNotNull(
-                                                f, "Field definition must not be null."))
-                        .map(f -> new RowField(f.name, f.dataType.getLogicalType(), f.description))
-                        .collect(Collectors.toList());
-        final List<DataType> fieldDataTypes =
-                Stream.of(fields).map(f -> f.dataType).collect(Collectors.toList());
-        return new FieldsDataType(new RowType(logicalFields), fieldDataTypes);
-    }
-
-
-```
-
-### schema & 反射的设计 & 自动推断能力
-RowTypeInfo
-PojoTypeInfo
-TypeInformation
-TypeExtractor
-
-
-### flink data结构
-1. RowData  JoinedRowData table模块
-   1. Base interface for an internal data structure   
-   2. org/apache/flink/table/data/RowData.java
-2. RowKind Row
-   1. A row is a fixed-length, null-aware composite type
-   2. Lists all kinds of changes that a row can describe in a changelog
-   3. org/apache/flink/types/Row.java
-3. GenericRowData GenericArrayData GenericMapData
-4. BinaryRowData BinaryArrayData BinaryMapData
-5. TimestampData 
-6. 类型
-   1. DataType
-   2. RowType
-   3. DistinctType
-   4. LogicalType
-   5. StructuredType
-7.  
-8. 
-#### data memory设计
-1. 参考 flink内存章节
-
-
-
-### flink自定义类加载器
-```
-核心类
-FlinkUserCodeClassLoader
-
-```
-
-### flink plan 计划设计
-1. 可视化网站
-   2. https://wints.github.io/flink-web//visualizer/
-3. plan结构设计
-   1. org.apache.flink.api.common
-   2. Plan
-   3. Operator
-4. plan工具
-   1. org.apache.flink.optimizer.plandump
-   2. org.apache.flink.optimizer.plantranslate
-   3. ExecutionPlanUtil 转json工具
-   4. 
-### flink图设计
-1. 入口函数
-   1. 参考case：testGeneratorWithoutAnyAttachements
-   2. FlinkPipelineTranslationUtil.getJobGraph
-   3. treamGraphTranslator.translateToJobGraph
-   4. StreamGraph.getJobGraph
-   5. StreamingJobGraphGenerator.createJobGraph
-   6. StreamGraphHasherV2.generateNodeHash
-2. 图类型
-   1. https://blog.csdn.net/u011047968/article/details/133921646
-   2. StreamGraph（数据流图）：是根据用户通过 Stream API 编写的代码生成的最初的图。用来表示程序的拓扑结构。
-   3. JobGraph（作业图）：StreamGraph经过优化后生成了 JobGraph，提交给 JobManager 的数据结构。主要的优化为，将多个符合条件的节点 chain 在一起作为一个节点，这样可以减少数据在节点之间流动所需要的序列化/反序列化/传输消耗。
-   4. ExecutionGraph（执行图）：JobManager 根据 JobGraph 生成 ExecutionGraph。ExecutionGraph 是 JobGraph 的并行化版本，是调度层最核心的数据结构。
-   5. Physical Graph（物理图）：JobManager 根据 ExecutionGraph 对 Job 进行调度后，在各个TaskManager 上部署 Task 后形成的 “图”，并不是一个具体的数据结构。
-3. 图结构设计
-   1. org.apache.flink.runtime.jobgraph
-   2. JobEdge JobGraph JobVertex
-   3. JsonPlanGenerator json配置计划生成
-   4. node结构
-      1. parallelism
-      2. trace
-   5. ProgramDesc 主图
-   6. BlockDesc 子图
-
-### flink ExecutionGraph 执行计划
-
-### flink udf设计
-1. UserCodeWrapper
-2. InputOutputFormatContainer
-3. DistributedRuntimeUDFContext
-4. createTemporarySystemFunction 注册函数入口
-   1. UserDefinedFunction 可以查到所有继承的udf函数
-   2. AddressNormalizer 示例udf
-
-### flink CoProcessFunction & coGroupFunction 设计
-
 ## 服务章节
 ### flink connect hive设计
 1. 如何测试hive端
@@ -2024,564 +2615,5 @@ import org.apache.flink.table.factories.FileSystemFormatFactory;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.logical.RowType;
 import org.apache.flink.table.utils.PartitionPathUtils;
-
-```
-
-## 痛点
-```
-低延时
-超大规模实时
-多维度高并发
-准确性
-动态可变
-快速响应
-
-
-71 篇 Flink 实战及原理解析文章（面试必备！） - 大数据羊说的文章 - 知乎
-https://zhuanlan.zhihu.com/p/467433350
-Flink企业级优化全面总结（3万字长文，15张图） - 大数据老哥的文章 - 知乎
-https://zhuanlan.zhihu.com/p/428923187
-Flink 使用大状态时的一点优化 - Flink 中文社区的文章 - 知乎
-https://zhuanlan.zhihu.com/p/164409354
-Flink_state 的优化与 remote_state 的探索 - Flink 中文社区的文章 - 知乎
-https://zhuanlan.zhihu.com/p/652100408
-
-```
-### 去重
-```
-
-
-```
-### 双流join
-```
-Flink 中极其重要的 Time 与 Window 详细解析
-https://cloud.tencent.com/developer/article/1779302
-
-万字详述 Flink SQL 4 种时间窗口语义
-https://cloud.tencent.com/developer/article/2043021
-
-Flink SQL 知其所以然（二十六）：2w 字详述 Join 操作
-https://cloud.tencent.com/developer/article/2043025
-
-原理与实战：AggregateFunction
-https://blog.csdn.net/duxu24/article/details/105746110
-
-
-水位线 
-
-窗口计算
-
-窗口join计算
-
-interval join计算
-
-
-
-
-
-```
-
-### 多流join
-
-### 维表方案
-```
-
-技术实践｜Flink维度表关联方案解析 - 中电金信研究院的文章 - 知乎
-https://zhuanlan.zhihu.com/p/694650448
-
-```
-
-### 分桶策略方案
-
-### Partial-Update
-
-### 增量存储具备批/流读写
-
-
-### Before/After 增量更新
-
-### 支持join长周期历史数据
-
-###  大状态快速恢复
-1. Flink具备1万slot/3层shuffle/50TB状态规模，从不支持到支持：1分钟级启动，5分钟级快照制作，10分钟级故障恢复
-2. 1k slot/2TB状态/3层shuffle规模内的Flink作业，可用性从99.95%提升到99.99%
-
-### 算子级别并发调整、TTL设置
-
-
-### FlinkSQL unique key 丢失导致数据乱序
-
-
-### Regular Join 算子开启mini-batch导致数据乱序问
-
-### 点查询能力
-
-### 离线表平滑迁移工具
-
-### Multi-Sink 性能问题优化
-
-
-### 流式样本训练
-```
-流式tfrecord格式样本生产flink任务
-
-流式特征抽取
-dense计算、fid算子计算、lisbvm格式
-
-```
-
-### 流式训练稳定性
-1. 外卖广告大规模深度学习模型工程实践：https://tech.meituan.com/2022/07/06/largescaledeeplearningmodel-engineeringpractice-in-mtwaimaiad.html
-2. 流式样本熔断、流式训练熔断功能
-3. 流式指标监控功能
-4. 训练回滚功能、serving回滚功能
-5. 流式训练支持模型HDFS存储功能
-
-### flatbuffers 序列化
-1. https://halfrost.com/flatbuffers_schema/
-2. https://flatbuffers.dev/
-3. 
-
-
-### 实时任务平滑重启， 平滑迁移
-1. Dag图修改，任务重启后，无法从checkpoint中恢复
-```
-比较常见的问题
-2024-07-01 12:35:31,359 [INFO] Caused by: java.lang.IllegalStateException: Failed to rollback to checkpoint/savepoint viewfs://hadoop-meituan/user/hadoop-rt/copy-replicate/flink-bj/checkpoints/hadoop-rt/retained/1514975/fd15a4b34dbfd050e5c043dd46324fe5/chk-20305. Cannot map checkpoint/savepoint state for operator e70bbd798b564e0a50e10e343f1ac56b to the new program, because the operator is not available in the new program. If you want to allow to skip this, you can set the --allowNonRestoredState option on the CLI.
-
-```
-
-### 稳定性 - 确保不用半夜起来修复问题
-```
-
-
-```
-
-### rocksdb 改造 hbase 提升flink吞吐量
-1. SlimBase-更省 IO、嵌入式共享 state 存储
-2. 采用 Flink+Kudu 的方案主要思想是借鉴了 Kylin 的思路，Kylin 可以指定很多维度和指标进行离线的预计算然后将预计算结果存储到 Hbase 中；快手的方案是通过 Flink 实时计算指标，再实时地写到 Kudu 里面
-3. 该场景下展现以后20分钟的点击被认为是有效点击，实时 Join 逻辑则是点击数据 Join 过去20分钟内的展现。其中，展现流的数据量相对比较大，20分钟数据在 1TB 以上。检查点设置为五分钟，Backend 选择 RocksDB。
-4. 整体思路是在数据写入时直接落地到共享存储中，避免 Checkpoint 带来的数据拷贝问题
-```
-Flink 在快手实时多维分析场景的应用
-
-https://developer.aliyun.com/article/765320
-
-
-在这样的场景下，面临着磁盘 IO 开销70%，其中50%开销来自于 Compaction；在 Checkpoint 期间，磁盘 IO 开销达到了100%，耗时在1~5分钟，甚至会长于 Checkpoint 间隔，业务能明显感觉到反压。经过分析找出问题：
-
-首先，在 Checkpoint 期间会产生四倍的大规模数据拷贝，即：从 RocksDB 中全量读取出来然后以三副本形式写入到 HDFS 中；
-
-其次，对于大规模数据写入，RocksDB 的默认 Level Compaction 会有严重的 IO 放大开销。
-
-
-
-整体思路是在数据写入时直接落地到共享存储中，避免 Checkpoint 带来的数据拷贝问题。手段是尝试使用更省 IO 的 Compaction，例如使用 SizeTieredCompation 方式，或者利用时序数据的特点使用并改造 FIFOCompaction。综合比较共享存储、SizeTieredCompation、基于事件时间的 FIFOCompaction 以及技术栈四个方面得出共识：HBase 代替 RocksDB 方案。
-
-共享存储方面，HBase 支持， RocksDB 不支持
-
-SizeTieredCompation 方面，RocksDB 默认不支持，HBase 默认支持
-
-基于事件时间下推的 FIFOCompaction 方面，RocksDB 不支持，但 HBase 开发起来比较简单
-
-技术栈方面，RocksDB 使用 C++，HBase 使用 java，HBase 改造起来更方便
-
-
-
-
-hbase劣势
-HBase 是一个依赖 zookeeper、包含 Master 和 RegionServer 的重量级分布式系统；而 RocksDB 仅是一个嵌入式的 Lib 库，很轻量级。
-
-在资源隔离方面，HBase 比较困难，内存和 cpu 被多个 Container 共享；而 RocksDB 比较容易，内存和 cpu 伴随 Container 天生隔离。
-
-网络开销方面，因为 HBase 是分布式的，所有比嵌入式的 RocksDB 开销要大很多。
-
-
-一层是 SlimBase 本身，包含三层结构：Slim HBase、适配器以及接口层；
-另一层是 SlimBaseStateBackend，主要包含 ListState、MapState、ValueState 和 ReduceState。
-
-hbase优化瘦身
-先对 HBase 进行减裁，去除 client、zookeeper 和 master，仅保留 RegionServer
-
-再对 RegionServer 进行剪裁，去除 ZK Listener、Master Tracker、Rpc、WAL 和 MetaTable
-
-仅保留 RegionServer 中的 Cache、Memstore、Compaction、Fluster 和 Fs
-
-将原来 Master 上用于清理 Hfile 的 HFileCleaner 迁移到 RegionServer 上
-
-RocksDB 支持读放大写的 merge 接口，但是 SlimBase 是不支持的，所以要实现 merge 的接口
-
-
-优化目标
-Checkpoint 和 Restore 的时延从分钟级别降到秒级。
-
-磁盘 IO 下降了66%
-
-磁盘写吞吐下降50%
-
-CPU 开销下降了33%
-
-
-
-```
-
-###  Cube、GroupingSet 优化
-1.  方式维度组合来计算小时或者天累计的 UV ( Unique Visitor )，新增和留存等指标
-2.  UV 精确去重问题，前文有提到，使用 Bitmap 进行精确去重，通过字典服务将 String 类型数据转换成 Long 类型数据进而便于存储到 Bitmap 中，因为统计 UV 要统计历史的数据，比如说按天累计，随着时间的推移，Bitmap 会越来越大，在 Rocksdb 状态存储下，读写过大的 KV 会比较耗性能，所以内部自定义了一个 BitmapState，将 Bitmap 进行分块存储，一个 blockid 对应一个局部的 bitmap，这样在 RocksDB 中存储时，一个 KV 会比较小，更新的时候也只需要根据 blockid 更新局部的 bitmap 就可以而不需要全量更新。
-3.  在建模指标计算中，为了避免维度数据倾斜问题，通过预聚合 ( 相同维度 hash 打散 ) 和全量聚合 ( 相同维度打散后聚合 ) 两种方式来解决
-4.  全维计算分为两个步骤，为避免数据倾斜问题，首先是维度打散预聚合，将相同的维度值先哈希打散一下。因为 UV 指标需要做到精确去重，所以采用 Bitmap 进行去重操作，每分钟一个窗口计算出增量窗口内数据的 Bitmap 发送给第二步按维度全量聚合；在全量聚合中，将增量的 Bitmap 合并到全量 Bitmap 中最终得出准确的 UV 值。然而有人会有问题，针对用户 id 这种的数值类型的可以采用此种方案，但是对于 deviceid 这种字符类型的数据应该如何处理？实际上在源头，数据进行维度聚合之前，会通过字典服务将字符类型的变量转换为唯一的 Long 类型值，进而通过 Bitmap 进行去重计算 UV。
-5.  降维计算中，通过全维计算得出的结果进行预聚合然后进行全量聚合，最终将结果进行输出。
-6.  
-7.  
-
-
-### 磁盘 - compaction 优化，以及如何避免 compaction
-
-
-### 细粒度设置数据源ttl 和 分区数
-1. https://www.bilibili.com/video/BV1wD4y1Y7pB/?spm_id_from=333.337.search-card.all.click&vd_source=0f9d0e0a195e3352b97b5cb0ca3e57a2
-2. 场景一 对数据进行去重后进行关联聚合，去重ttl 3h，聚合ttl 3d
-3. 场景二 双流join，主表 ttl 2d，维表 30d
-4. 美团的解决方案
-   1. 执行计划 可编辑，可设置参数
-5. 可修改TTL
-   1. 为 ExecNode 增加 id 标识，并围绕创建 ExecNodeContext，每个 ExecNode 在翻译前将其加入到工作栈
-   2. 在获取 TTL 的时候从栈顶拿到当前正在处理的 ExecNode，得到对应的 TTL 配置
-   3. 当前 ExecNode 翻译结束后，将对应的 ExecNodeContext 出栈，记录 Transformation  id -> ExecNode id 的映射关系
-6. 可修改分区模式
-   1. 分区关系优化 rebalance 改成 rescala
-   2. 2000 -> 1000 共需 2000 * 1000 = 2000000 个连接
-   3. Rescale 只需 2000 个连接，大大降低了 Network buffer 内存
-7. 单独修改算子并发并从状态恢复
-8. 单独修改算子的  slotSharingGroup
-9. 修改 chain 逻辑并从状态恢复
-
-### SQL 变更支持从状态恢复
-1. SQL 层使用 AST 做业务逻辑兼容性校验
-2. 基于可编辑执行计划做拓扑逻辑兼容性校验
-3. 状态 Schema 兼容性校验
-4. 目的
-   1. 判断哪些任务的升级和变更不支持从状态恢复
-
-
-### Flink SQL Debug 能力
-1. Case1:Flink SQL 自身bug导致的正确性问题(丢数)
-2. Case2:Flink SQL 设计缺陷导致的正确性问题(乱序)
-3. Case3:Flink SQL 使用不当导致的正确性问题
-
-
-### SQL State 可查询 & 支持懒迁移
-
-### flink sql字段血缘
-1. https://cloud.tencent.com/developer/article/1969415
-
-
-### unique key 丢失引起的乱序性能问题 & SQL风险提示
-
-### 状态恢复条件严格
-
-### 流批存储层
-```
-KV层（Hbase）：基于Hbase改造，支持按主键插入，更新和删除；负责生成changlog（Before/After）数据。
-
-存储层（Hudi）：基于Hudi改造，集成成熟读写接口和设计，支持增量读写和批量读写。
-
-```
-
-
-
-### 中间表不可查、中间状态不可查
-
-### 黑名单机制
-1. https://cwiki.apache.org/confluence/display/FLINK/FLIP-224%3A+Blocklist+Mechanism
-
-### 
-
-## flink cpu分析
-1. ps + top + jstack 找热点进程和线程堆栈
-
-```
-	
-jstack 查找(打印5次至少3次)，并结合代码进行分析
-
-ps -ef | grep java  找到 Java 进程 id
-
-top -Hp pid  找到使用 CPU 最高的线程
-
-printf ‘0x%x’  tid  线程 id 转化 16 进制
-
-jstack pid | grep tid  找到线程堆栈
-
-因为cpu使用率是时间段内的统计值，jstack是一个瞬时堆栈只记录瞬时状态，两个根本不是一个维度的事，如果完全按照上面那一套步骤做的话碰到这种情况就傻眼了，冥思苦想半天却不得其解，根本不明白为什么这种代码会导致高cpu。针对可能出现的这种情况，实际排查问题的时候jstack建议打印5次至少3次，根据多次的堆栈内容，再结合相关代码进行分析，定位高cpu出现的原因，高cpu可能是代码段中某个bug导致的而不是堆栈打印出来的那几行导致的。
-
-
-load 高 & cpu高：
-
-   流量激增
-
-   gc频繁
-
-   代码问题（需要通过下面的3个方式根因定位）
-
-   查询占用CPU多的进程、线程，最终定位到代码
-
-load高但是cpu不高 - 进程队列长度大，但是cpu运行的进程很少，很多进程都在等待运行
-
-   大概率io高才是罪魁祸首，它导致的是任务一直在跑，迟迟处理不完，线程无法回归线程池中。io包含磁盘io和网络io，磁盘io高导致的load高是少数，更多的高io应当是在处理网络请求
-
-   排查重点：依赖方的响应时间RT
-
-   DB
-
-   redis
-
-   RPC/HTTP
-
-```
-
-## flink 内存泄露排查
-1. 必看 - jhat分析内存实例：https://blog.csdn.net/MrHamster/article/details/107723667
-2. 必看 - VisualVM分析内存实例
-   1. https://www.cnblogs.com/wade-xu/p/4369094.html
-   2. https://blog.csdn.net/MrHamster/article/details/107723850
-3. 必看 - 堆外内存分析
-   1. https://pdai.tech/md/java/jvm/java-jvm-oom-offheap.html
-4. Flink JVM 内存超限的分析方法总结 https://cloud.tencent.com/developer/article/1884177
-5. jemalloc 内存泄漏 https://github.com/jemalloc/jemalloc/wiki/Use-Case%3A-Leak-Checking
-6. jemalloc的heap profiling：https://www.yuanguohuo.com/2019/01/02/jemalloc-heap-profiling/
-7. 堆内
-   1. FinalReference 完全解读：https://www.infoq.cn/article/jvm-source-code-analysis-finalreference
-   2. 一次 Young GC 的优化实践：https://mp.weixin.qq.com/s/I3g-d1n7kdaAmmXb-dVNVg
-8.  案例
-   1. flink中引用drools引发oom：https://www.cnblogs.com/daoqidelv/p/7246624.html
-   2. 
-
-```
-堆内内存的分析
-观察full gc指标和jstat
-统计火焰图
- jmap 来获取一份堆内存的 dump
-
-如果进程崩溃难以捕捉，可以在 Flink 配置的 JVM 启动参数中增加：
-env.java.opts.taskmanager: -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/taskmanager.hprof
-
-MAT对dump信息输出报表
-JProfiler 等更全面的工具可以进行堆内存的高级分析。
-
-这个出问题的作业的堆内存区域并没有用满，GC 日志看起来一切正常，堆内存泄漏的可能性排除。
-
-
-堆外内存的分析
-使用 Native Memory Tracking 查看 JVM 的各个内存区域用量
--XX:+UnlockDiagnosticVMOptions -XX:+PrintNMTStatistics -XX:NativeMemoryTracking=summary
-
-jcmd 进程 VM.native_memory summary
-取此时此刻的 JVM 各区域的内存用量报表
-
-堆外 设计c++层
-gperftools
-Btrace
-Native Memory Tracking
-
-任务启动 strace去追踪系统调用
-
-gdp -pid pid
-dump memory mem.bin startAddress endAddressdump内存
-
-startAddress和endAddress可以从/proc/pid/smaps中查找。然后使用strings mem.bin查看dump的内容，如下：
-
-
-查看分析 hprof文件
-jhat Downloads/container_e06_1712817925707_4195906_01_000226-2024_07_19_12_29_50.hprof
-```
-
-### 堆外分析步骤
-1. 新增参数 -XX:+UnlockDiagnosticVMOptions -XX:+PrintNMTStatistics -XX:NativeMemoryTracking=summary
-2. 针对java进程获取内存报告 jcmd pid VM.native_memory detail
-3. pmap查看内存分布 pmap -x pid | sort -k 3 -n -r
-   1. 使用文档：https://www.cnblogs.com/yinghao-liu/p/7287941.html
-4. 系统层面排查 gperftools
-
-### jcmd结果
-```
-118361:
-
-Native Memory Tracking:
-
-Total: reserved=7628020KB, committed=6443532KB
--                 Java Heap (reserved=4325376KB, committed=4325376KB)
-                            (mmap: reserved=4325376KB, committed=4325376KB) 
- 
--                     Class (reserved=1200866KB, committed=169390KB)
-                            (classes #23060)
-                            (malloc=27362KB #37283) 
-                            (mmap: reserved=1173504KB, committed=142028KB) 
- 
--                    Thread (reserved=505390KB, committed=505390KB)
-                            (thread #490)
-                            (stack: reserved=502528KB, committed=502528KB)
-                            (malloc=1664KB #2934) 
-                            (arena=1198KB #963)
- 
--                      Code (reserved=269393KB, committed=116385KB)
-                            (malloc=19793KB #24259) 
-                            (mmap: reserved=249600KB, committed=96592KB) 
- 
--                        GC (reserved=185728KB, committed=185728KB)
-                            (malloc=27696KB #563) 
-                            (mmap: reserved=158032KB, committed=158032KB) 
- 
--                  Compiler (reserved=1099KB, committed=1099KB)
-                            (malloc=954KB #2106) 
-                            (arena=145KB #18)
- 
--                  Internal (reserved=1104632KB, committed=1104628KB)
-                            (malloc=1104596KB #61574) 
-                            (mmap: reserved=36KB, committed=32KB) 
- 
--                    Symbol (reserved=29105KB, committed=29105KB)
-                            (malloc=26987KB #264752) 
-                            (arena=2118KB #1)
- 
--    Native Memory Tracking (reserved=6231KB, committed=6231KB)
-                            (malloc=57KB #626) 
-                            (tracking overhead=6175KB)
- 
--               Arena Chunk (reserved=200KB, committed=200KB)
-                            (malloc=200KB) 
-
-```
-
-## 回撤流
-1. 回撤场景：http://blog.nemoface.com/views/backEnd/202112/20211226.html
-   1. group by会导致回撤
-   2. 输入 是非回撤流
-   3. 输入 是回撤流 输出结果都会不一样
-2. Flink-Table-的三种-Sink-模式：https://www.whitewood.me/2020/02/26/Flink-Table-%E7%9A%84%E4%B8%89%E7%A7%8D-Sink-%E6%A8%A1%E5%BC%8F/
-3. 代码生成：https://blog.51cto.com/u_9928699/10917371
-4. src/main/scala/org/apache/flink/table/runtime/aggregate/AggregateUtil.scala
-5. src/main/scala/org/apache/flink/table/codegen/AggregationCodeGenerator.scala
-```
-AggregateUtil
-
-```
-
-
-## 乱序流
-1. 
-2. 
-
-
-## 变更流
-### flink核心类
-1. DebeziumJsonFormatFactory
-2. CanalJsonFormatFactory
-### Debezium vs Canal vs Maxwell
-1. 数据同步工具之FlinkCDC/Canal/Debezium对比 - 王知无的文章 - 知乎 https://zhuanlan.zhihu.com/p/426489574
-2. Debezium监控数据库时，它会将数据库的变更操作（如插入、更新、删除）转换为JSON格式的消息
-3. 这些消息包含了变更前的旧值和变更后的新值，以及其他与变更相关的元数据信息
-4. Cancel
-   1. 阿里巴巴因为杭州和美国双机房部署
-   2. 索引构建和实时维护(拆分异构索引、倒排索引等)
-   3. 数据库镜像
-   4. 数据库实时备份
-   5. 业务 cache 刷新
-   6. 带业务逻辑的增量数据处理
-   7. 
-```
-
-{
-  "before": {
-    "id": 1,
-    "name": "John Doe",
-    "age": 30
-  },
-  "after": {
-    "id": 1,
-    "name": "John Doe",
-    "age": 31
-  },
-  "source": {
-    "version": "1.5.0.Final",
-    "connector": "mysql",
-    "name": "dbserver1",
-    "ts_ms": 1642658415000,
-    "snapshot": "false",
-    "db": "mydb",
-    "table": "users",
-    "server_id": 1,
-    "gtid": null,
-    "file": "mysql-bin.000003",
-    "pos": 123456,
-    "row": 0,
-    "thread": 1,
-    "query": null
-  },
-  "op": "u"
-}
-
-
-```
-
-
-
-## 行业实践参考
-1. Flink 在蚂蚁实时特征平台的深度应用：https://blog.csdn.net/weixin_44904816/article/details/136204440   
-2. Flink 在风控场景实时特征落地实战 - 是咕咕鸡的文章 - 知乎 https://zhuanlan.zhihu.com/p/477262244
-3. 微信安全基于 Flink 实时特征开发平台实践 - Flink 中文社区的文章 - 知乎
-https://zhuanlan.zhihu.com/p/646114539
-```
-
-
-
-
-
-```
-
-### 极客挑战赛
-```
-第三届 Apache Flink 极客挑战赛暨AAIG CUP——电商推荐“抱大腿”攻击识别亚军代码方案
-https://github.com/rickyxume/TianChi_RecSys_AntiSpam
-
-```
-
-## case 代码
-### 造数
-```
-    public List<Row> fakeRows() {
-        // 创建虚拟行列表
-        List<Row> rows = new ArrayList<>();
-        rows.add(Row.of("15030140049", "wangzixian", 18));
-        rows.add(Row.of("5030140049", "wangzixian", 19));
-        rows.add(Row.of("15030140049", "wangzixian", 20));
-        return rows;
-    }
-
-    public RowTypeInfo rowTypeInfo() {
-        TypeInformation<?>[] types = {
-                BasicTypeInfo.STRING_TYPE_INFO,
-                BasicTypeInfo.STRING_TYPE_INFO,
-                BasicTypeInfo.INT_TYPE_INFO
-        };
-        String[] names = {"a", "b", "c"};
-        RowTypeInfo typeInfo = new RowTypeInfo(types, names);
-        return typeInfo;
-    }
-
-private static final List<Row> testData = new ArrayList<>();
-    private static final RowTypeInfo testTypeInfo =
-            new RowTypeInfo(
-                    new TypeInformation[] {Types.INT, Types.LONG, Types.STRING},
-                    new String[] {"a", "b", "c"});
-
-    static {
-        testData.add(Row.of(1, 1L, "Hi"));
-        testData.add(Row.of(2, 2L, "Hello"));
-        testData.add(Row.of(3, 2L, "Hello world"));
-        testData.add(Row.of(3, 3L, "Hello world!"));
-    }
-
-
-
 
 ```
