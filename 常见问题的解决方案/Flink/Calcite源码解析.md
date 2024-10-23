@@ -580,6 +580,47 @@ SqlValidatorUtil
 1. 参考calcite源码：core/src/test/java/org/apache/calcite/tools/PlannerTest.java#testValidateUserDefinedAggregate
 2. core/src/test/java/org/apache/calcite/test/UdfTest.java
 3. SqlStdOperatorTable：所有内置函数表
+4. ReflectiveSqlOperatorTable：注册表，业务需要继承，参考flink 和 OracleSqlOperatorTable
+5. ChainedSqlOperatorTable：链式方法，加载所有函数表，参考flink
+6. 内置函数
+   1. BuiltInMethod
+7. 用户自定义函数 - 需要额外加关键词 和 validate
+   1. SqlUserDefinedFunction
+   2. SqlUserDefinedTableFunction
+   3. LookupOperatorOverloadsTest
+8. Sqlfunction详解
+   1. SqlIdentifier：自定义必须初始化，不然校验过程会失败
+      1. A user-defined function will have a value for {@code sqlIdentifier}; for a built-in function it will be null.
+   2. OperandTypes：
+      1. SqlSingleOperandTypeChecker NILADIC = family();
+         1. 对 niladic 函数（例如 CURRENT_DATE）的调用不接受括号。在某些一致性级别中，可以接受带括号的调用（例如 CURRENT_DATE()）
+         2. 无参数的函数通常也叫做 Niladic Function
+         3. https://strongduanmu.com/wiki/calcite/reference.html
+         4. https://strongduanmu.com/blog/apache-calcite-catalog-udf-function-implementation-and-extension.html
+      2. SqlOperandTypeChecker VARIADIC
+   3. returnTypeInference  strategy to use for return type inference
+   4. operandTypeInference strategy to use for parameter type inference
+   5. operandTypeChecker   strategy to use for parameter type checking
+9.  函数定义：接受参数并返回结果的命名表达式
+#### 注册不同数据源函数表
+```
+1. core/src/test/java/org/apache/calcite/sql/test/SqlOperatorBaseTest.java
+
+
+  protected SqlTester oracleTester() {
+    return tester.withOperatorTable(
+        ChainedSqlOperatorTable.of(OracleSqlOperatorTable.instance(),
+            SqlStdOperatorTable.instance()))
+        .withConnectionFactory(
+            CalciteAssert.EMPTY_CONNECTION_FACTORY
+                .with(new CalciteAssert
+                    .AddSchemaSpecPostProcessor(CalciteAssert.SchemaSpec.HR))
+                .with(CalciteConnectionProperty.FUN, "oracle"));
+  }
+
+```
+
+#### 注册count函数
 ```
 比如注册 MyCountAggFunction
 初始化函数表
@@ -670,6 +711,38 @@ return Frameworks.newConfigBuilder()
 ```
 
 
+### 内置函数和自定义函数的区别
+1. USER_DEFINED_FUNCTION 需要实现 sqlIdentifier
+   1. 自定义函数需要实现 operandTypeChecker
+2. SqlFunctionCategory.SYSTEM 则不需要
+```
+    public static final SqlFunction GET_COLUMNS =
+            new SqlFunction(
+                    "GET_COLUMNS",
+                    SqlKind.OTHER_FUNCTION,
+                    ReturnTypes.DOUBLE_NULLABLE,
+                    null,
+                    OperandTypes.ONE_OR_MORE,
+                    SqlFunctionCategory.USER_DEFINED_FUNCTION
+            );
+
+    public static final SqlFunction STANDARD_FEATURES_GENERATION =
+            new SqlFunction(
+//                    "STANDARD_FEATURES_GENERATION",
+                    "standard_features_generation",
+                    SqlKind.OTHER_FUNCTION,
+                    ReturnTypes.DOUBLE_NULLABLE,
+                    null,
+                    OperandTypes.ANY,
+                    SqlFunctionCategory.SYSTEM
+            );
+
+
+  
+
+```
+
+
 
 ### 新增RelTraitDef
 1. 参考flink源码：flink-table/flink-table-planner-blink/src/test/java/org/apache/flink/table/planner/expressions/converter/ExpressionConverterTest.java
@@ -730,8 +803,54 @@ public void init() {
 ```
 
 
+### flink 函数注册
+1. FunctionCatalogOperatorTable
+2. FlinkSqlOperatorTable：继承calcite，并注册业务自己function
+3. CalciteSqlFunction
+
+#### 初始化函数表
+```
+
+	/**
+	 * Returns the operator table for this environment including a custom Calcite configuration.
+	 */
+	private SqlOperatorTable getSqlOperatorTable(CalciteConfig calciteConfig) {
+		return JavaScalaConversionUtil.toJava(calciteConfig.getSqlOperatorTable()).map(operatorTable -> {
+					if (calciteConfig.replacesSqlOperatorTable()) {
+						return operatorTable;
+					} else {
+						return ChainedSqlOperatorTable.of(getBuiltinSqlOperatorTable(), operatorTable);
+					}
+				}
+		).orElseGet(this::getBuiltinSqlOperatorTable);
+	}
+
+	/**
+	 * Returns builtin the operator table and external the operator for this environment.
+	 */
+	private SqlOperatorTable getBuiltinSqlOperatorTable() {
+		return ChainedSqlOperatorTable.of(
+				new FunctionCatalogOperatorTable(
+						context.getFunctionCatalog(),
+						typeFactory),
+				FlinkSqlOperatorTable.instance());
+	}
+
+```
+
+
+#### 注册没有返回值的函数
+
+
+
+#### 注册动态数量形参的函数
+1. https://issues.apache.org/jira/browse/CALCITE-3485
+
+
 ### flink如何复用validator能力
 1. FlinkCalciteSqlValidator
+
+
 
 
 ### flink如何处理复杂类型，如array<int>
