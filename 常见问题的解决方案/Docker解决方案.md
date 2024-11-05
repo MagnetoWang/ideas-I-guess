@@ -4,6 +4,25 @@
 
 [TOC]
 
+
+### 安装
+```
+linux 
+https://docs.docker.com/engine/install/centos/
+sudo yum install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+启动
+sudo systemctl start docker
+
+sudo docker run hello-world
+
+
+
+安装gui的linux镜像
+
+
+```
+
 ### 基本操作
 
 - docker与本机互相传输文件：https://segmentfault.com/a/1190000011609175
@@ -36,6 +55,9 @@ vi /etc/docker/daemon.json
 重启服务
 sudo systemctl daemon-reload
 sudo systemctl restart docker
+
+
+docker pull x11docker/gnome
 ```
 
 
@@ -184,3 +206,24 @@ docker run --net=host --name test_postgres -e POSTGRES_PASSWORD=123456 -e POSTGR
 
 
 ```
+
+
+## 问题
+
+### Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+```
+docker服务没有启动
+
+```
+
+
+
+### Failed to get D-Bus connection: Operation not permitted
+```
+
+镜像权限不够
+
+https://serverfault.com/questions/824975/failed-to-get-d-bus-connection-operation-not-permitted
+
+```
+
