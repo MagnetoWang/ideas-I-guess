@@ -87,8 +87,8 @@ flink + 公司项目
 7. 行业应用
    1. Flink 在蚂蚁实时特征平台的深度应用：https://blog.csdn.net/weixin_44904816/article/details/136204440   
    2. Flink 在风控场景实时特征落地实战 - 是咕咕鸡的文章 - 知乎 https://zhuanlan.zhihu.com/p/477262244
-   3.  微信安全基于 Flink 实时特征开发平台实践 - Flink 中文社区的文章 - 知乎https://zhuanlan.zhihu.com/p/646114539
-   4.  腾讯基于 Flink SQL 的功能扩展与深度优化实践：https://juejin.cn/post/6924868645537792008
+   3. 微信安全基于 Flink 实时特征开发平台实践 - Flink 中文社区的文章 - 知乎https://zhuanlan.zhihu.com/p/646114539
+   4. 腾讯基于 Flink SQL 的功能扩展与深度优化实践：https://juejin.cn/post/6924868645537792008
 ```
 xiaogang shi
 动态数据流上的实时迭代计算
@@ -134,6 +134,16 @@ flink dag用法
 流批一体
 
 ```
+
+## flink前沿技术更新
+1. Flink 2.0
+   1. 由于RocksDB中LSM结构的周期性 Compaction 导致计算资源尖峰的问题
+   2. 大规模状态快速扩缩容的挑战
+   3. 容器化环境下计算节点受本地磁盘大小限制的问题
+   4. 原生的轻量级和快速检查点
+2. Benchmark
+   1. https://github.com/nexmark/nexmark
+
 ## 阅读笔记
 ### Streaming System 
 
@@ -234,6 +244,49 @@ Watermarked
 1. stream table core java scala 关系图
 2. task opchain op function window join  state 调用链路，构造到执行层
 3. time watermark
+
+## 罗西 blog
+1. flink应用理解
+   1. Alink漫谈(一) : 从KMeans算法实现不同看Alink设计思想：https://www.cnblogs.com/rossiXYZ/p/12831175.html
+   2. Alink漫谈(二) : 从源码看机器学习平台Alink设计和架构：https://www.cnblogs.com/rossiXYZ/p/12861848.html
+   3. [Alink漫谈之三] AllReduce通信模型：https://www.cnblogs.com/rossiXYZ/p/12898743.html
+   4. Alink漫谈(四) : 模型的来龙去脉：https://www.cnblogs.com/rossiXYZ/p/12940942.html
+   5. Alink漫谈(五) : 迭代计算和Superstep：https://www.cnblogs.com/rossiXYZ/p/12990632.html
+   6. Alink漫谈(六) : TF-IDF算法的实现：https://www.cnblogs.com/rossiXYZ/p/13052449.html
+   7. Alink漫谈(七) : 如何划分训练数据集和测试数据集：https://www.cnblogs.com/rossiXYZ/p/13110960.html
+   8. Alink漫谈(八) : 二分类评估 AUC、K-S、PRC、Precision、Recall、LiftChart 如何实现：https://www.cnblogs.com/rossiXYZ/p/13194023.html
+   9. Alink漫谈(九) ：特征工程之特征哈希/标准化缩放：https://www.cnblogs.com/rossiXYZ/p/13233067.html
+   10. Alink漫谈(十) ：线性回归实现 之 数据预处理：https://www.cnblogs.com/rossiXYZ/p/13282333.html
+   11. Alink漫谈(十一) ：线性回归 之 L-BFGS优化：https://www.cnblogs.com/rossiXYZ/p/13289634.html
+   12. Alink漫谈(十二) ：在线学习算法FTRL 之 整体设计：https://www.cnblogs.com/rossiXYZ/p/13325308.html
+   13. Alink漫谈(十三) ：在线学习算法FTRL 之 具体实现：https://www.cnblogs.com/rossiXYZ/p/13357435.html
+   14. Alink漫谈(十四) ：多层感知机 之 总体架构：https://www.cnblogs.com/rossiXYZ/p/13381235.html
+   15. Alink漫谈(十五) ：多层感知机 之 迭代优化：https://www.cnblogs.com/rossiXYZ/p/13399527.html
+   16. Alink漫谈(十六) ：Word2Vec源码分析 之 建立霍夫曼树：https://www.cnblogs.com/rossiXYZ/p/13427829.html
+   17. Alink漫谈(十七) ：Word2Vec源码分析 之 迭代训练：https://www.cnblogs.com/rossiXYZ/p/13456468.html
+   18. Alink漫谈(十八) ：源码解析 之 多列字符串编码MultiStringIndexer：https://www.cnblogs.com/rossiXYZ/p/13429876.html
+   19. Alink漫谈(十九) ：源码解析 之 分位点离散化Quantile：https://www.cnblogs.com/rossiXYZ/p/13531980.html
+   20. Alink漫谈(二十) ：卡方检验源码解析：https://www.cnblogs.com/rossiXYZ/p/13580716.html
+   21. Alink漫谈(二十一) ：回归评估之源码分析：https://www.cnblogs.com/rossiXYZ/p/13733152.html
+   22. Alink漫谈(二十二) ：源码分析之聚类评估：https://www.cnblogs.com/rossiXYZ/p/13733182.html
+2. flink源码
+   1. 当 Java Stream 遇见 Flink：https://www.cnblogs.com/rossiXYZ/p/13515612.html
+   2. 带你梳理 Flink SQL / Table API内部执行流程：https://www.cnblogs.com/rossiXYZ/p/12770436.html
+   3. 从"UDF不应有状态" 切入来剖析Flink SQL代码生成：https://www.cnblogs.com/rossiXYZ/p/12773123.html
+      1. https://www.cnblogs.com/rossiXYZ/p/12805698.html
+   4. [源码解析] Flink UDAF 背后做了什么：https://www.cnblogs.com/rossiXYZ/p/13460408.html
+   5. 从FlatMap用法到Flink的内部实现：https://www.cnblogs.com/rossiXYZ/p/12594424.html
+   6. GroupReduce，GroupCombine和Flink SQL group by：https://www.cnblogs.com/rossiXYZ/p/13148695.html
+   7. Flink的groupBy和reduce究竟做了什么：https://www.cnblogs.com/rossiXYZ/p/13080429.html
+   8. [源码分析] 从实例和源码入手看 Flink 之广播 Broadcast：https://www.cnblogs.com/rossiXYZ/p/12594315.html
+   9. [白话解析] Flink的Watermark机制：https://www.cnblogs.com/rossiXYZ/p/12286407.html
+   10. 从源码入手看 Flink Watermark 之传播过程：https://www.cnblogs.com/rossiXYZ/p/12345969.html
+   11. Flink的Slot究竟是什么？：https://www.cnblogs.com/rossiXYZ/p/13554085.html
+   12. Flink 的slot究竟是什么？(2)：https://www.cnblogs.com/rossiXYZ/p/13554156.html
+   13. 从TimeoutException看Flink的心跳机制：从TimeoutException看Flink的心跳机制
+3. [源码解析]为什么mapPartition比map更高效：https://www.cnblogs.com/rossiXYZ/p/13033949.html
+4. [记录点滴] Spark迁移到Flink的几个点：https://www.cnblogs.com/rossiXYZ/p/13172145.html
+5. [业界方案] Yarn的业界解决方案和未来方向：https://www.cnblogs.com/rossiXYZ/p/13413273.html
 
 ### 数据流图
 1. 实时数据流 - 移动到flink源码解析文档
@@ -650,9 +703,82 @@ Watermarked
 
 
 ## 横向拆解 - Core
+1. 四大模块
+   1. core 内核源码
+      1. 核心能力：内存，io，文件读写和对外执行任务接口（调度）
+   2. api 对外接口
+      1. 核心能力：ClosureCleaner dag 和 connector
+   3. types 数据类型系统
+      1. 核心能力：DataInputView DataOutputView 高效数据读写
+      2. 上层应用：typeinfo typeutil 
+   4. configuration util 工具和配置类，函数式开发模式
+2. 梳理思路
+   1. 上层应用
+   2. 下层实现
+   3. test测试链路
+   4. 业务属性
+   5. 上下游相同包名能力对比
+   6. 相同包名，如何一层层叠加形成完整功能比如 io fs op function等等
+   7. 具体代码类实现
+
+### core
+
+
+### core - memory
+
+### core - io
+1. 上层应用 - api.io
+
+### core - fs
+
+
+### core - execution 调度
+
+
+### api
+### api - Transformation
+
+
+### api - operators
+
+### api - State
+
+
+
+### api - functions
+
+### api - eventtime
+
+
+### api - aggregators accumulators
+
+
+### api - distributions cache 
+
+
+
 
 
 ## 横向拆解 - Java API
+1. 核心模块
+   1. ExecutionEnvironment
+   2. operators 比如map join filter
+   3. Function
+   4. io 比如csv 和 test format 以及读写
+
+
+### Environment
+
+### operators
+
+### aggregation
+
+### function
+
+
+### io - 基于flink-core扩展
+
+
 
 
 ## 横向拆解 - Scala API 基于Java封装，可以不细看
@@ -663,13 +789,202 @@ Watermarked
 
 
 
-## 横向拆解 - Runtime 运行层
+## 横向拆解 - Runtime 运行层第一部分
+1. 代码非常复杂，需要结合代码分析工具，找到核心类
+2. Dependency Structure Matrices：https://www.infoq.cn/article/2008/02/idea-dependency-structure-matrix
+3. runtime 和 flink-java 很难直接关联，因为设计重点不在于flink-core的扩展和应用了
+4. 核心模块
+   1. executorgraph
+   2. jobgraph
+   3. jobmaster
+   4. scheduler
+   5. iterative
+   6. taskmanager
+   7. taskexecutor
+   8. dispatcher
+   9. checkpoint
+5. 中频
+   1. resourcemanager
+   2. operators
+   3. execution
+   4. metrics
+
+### 参考资料
+1. Flink 运行时[Runtime] 整体架构：https://blog.csdn.net/zhengzhaoyang122/article/details/135162074
+2. 自适应批作业调度器：为 Flink 批作业自动推导并行度：http://47.98.188.209/article/detail/12e3d68e270942311e3830023d7b425d
+3. 调度源码分析1：调度过程：https://blog.csdn.net/White_Ink_/article/details/136873091
+4. logical Slot 分配策略：https://blog.csdn.net/White_Ink_/article/details/136940948
+5. Physical Slot 分配过程：https://blog.csdn.net/White_Ink_/article/details/138966819
+6. Flink的Slot究竟是什么？：https://www.cnblogs.com/rossiXYZ/p/13554085.html
+7. 一个TaskManager 实例下，多个slot线程分别执行不同job任务，如何隔离jar包资源以及计算资源：https://blog.csdn.net/qq_31454379/article/details/119204095
+
+
+### 整体框架
+1. 一个 Flink Cluster 是由一个 Flink Master 和多个 Task Manager 组成的，一个 Flink Master 中有一个 Resource Manager 和多个 Job Manager。
+2. 
 
 ### Runtime 和 querable-state之间关系
 
 
+### runtime核心设计 - scheduler 调度
+1. 入口
+   1. SchedulerBase
+   2. SchedulerNG SchedulerNGFactory
+   3. DefaultScheduler extends SchedulerBase implements SchedulerOperation
+   4. SchedulingStrategy.startScheduling
+   5. allocateSlotsAndDeploy 方法为每个示例分配 slot
+2. 调度策略
+   1. SchedulingStrategy SchedulingStrategyFactory 策略接口和工厂
+   2. SimpleExecutionSlotAllocator
+   3. SlotSharingExecutionSlotAllocator
+   4. ExecutionSlotAllocator 自定义
+3. 调度拓扑图
+   1. SchedulingTopology
+   2. 执行节点
+      1. SchedulingExecutionVertex ExecutionVertexID
+   3. 中间结果
+      1. IntermediateResultPartitionID
+   4. 输出结果
+      1. SchedulingResultPartition
+4. 第三方依赖
+   1. jobgraph
+   2. executiongraph
+   3. jobmanager
+   4. checkpoint
+   5. taskexecutor
+   6. 低
+      1. instance
+      2. checkpoint
+      3. shuffle
+      4. BackPressureStatsTracker
 
-## 横向拆解 - Optimizer 优化层
+
+### runtime核心设计 - operators 算子链
+
+### manager - client
+
+### manager - dispatcher
+
+### manager - resourcemanager
+1. 实际上在1.9之前，Flink是不支持细粒度的资源描述的，而是统一的认为每个Slot提供的资源和Task需要的资源都是相同的
+
+### manager - jobmanager
+
+#### 完整的 job 层描述 - jobgraph
+1. JsonPlanGenerator 可视化和调试工具
+2. 逻辑拓扑图 topology
+   1. 节点 输出结果 和 关系图
+3. 业务job图
+   1. job 节点 输出结果 和 关系图
+4. Job节点附属信息
+   1. 输入输出节点
+   2. 中间结果集和唯一ID
+   3. 算子和唯一ID
+   4. savepoint配置参数 
+
+#### 启动Job任务 - jobmaster
+1. 创建调度器
+2. 选举
+3. 分配slot
+4. 失败回滚
+5. 任务执行
+
+
+
+#### job 与 调度器交互关系 - jobmanager
+1. job图持久化
+   1. JobGraphStore JobGraphWriter
+2. job有关调度附属信息
+   1. ScheduledUnit
+   2. CoLocationGroupDesc
+   3. SlotSharingGroup
+   4. Locality
+
+
+#### 任务反压
+1. BackPressureStatsTracker
+2. OperatorBackPressureStats
+3. OperatorBackPressureStatsResponse
+
+
+
+### manager - taskmanager
+
+#### 任务执行器 - taskexecutor
+
+#### 完整的 execution 层描述 - executiongraph
+
+
+
+
+### 执行层横截面 - metrics & monitor
+
+### 执行层横截面 - shuffle
+
+### 执行层横截面 - state
+
+
+### 执行层横截面 - executiongraph
+
+
+### 执行层横截面 - slots
+1. JobMaster 分配 Slot 给 Subtask 的过程，系统已经实现的分配策略有：SimpleExecutionSlotAllocator、SlotSharingExecutionSlotAllocator。流计算使用的是 SlotSharingExecutionSlotAllocator
+2. ExecutionSlotSharingGroup 是用于控制任务槽（Task Slot）之间资源共享的概念
+3. ExecutionSlotSharingGroup 可以将一组 task 划分为一个共享组，这些任务在同一个共享组中的任务槽上运行时会共享资源
+4. 不在同一共享组的 task一定不能分到同一 slot 中
+5. CoLocationGroup 是用于控制任务之间部署位置的概念
+6. 通过将 task 划分到同一共位组，可以确保这些 task 在同一个 slot 上执行，从而减少任务之间的网络通信开销，提高作业的执行效率和性能。
+7. logical Slot VS Physical slot
+8. Slot究竟是什么？
+9. Slot在代码中是如何实现的？
+10. Slot定义里面究竟有什么？CPU？内存？
+11. Slot是怎么实现各种隔离的？
+12. TM中需要分成多少个Slot？
+13. Slot是怎么分配给Task的？或者说Task是怎么跑在Slot上的？
+
+
+#### slot 分配
+1. ExecutionSlotAllocator
+   1. DefaultExecutionSlotAllocator EvenlySpreadOutTaskExecutionSlotAllocator 
+2. SharedSlot
+3. slot 分配策略
+   1. SlotSelectionStrategy
+   2. EvenlySpreadOutLocationPreferenceSlotSelectionStrategy
+   3. DefaultLocationPreferenceSlotSelectionStrategy
+   4. PreviousAllocationSlotSelectionStrategy
+4. slot 和 机器交互
+   1. SlotCPUSpecRetriever
+   2. clusterframework.types.ResourceProfile
+   3. clusterframework.types.SlotProfile
+
+#### jobmaster
+1. slot池
+2. 逻辑slot
+   1. 
+3. 物理slot
+   1. PhysicalSlot
+
+
+
+
+### 分布式 - leader election
+
+
+### 分布式 - leader retrieval
+
+### 分布式 - Failover
+1. Flink在1.9中引入了一种新的Region-Based 的 Failover策略
+
+
+## 横向拆解 - Runtime 运行层第二部分
+
+### 核心设计 - datastream
+
+
+## 横向拆解 - Optimizer 优化层 - streaming模块好像没有用到 optimizer
+1. flink-gelly用的比较多，这个模块也可以不细看
+2. 作业优化器模块，用于优化 Flink 批处理作业的执行计划，提高作业的性能和效率
+3. 简单介绍：https://blog.csdn.net/weixin_43468369/article/details/139830979
 ### Optimizer 和 Runtime 关系
 
 
@@ -678,18 +993,61 @@ Watermarked
 1. Scala基于Java封装
 2. Streaming 只调用了optimizer 模块的 org.apache.flink.optimizer.plantranslate.JobGraphGenerator
 3. 大部分是直接调用runtime 和 core
+4. api
+   1. 流式系统必备组件：流 图 函数 算子 水位线 触发器
+5. runtime
+   1. 核心设计 流元素 流状态 分区 窗口算子以及checkpoint的io
+
+### api
+
+### api - datastream
+
+### api - functions
+
+### api - graph
+
+### api - operators
+
+### api - windowing
+
+
+
+
+
+### api - Transformation
+
+
+### api - watermark
+
+
+
+### runtime
+
+### runtime - StreamElement
+
+### runtime - StreamStatus
+
+
+### runtime - partitioner
+
+
+### runtime - WindowOperator
+
+
+### runtime - CheckpointBarrier & StreamTaskNetWork
 
 
 ## 横向拆解 - Client 对外的stream客户端和plan构造器
 
 
 ## 横向拆解 - Table 集成flink底层能力 + 外部存储rocksdb
-1. api java
-2. sql parser
-3. sql planner
-4. sql runtime
-5. sql blink
-6. sql client
+1. 结合calcite一块看，calcite源码解析
+2. api java
+3. sql parser
+4. sql planner
+5. sql runtime
+6. sql blink
+7. sql client
 
 
 ## 纵向拆解 - 外部文件系统 like connector with file level 
@@ -794,7 +1152,7 @@ AggregateUtil
    2. 
 
 
-
+## 参考设计
 ### StreamTableEnvironment
 ```
 Flink SQL 系列 | 5 个 TableEnvironment 我该用哪个
