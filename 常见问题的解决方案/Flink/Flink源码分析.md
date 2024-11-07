@@ -909,22 +909,152 @@ Watermarked
 
 
 ### manager - taskmanager
+1. 核心类
+   1. Task
+   2. 上下文
+      1. Environment
+      2. SavepointEnvironment
+      3. RuntimeEnvironment
+      4. ShuffleEnvironment
+   3. 服务
+      1. TaskManagerServices
+      2. TaskManagerRunner
+      3. KvStateService
+      4. JobLeaderService
+   4. 任务状态
+      1. ExecutionState
+2. 第三方依赖
+   1. checkpoint
+   2. network
+   3. memory
+   4. blob
 
 #### 任务执行器 - taskexecutor
+1. TaskExecutor
+2. 核心功能
+   1. slot
+   2. rpc
+3. 反压检测
+   1. BackPressureSampleService
+4. 选主节点 通信及服务
+   1. JobLeaderService
+5. 第三方依赖
+   1. clusterframework
+      1. 资源 slot 唯一id
+   2. checkpoint
+   3. 和 jobmaster 的slot信息交互
+   4. resourcemanager
 
 #### 完整的 execution 层描述 - executiongraph
+1. 核心类
+   1. Execution
+2. 图基本要素
+   1. ExecutionEdge
+   2. ExecutionGraph ExecutionGraphBuilder
+   3. ExecutionVertex ExecutionJobVertex
+3. 中间结果
+   1. IntermediateResult
+   2. IntermediateResultPartition
+4. 上游Job
+   1. JobInformation
+   2. TaskInformation
+5. 高可用性
+   1. failover
+   2. metrics
+   3. restart
 
 
+### 执行层横截面 - checkpoint 的应用
+1. 核心
+   1. checkpoint 本质是文件
+   2. CheckpointCoordinator
+2. 文件位置
+   1. CheckpointStorageLocation
+3. 文件输入输出流
+   1. CheckpointStreamFactory
+   2. MemoryCheckpointOutputStream
+4. 重要度
+   1. schedule 调用
+      1. CheckpointRecoveryFactory
+      2. CheckpointCoordinator
+      3. CheckpointRestoreResult
+      4. TaskStateSnapshot
+   2. taskexecutor 
+      1. JobManagerTaskRestore
+      2. TaskStateSnapshot
+      3. CheckpointType
+      4. CheckpointOptions
+      5. CheckpointCoordinatorGateway
+      6. CheckpointMetrics
+   3. state
+      1. CheckpointOptions
+      2. PrioritizedOperatorSubtaskState
+      3. CheckpointMetaData
+      4. CheckpointMetrics
+      5. TaskStateSnapshot
+      6. OperatorSubtaskState
+   4. executiongraph
+      1. MasterHooks 非常少见的调用
+      2. CheckpointIDCounter
+      3. CheckpointCoordinator
+      4. CheckpointStatsSnapshot
+      5. CheckpointStatsTracker
+      6. CheckpointType
+      7. CheckpointOptions
+      8. CompletedCheckpointStore
+      9. CheckpointRecoveryFactory
+      10. MasterTriggerRestoreHook
+ 
 
+
+### 执行层横截面 - state
+1. 非常独立的模块，找找上游谁在用
+   1. 全局搜 org.apache.flink.runtime.state
+   2. 再用的类，相对来说比较重要
+   3. checkpoint 应用state最多！
+   4. 其次是 query 和 zookeeper
+   5. 上哟调用 状态模块 主要就是加载和保存，看起来是当分布式的map使用
+2. 核心类 统计分析得出入口类和重要的类
+   1. TaskStateManager TaskStateManagerImpl
+   2. TaskLocalStateStore TaskExecutorLocalStateStoresManager
+   3. StateBackend StateBackendLoader
+   4. KeyGroupRange
+3. 入口
+   1. 状态加载器 StateBackendLoader
+   2. StateBackend 创建任务，算子和快照存储
+      1. createCheckpointStorage
+      2. createKeyedStateBackend
+      3. createOperatorStateBackend
+      4. 算子状态
+         1. OperatorStateBackend
+      5. cp状态 - 细节看 checkpoint 的应用
+         1. CheckpointStorage
+         2. 基于文件 FsCheckpointStorage
+         3. 基于内存 MemoryBackendCheckpointStorage
+4. 状态类型
+   1. 子任务状态
+      1. SubtaskState
+   2. 任务快照
+      1. TaskStateSnapshot
+   3. 状态统计
+      1. MinMaxAvgStats 
+
+
+### 执行层横截面 - shuffle
+1. 核心类 代码量不多，看起来都是元信息
+   1. ShuffleEnvironment
+   2. ShuffleMaster
+      1. NettyShuffleMaster
+2. 信息结构
+   1. NettyShuffleDescriptor
+   2. ProducerDescriptor
+   3. PartitionDescriptor
+
+### 执行层横截面 - rpc & rest
 
 ### 执行层横截面 - metrics & monitor
 
-### 执行层横截面 - shuffle
 
-### 执行层横截面 - state
-
-
-### 执行层横截面 - executiongraph
 
 
 ### 执行层横截面 - slots
@@ -1049,6 +1179,188 @@ Watermarked
 6. sql blink
 7. sql client
 
+### 资料
+1. FlinkSQL源码解析（一）转换流程：https://blog.csdn.net/Yuan_CSDF/article/details/123397988
+
+### SQL 流程 - 入口
+1. tEnv.sqlQuery("SELECT * FROM tableName");
+2. 整体流程大致为：sqlNode --> Operation --> RelNode --> 优化 --> execNode --> Transformation
+```
+@Override
+	public Table sqlQuery(String query) {
+		List<Operation> operations = parser.parse(query);
+
+		if (operations.size() != 1) {
+			throw new ValidationException(
+				"Unsupported SQL query! sqlQuery() only accepts a single SQL query.");
+		}
+
+		Operation operation = operations.get(0);
+
+		if (operation instanceof QueryOperation && !(operation instanceof ModifyOperation)) {
+			return createTable((QueryOperation) operation);
+		} else {
+			throw new ValidationException(
+				"Unsupported SQL query! sqlQuery() only accepts a single SQL query of type " +
+					"SELECT, UNION, INTERSECT, EXCEPT, VALUES, and ORDER_BY.");
+		}
+	}
+
+
+```
+
+### SQL 流程 - paser
+
+```
+
+      @Override
+	public List<Operation> parse(String statement) {
+		CalciteParser parser = calciteParserSupplier.get();
+		FlinkPlannerImpl planner = validatorSupplier.get();
+		// parse the sql query
+		SqlNode parsed = parser.parse(statement);
+
+		Operation operation = SqlToOperationConverter.convert(planner, catalogManager, parsed)
+			.orElseThrow(() -> new TableException("Unsupported query: " + statement));
+		return Collections.singletonList(operation);
+	}
+
+```
+
+### SQL 流程 - validate
+
+```
+FlinkPlannerImpl flinkPlanner
+final SqlNode validated = flinkPlanner.validate(sqlNode);
+
+```
+
+
+### SQL 流程 - 优化
+
+```
+
+
+
+```
+
+
+
+### SQL 流程 - 改写
+
+```
+
+
+
+```
+
+
+### SQL 流程 - 执行
+
+```
+
+
+
+```
+### TableEnvironment 应用 - 初始化
+1. createFlinkPlanner
+2. 
+3. FlinkPlannerImpl
+   1. FrameworkConfig
+   2. CalciteParser
+   3. FlinkCalciteSqlValidator extend SqlValidatorImpl
+   4. SqlOperatorTable
+   5. SqlRexConvertletTable
+
+### TableEnvironment 应用 - 注册表和临时表
+1. createTemporaryTable
+2. registerTableSource
+3. registerTableSink
+
+```
+
+
+
+```
+
+
+### TableEnvironment 应用 - 注册函数
+1. 一句话来说 继承 SqlOperatorTable 实现 lookupOperatorOverloads，就能完成业务定制化UDF注册逻辑
+2. 内置函数集
+   1. flink-table/flink-table-common/src/main/java/org/apache/flink/table/functions/BuiltInFunctionDefinitions.java
+3. FunctionCatalog 和 SqlOperatorTable 如何关联
+   1. 通过 FunctionCatalogOperatorTable  转成函数表
+4. FunctionCatalog
+   1. 注册临时函数
+   2. 注册udf udaf udtf等
+5. flink中的 calcite 如何校验查询函数呢
+   1. FunctionCatalogOperatorTable 覆盖这个方法即可 lookupOperatorOverloads
+   2. FunctionCatalogOperatorTable 从 FunctionCatalog 获取元信息
+6. FunctionKind -> FunctionDefinition -> FunctionCatalog -> FunctionCatalogOperatorTable -> SqlOperatorTable -> FrameworkConfig
+   
+```
+
+private FrameworkConfig createFrameworkConfig() {
+		return Frameworks
+			.newConfigBuilder()
+			.parserConfig(getSqlParserConfig())
+			.costFactory(costFactory)
+			.typeSystem(typeSystem)
+			.operatorTable(getSqlOperatorTable(calciteConfig(tableConfig), functionCatalog))
+			.sqlToRelConverterConfig(
+				getSqlToRelConverterConfig(
+					calciteConfig(tableConfig),
+					expressionBridge))
+			// set the executor to evaluate constant expressions
+			.executor(new ExpressionReducer(tableConfig))
+			.build();
+	}
+
+```
+
+#### 内置函数集
+1. 类型构建
+   1. InputTypeStrategy
+   2. TypeStrategy
+2. BuiltInFunctionDefinition -> FunctionDefinition -> FunctionCatalog.lookupFunction -> FunctionCatalogOperatorTable.convertToSqlFunction
+3. FunctionDefinition -> SqlFunction 
+4. TableFunction -> UserDefinedFunction -> FunctionDefinition
+5. 
+```
+
+	/**
+	 * Builder for fluent definition of built-in functions.
+	 */
+	public static class Builder {
+
+		private String name;
+
+		private FunctionKind kind;
+
+		private TypeInference.Builder typeInferenceBuilder = new TypeInference.Builder();
+
+   }
+
+```
+
+#### 初始化标量函数
+```
+
+class ScalarSqlFunction(
+    name: String,
+    displayName: String,
+    scalarFunction: ScalarFunction,
+    typeFactory: FlinkTypeFactory)
+  extends SqlFunction(
+    new SqlIdentifier(name, SqlParserPos.ZERO),
+    createReturnTypeInference(name, scalarFunction, typeFactory),
+    createEvalOperandTypeInference(name, scalarFunction, typeFactory),
+    createEvalOperandTypeChecker(name, scalarFunction),
+    null,
+    SqlFunctionCategory.USER_DEFINED_FUNCTION)
+
+
+```
 
 ## 纵向拆解 - 外部文件系统 like connector with file level 
 1. 是一个挂载插件-文件级别
@@ -1409,7 +1721,8 @@ FlinkUserCodeClassLoader
 
 ### flink CoProcessFunction & coGroupFunction 设计
 
-
+### 规则引擎
+1. flink规则引擎设计思路：https://blog.csdn.net/woloqun/article/details/128649833
 
 ## 纵向拆解 - 性能优化
 
