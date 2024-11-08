@@ -576,19 +576,55 @@ SqlValidatorUtil
 ### 新增校验逻辑规则
 
 
-### 新增函数和算子
-1. 参考calcite源码：core/src/test/java/org/apache/calcite/tools/PlannerTest.java#testValidateUserDefinedAggregate
-2. core/src/test/java/org/apache/calcite/test/UdfTest.java
-3. SqlStdOperatorTable：所有内置函数表
-4. ReflectiveSqlOperatorTable：注册表，业务需要继承，参考flink 和 OracleSqlOperatorTable
-5. ChainedSqlOperatorTable：链式方法，加载所有函数表，参考flink
-6. 内置函数
+### 新增 UDF
+1. 参考calcite源码：
+   1. 函数集：core/src/main/java/org/apache/calcite/sql/fun/SqlStdOperatorTable.java
+   2. 定义类，动态加载函数：core/src/test/java/org/apache/calcite/tools/PlannerTest.java#testValidateUserDefinedAggregate
+   3. udf测试：core/src/test/java/org/apache/calcite/test/UdfTest.java
+   4. 定义同名不同参数函数：core/src/test/java/org/apache/calcite/util/Smalls.java
+   5. 查询udf测试代码：core/src/test/java/org/apache/calcite/prepare/LookupOperatorOverloadsTest.java
+2. 函数全流程
+   1. 定义函数 Function -> 再定义 Sqlfunction
+      1. Function
+         1. ScalarFunction ScalarFunctionImpl
+         2. AggregateFunction AggregateFunctionImpl
+         3. TableFunction TableFunctionImpl
+      2. Sqlfunction
+         1. SqlUserDefinedFunction 
+         2. SqlUserDefinedAggFunction
+         3. SqlUserDefinedTableFunction
+         4. LookupOperatorOverloadsTest
+   2. 注册函数表  Sqlfunction 注册到 SqlOperatorTable 
+      1. 如 ReflectiveSqlOperatorTable 通过class就可以自动注册
+         1. 也可以用 register(SqlOperator op)
+      2. ListSqlOperatorTable 可以直接 add sqlfunction，适合动态化加载函数到函数表
+      3. ChainedSqlOperatorTable
+         1. add(SqlOperatorTable table) 整合一张更大函数宽表
+   3. 函数表 注册到 FrameConfig 至此 全流程完成
+   4. 初始化plan 执行SQL验证
+3. CalciteCatalogReader
+   1. 注册UDF lookupOperatorOverloads
+   2. 支持 classname 转 Function 再转 SqlOperator
+   3. 加载元数据实现 ModelHandler.addFunctions
+   4. 反射方式加载函数
+      1. TableFunctionImpl.create(clazz, Util.first(methodName, "eval"));
+      2. AggregateFunctionImpl.create(clazz);
+      3. ScalarFunctionImpl.create(clazz, Util.first(methodName, "eval"));
+   5. toOp Converts a function to a {@link org.apache.calcite.sql.SqlOperator}.
+      1. 
+4. SqlOperatorTable
+   1. 需要实现 lookupOperatorOverloads
+   2. SqlStdOperatorTable：所有内置函数表
+   3. ReflectiveSqlOperatorTable：注册表，业务需要继承，参考flink 和 OracleSqlOperatorTable
+   4. ChainedSqlOperatorTable：链式方法，加载所有函数表，参考flink
+5. 内置函数
    1. BuiltInMethod
-7. 用户自定义函数 - 需要额外加关键词 和 validate
-   1. SqlUserDefinedFunction
-   2. SqlUserDefinedTableFunction
-   3. LookupOperatorOverloadsTest
-8. Sqlfunction详解
+6. 聚合函数
+   1. 定义
+      1. SqlSumAggFunction —> SqlAggFunction -> SqlFunction
+   2. 注册到函数表 ReflectiveSqlOperatorTable
+      1. public static final SqlAggFunction SUM = new SqlSumAggFunction(null);
+7. Sqlfunction详解
    1. SqlIdentifier：自定义必须初始化，不然校验过程会失败
       1. A user-defined function will have a value for {@code sqlIdentifier}; for a built-in function it will be null.
    2. OperandTypes：
@@ -601,7 +637,109 @@ SqlValidatorUtil
    3. returnTypeInference  strategy to use for return type inference
    4. operandTypeInference strategy to use for parameter type inference
    5. operandTypeChecker   strategy to use for parameter type checking
-9.  函数定义：接受参数并返回结果的命名表达式
+8. 函数定义：接受参数并返回结果的命名表达式
+#### 函数类型
+1. SqlFunction
+2. SqlAggFunction
+3. SqlUserDefinedFunction
+4. SqlUserDefinedTableMacro
+5. SqlUserDefinedTableFunction
+6. SqlUserDefinedAggFunction
+
+#### 函数类型 - 标量函数示例
+```
+
+```
+
+
+#### 函数类型 - udaf 示例
+1. core/src/main/java/org/apache/calcite/sql/fun/SqlStdOperatorTable.java
+```
+/** Creates a built-in or user-defined SqlAggFunction or window function.
+   *
+   * <p>A user-defined function will have a value for {@code sqlIdentifier}; for
+   * a built-in function it will be null. */
+  protected SqlAggFunction(
+      String name,
+      SqlIdentifier sqlIdentifier,
+      SqlKind kind,
+      SqlReturnTypeInference returnTypeInference,
+      SqlOperandTypeInference operandTypeInference,
+      SqlOperandTypeChecker operandTypeChecker,
+      SqlFunctionCategory funcType,
+      boolean requiresOrder,
+      boolean requiresOver,
+      Optionality requiresGroupOrder) {
+    super(name, sqlIdentifier, kind, returnTypeInference, operandTypeInference,
+        operandTypeChecker, null, funcType);
+    this.requiresOrder = requiresOrder;
+    this.requiresOver = requiresOver;
+    this.requiresGroupOrder = Objects.requireNonNull(requiresGroupOrder);
+  }
+
+SUM函数
+public SqlSumAggFunction(RelDataType type) {
+    super(
+        "SUM",
+        null,
+        SqlKind.SUM,
+        ReturnTypes.AGG_SUM,
+        null,
+        OperandTypes.NUMERIC,
+        SqlFunctionCategory.NUMERIC,
+        false,
+        false,
+        Optionality.FORBIDDEN);
+    this.type = type;
+  }
+
+
+Count
+
+  public SqlCountAggFunction(String name) {
+    this(name, CalciteSystemProperty.STRICT.value() ? OperandTypes.ANY : OperandTypes.ONE_OR_MORE);
+  }
+
+  public SqlCountAggFunction(String name,
+      SqlOperandTypeChecker sqlOperandTypeChecker) {
+    super(name, null, SqlKind.COUNT, ReturnTypes.BIGINT, null,
+        sqlOperandTypeChecker, SqlFunctionCategory.NUMERIC, false, false,
+        Optionality.FORBIDDEN);
+  }
+
+
+MinMax
+  /** Creates a SqlMinMaxAggFunction. */
+  public SqlMinMaxAggFunction(SqlKind kind) {
+    super(kind.name(),
+        null,
+        kind,
+        ReturnTypes.ARG0_NULLABLE_IF_EMPTY,
+        null,
+        OperandTypes.COMPARABLE_ORDERED,
+        SqlFunctionCategory.SYSTEM,
+        false,
+        false,
+        Optionality.FORBIDDEN);
+    this.argTypes = ImmutableList.of();
+    this.minMaxKind = MINMAX_COMPARABLE;
+    Preconditions.checkArgument(kind == SqlKind.MIN
+        || kind == SqlKind.MAX);
+  }
+```
+
+
+
+#### 函数类型 - udtf 示例
+```
+
+```
+
+
+#### 反射机制实现加载函数
+1. ReflectiveFunctionBase
+2. ReflectiveSchema
+
 #### 注册不同数据源函数表
 ```
 1. core/src/test/java/org/apache/calcite/sql/test/SqlOperatorBaseTest.java
@@ -695,7 +833,7 @@ public class SqlSumEmptyIsZeroAggFunction extends SqlAggFunction {
   }
 
 
-注册
+函数表注册到Config中
 return Frameworks.newConfigBuilder()
                 .defaultSchema(rootSchema.plus())
                 .parserConfig(sqlParserConfig)
@@ -708,6 +846,42 @@ return Frameworks.newConfigBuilder()
 //                .context(context)
                 .traitDefs(traitDefs)
                 .build();
+```
+
+ 
+#### 动态注册函数
+1. ListSqlOperatorTable 可以支持add function
+2. 业务自己初始化好funciont即可
+```
+
+  /** Creates an operator table that contains functions in the given class.
+   *
+   * @see ModelHandler#addFunctions */
+  public static SqlOperatorTable operatorTable(String className) {
+    // Dummy schema to collect the functions
+    final CalciteSchema schema =
+        CalciteSchema.createRootSchema(false, false);
+    ModelHandler.addFunctions(schema.plus(), null, ImmutableList.of(),
+        className, "*", true);
+
+    // The following is technical debt; see [CALCITE-2082] Remove
+    // RelDataTypeFactory argument from SqlUserDefinedAggFunction constructor
+    final SqlTypeFactoryImpl typeFactory =
+        new SqlTypeFactoryImpl(RelDataTypeSystem.DEFAULT);
+
+    final ListSqlOperatorTable table = new ListSqlOperatorTable();
+    for (String name : schema.getFunctionNames()) {
+      for (Function function : schema.getFunctions(name, true)) {
+        final SqlIdentifier id = new SqlIdentifier(name, SqlParserPos.ZERO);
+        table.add(
+            toOp(typeFactory, id, function));
+      }
+    }
+    return table;
+  }
+
+
+
 ```
 
 
@@ -804,9 +978,12 @@ public void init() {
 
 
 ### flink 函数注册
-1. FunctionCatalogOperatorTable
-2. FlinkSqlOperatorTable：继承calcite，并注册业务自己function
-3. CalciteSqlFunction
+1. 入口
+   1. FunctionCatalogOperatorTable
+   2. FlinkSqlOperatorTable：继承calcite，并注册业务自己function
+   3. CalciteSqlFunction
+2. 官方文档：https://nightlies.apache.org/flink/flink-docs-master/zh/docs/dev/table/functions/udfs/#%E8%A1%A8%E5%80%BC%E5%87%BD%E6%95%B0
+3. Flink SQL UDF 调用：https://tech.qimao.com/flink-gui-ze-yin-qing-ji-zhu-fang-an-she-ji/
 
 #### 初始化函数表
 ```
@@ -839,12 +1016,104 @@ public void init() {
 ```
 
 
+#### CREATE FUNCTION 实现
+
+
+#### 接口注册函数 实现
+1. 函数catalog
+   1. FunctionCatalog registerTempSystemScalarFunction
+   2. FunctionCatalogOperatorTable convertToSqlFunction
+      1. FunctionDefinition -> SqlFunction
+      2. convertTableFunction 
+      3. convertScalarFunction
+      4. convertAggregateFunction 
+   3. UserDefinedFunctionUtils 创建各种SqlFunction
+2. 函数定义
+   1. 表函数
+      1. TableFunction
+      2. TableFunctionDefinition
+      3. TemporalTableFunctionImpl
+   2. 内置函数
+      1. BuiltInFunctionDefinitions
+   3. calcite 中的父类函数
+      1. SqlUserDefinedAggFunction
+      2. SqlFunction
+      3. SqlUserDefinedTableFunction
+3. 函数定义工具
+   1. UserDefinedFunctionHelper
+   2. FunctionDefinitionUtil
+4. 函数注册后如何运用到校验逻辑
+   1. SqlValidatorImpl implements SqlValidatorWithHints
+```
+// 注册函数
+StreamTableEnvironment tEnv = ...
+tEnv.registerFunction("top2", new Top2());
+
+
+
+
+```
+
 #### 注册没有返回值的函数
 
 
 
 #### 注册动态数量形参的函数
 1. https://issues.apache.org/jira/browse/CALCITE-3485
+
+#### 注册Row方法
+1. BuiltInMethods
+2. FunctionGenerator
+```
+
+val ASIN = Types.lookupMethod(classOf[Math], "asin", classOf[Double])
+
+
+addSqlFunctionMethod(
+    ABS,
+    Seq(DOUBLE),
+    BuiltInMethods.ABS)
+
+```
+
+### flink 动态加载UDF
+1. registerTableFunctionInternal
+
+
+#### createTemporarySystemFunction
+```
+
+    /** Merges two rows as efficient as possible using internal data structures. */
+    private static void executeInternalRowMergerFunction(TableEnvironment env) {
+        // create a table with example data
+        final Table customers =
+                env.fromValues(
+                        DataTypes.of(
+                                "ROW<name STRING, data1 ROW<birth_date DATE>, data2 ROW<city STRING, phone STRING>>"),
+                        Row.of(
+                                "Guillermo Smith",
+                                Row.of(LocalDate.parse("1992-12-12")),
+                                Row.of("New Jersey", "816-443-8010")),
+                        Row.of(
+                                "Valeria Mendoza",
+                                Row.of(LocalDate.parse("1970-03-28")),
+                                Row.of("Los Angeles", "928-264-9662")),
+                        Row.of(
+                                "Leann Holloway",
+                                Row.of(LocalDate.parse("1989-05-21")),
+                                Row.of("Eugene", "614-889-6038")));
+        env.createTemporaryView("customers", customers);
+
+        // register and execute the function
+        env.createTemporarySystemFunction(
+                "InternalRowMergerFunction", InternalRowMergerFunction.class);
+        env.executeSql("SELECT name, InternalRowMergerFunction(data1, data2) FROM customers")
+                .print();
+
+        // clean up
+        env.dropTemporaryView("customers");
+    }
+```
 
 
 ### flink如何复用validator能力
@@ -1020,6 +1289,9 @@ LogicalSort(subset=[rel#118:RelSubset#6.ENUMERABLE.[1]], sort0=[$1], dir0=[ASC])
 https://dreampuf.github.io/GraphvizOnline/#digraph%20G%20%7B%0A%20%20%20%20%09root%20%5Bstyle%3Dfilled%2Clabel%3D%22Root%22%5D%3B%0A%20%20%20%20%09subgraph%20cluster0%7B%0A%20%20%20%20%09%09label%3D%22Set%200%20RecordType(JavaType(int)%20empid%2C%20JavaType(int)%20deptno%2C%20JavaType(class%20java.lang.String)%20name%2C%20JavaType(int)%20salary%2C%20JavaType(class%20java.lang.Integer)%20commission)%22%3B%0A%20%20%20%20%09%09rel99%20%5Blabel%3D%22rel%2399%3ALogicalTableScan%5Cntable%3D%5Bhr%2C%20emps%5D%5Cnrows%3D4.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel120%20%5Blabel%3D%22rel%23120%3AEnumerableTableScan%5Cntable%3D%5Bhr%2C%20emps%5D%5Cnrows%3D4.0%2C%20cost%3D%7B4.0%20rows%2C%205.0%20cpu%2C%200.0%20io%7D%22%2Ccolor%3Dblue%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset106%20%5Blabel%3D%22rel%23106%3ARelSubset%230.NONE.%5B0%5D%22%5D%0A%20%20%20%20%09%09subset121%20%5Blabel%3D%22rel%23121%3ARelSubset%230.ENUMERABLE.%5B0%5D%22%5D%0A%20%20%20%20%09%7D%0A%20%20%20%20%09subgraph%20cluster1%7B%0A%20%20%20%20%09%09label%3D%22Set%201%20RecordType(JavaType(int)%20deptno%2C%20JavaType(class%20java.lang.String)%20name)%22%3B%0A%20%20%20%20%09%09rel100%20%5Blabel%3D%22rel%23100%3ALogicalTableScan%5Cntable%3D%5Bhr%2C%20depts%5D%5Cnrows%3D3.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel122%20%5Blabel%3D%22rel%23122%3AEnumerableTableScan%5Cntable%3D%5Bhr%2C%20depts%5D%5Cnrows%3D3.0%2C%20cost%3D%7B3.0%20rows%2C%204.0%20cpu%2C%200.0%20io%7D%22%2Ccolor%3Dblue%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset107%20%5Blabel%3D%22rel%23107%3ARelSubset%231.NONE.%5B0%5D%22%5D%0A%20%20%20%20%09%09subset123%20%5Blabel%3D%22rel%23123%3ARelSubset%231.ENUMERABLE.%5B0%5D%22%5D%0A%20%20%20%20%09%7D%0A%20%20%20%20%09subgraph%20cluster2%7B%0A%20%20%20%20%09%09label%3D%22Set%202%20RecordType(JavaType(int)%20deptno)%22%3B%0A%20%20%20%20%09%09rel108%20%5Blabel%3D%22rel%23108%3ALogicalProject%5Cninput%3DRelSubset%23107%2Cinputs%3D0%5Cnrows%3D3.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset109%20%5Blabel%3D%22rel%23109%3ARelSubset%232.NONE.%5B0%5D%22%5D%0A%20%20%20%20%09%7D%0A%20%20%20%20%09subgraph%20cluster3%7B%0A%20%20%20%20%09%09label%3D%22Set%203%20RecordType(JavaType(int)%20deptno)%22%3B%0A%20%20%20%20%09%09rel110%20%5Blabel%3D%22rel%23110%3ALogicalAggregate%5Cninput%3DRelSubset%23109%2Cgroup%3D%7B0%7D%5Cnrows%3D3.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset111%20%5Blabel%3D%22rel%23111%3ARelSubset%233.NONE.%5B%5D%22%5D%0A%20%20%20%20%09%7D%0A%20%20%20%20%09subgraph%20cluster4%7B%0A%20%20%20%20%09%09label%3D%22Set%204%20RecordType(JavaType(int)%20empid%2C%20JavaType(int)%20deptno%2C%20JavaType(class%20java.lang.String)%20name%2C%20JavaType(int)%20salary%2C%20JavaType(class%20java.lang.Integer)%20commission%2C%20JavaType(int)%20deptno0)%22%3B%0A%20%20%20%20%09%09rel112%20%5Blabel%3D%22rel%23112%3ALogicalJoin%5Cnleft%3DRelSubset%23106%2Cright%3DRelSubset%23111%2Ccondition%3D%3D(%241%2C%20%245)%2CjoinType%3Dinner%5Cnrows%3D1.7999999999999998%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel129%20%5Blabel%3D%22rel%23129%3ALogicalSort%5Cninput%3DRelSubset%23113%2Csort0%3D%240%2Cdir0%3DASC%5Cnrows%3D1.7999999999999998%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset113%20%5Blabel%3D%22rel%23113%3ARelSubset%234.NONE.%5B%5D%22%5D%0A%20%20%20%20%09%09subset131%20%5Blabel%3D%22rel%23131%3ARelSubset%234.NONE.%5B0%5D%22%5D%0A%20%20%20%20%09%09subset113%20-%3E%20subset131%3B%09%7D%0A%20%20%20%20%09subgraph%20cluster5%7B%0A%20%20%20%20%09%09label%3D%22Set%205%20RecordType(JavaType(int)%20deptno%2C%20JavaType(int)%20empid)%22%3B%0A%20%20%20%20%09%09rel114%20%5Blabel%3D%22rel%23114%3ALogicalProject%5Cninput%3DRelSubset%23113%2Cexprs%3D%5B%241%2C%20%240%5D%5Cnrows%3D1.7999999999999998%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel128%20%5Blabel%3D%22rel%23128%3ALogicalProject%5Cninput%3DRelSubset%23127%2Cexprs%3D%5B%241%2C%20%240%5D%5Cnrows%3D4.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset115%20%5Blabel%3D%22rel%23115%3ARelSubset%235.NONE.%5B%5D%22%5D%0A%20%20%20%20%09%7D%0A%20%20%20%20%09subgraph%20cluster6%7B%0A%20%20%20%20%09%09label%3D%22Set%206%20RecordType(JavaType(int)%20deptno%2C%20JavaType(int)%20empid)%22%3B%0A%20%20%20%20%09%09rel116%20%5Blabel%3D%22rel%23116%3ALogicalSort%5Cninput%3DRelSubset%23115%2Csort0%3D%241%2Cdir0%3DASC%5Cnrows%3D1.7999999999999998%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel119%20%5Blabel%3D%22rel%23119%3AAbstractConverter%5Cninput%3DRelSubset%23117%2Cconvention%3DENUMERABLE%2Csort%3D%5B1%5D%5Cnrows%3D1.7999999999999998%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel132%20%5Blabel%3D%22rel%23132%3ALogicalProject%5Cninput%3DRelSubset%23131%2Cexprs%3D%5B%241%2C%20%240%5D%5Cnrows%3D1.7999999999999998%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel136%20%5Blabel%3D%22rel%23136%3ALogicalProject%5Cninput%3DRelSubset%23135%2Cexprs%3D%5B%241%2C%20%240%5D%5Cnrows%3D4.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset117%20%5Blabel%3D%22rel%23117%3ARelSubset%236.NONE.%5B1%5D%22%5D%0A%20%20%20%20%09%09subset118%20%5Blabel%3D%22rel%23118%3ARelSubset%236.ENUMERABLE.%5B1%5D%22%2Ccolor%3Dred%5D%0A%20%20%20%20%09%7D%0A%20%20%20%20%09subgraph%20cluster7%7B%0A%20%20%20%20%09%09label%3D%22Set%207%20RecordType(JavaType(int)%20empid%2C%20JavaType(int)%20deptno%2C%20JavaType(class%20java.lang.String)%20name%2C%20JavaType(int)%20salary%2C%20JavaType(class%20java.lang.Integer)%20commission)%22%3B%0A%20%20%20%20%09%09rel126%20%5Blabel%3D%22rel%23126%3ALogicalJoin%5Cnleft%3DRelSubset%23106%2Cright%3DRelSubset%23109%2Ccondition%3D%3D(%241%2C%20%245)%2CjoinType%3Dsemi%5Cnrows%3D4.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel133%20%5Blabel%3D%22rel%23133%3ALogicalSort%5Cninput%3DRelSubset%23127%2Csort0%3D%240%2Cdir0%3DASC%5Cnrows%3D4.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset127%20%5Blabel%3D%22rel%23127%3ARelSubset%237.NONE.%5B%5D%22%5D%0A%20%20%20%20%09%09subset135%20%5Blabel%3D%22rel%23135%3ARelSubset%237.NONE.%5B0%5D%22%5D%0A%20%20%20%20%09%09subset127%20-%3E%20subset135%3B%09%7D%0A%20%20%20%20%09root%20-%3E%20subset118%3B%0A%20%20%20%20%09subset106%20-%3E%20rel99%3B%0A%20%20%20%20%09subset121%20-%3E%20rel120%5Bcolor%3Dblue%5D%3B%0A%20%20%20%20%09subset107%20-%3E%20rel100%3B%0A%20%20%20%20%09subset123%20-%3E%20rel122%5Bcolor%3Dblue%5D%3B%0A%20%20%20%20%09subset109%20-%3E%20rel108%3B%20rel108%20-%3E%20subset107%3B%0A%20%20%20%20%09subset111%20-%3E%20rel110%3B%20rel110%20-%3E%20subset109%3B%0A%20%20%20%20%09subset113%20-%3E%20rel112%3B%20rel112%20-%3E%20subset106%5Blabel%3D%220%22%5D%3B%20rel112%20-%3E%20subset111%5Blabel%3D%221%22%5D%3B%0A%20%20%20%20%09subset131%20-%3E%20rel129%3B%20rel129%20-%3E%20subset113%3B%0A%20%20%20%20%09subset115%20-%3E%20rel114%3B%20rel114%20-%3E%20subset113%3B%0A%20%20%20%20%09subset115%20-%3E%20rel128%3B%20rel128%20-%3E%20subset127%3B%0A%20%20%20%20%09subset117%20-%3E%20rel116%3B%20rel116%20-%3E%20subset115%3B%0A%20%20%20%20%09subset118%20-%3E%20rel119%3B%20rel119%20-%3E%20subset117%3B%0A%20%20%20%20%09subset117%20-%3E%20rel132%3B%20rel132%20-%3E%20subset131%3B%0A%20%20%20%20%09subset117%20-%3E%20rel136%3B%20rel136%20-%3E%20subset135%3B%0A%20%20%20%20%09subset127%20-%3E%20rel126%3B%20rel126%20-%3E%20subset106%5Blabel%3D%220%22%5D%3B%20rel126%20-%3E%20subset109%5Blabel%3D%221%22%5D%3B%0A%20%20%20%20%09subset135%20-%3E%20rel133%3B%20rel133%20-%3E%20subset127%3B%0A%20%20%20%20%7D
 
 ```
+
+### flink 动态加载rule
+1. 广播流支持加rule：https://stackoverflow.com/questions/63152612/how-can-i-create-dynamic-rule-in-apache-flink
 
 ## 横向拆解 - execute
 
@@ -1459,21 +1731,33 @@ Caused by: org.apache.calcite.runtime.CalciteContextException: From line 2, colu
 	... 26 more
 
 ```
+## 纵向拆解 - Type概念理解
+1. OperandTypes
+2. ReturnTypes
+3. InferTypes
+4. SqlTypeFamily
 
 
 ## 纵向拆解 - 灵活的数据类型系统
 1. SqlTypeUtil：Contains utility methods used during SQL validation or type derivation.
-2. SqlTypeName：所有sql类型字面值
-3. SqlTypeFactoryImpl：sql类型工厂，基础类型创建和复杂类型创建
-4. JavaTypeFactoryImpl：java类型工厂，基础类型创建和复杂类型创建，可以转SQL类型 
-   1. 方法：getJavaClass 和 toSql
-5. RelOptUtil：rel工具，判断类型是否匹配，类型转换
-6. RelCollationImpl
+2. 类型
+   1. SqlTypeName：所有sql类型字面值
+   2. RelDataType 
+   3. JavaType
+3. 类型工厂
+   1. SqlTypeFactoryImpl：sql类型工厂，基础类型创建和复杂类型创建
+   2. JavaTypeFactoryImpl：java类型工厂，基础类型创建和复杂类型创建，可以转SQL类型 
+      1. 方法：getJavaClass 和 toSql
+   3. RelDataTypeFactory
+4. RelOptUtil：rel工具，判断类型是否匹配，类型转换
+5. RelCollationImpl
    1. addCharsetAndCollation createTypeWithCharsetAndCollation 
-7. RelDataType
+6. RelDataType
    1. getCharset 默认字符集 DEFAULT_CHARSET
    2. getCollation 默认排序规则
-8. 参考源码
+7.  RelDataTypeImpl
+   1. 
+8.  参考源码
    1. core/src/test/java/org/apache/calcite/test/CollectionTypeTest.java#getRowType
 ### 创建复杂类型
 ```
@@ -1499,6 +1783,19 @@ typeFactory.createMapType(nullableVarcharType, nullableIntegerType)
 
 
 
+
+```
+
+
+### 显示创建返回值
+```
+  /**
+   * Creates an inference rule which returns a type with no precision or scale,
+   * such as {@code DATE}.
+   */
+  public static ExplicitReturnTypeInference explicit(SqlTypeName typeName) {
+    return explicit(RelDataTypeImpl.proto(typeName, false));
+  }
 
 ```
 
