@@ -74,7 +74,8 @@ calcite + 公司项目
 
 ### 核心思考
 1. calcite为什么那么难用：https://shenzhu.github.io/calcite-user-perspective/
-2. 必看代码
+2. 注册一个UDTF都麻烦的要死！文档稍微好好写都不会这样来回调试，还要调研flink怎么注册UDTF
+3. 必看代码
    1. core/src/test/java/org/apache/calcite/sql/parser/SqlParserTest.java
    2. core/src/test/java/org/apache/calcite/test/SqlValidatorTest.java
    3. core/src/test/java/org/apache/calcite/rel/rules/SortRemoveRuleTest.java
@@ -578,11 +579,12 @@ SqlValidatorUtil
 
 ### 新增 UDF
 1. 参考calcite源码：
-   1. 函数集：core/src/main/java/org/apache/calcite/sql/fun/SqlStdOperatorTable.java
-   2. 定义类，动态加载函数：core/src/test/java/org/apache/calcite/tools/PlannerTest.java#testValidateUserDefinedAggregate
-   3. udf测试：core/src/test/java/org/apache/calcite/test/UdfTest.java
-   4. 定义同名不同参数函数：core/src/test/java/org/apache/calcite/util/Smalls.java
-   5. 查询udf测试代码：core/src/test/java/org/apache/calcite/prepare/LookupOperatorOverloadsTest.java
+   1. 官方文档：https://github.com/julianhyde/calcite/blob/1095-not-precedence/site/_docs/reference.md#operator-precedence
+   2. 函数集：core/src/main/java/org/apache/calcite/sql/fun/SqlStdOperatorTable.java
+   3. 定义类，动态加载函数：core/src/test/java/org/apache/calcite/tools/PlannerTest.java#testValidateUserDefinedAggregate
+   4. udf测试：core/src/test/java/org/apache/calcite/test/UdfTest.java
+   5. 定义同名不同参数函数：core/src/test/java/org/apache/calcite/util/Smalls.java
+   6. 查询udf测试代码：core/src/test/java/org/apache/calcite/prepare/LookupOperatorOverloadsTest.java
 2. 函数全流程
    1. 定义函数 Function -> 再定义 Sqlfunction
       1. Function
@@ -639,21 +641,99 @@ SqlValidatorUtil
    5. operandTypeChecker   strategy to use for parameter type checking
 8. 函数定义：接受参数并返回结果的命名表达式
 #### 函数类型
-1. SqlFunction
-2. SqlAggFunction
-3. SqlUserDefinedFunction
-4. SqlUserDefinedTableMacro
-5. SqlUserDefinedTableFunction
-6. SqlUserDefinedAggFunction
+1. SqlLibrary 函数集合
+   1. SqlLibraryOperators
+   2. SqlStdOperatorTable
+2. SqlFunction 函数种类
+   1. SqlAggFunction
+   2. SqlUserDefinedFunction 需要实现一个实体类class作为参数，才能被解析
+   3. SqlUserDefinedTableMacro 需要实现一个实体类class作为参数，才能被解析
+   4. SqlUserDefinedTableFunction 需要实现一个实体类class作为参数，才能被解析
+   5. SqlUserDefinedAggFunction 需要实现一个实体类class作为参数，才能被解析
+3. 
+
+
+#### 函数类型 - 输出结果校验示例
+```
+
+        returnTypesMap.put("BOOLEAN", ReturnTypes.BOOLEAN);
+        returnTypesMap.put("DATE", ReturnTypes.DATE);
+        returnTypesMap.put("TIME", ReturnTypes.TIME);
+        returnTypesMap.put("DOUBLE", ReturnTypes.DOUBLE);
+        returnTypesMap.put("INTEGER", ReturnTypes.INTEGER);
+        returnTypesMap.put("BIGINT", ReturnTypes.BIGINT);
+        returnTypesMap.put("VARCHAR_2000", ReturnTypes.VARCHAR_2000);
+
+```
+
+
+#### 函数类型 - 输入参数校验示例
+1. SqlOperandTypeChecker
+   1. FamilyOperandTypeChecker
+   2. SqlSingleOperandTypeChecker
+   3. LiteralOperandTypeChecker
+```
+可变形参
+
+DECODE
+  /** The "DECODE(v, v1, result1, [v2, result2, ...], resultN)" function. */
+  @LibraryOperator(libraries = {ORACLE})
+  public static final SqlFunction DECODE =
+      new SqlFunction("DECODE", SqlKind.DECODE, DECODE_RETURN_TYPE, null,
+          OperandTypes.VARIADIC, SqlFunctionCategory.SYSTEM);
+
+
+  /** Operand type-checking strategy that allows one or more operands. */
+  public static final SqlOperandTypeChecker ONE_OR_MORE =
+      variadic(SqlOperandCountRanges.from(1));
+new SqlFunction("DECODE", SqlKind.DECODE, DECODE_RETURN_TYPE, null,
+          OperandTypes.ONE_OR_MORE, SqlFunctionCategory.SYSTEM)
+```
+
 
 #### 函数类型 - 标量函数示例
 ```
+
+
+  /**
+   * Uses SqlOperatorTable.useDouble for its return type since we don't know
+   * what the result type will be by just looking at the operand types. For
+   * example POW(int, int) can return a non integer if the second operand is
+   * negative.
+   */
+  public static final SqlFunction POWER =
+      new SqlFunction(
+          "POWER",
+          SqlKind.OTHER_FUNCTION,
+          ReturnTypes.DOUBLE_NULLABLE,
+          null,
+          OperandTypes.NUMERIC_NUMERIC,
+          SqlFunctionCategory.NUMERIC);
+
+
+
+  public SqlCoalesceFunction() {
+    // NOTE jvs 26-July-2006:  We fill in the type strategies here,
+    // but normally they are not used because the validator invokes
+    // rewriteCall to convert COALESCE into CASE early.  However,
+    // validator rewrite can optionally be disabled, in which case these
+    // strategies are used.
+    super("COALESCE",
+        SqlKind.COALESCE,
+        ReturnTypes.cascade(ReturnTypes.LEAST_RESTRICTIVE,
+            SqlTypeTransforms.LEAST_NULLABLE),
+        null,
+        OperandTypes.SAME_VARIADIC,
+        SqlFunctionCategory.SYSTEM);
+  }
 
 ```
 
 
 #### 函数类型 - udaf 示例
 1. core/src/main/java/org/apache/calcite/sql/fun/SqlStdOperatorTable.java
+2. calcite
+   1. SqlUserDefinedAggFunction -> SqlAggFunction -> SqlFunction
 ```
 /** Creates a built-in or user-defined SqlAggFunction or window function.
    *
@@ -694,6 +774,17 @@ public SqlSumAggFunction(RelDataType type) {
   }
 
 
+COLLECT 函数
+new SqlAggFunction("COLLECT",
+          null,
+          SqlKind.COLLECT,
+          ReturnTypes.TO_MULTISET,
+          null,
+          OperandTypes.ANY,
+          SqlFunctionCategory.SYSTEM, false, false,
+          Optionality.OPTIONAL) {
+      };
+
 Count
 
   public SqlCountAggFunction(String name) {
@@ -726,14 +817,242 @@ MinMax
     Preconditions.checkArgument(kind == SqlKind.MIN
         || kind == SqlKind.MAX);
   }
+
+
+JSON
+  public SqlJsonArrayFunction() {
+    super("JSON_ARRAY", SqlKind.OTHER_FUNCTION, ReturnTypes.VARCHAR_2000,
+        InferTypes.ANY_NULLABLE, OperandTypes.VARIADIC, SqlFunctionCategory.SYSTEM);
+  }
+
+
+  public SqlJsonArrayAggAggFunction(SqlKind kind,
+      SqlJsonConstructorNullClause nullClause) {
+    super(kind + "_" + nullClause.name(), null, kind, ReturnTypes.VARCHAR_2000,
+        InferTypes.ANY_NULLABLE, OperandTypes.family(SqlTypeFamily.ANY),
+        SqlFunctionCategory.SYSTEM, false, false, Optionality.OPTIONAL);
+    this.nullClause = Objects.requireNonNull(nullClause);
+  }
+
+
+substring
+ SqlSubstringFunction() {
+    super(
+        "SUBSTRING",
+        SqlKind.OTHER_FUNCTION,
+        ReturnTypes.ARG0_NULLABLE_VARYING,
+        null,
+        null,
+        SqlFunctionCategory.STRING);
+  }
+
+
+lead lag
+  private static final SqlSingleOperandTypeChecker OPERAND_TYPES =
+      OperandTypes.or(
+          OperandTypes.ANY,
+          OperandTypes.family(SqlTypeFamily.ANY, SqlTypeFamily.NUMERIC),
+          OperandTypes.and(
+              OperandTypes.family(SqlTypeFamily.ANY, SqlTypeFamily.NUMERIC,
+                  SqlTypeFamily.ANY),
+              // Arguments 1 and 3 must have same type
+              new SameOperandTypeChecker(3) {
+                @Override protected List<Integer>
+                getOperandList(int operandCount) {
+                  return ImmutableList.of(0, 2);
+                }
+              }));
+
+  private static final SqlReturnTypeInference RETURN_TYPE =
+      ReturnTypes.cascade(ReturnTypes.ARG0, (binding, type) -> {
+        // Result is NOT NULL if NOT NULL default value is provided
+        SqlTypeTransform transform;
+        if (binding.getOperandCount() < 3) {
+          transform = SqlTypeTransforms.FORCE_NULLABLE;
+        } else {
+          RelDataType defValueType = binding.getOperandType(2);
+          transform = defValueType.isNullable()
+              ? SqlTypeTransforms.FORCE_NULLABLE
+              : SqlTypeTransforms.TO_NOT_NULLABLE;
+        }
+        return transform.transformType(binding, type);
+      });
+
+  public SqlLeadLagAggFunction(SqlKind kind) {
+    super(kind.name(),
+        null,
+        kind,
+        RETURN_TYPE,
+        null,
+        OPERAND_TYPES,
+        SqlFunctionCategory.NUMERIC,
+        false,
+        true,
+        Optionality.FORBIDDEN);
+    Preconditions.checkArgument(kind == SqlKind.LEAD
+        || kind == SqlKind.LAG);
+  }
 ```
 
 
 
 #### 函数类型 - udtf 示例
-```
+1. 和其他函数的区别
+   1. 注册返回值，可以是多个字段，且不同类型
+2. Java UDTF：https://help.aliyun.com/zh/maxcompute/user-guide/java-udtfs?spm=a2c4g.11186623.0.0.477d4e0bN1XLri#concept-2105833
+3. Python 用户定义表函数 (UDTF)：https://learn.microsoft.com/zh-cn/azure/databricks/udf/python-udtf
+4. UDTF需求分析文档：https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=165221503
+5. calcite 支持udtf
+   1. https://issues.apache.org/jira/browse/CALCITE-1309
+   2. https://issues.apache.org/jira/browse/CALCITE-1838
+   3. https://issues.apache.org/jira/browse/CALCITE-1581
+   4. SqlUserDefinedTableFunction -> SqlUserDefinedFunction -> SqlFunction SqlFunctionCategory.USER_DEFINED_TABLE_FUNCTION
+   5. 源码：core/src/test/java/org/apache/calcite/test/TableFunctionTest.java
+   6. https://github.com/apache/calcite/pull/1138 closed
+   7. https://github.com/apache/calcite/pull/2092 open 还没有合并，可能因为拖延症吧
+6. calcite目前找不到很好示例，只能从flink应用calcite最广泛的项目中找
+   1. calcite 需要集成tablefunction 返回 QueryableTable，为什么到了flink却不需要，如何做到的？？？
+7. flink文档：https://github.com/apachecn/flink-doc-zh/blob/master/docs/1.7/71.md
+8. flink自定义udtf：https://www.cnblogs.com/felixzh/p/16846624.html
+   1. 源码：flink-table/flink-table-planner-blink/src/test/scala/org/apache/flink/table/planner/runtime/batch/sql/MiscITCase.scala
+   2. flink-connectors/flink-connector-hive/src/main/java/org/apache/flink/table/functions/hive/HiveGenericUDTF.java
+9.  UDTF要比其他函数更复杂，它需要自定义一个Function，不像标量函数，可以统一是SqlFunction即可，再更新输入输出参数就行
+10. 常见引擎开发，都是定义一个class，再反解析 class 的输入输出类型，然后注册到函数表
+11. flink工具 class -> function
+   1. UserDefinedFunctionUtils
+   2. FunctionDefinitionUtil
+   3. UserDefinedFunctionHelper
+   4. TemporalTableFunctionImpl
 
 ```
+ 
+hive支持，calcite 不支持，有人实现过，但是没有合进master https://github.com/apache/calcite/pull/2092
+select udtf(arg1, arg2) as (seg1, seg2, seg3) from table
+
+flink SQL语法参考
+select name,content_type,url
+from kafka_table CROSS JOIN lateral TABLE (ParserJsonArrayTest(`data`)) AS t (content_type,url)
+ 
+
+select name,content_type,url
+from kafka_table, lateral TABLE (ParserJsonArrayTest(`data`)) AS t (content_type,url)
+ 
+
+select name,content_type,url
+from kafka_table left join lateral TABLE (ParserJsonArrayTest(`data`)) AS t (content_type,url) on true
+
+
+calcite 的 udtf 实现，需要返回 QueryableTable
+全局搜 public static QueryableTable generateStrings(final Integer count)
+
+基于 QueryableTable 在实现 getElementType getRowType 方法，拿到输入输出
+calcite udtf -> calcite TableFunctionImpl -> calcite TableFunction
+
+flink udtf
+
+@SerialVersionUID(1L)
+class IntExplodeTableFunc extends TableFunction[Int] {
+  def eval(arr: Array[Int]): Unit = {
+    arr.foreach(collect)
+  }
+
+  def eval(map: util.Map[Int, Integer]): Unit = {
+    CommonCollect.collect(map, collect)
+  }
+}
+
+函数初始化
+IntExplodeTableFunc -> flink TableFunction<T> ->  UserDefinedFunction -> FunctionDefinition
+
+flink function -> calcite function 转化过程
+IntExplodeTableFunc -> ExplodeFunctionUtil.explodeTableFuncFromType -> DeferredTypeFlinkTableFunction -> FlinkTableFunction -> org.apache.calcite.schema.TableFunction
+
+
+codegen 生成的函数 -> calcite function
+代码生成 TableFunctionCallGen -> TableSqlFunction(flink TableFunction<T>, FlinkTableFunctionImpl) -> org.apache.flink.table.plan.schema.FlinkTableFunctionImpl -> org.apache.calcite.schema.TableFunction
+
+
+org.apache.flink.table.planner.plan.schema.FlinkTableFunction -> FlinkTableFunction
+
+解析 result
+getExternalResultType
+
+
+需要实现函数
+getElementType
+getRowType
+
+
+flink 中的 explode
+
+          val explodeSqlFunc = UserDefinedFunctionUtils.createTableSqlFunction(
+            FunctionIdentifier.of("explode"),
+            "explode",
+            explodeTableFunc,
+            fromLogicalTypeToDataType(toLogicalType(componentType)),
+            cluster.getTypeFactory.asInstanceOf[FlinkTypeFactory])
+
+val explodeFunction = ExplodeFunctionUtil.explodeTableFuncFromType(mapTypeInfo)
+              (componentType, explodeFunction)
+
+
+函数定义
+@SerialVersionUID(1L)
+class IntExplodeTableFunc extends TableFunction[Int] {
+  def eval(arr: Array[Int]): Unit = {
+    arr.foreach(collect)
+  }
+
+  def eval(map: util.Map[Int, Integer]): Unit = {
+    CommonCollect.collect(map, collect)
+  }
+}
+
+
+calcite 
+
+```
+
+#### UDTF总结
+1. calcite TableFunction
+   1. calcite TableFunctionImpl calicte内置的，对接起来困难
+   2. flink DeferredTypeFlinkTableFunction -> FlinkTableFunction 实现一个方法，flink会通过反射解析数据类型，注册到calcite
+      1. 业务自定义就会继承这个类，比较方便
+   3. flink FlinkTableFunctionImpl flink一般用这个类做codegen
+
+
+#### hive udtf示例
+1. flink-connectors/flink-connector-hive/src/test/java/org/apache/flink/table/functions/hive/HiveGenericUDTFTest.java
+```
+	/**
+	 * Test split udtf.
+	 */
+	public static class TestSplitUDTF extends GenericUDTF {
+
+		@Override
+		public StructObjectInspector initialize(ObjectInspector[] argOIs) throws UDFArgumentException {
+			return ObjectInspectorFactory.getStandardStructObjectInspector(
+				Collections.singletonList("col1"),
+				Collections.singletonList(PrimitiveObjectInspectorFactory.javaStringObjectInspector));
+		}
+
+		@Override
+		public void process(Object[] args) throws HiveException {
+			String str = (String) args[0];
+			for (String s : str.split(",")) {
+				forward(s);
+			}
+		}
+
+		@Override
+		public void close() {
+		}
+	}
+
+```
+
+
+
 
 
 #### 反射机制实现加载函数
@@ -1028,6 +1347,18 @@ public void init() {
       3. convertScalarFunction
       4. convertAggregateFunction 
    3. UserDefinedFunctionUtils 创建各种SqlFunction
+      1. createScalarSqlFunction
+      2. createTableSqlFunction
+      3. createAggregateSqlFunction
+   4. return type解析
+      1. val (fieldNames, fieldIndexes, _) = UserDefinedFunctionUtils.getFieldInfo(resultType)
+      2. flink typeInfo -> RelDataType
+      3. hiveUdtf LogicalType -> typeInfo -> RelDataType
+      4. RelDataType 可以嵌套多个类型
+      5. createEvalOperandTypeInference
+      6. createEvalOperandTypeChecker
+   5. input type 解析
+      1. FieldInfoUtils
 2. 函数定义
    1. 表函数
       1. TableFunction
@@ -1042,13 +1373,36 @@ public void init() {
 3. 函数定义工具
    1. UserDefinedFunctionHelper
    2. FunctionDefinitionUtil
-4. 函数注册后如何运用到校验逻辑
+4. 函数类型转换
+   1. TypeInfoLogicalTypeConverter.fromLogicalTypeToTypeInfo
+   2. UserDefinedFunctionUtils.fromLogicalTypeToDataType
+   3. LogicalTypeDataTypeConverter.fromDataTypeToLogicalType
+5. 代码生成
+   1. FunctionCodeGenerator
+6. 函数注册后如何运用到校验逻辑
    1. SqlValidatorImpl implements SqlValidatorWithHints
+7. 源码
+   1. flink-table/flink-table-planner-blink/src/test/scala/org/apache/flink/table/planner/expressions/UserDefinedScalarFunctionTest.scala
+   2. 
 ```
 // 注册函数
 StreamTableEnvironment tEnv = ...
 tEnv.registerFunction("top2", new Top2());
 
+Correlate 示例
+ private[flink] def generateFunction[T <: Function](
+    config: TableConfig,
+    inputSchema: RowSchema,
+    udtfTypeInfo: TypeInformation[Any],
+    returnSchema: RowSchema,
+    joinType: JoinRelType,
+    rexCall: RexCall,
+    pojoFieldMapping: Option[Array[Int]],
+    ruleDescription: String,
+    functionClass: Class[T]):
+  GeneratedFunction[T, Row] = {
+
+generateFunction -> FunctionCodeGenerator
 
 
 
@@ -1755,9 +2109,13 @@ Caused by: org.apache.calcite.runtime.CalciteContextException: From line 2, colu
 6. RelDataType
    1. getCharset 默认字符集 DEFAULT_CHARSET
    2. getCollation 默认排序规则
-7.  RelDataTypeImpl
-   1. 
-8.  参考源码
+7. RelDataTypeImpl
+8. DynamicRecordType
+9. DynamicRecordTypeImpl
+10. DelegatingTypeSystem
+11. SqlTypeUtil.canCastFrom 类型强转
+12. 非标量类型：https://strongduanmu.com/wiki/calcite/reference.html#%E9%9D%9E%E6%A0%87%E9%87%8F%E7%B1%BB%E5%9E%8B
+13. 参考源码
    1. core/src/test/java/org/apache/calcite/test/CollectionTypeTest.java#getRowType
 ### 创建复杂类型
 ```
