@@ -143,6 +143,11 @@ flink dag用法
    4. 原生的轻量级和快速检查点
 2. Benchmark
    1. https://github.com/nexmark/nexmark
+3. flink 向量化引擎 flash
+   1. https://developer.aliyun.com/article/1634363
+
+## flink思考
+1. pipeline 和 Transformation
 
 ## 阅读笔记
 ### Streaming System 
@@ -245,7 +250,8 @@ Watermarked
 2. task opchain op function window join  state 调用链路，构造到执行层
 3. time watermark
 
-## 罗西 blog
+## blog
+### 罗西 blog
 1. flink应用理解
    1. Alink漫谈(一) : 从KMeans算法实现不同看Alink设计思想：https://www.cnblogs.com/rossiXYZ/p/12831175.html
    2. Alink漫谈(二) : 从源码看机器学习平台Alink设计和架构：https://www.cnblogs.com/rossiXYZ/p/12861848.html
@@ -288,7 +294,10 @@ Watermarked
 4. [记录点滴] Spark迁移到Flink的几个点：https://www.cnblogs.com/rossiXYZ/p/13172145.html
 5. [业界方案] Yarn的业界解决方案和未来方向：https://www.cnblogs.com/rossiXYZ/p/13413273.html
 
-### 数据流图
+### 有一个娃 blog
+1. https://home.cnblogs.com/u/GeQian-hq
+
+## 数据流图
 1. 实时数据流 - 移动到flink源码解析文档
    1. flink计算图
    2. 所有算子区别
@@ -963,6 +972,32 @@ Watermarked
    2. metrics
    3. restart
 
+### 执行流程 - Job
+1. 调度
+2. 创建
+3. 执行
+4. 完成
+5. 取消 & 失败
+
+### 执行流程 - Task
+1. task输入
+   1. InputGate InputChannel
+2. task处理
+   1. streamstatus
+   2. resultPartition
+   3. resultSubPartition
+3. task输出
+   1. StreamTaskNetworkOutput
+4. Flink源码解析(十五)——Flink Task部署过程解析：https://www.cnblogs.com/GeQian-hq/p/18035550
+5. Flink源码解析(十六)——Flink Task启动过程解析：https://www.cnblogs.com/GeQian-hq/p/18050001
+6. Flink源码解析(十七)——Flink Task写数据过程解析 ：https://www.cnblogs.com/GeQian-hq/p/18050002
+7. Flink源码解析(十八)——Flink Task读数据过程解析：https://www.cnblogs.com/GeQian-hq/p/18050004
+8. Flink源码解析(十九)——Flink Task Netty数据通信过程解析：https://www.cnblogs.com/GeQian-hq/p/18050009
+#### Task 处理 LatencyMark WaterMark StreamRecord
+
+
+#### MailBox单线程模型 和 多线程模型 执行区别
+
 
 ### 执行层横截面 - checkpoint 的应用
 1. 核心
@@ -1134,7 +1169,17 @@ Watermarked
 
 ### api - functions
 
-### api - graph
+### api - Graph
+1. StreamGraph implements Pipeline
+2. 本质是pipeline 和 Transformation 是flink两大核心类，专门描述数据流
+3. Flink源码解析(七)——StreamGraph生成过程解析：https://www.cnblogs.com/GeQian-hq/p/17861877.html
+4. Flink源码解析(八)——JobGraph生成过程解析：https://www.cnblogs.com/GeQian-hq/p/17880647.html
+5. Flink源码解析(九)——ExecutionGraph生成过程解析：https://www.cnblogs.com/GeQian-hq/p/17911407.html
+6. Flink源码解析(十四)——Flink On Yarn ExecutionGraph调度及TaskManager启动过程解析：https://www.cnblogs.com/GeQian-hq/p/18005142
+```
+StreamGraph
+
+```
 
 ### api - operators
 
@@ -1145,7 +1190,40 @@ Watermarked
 
 
 ### api - Transformation
+1. 数据流基本描述，但是没有具体实现
+2. 衔接DataStream API和Flink内核的逻辑结构
+3. 物理Transformation和虚拟Transformation
+4. 应用场景
+   1. datastream -> transformation
+   2. flink sql -> relNode -> transformation
+5. Flink源码解析(三)——DataStream和Transformation解析：https://www.cnblogs.com/GeQian-hq/p/17627006.html
+```
+Transformation类型
+   CoFeedbackTransformation.java
+   FeedbackTransformation.java
+   OneInputTransformation.java
+   PartitionTransformation.java
+   PhysicalTransformation.java
+   SelectTransformation.java
+   SideOutputTransformation.java
+   SinkTransformation.java
+   SourceTransformation.java
+   SplitTransformation.java
+   TwoInputTransformation.java
+   UnionTransformation.java
 
+Transformation关键成员变量说明
+   protected final int id;　　//每个Transformation唯一id标识，基于AtomicInteger ID_COUNTER静态累积器生成
+   protected String name;　　//Transformation名称，主要用户可视化展示及日志打印
+   protected TypeInformation<T> outputType;　　//输出类型，用于序列化数据
+   private int parallelism;　　//并行度
+   private int maxParallelism = -1;　　//状态分组key group有关
+   private String uid;　　//用户指定的uid值，主要目的是在job重启时再次分配跟之前相同的uid
+   private String userProvidedNodeHash;　　//用户提供的node hash，用户生成JobGraph图节点JobVertex的JobVertexID属性值。
+   protected long bufferTimeout = -1;　　//数据缓冲时间
+   private Optional<SlotSharingGroup> slotSharingGroup;　　//Slot共享组标识
+
+```
 
 ### api - watermark
 
@@ -1237,31 +1315,341 @@ final SqlNode validated = flinkPlanner.validate(sqlNode);
 
 
 ### SQL 流程 - 优化
+1. org.apache.flink.table.delegation.Planner
+   1. optimize
+   2. translateToExecNodePlan  RelNode -> ExecNode
+2. CommonSubGraphBasedOptimizer
+3. 针对每一个sink数据源 做优化
+   1. relNodeBlock
+   2. RelNodeBlockPlanBuilder.buildRelNodeBlockPlan(roots, config)
+4. 基本概念
+   1. digest：摘要 子查询片段
+   2. RelNodeBlock：每个RelNodeBlock只有一个Sink，代表一棵子树
+
+```
+优化规则集
+BatchOptimizeContext.scala
+FlinkBatchProgram.scala
+FlinkChainedProgram.scala
+FlinkDecorrelateProgram.scala
+FlinkGroupProgram.scala
+FlinkHepProgram.scala
+FlinkHepRuleSetProgram.scala
+FlinkMiniBatchIntervalTraitInitProgram.scala
+FlinkOptimizeContext.scala
+FlinkOptimizeProgram.scala
+FlinkRelTimeIndicatorProgram.scala
+FlinkRuleSetProgram.scala
+FlinkStreamProgram.scala
+FlinkUpdateAsRetractionTraitInitProgram.scala
+FlinkVolcanoProgram.scala
+StreamOptimizeContext.scala
+
+
 
 ```
 
 
 
+### SQL 流程 - 转成 DataStream
+1. 核心类
+   1. TableEnvironmentImpl 封装了paser planner 和 executor
+   2. SQL层函数
+      1. sqlQuery
+      2. sqlUpdate
+   3. 翻译层
+      1. translate
+   4. 执行层
+      1. execute
+2. Parser 
+   1. sqlQuery(String query)
+   2. toQueryOperation(flinkPlanner, node)
+   3. OperationTreeBuilder
+3. Table
+   1. TableImpl
+   2. TableEnvironmentImpl
+   3. org.apache.flink.table.api.TableEnvironment
+   4. org.apache.flink.table.api.internal.TableEnvironmentImpl extends TableEnvironment
+      1. sqlQuery
+      2. sqlUpdate
+         1. convertSqlInsert(RichSqlInsert insert)
+         2. new CatalogSinkModifyOperation
+         3. translate Operations -> Transformation
+         4. buffer 缓存Update SQL
+      3. execute
+   5. org.apache.flink.table.api.java.StreamTableEnvironment
+   6. org.apache.flink.table.api.java.StreamTableEnvironment extends TableEnvironmentImpl implements StreamTableEnvironment 
+      1. execute
+   7. org.apache.flink.table.delegation.Planner
+   8. org.apache.flink.table.delegation.Executor
+4. org.apache.flink.table.delegation
+   1. Planner
+      1. PlannerBase
+      2. StreamPlanner
+      3. BatchPlanner
+      4. List<Transformation<?>> translate(List<ModifyOperation> modifyOperations)
+      5. optimize Seq[RelNode] -> Seq[RelNode]
+      6. translateToExecNodePlan  RelNode -> ExecNode
+      7. translateToPlan ExecNode -> Transformation
+      8. 每个ExecNode节点需要实现 translateToPlanInternal
+      9. 然后模式匹配即可
+      10. Transformation 内容参考 stream-Transformation 章节
+   2. Executor
+      1. ExecutionEnvironment
+      2. StreamExecutionEnvironment
+      3. void apply(List<Transformation<?>> transformations);
+      4. Pipeline createPipeline(String name)
+      5. Plan createProgramPlan(String jobName)
+5. sql到flink 算子：https://blog.jrwang.me/2019/flink-source-code-sql-overview/
+6. 官方文档：https://nightlies.apache.org/flink/flink-docs-master/docs/dev/table/sql/queries/overview/
+7.  测试用例
+   1. flink-table/flink-table-planner-blink/src/test/java/org/apache/flink/table/planner/catalog/CatalogStatisticsTest.java
+
+#### Demo
+```java
+
+PlannerBase.scala
+
+  override def translate(
+      modifyOperations: util.List[ModifyOperation]): util.List[Transformation[_]] = {
+    if (modifyOperations.isEmpty) {
+      return List.empty[Transformation[_]]
+    }
+    // prepare the execEnv before translating
+    getExecEnv.configure(
+      getTableConfig.getConfiguration,
+      Thread.currentThread().getContextClassLoader)
+    overrideEnvParallelism()
+
+    val relNodes = modifyOperations.map(translateToRel)
+    val optimizedRelNodes = optimize(relNodes)
+    val execNodes = translateToExecNodePlan(optimizedRelNodes)
+    translateToPlan(execNodes)
+  }
+
+
+  override protected def translateToPlan(
+      execNodes: util.List[ExecNode[_, _]]): util.List[Transformation[_]] = {
+    execNodes.map {
+      case node: StreamExecNode[_] => node.translateToPlan(this)
+      case _ =>
+        throw new TableException("Cannot generate DataStream due to an invalid logical plan. " +
+          "This is a bug and should not happen. Please file an issue.")
+    }
+  }
+
 ```
 
-
-
-### SQL 流程 - 改写
+#### 原理解析
 
 ```
+sql -> relnode -> operation -> Table -> transformation -> StreamGraph
 
+
+逻辑节点
+FlinkLogicalJoin extends Calcite Join
+ with FlinkLogicalRel extends FlinkRelNode extends RelNode 
+
+
+物理节点
+StreamExecJoin extends CommonPhysicalJoin extends Calcite Join
+with StreamPhysicalRel extends FlinkPhysicalRel extends FlinkRelNode extends RelNode
+with StreamExecNode extends ExecNode
+
+datastream 节点
+DataStreamRel extends FlinkRelNode extends RelNode
+
+
+
+
+
+
+
+SqlToOperationConverter
+QueryOperationConverter
+FlinkRelBuilder 
+PlannerQueryOperation
+
+
+	JobExecutionResult execute(String jobName) throws Exception;
+
+	OperatorTranslation
+
+   protected abstract org.apache.flink.api.common.operators.Operator<OUT> translateToDataFlow(
+			org.apache.flink.api.common.operators.Operator<IN> input)
+
+   
+   def translateToPlan(planner: E): Transformation[T]
+
+
+   ExecutionEnvironment
+   
+   final Plan plan = createProgramPlan(jobName);
+
+   
+   Plan plan = translator.translateToPlan(this.sinks, jobName);
+
+   		
+
+
+	public JobClient executeAsync(StreamGraph streamGraph) throws Exception {
+
+
+	CompletableFuture<JobClient> execute(final Pipeline pipeline, final Configuration configuration) throws Exception;
+
+
+		final JobGraph jobGraph = ExecutorUtils.getJobGraph(pipeline, configuration);
 
 
 ```
 
 
 ### SQL 流程 - 执行
+1. Executor
+   1. StreamExecutor
+2. 
+   1. StreamExecutionEnvironment
+#### Demo
+```java
+	public static void main(String[] args) throws Exception {
+
+		// set up execution environment
+		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+		// use blink planner in streaming mode,
+		// because watermark statement is only available in blink planner.
+		EnvironmentSettings settings = EnvironmentSettings.newInstance()
+			.useBlinkPlanner()
+			.inStreamingMode()
+			.build();
+		StreamTableEnvironment tEnv = StreamTableEnvironment.create(env, settings);
+
+		// write source data into temporary file and get the absolute path
+		String contents = "1,beer,3,2019-12-12 00:00:01\n" +
+			"1,diaper,4,2019-12-12 00:00:02\n" +
+			"2,pen,3,2019-12-12 00:00:04\n" +
+			"2,rubber,3,2019-12-12 00:00:06\n" +
+			"3,rubber,2,2019-12-12 00:00:05\n" +
+			"4,beer,1,2019-12-12 00:00:08";
+		String path = createTempFile(contents);
+
+		// register table via DDL with watermark,
+		// the events are out of order, hence, we use 3 seconds to wait the late events
+		String ddl = "CREATE TABLE orders (\n" +
+			"  user_id INT,\n" +
+			"  product STRING,\n" +
+			"  amount INT,\n" +
+			"  ts TIMESTAMP(3),\n" +
+			"  WATERMARK FOR ts AS ts - INTERVAL '3' SECOND\n" +
+			") WITH (\n" +
+			"  'connector.type' = 'filesystem',\n" +
+			"  'connector.path' = '" + path + "',\n" +
+			"  'format.type' = 'csv'\n" +
+			")";
+		tEnv.sqlUpdate(ddl);
+
+		// run a SQL query on the table and retrieve the result as a new Table
+		String query = "SELECT\n" +
+			"  CAST(TUMBLE_START(ts, INTERVAL '5' SECOND) AS STRING) window_start,\n" +
+			"  COUNT(*) order_num,\n" +
+			"  SUM(amount) total_amount,\n" +
+			"  COUNT(DISTINCT product) unique_products\n" +
+			"FROM orders\n" +
+			"GROUP BY TUMBLE(ts, INTERVAL '5' SECOND)";
+		Table result = tEnv.sqlQuery(query);
+		tEnv.toAppendStream(result, Row.class).print();
+
+		// submit the job
+		tEnv.execute("Streaming Window SQL Job");
+
+		// should output:
+		// 2019-12-12 00:00:00.000,3,10,3
+		// 2019-12-12 00:00:05.000,3,6,2
+	}
+
+
 
 ```
 
+#### 原理解析
+``` java
 
 
+获取streamGraph
+public JobExecutionResult execute(String jobName) throws Exception {
+		Preconditions.checkNotNull(jobName, "Streaming Job name should not be null.");
+
+		JobExecutionResult.executeFlag = true;
+		return execute(getStreamGraph(jobName));
+	}
+
+
+执行streamGraph
+public JobClient executeAsync(StreamGraph streamGraph) throws Exception {
+		checkNotNull(streamGraph, "StreamGraph cannot be null.");
+		checkNotNull(configuration.get(DeploymentOptions.TARGET), "No execution.target specified in your configuration file.");
+
+		final PipelineExecutorFactory executorFactory =
+			executorServiceLoader.getExecutorFactory(configuration);
+
+		checkNotNull(
+			executorFactory,
+			"Cannot find compatible factory for specified execution.target (=%s)",
+			configuration.get(DeploymentOptions.TARGET));
+
+		CompletableFuture<JobClient> jobClientFuture = executorFactory
+			.getExecutor(configuration)
+			.execute(streamGraph, configuration);
+
+		try {
+			JobClient jobClient = jobClientFuture.get();
+			jobListeners.forEach(jobListener -> jobListener.onJobSubmitted(jobClient, null));
+			return jobClient;
+		} catch (Throwable t) {
+			jobListeners.forEach(jobListener -> jobListener.onJobSubmitted(null, t));
+			ExceptionUtils.rethrow(t);
+
+			// make javac happy, this code path will not be reached
+			return null;
+		}
+	}
+
+
+执行jobGraph
+	public static JobGraph getJobGraph(
+			Pipeline pipeline,
+			Configuration optimizerConfiguration,
+			int defaultParallelism) {
+
+		FlinkPipelineTranslator pipelineTranslator = getPipelineTranslator(pipeline);
+
+		return pipelineTranslator.translateToJobGraph(pipeline,
+				optimizerConfiguration,
+				defaultParallelism);
+	}
+
+   
+public CompletableFuture<JobClient> execute(Pipeline pipeline, Configuration configuration) throws Exception {
+		checkNotNull(pipeline);
+		checkNotNull(configuration);
+
+		// we only support attached execution with the local executor.
+		checkState(configuration.getBoolean(DeploymentOptions.ATTACHED));
+
+		final JobGraph jobGraph = getJobGraph(pipeline, configuration);
+		final MiniCluster miniCluster = startMiniCluster(jobGraph, configuration);
+		final MiniClusterClient clusterClient = new MiniClusterClient(configuration, miniCluster);
+
+		CompletableFuture<JobID> jobIdFuture = clusterClient.submitJob(jobGraph);
+
+		jobIdFuture
+				.thenCompose(clusterClient::requestJobResult)
+				.thenAccept((jobResult) -> clusterClient.shutDownCluster());
+
+		return jobIdFuture.thenApply(jobID ->
+				new ClusterClientJobClientAdapter<>(() -> clusterClient, jobID));
+	}
 ```
+
 ### TableEnvironment 应用 - 初始化
 1. createFlinkPlanner
 2. 
@@ -1361,6 +1749,32 @@ class ScalarSqlFunction(
 
 
 ```
+
+### 语句翻译 - Where 翻译成 datastream 算子
+1. SqlToOperationConverter.convert
+2. PlannerQueryOperation toQueryOperation
+3. PlannerQueryOperation
+4. TableImpl 保存所有 RelNode信息
+
+
+### 语句翻译 - Select 翻译成 datastream 算子
+
+
+### 语句翻译 - OrderBy 翻译成 datastream 算子
+
+
+### 语句翻译 - GroupBy 翻译成 datastream 算子
+
+### 语句翻译 - UDF 翻译成 datastream 算子
+
+
+### 语句翻译 - View 翻译成 datastream 算子
+
+
+
+## 纵向拆解 - Graph
+1. API/SQL -> Transformation -> StreamGraph -> JobGraph -> ExecutionGraph
+2. Batch -> OptimizedPlan -> JobGraph -> ExecutionGraph
 
 ## 纵向拆解 - 外部文件系统 like connector with file level 
 1. 是一个挂载插件-文件级别
@@ -1830,6 +2244,8 @@ jhat Downloads/container_e06_1712817925707_4195906_01_000226-2024_07_19_12_29_50
 3. pmap查看内存分布 pmap -x pid | sort -k 3 -n -r
    1. 使用文档：https://www.cnblogs.com/yinghao-liu/p/7287941.html
 4. 系统层面排查 gperftools
+5. 堆外内存排查工具
+   1. 
 
 ### jcmd结果
 ```
