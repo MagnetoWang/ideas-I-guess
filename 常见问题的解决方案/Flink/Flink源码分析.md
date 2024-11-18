@@ -54,7 +54,7 @@ flink + 公司项目
 
 ```
 
-### 核心问题
+### 核心思考问题
 1. flink为什么那么快
    1. 内存复制
       1. BufferEntry
@@ -62,13 +62,26 @@ flink + 公司项目
    3. 单条数据处理的关键路径
    4. 非常低的读写延迟（µs）
    5. 轻量稳定的 Checkpointing 流程
+   6. fs优化
+   7. memory优化
+   8. io优化
 2. flink如何保证稳定性
    1. 回滚机制
    2. 资源申请与释放
    3. 机器节点故障排查
    4. 状态恢复机制
-3. flink如何高效开发，测试，迭代和发布
-4. 进一步高效深入理解flink，需要结合峰会主题分享，挖掘高价值问题
+3. flink设计
+   1. dag 描述符 pipeline 和 Transformation
+   2. op ，function ， input 和 output 的父类和所有子类关系
+   3. 状态的应用
+   4. 时间水位线的应用
+4. flink如何高效开发，测试，迭代和发布
+   1. 代码如果看的越熟，开发效率越快。本身项目非常复杂，要想短时间内提高效率，那就只能多看代码解析的文章，帮助自己加速理解代码设计
+   2. 从这个文章2023年7月10号到今天 2024年11月18号，我算是勉强能上手并开发flink代码，所以整个过程还是比较漫长的，门槛有一定要求
+   3. 理解的过程中，直接看代码基本不现实，我是结合业务逻辑，业务报的异常，网络上的文章，不同公司落地视频分享，收集一些对flink的问题，spark和flink的异同点，流批一体的设计点和平时与同事的沟通聊天中
+   4. 整理了许多问题，这些问题是多角度的，带着问题作为入口再去看flink，就能一点点撕开flink的整个设计流程，最终又像网状结构耦合在一起。
+   5. 如果有人带是最好的，帮助你分析每个模块作用，模块与模块之间关系，甚至具体到类与类之间关系，以及类的设计含义，同时还能告诉你先看哪个模块，再看哪个模块，这样效率就能提高很多
+5. 进一步高效深入理解flink，需要结合峰会主题分享，挖掘高价值问题
    1. 带着高价值问题，再深入找重要技术细节
 
 
@@ -146,8 +159,7 @@ flink dag用法
 3. flink 向量化引擎 flash
    1. https://developer.aliyun.com/article/1634363
 
-## flink思考
-1. pipeline 和 Transformation
+
 
 ## 阅读笔记
 ### Streaming System 
@@ -733,6 +745,49 @@ Watermarked
 ### core
 
 
+### Funciton DualInputOperator 和 CopyingListCollector 实现一个最简易的流式计算
+1. flink-core/src/test/java/org/apache/flink/api/common/operators/base/InnerJoinOperatorBaseTest.java
+2. state checkpoint 和 watermark 都是附加
+
+```
+public void testJoinPlain(){
+		final FlatJoinFunction<String, String, Integer> joiner = new FlatJoinFunction<String, String, Integer>() {
+
+			@Override
+			public void join(String first, String second, Collector<Integer> out) throws Exception {
+				out.collect(first.length());
+				out.collect(second.length());
+			}
+		};
+
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		InnerJoinOperatorBase<String, String, Integer,
+						FlatJoinFunction<String, String,Integer> > base = new InnerJoinOperatorBase(joiner,
+				new BinaryOperatorInformation(BasicTypeInfo.STRING_TYPE_INFO, BasicTypeInfo.STRING_TYPE_INFO,
+						BasicTypeInfo.INT_TYPE_INFO), new int[0], new int[0], "TestJoiner");
+
+		List<String> inputData1 = new ArrayList<String>(Arrays.asList("foo", "bar", "foobar"));
+		List<String> inputData2 = new ArrayList<String>(Arrays.asList("foobar", "foo"));
+		List<Integer> expected = new ArrayList<Integer>(Arrays.asList(3, 3, 6 ,6));
+
+		try {
+			ExecutionConfig executionConfig = new ExecutionConfig();
+			executionConfig.disableObjectReuse();
+			List<Integer> resultSafe = base.executeOnCollections(inputData1, inputData2, null, executionConfig);
+			executionConfig.enableObjectReuse();
+			List<Integer> resultRegular = base.executeOnCollections(inputData1, inputData2, null, executionConfig);
+
+			assertEquals(expected, resultSafe);
+			assertEquals(expected, resultRegular);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+
+```
+
 ### core - memory
 
 ### core - io
@@ -1228,8 +1283,303 @@ Transformation关键成员变量说明
 ### api - watermark
 
 
+### api - timeservice
+1. TimerService extends ProcessingTimeService
+   1. org.apache.flink.streaming.api
+   2. org.apache.flink.cep.time
+
 
 ### runtime
+
+### runtime - tasks
+1. TwoInputStreamTask 执行任务基本单位
+   1. task任务链
+   2. transformTwoInputTransform -> streamGraph.addCoOperator -> StreamNode —> TwoInputStreamTask -> StreamTwoInputProcessor
+2. Task内置变量
+   1. WatermarkGauge
+   2. OperatorChain
+   3. TimerService
+   4. ExecutorService
+   5. RecordWriterDelegate
+   6. MailboxProcessor
+   7. TRIGGER_THREAD_GROUP
+   8. StreamInputProcessor
+
+#### Task类别
+```
+StreamTask.java
+TwoInputStreamTask.java
+SourceReaderStreamTask.java
+SourceStreamTask.java
+OneInputStreamTask.java
+AbstractTwoInputStreamTask.java
+
+
+```
+
+
+#### Transform -> Task
+```
+private Collection<Integer> transform(Transformation<?> transform) {
+
+		if (alreadyTransformed.containsKey(transform)) {
+			return alreadyTransformed.get(transform);
+		}
+
+		LOG.debug("Transforming " + transform);
+
+		if (transform.getMaxParallelism() <= 0) {
+
+			// if the max parallelism hasn't been set, then first use the job wide max parallelism
+			// from the ExecutionConfig.
+			int globalMaxParallelismFromConfig = executionConfig.getMaxParallelism();
+			if (globalMaxParallelismFromConfig > 0) {
+				transform.setMaxParallelism(globalMaxParallelismFromConfig);
+			}
+		}
+
+		// call at least once to trigger exceptions about MissingTypeInfo
+		transform.getOutputType();
+
+		Collection<Integer> transformedIds;
+		if (transform instanceof OneInputTransformation<?, ?>) {
+			transformedIds = transformOneInputTransform((OneInputTransformation<?, ?>) transform);
+		} else if (transform instanceof TwoInputTransformation<?, ?, ?>) {
+			transformedIds = transformTwoInputTransform((TwoInputTransformation<?, ?, ?>) transform);
+		} else if (transform instanceof SourceTransformation<?>) {
+			transformedIds = transformSource((SourceTransformation<?>) transform);
+		} else if (transform instanceof SinkTransformation<?>) {
+			transformedIds = transformSink((SinkTransformation<?>) transform);
+		} else if (transform instanceof UnionTransformation<?>) {
+			transformedIds = transformUnion((UnionTransformation<?>) transform);
+		} else if (transform instanceof SplitTransformation<?>) {
+			transformedIds = transformSplit((SplitTransformation<?>) transform);
+		} else if (transform instanceof SelectTransformation<?>) {
+			transformedIds = transformSelect((SelectTransformation<?>) transform);
+		} else if (transform instanceof FeedbackTransformation<?>) {
+			transformedIds = transformFeedback((FeedbackTransformation<?>) transform);
+		} else if (transform instanceof CoFeedbackTransformation<?>) {
+			transformedIds = transformCoFeedback((CoFeedbackTransformation<?>) transform);
+		} else if (transform instanceof PartitionTransformation<?>) {
+			transformedIds = transformPartition((PartitionTransformation<?>) transform);
+		} else if (transform instanceof SideOutputTransformation<?>) {
+			transformedIds = transformSideOutput((SideOutputTransformation<?>) transform);
+		} else {
+			throw new IllegalStateException("Unknown transformation: " + transform);
+		}
+
+		...
+
+		return transformedIds;
+	}
+
+
+
+
+	private <T> Collection<Integer> transformSelect(SelectTransformation<T> select) {
+		Transformation<T> input = select.getInput();
+		Collection<Integer> resultIds = transform(input);
+
+		// the recursive transform might have already transformed this
+		if (alreadyTransformed.containsKey(select)) {
+			return alreadyTransformed.get(select);
+		}
+
+		List<Integer> virtualResultIds = new ArrayList<>();
+
+		for (int inputId : resultIds) {
+			int virtualId = Transformation.getNewNodeId();
+			streamGraph.addVirtualSelectNode(inputId, virtualId, select.getSelectedNames());
+			virtualResultIds.add(virtualId);
+		}
+		return virtualResultIds;
+	}
+
+
+   private <T> Collection<Integer> transformSideOutput(SideOutputTransformation<T> sideOutput) {
+		Transformation<?> input = sideOutput.getInput();
+		Collection<Integer> resultIds = transform(input);
+
+		// the recursive transform might have already transformed this
+		if (alreadyTransformed.containsKey(sideOutput)) {
+			return alreadyTransformed.get(sideOutput);
+		}
+
+		List<Integer> virtualResultIds = new ArrayList<>();
+
+		for (int inputId : resultIds) {
+			int virtualId = Transformation.getNewNodeId();
+			streamGraph.addVirtualSideOutputNode(inputId, virtualId, sideOutput.getOutputTag());
+			virtualResultIds.add(virtualId);
+		}
+		return virtualResultIds;
+	}
+```
+
+#### Task -> Gate -> Processor -> StreamTaskNetworkOutput/StreamTaskNetworkInput -> AbstractStreamOperator
+```
+
+protected void createInputProcessor(
+		Collection<InputGate> inputGates1,
+		Collection<InputGate> inputGates2,
+		TypeSerializer<IN1> inputDeserializer1,
+		TypeSerializer<IN2> inputDeserializer2) throws IOException {
+
+		TwoInputSelectionHandler twoInputSelectionHandler = new TwoInputSelectionHandler(
+			headOperator instanceof InputSelectable ? (InputSelectable) headOperator : null);
+
+		InputGate unionedInputGate1 = InputGateUtil.createInputGate(inputGates1.toArray(new InputGate[0]));
+		InputGate unionedInputGate2 = InputGateUtil.createInputGate(inputGates2.toArray(new InputGate[0]));
+
+		// create a Input instance for each input
+		CheckpointedInputGate[] checkpointedInputGates = InputProcessorUtil.createCheckpointedInputGatePair(
+			this,
+			getConfiguration().getCheckpointMode(),
+			getEnvironment().getIOManager(),
+			unionedInputGate1,
+			unionedInputGate2,
+			getEnvironment().getTaskManagerInfo().getConfiguration(),
+			getEnvironment().getMetricGroup().getIOMetricGroup(),
+			getTaskNameWithSubtaskAndId());
+		checkState(checkpointedInputGates.length == 2);
+
+		inputProcessor = new StreamTwoInputProcessor<>(
+			checkpointedInputGates,
+			inputDeserializer1,
+			inputDeserializer2,
+			getCheckpointLock(),
+			getEnvironment().getIOManager(),
+			getStreamStatusMaintainer(),
+			headOperator,
+			twoInputSelectionHandler,
+			input1WatermarkGauge,
+			input2WatermarkGauge,
+			operatorChain,
+			setupNumRecordsInCounter(headOperator),
+			getEnvironment().getMetricGroup().getIOMetricGroup(),
+			getEnvironment().getTaskManagerInfo().getConfiguration());
+	}
+
+
+
+	public StreamTwoInputProcessor(
+			CheckpointedInputGate[] checkpointedInputGates,
+			TypeSerializer<IN1> inputSerializer1,
+			TypeSerializer<IN2> inputSerializer2,
+			Object lock,
+			IOManager ioManager,
+			StreamStatusMaintainer streamStatusMaintainer,
+			TwoInputStreamOperator<IN1, IN2, ?> streamOperator,
+			TwoInputSelectionHandler inputSelectionHandler,
+			WatermarkGauge input1WatermarkGauge,
+			WatermarkGauge input2WatermarkGauge,
+			OperatorChain<?, ?> operatorChain,
+			Counter numRecordsIn,
+			TaskIOMetricGroup metrics,
+			Configuration taskManagerConfig) {
+
+		this.lock = checkNotNull(lock);
+		this.inputSelectionHandler = checkNotNull(inputSelectionHandler);
+
+		this.recordProcessSamplingInterval = taskManagerConfig.getInteger(MetricOptions.RECORD_PROCESS_TIME_SAMPLING_INTERVAL);
+		if (recordProcessSamplingInterval > 0) {
+			this.recordProcessLatency = metrics.gauge("recordProcessLatency", new RecordLatency(128));
+		}
+
+		this.output1 = new StreamTaskNetworkOutput<>(
+			streamOperator,
+			record -> processRecord1(record, streamOperator, numRecordsIn),
+			lock,
+			streamStatusMaintainer,
+			input1WatermarkGauge,
+			0);
+		this.output2 = new StreamTaskNetworkOutput<>(
+			streamOperator,
+			record -> processRecord2(record, streamOperator, numRecordsIn),
+			lock,
+			streamStatusMaintainer,
+			input2WatermarkGauge,
+			1);
+
+		statusWatermarkValve1 = new StatusWatermarkValve(checkpointedInputGates[0].getNumberOfInputChannels(), output1);
+		this.input1 = new StreamTaskNetworkInput<>(
+			checkpointedInputGates[0],
+			inputSerializer1,
+			ioManager,
+			statusWatermarkValve1,
+			0);
+		statusWatermarkValve2 = new StatusWatermarkValve(checkpointedInputGates[1].getNumberOfInputChannels(), output2);
+		this.input2 = new StreamTaskNetworkInput<>(
+			checkpointedInputGates[1],
+			inputSerializer2,
+			ioManager,
+			statusWatermarkValve2,
+			1);
+
+		metrics.gauge("watermarkMaxDiffTime", () -> getWatermarkDifference());
+
+		this.operatorChain = checkNotNull(operatorChain);
+	}
+
+```
+
+### runtime - reocord传输
+
+#### 输入
+```
+public interface PushingAsyncDataInput<T> extends AvailabilityProvider {
+
+	/**
+	 * Pushes the next element to the output from current data input, and returns
+	 * the input status to indicate whether there are more available data in
+	 * current input.
+	 *
+	 * <p>This method should be non blocking.
+	 */
+	InputStatus emitNext(DataOutput<T> output) throws Exception;
+}
+
+
+public interface PullingAsyncDataInput<T> extends AvailabilityProvider {
+	/**
+	 * Poll the next element. This method should be non blocking.
+	 *
+	 * @return {@code Optional.empty()} will be returned if there is no data to return or
+	 * if {@link #isFinished()} returns true. Otherwise {@code Optional.of(element)}.
+	 */
+	Optional<T> pollNext() throws Exception;
+
+	/**
+	 * @return true if is finished and for example end of input was reached, false otherwise.
+	 */
+	boolean isFinished();
+}
+
+
+```
+
+
+#### 输出
+```
+
+	/**
+	 * Basic data output interface used in emitting the next element from data input.
+	 *
+	 * @param <T> The type encapsulated with the stream record.
+	 */
+	interface DataOutput<T> {
+
+		void emitRecord(StreamRecord<T> streamRecord) throws Exception;
+
+		void emitWatermark(Watermark watermark) throws Exception;
+
+		void emitStreamStatus(StreamStatus streamStatus) throws Exception;
+
+		void emitLatencyMarker(LatencyMarker latencyMarker) throws Exception;
+	}
+
+```
+
 
 ### runtime - StreamElement
 
@@ -1259,6 +1609,9 @@ Transformation关键成员变量说明
 
 ### 资料
 1. FlinkSQL源码解析（一）转换流程：https://blog.csdn.net/Yuan_CSDF/article/details/123397988
+2. SQL内部执行流程：https://ik3te1knhq.feishu.cn/wiki/ZuEuwK1JuiVRMCkJZeec0saanug
+3. 图解flink sql应用提交方式（二）https://www.aboutyun.com/thread-31754-1-1.html
+4. 大量图解：https://mp.weixin.qq.com/s/ak9s2gUw6On7WwoiduEhYQ?
 
 ### SQL 流程 - 入口
 1. tEnv.sqlQuery("SELECT * FROM tableName");
@@ -1507,8 +1860,8 @@ PlannerQueryOperation
 ### SQL 流程 - 执行
 1. Executor
    1. StreamExecutor
-2. 
-   1. StreamExecutionEnvironment
+2. StreamExecutionEnvironment
+3. 用代码把中间的数据类型全部打印出来看看
 #### Demo
 ```java
 	public static void main(String[] args) throws Exception {
@@ -1627,7 +1980,7 @@ public JobClient executeAsync(StreamGraph streamGraph) throws Exception {
 				defaultParallelism);
 	}
 
-   
+
 public CompletableFuture<JobClient> execute(Pipeline pipeline, Configuration configuration) throws Exception {
 		checkNotNull(pipeline);
 		checkNotNull(configuration);
