@@ -1,4 +1,27 @@
 ## Pytorch
+
+## 目录参考
+1. 理解时间
+2. 背景介绍
+3. 参考资料
+4. 核心思考问题
+5. 入门概念
+6. 阅读笔记
+7. 项目工作流
+8. 技术流图和图解
+9.  源码目录
+10. 模块拆解-横向
+11. 模块拆解-纵向
+12. 性能总结
+13. 设计总结
+14. 经验总结
+15. 第三方依赖
+16. 应用场景
+17. 业务通点
+18. 行业实践
+19. case代码
+
+
 ### 理解时间
 ```
 2024年2月18号启动
@@ -6,6 +29,11 @@
 永远带着问题/需求/目标/兴趣/收益看代码
 
 源码理解角度
+   高层次流图分析 - 更好把握主次
+    比如大数据框架 考虑流式计算范式
+    比如机器学习框架 考虑数学计算流图
+    共性分析数据格式 存储 读写 和 网络流图
+    业务使用流程图和场景图
    横向梳理所有模块
    纵向梳理某个功能点
    编译角度
@@ -44,27 +72,46 @@ Pytorch + 公司项目
 
 ```
 
+### 核心思考问题
+1. pytorch如何一步步发展起来的，社区和生态是如何成长的
+2. 最会用pytorch的人和文章
+3. 最懂pytorch原理的人和文章
+4. 高度依赖pytorch二次开发的开源项目
+
 ### TODO - 必看必做
 1. 如何提高自己的代码能力以达到熟练使用pytorch? - pythonic生物人的回答 - 知乎 https://www.zhihu.com/question/352525266/answer/3356272708
-2. 
+2. 如何提高自己的代码能力以达到熟练使用pytorch? - 知乎 https://www.zhihu.com/question/352525266
+3. 如何提高自己的代码能力以达到熟练使用pytorch? - 观光居士的回答 - 知乎 https://www.zhihu.com/question/352525266/answer/3395318281
 
 ### 参考资料
-1. PyTorch 2.0 重磅发布：编译、编译、还是编译 https://hyper.ai/news/22891
-2. 万字综述，核心开发者全面解读PyTorch内部机制 https://mp.weixin.qq.com/s/8J-vsOukt7xwWQFtwnSnWw
-3. 如何提高自己的代码能力以达到熟练使用pytorch? - 王阿骆的回答 - 知乎 https://www.zhihu.com/question/352525266/answer/3395318281
-4. PyTorch显存管理介绍与源码解析（一） - kaiyuan的文章 - 知乎 https://zhuanlan.zhihu.com/p/680769942
-5. 20天吃透Pytorch https://www.pytorchmaster.com/1-1%2C%E7%BB%93%E6%9E%84%E5%8C%96%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1%E6%B5%81%E7%A8%8B%E8%8C%83%E4%BE%8B/
-6. Pytorch 模型部署到服务器有没有什么好的方案? - DefTruth的回答 - 知乎 https://www.zhihu.com/question/394121546/answer/2322922488
-7. 如何看/学习tensorflow的所有函数C/C++源码？ - DefTruth的回答 - 知乎 https://www.zhihu.com/question/332152176/answer/2285671222
-8. Pytorch格式 .pt .pth .bin .onnx 详解 - 薛定谔的问题的文章 - 知乎 https://zhuanlan.zhihu.com/p/620688513
-9. 【最全算法工程师面经】工程部署篇 - Alone的文章 - 知乎 https://zhuanlan.zhihu.com/p/689895960
-10. pytorch资源：https://zhuanlan.zhihu.com/p/28475866
-    1.  attention实现：https://github.com/jadore801120/attention-is-all-you-need-pytorch
-    2.  DeepLearningForNLPInPytorch：https://github.com/rguthrie3/DeepLearningForNLPInPytorch
-    3.  一个开放领域问答系统DrQA的PyTorch实现：https://github.com/facebookresearch/DrQA
-11. PyTorch Metric Learning Overview：https://github.com/KevinMusgrave/pytorch-metric-learning?tab=readme-ov-file
-12. 推理
+1. 重要发布
+   1. pytorch2024：https://www.youtube.com/watch?v=9VFHuGaq7SU
+   2. PyTorch 2.0 重磅发布：编译、编译、还是编译 https://hyper.ai/news/22891
+2. 技术文章
+   1. 万字综述，核心开发者全面解读PyTorch内部机制 https://mp.weixin.qq.com/s/8J-vsOukt7xwWQFtwnSnWw
+   2. 如何提高自己的代码能力以达到熟练使用pytorch? - 王阿骆的回答 - 知乎 https://www.zhihu.com/question/352525266/answer/3395318281
+   3. PyTorch显存管理介绍与源码解析（一） - kaiyuan的文章 - 知乎 https://zhuanlan.zhihu.com/p/680769942
+   4. 20天吃透Pytorch https://www.pytorchmaster.com/1-1%2C%E7%BB%93%E6%9E%84%E5%8C%96%E6%95%B0%E6%8D%AE%E5%BB%BA%E6%A8%A1%E6%B5%81%E7%A8%8B%E8%8C%83%E4%BE%8B/
+   5. Pytorch 模型部署到服务器有没有什么好的方案? - DefTruth的回答 - 知乎 https://www.zhihu.com/question/394121546/answer/2322922488
+   6. 如何看/学习tensorflow的所有函数C/C++源码？ - DefTruth的回答 - 知乎 https://www.zhihu.com/question/332152176/answer/2285671222
+   7.  Pytorch格式 .pt .pth .bin .onnx 详解 - 薛定谔的问题的文章 - 知乎 https://zhuanlan.zhihu.com/p/620688513
+3. pytorch资源：https://zhuanlan.zhihu.com/p/28475866
+    1. attention实现：https://github.com/jadore801120/attention-is-all-you-need-pytorch
+    2. DeepLearningForNLPInPytorch：https://github.com/rguthrie3/DeepLearningForNLPInPytorch
+    3. 一个开放领域问答系统DrQA的PyTorch实现：https://github.com/facebookresearch/DrQA
+    4. PyTorch Metric Learning Overview：https://github.com/KevinMusgrave/pytorch-metric-learning?tab=readme-ov-file
+4. 推理
     1. 模型推理服务化框架Triton保姆式教程：https://juejin.cn/post/7232571353122177082
+    2. triton：https://github.com/triton-lang/triton
+    3. triton论文：https://www.eecs.harvard.edu/~htk/publication/2019-mapl-tillet-kung-cox.pdf
+5. 优质blog
+    1. 腾讯工程师 hurray ：https://hurray0.com/menu/151/
+    2. 阿里巴巴达摩院算法专家 祖新星：https://www.zhihu.com/people/patrick-zz/posts
+    3. 【最全算法工程师面经】工程部署篇 - Alone的文章 - 知乎 https://zhuanlan.zhihu.com/p/689895960
+6. 源码
+    1. 模型实现：https://github.com/bobo0810/PytorchNetHub
+7. 面试
+   1. 50 Must-Know PyTorch Interview Questions：https://github.com/Devinterview-io/pytorch-interview-questions
 
 
 
@@ -244,6 +291,9 @@ github/pytorch/aten/src/ATen/native/Dropout.cpp
 
 ```
    
+## 大纲
+1. 通信
+   1. 分布式通信：https://mp.weixin.qq.com/s/N0ivo96jF4XO3_eSCwZl5Q
 
 ## 源码解析 - 横向结构
 1. dispatch 机制
@@ -439,6 +489,9 @@ torch.autograd.set_detect_anomaly(True)
 ```
 
 
+
+## 横向结构 - checkpoint
+1. 【pytorch】重计算checkpoint机制 - Joe.Zhao的文章 - 知乎 https://zhuanlan.zhihu.com/p/711615560
 
 
 
@@ -855,7 +908,8 @@ https://github.com/pytorch/pytorch/wiki/Dev-Infra-Office-Hours
 ```
 
 
-## test - 从测试用例看pytorch
+## 测试 - 从测试用例看pytorch
+
 
 ### HowToWriteTestsUsingFileCheck.md
 ```
@@ -1164,154 +1218,17 @@ graph(%self : __torch__.LinearMod,
 
 ### cuda
 
-## 横向拆解 - checkpoint
-1. 【pytorch】重计算checkpoint机制 - Joe.Zhao的文章 - 知乎 https://zhuanlan.zhihu.com/p/711615560
+
+## 算子层
 
 
-## 自定义网络结构和模型
-### pytorch
-1. 官方：https://pytorch.org/docs/stable/notes/modules.html
-2. 手写 vs torch vs torch autograd vs nn：https://blog.csdn.net/jiangchao98/article/details/114538161
-3. 使用Module类来自定义模型：https://blog.csdn.net/qq_27825451/article/details/90550890
-
-#### LeNet
-```
-import torch
- 
-class MyNet(torch.nn.Module):
-    def __init__(self):
-        super(MyNet, self).__init__()  # 第一句话，调用父类的构造函数
-        self.conv1 = torch.nn.Conv2d(3, 32, 3, 1, 1)
-        self.relu1=torch.nn.ReLU()
-        self.max_pooling1=torch.nn.MaxPool2d(2,1)
- 
-        self.conv2 = torch.nn.Conv2d(3, 32, 3, 1, 1)
-        self.relu2=torch.nn.ReLU()
-        self.max_pooling2=torch.nn.MaxPool2d(2,1)
- 
-        self.dense1 = torch.nn.Linear(32 * 3 * 3, 128)
-        self.dense2 = torch.nn.Linear(128, 10)
- 
-    def forward(self, x):
-        x = self.conv1(x)
-        x = self.relu1(x)
-        x = self.max_pooling1(x)
-        x = self.conv2(x)
-        x = self.relu2(x)
-        x = self.max_pooling2(x)
-        x = self.dense1(x)
-        x = self.dense2(x)
-        return x
- 
-model = MyNet()
-print(model)
+## IR层
 
 
-```
+## Python层
 
 
-### paddle
-1. paddle：https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/advanced/layer_and_model_cn.html#layer
-2. 使用 paddle.nn.Sequential 组网
-3. 使用 paddle.nn.Layer 组网
-4. transformer实现：https://zhuanlan.zhihu.com/p/446809976
-
-#### LeNet
-```
-from paddle import nn
-
-# 使用 paddle.nn.Sequential 构建 LeNet 模型
-lenet_Sequential = nn.Sequential(
-    nn.Conv2D(1, 6, 3, stride=1, padding=1),
-    nn.ReLU(),
-    nn.MaxPool2D(2, 2),
-    nn.Conv2D(6, 16, 5, stride=1, padding=0),
-    nn.ReLU(),
-    nn.MaxPool2D(2, 2),
-    nn.Flatten(),
-    nn.Linear(400, 120),
-    nn.Linear(120, 84), 
-    nn.Linear(84, 10)
-)
-# 可视化模型组网结构和参数
-paddle.summary(lenet_Sequential,(1, 1, 28, 28))
-
-
----------------------------------------------------------------------------
- Layer (type)       Input Shape          Output Shape         Param #    
-===========================================================================
-   Conv2D-3       [[1, 1, 28, 28]]      [1, 6, 28, 28]          60       
-    ReLU-3        [[1, 6, 28, 28]]      [1, 6, 28, 28]           0       
-  MaxPool2D-3     [[1, 6, 28, 28]]      [1, 6, 14, 14]           0       
-   Conv2D-4       [[1, 6, 14, 14]]     [1, 16, 10, 10]         2,416     
-    ReLU-4       [[1, 16, 10, 10]]     [1, 16, 10, 10]           0       
-  MaxPool2D-4    [[1, 16, 10, 10]]      [1, 16, 5, 5]            0       
-   Flatten-1      [[1, 16, 5, 5]]          [1, 400]              0       
-   Linear-4          [[1, 400]]            [1, 120]           48,120     
-   Linear-5          [[1, 120]]            [1, 84]            10,164     
-   Linear-6          [[1, 84]]             [1, 10]              850      
-===========================================================================
-Total params: 61,610
-Trainable params: 61,610
-Non-trainable params: 0
----------------------------------------------------------------------------
-Input size (MB): 0.00
-Forward/backward pass size (MB): 0.11
-Params size (MB): 0.24
-Estimated Total Size (MB): 0.35
----------------------------------------------------------------------------
-
-
-
-
-
-
-{'total_params': 61610, 'trainable_params': 61610}
-
-
-
-# 使用 Subclass 方式构建 LeNet 模型
-class LeNet(nn.Layer):
-    def __init__(self, num_classes=10):
-        super().__init__()
-        self.num_classes = num_classes
-        # 构建 features 子网，用于对输入图像进行特征提取
-        self.features = nn.Sequential(
-            nn.Conv2D(
-                1, 6, 3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2D(2, 2),
-            nn.Conv2D(
-                6, 16, 5, stride=1, padding=0),
-            nn.ReLU(),
-            nn.MaxPool2D(2, 2))
-        # 构建 linear 子网，用于分类
-        if num_classes > 0:
-            self.linear = nn.Sequential(
-                nn.Linear(400, 120),
-                nn.Linear(120, 84), 
-                nn.Linear(84, num_classes)
-            )
-    # 执行前向计算
-    def forward(self, inputs):
-        x = self.features(inputs)
-
-        if self.num_classes > 0:
-            x = paddle.flatten(x, 1)
-            x = self.linear(x)
-        return x
-lenet_SubClass = LeNet()
-
-# 可视化模型组网结构和参数
-params_info = paddle.summary(lenet_SubClass,(1, 1, 28, 28))
-print(params_info)
-
-
-
-```
-
-
-## 应用
+## 应用层
 
 ### 基础概念
 1. stripe
@@ -1481,6 +1398,150 @@ model = NeuralNet(input_size, hidden_size, num_classes).to(device)
 
 
 ```
+
+
+
+### 自定义网络结构和模型 - pytorch
+1. 官方：https://pytorch.org/docs/stable/notes/modules.html
+2. 手写 vs torch vs torch autograd vs nn：https://blog.csdn.net/jiangchao98/article/details/114538161
+3. 使用Module类来自定义模型：https://blog.csdn.net/qq_27825451/article/details/90550890
+
+#### LeNet
+```
+import torch
+ 
+class MyNet(torch.nn.Module):
+    def __init__(self):
+        super(MyNet, self).__init__()  # 第一句话，调用父类的构造函数
+        self.conv1 = torch.nn.Conv2d(3, 32, 3, 1, 1)
+        self.relu1=torch.nn.ReLU()
+        self.max_pooling1=torch.nn.MaxPool2d(2,1)
+ 
+        self.conv2 = torch.nn.Conv2d(3, 32, 3, 1, 1)
+        self.relu2=torch.nn.ReLU()
+        self.max_pooling2=torch.nn.MaxPool2d(2,1)
+ 
+        self.dense1 = torch.nn.Linear(32 * 3 * 3, 128)
+        self.dense2 = torch.nn.Linear(128, 10)
+ 
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.relu1(x)
+        x = self.max_pooling1(x)
+        x = self.conv2(x)
+        x = self.relu2(x)
+        x = self.max_pooling2(x)
+        x = self.dense1(x)
+        x = self.dense2(x)
+        return x
+ 
+model = MyNet()
+print(model)
+
+
+```
+
+
+### 自定义网络结构和模型 - paddle
+1. paddle：https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/advanced/layer_and_model_cn.html#layer
+2. 使用 paddle.nn.Sequential 组网
+3. 使用 paddle.nn.Layer 组网
+4. transformer实现：https://zhuanlan.zhihu.com/p/446809976
+
+#### LeNet
+```
+from paddle import nn
+
+# 使用 paddle.nn.Sequential 构建 LeNet 模型
+lenet_Sequential = nn.Sequential(
+    nn.Conv2D(1, 6, 3, stride=1, padding=1),
+    nn.ReLU(),
+    nn.MaxPool2D(2, 2),
+    nn.Conv2D(6, 16, 5, stride=1, padding=0),
+    nn.ReLU(),
+    nn.MaxPool2D(2, 2),
+    nn.Flatten(),
+    nn.Linear(400, 120),
+    nn.Linear(120, 84), 
+    nn.Linear(84, 10)
+)
+# 可视化模型组网结构和参数
+paddle.summary(lenet_Sequential,(1, 1, 28, 28))
+
+
+---------------------------------------------------------------------------
+ Layer (type)       Input Shape          Output Shape         Param #    
+===========================================================================
+   Conv2D-3       [[1, 1, 28, 28]]      [1, 6, 28, 28]          60       
+    ReLU-3        [[1, 6, 28, 28]]      [1, 6, 28, 28]           0       
+  MaxPool2D-3     [[1, 6, 28, 28]]      [1, 6, 14, 14]           0       
+   Conv2D-4       [[1, 6, 14, 14]]     [1, 16, 10, 10]         2,416     
+    ReLU-4       [[1, 16, 10, 10]]     [1, 16, 10, 10]           0       
+  MaxPool2D-4    [[1, 16, 10, 10]]      [1, 16, 5, 5]            0       
+   Flatten-1      [[1, 16, 5, 5]]          [1, 400]              0       
+   Linear-4          [[1, 400]]            [1, 120]           48,120     
+   Linear-5          [[1, 120]]            [1, 84]            10,164     
+   Linear-6          [[1, 84]]             [1, 10]              850      
+===========================================================================
+Total params: 61,610
+Trainable params: 61,610
+Non-trainable params: 0
+---------------------------------------------------------------------------
+Input size (MB): 0.00
+Forward/backward pass size (MB): 0.11
+Params size (MB): 0.24
+Estimated Total Size (MB): 0.35
+---------------------------------------------------------------------------
+
+
+
+
+
+
+{'total_params': 61610, 'trainable_params': 61610}
+
+
+
+# 使用 Subclass 方式构建 LeNet 模型
+class LeNet(nn.Layer):
+    def __init__(self, num_classes=10):
+        super().__init__()
+        self.num_classes = num_classes
+        # 构建 features 子网，用于对输入图像进行特征提取
+        self.features = nn.Sequential(
+            nn.Conv2D(
+                1, 6, 3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2D(2, 2),
+            nn.Conv2D(
+                6, 16, 5, stride=1, padding=0),
+            nn.ReLU(),
+            nn.MaxPool2D(2, 2))
+        # 构建 linear 子网，用于分类
+        if num_classes > 0:
+            self.linear = nn.Sequential(
+                nn.Linear(400, 120),
+                nn.Linear(120, 84), 
+                nn.Linear(84, num_classes)
+            )
+    # 执行前向计算
+    def forward(self, inputs):
+        x = self.features(inputs)
+
+        if self.num_classes > 0:
+            x = paddle.flatten(x, 1)
+            x = self.linear(x)
+        return x
+lenet_SubClass = LeNet()
+
+# 可视化模型组网结构和参数
+params_info = paddle.summary(lenet_SubClass,(1, 1, 28, 28))
+print(params_info)
+
+
+
+```
+
 
 ## 高阶模型结构示例
 ### CNN
@@ -1677,6 +1738,28 @@ model = ResNet(ResidualBlock, [2, 2, 2]).to(device)
 
 
 ```
+
+
+### Hugging Face模型库
+
+
+## 多机多卡
+
+###  FAIR fairscale
+1. https://github.com/facebookresearch/fairscale.git
+
+### Deepspeed
+1. https://github.com/microsoft/DeepSpeed.git
+2. 优质blog
+   1. emiya：https://www.zhihu.com/people/emiya-98/posts/posts_by_votes
+3. 技术文章
+   1. [DeepSpeedZERO-01] 引言 - emiya的文章 - 知乎 https://zhuanlan.zhihu.com/p/712648380
+   2. 数据并行：https://mp.weixin.qq.com/s/b2_SBwOpPp8MKSQwgjSm6w?poc_token=HIwRO2ejppL588fF3zl3P3zTmxODZHNdVZiOXoxF
+   3. 关于Deepspeed的一些总结与心得：https://zhuanlan.zhihu.com/p/650824387
+   4. Deepspeed并行框架介绍--ZeRO去除冗余的并行方案 - 汀丶人工智能技术的文章 - 知乎 https://zhuanlan.zhihu.com/p/7358856302
+   5. 如何评价微软开源的分布式训练框架deepspeed？ - 西门宇少的回答 - 知乎 https://www.zhihu.com/question/371094177/answer/2344166394
+
+
 
 ## 附录
 ### 编译库顺序

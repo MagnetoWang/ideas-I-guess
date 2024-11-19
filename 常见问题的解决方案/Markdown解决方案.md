@@ -87,3 +87,50 @@ cond3(yes)->value->e
 cond1(no)->none->e
 cond2(no)->none->e
 cond3(no)->none->e
+
+
+
+## 数学公式
+1. 公式语法：https://www.cnblogs.com/bytesfly/p/markdown-formula.html
+2. 需要 $公式语法$ 框起来
+3. [转]Markdown数学符号 - 李睿的文章 - 知乎 https://zhuanlan.zhihu.com/p/2293107002
+4. https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/writing-mathematical-expressions
+5. https://www.mathjax.org/
+6. latex语法：https://qyxf.github.io/2020/01/03/latex-formula-beginner
+   1. 粗体（bold font shape），可以用 \mathbf 命令
+   2. 镂空粗体（blackboard bold）字符，应使用 \mathbb 命令
+   3. 花体（calligraphical） \mathcal 与文本体（script） \mathscr
+   4. 一对命令 \Bigl 与 \Bigr 吸附在左右括号之前，调整了其大小
+
+$\text{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2$
+
+$\rightarrow$
+
+$\leftarrow$
+
+$\sqrt{3x-1}+(1+x)^2$
+
+
+$$\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)$$
+
+$f(x) = \Bigl( \frac{a^x}{b} \Bigr)$
+
+$f(x) = \left( \frac{a^x}{b} \right)$
+
+
+矩阵
+- 自带圆括号 ()的 pmatrix 环境；
+- 自带方括号 []的 bmatrix 环境；
+- 自带花括号 {}的 Bmatrix 环境；
+- 自带绝对值界的 vmatrix 环境与自带范数界的 Vmatrix 
+$\begin{matrix}
+a & b & c\\
+d & e & f
+\end{matrix}$
+
+
+```math
+\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)
+```
+
+$0.98^{365} \approx 0.0006$

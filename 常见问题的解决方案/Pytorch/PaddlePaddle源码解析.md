@@ -32,11 +32,70 @@ PaddlePaddle + 公司项目
 
 
 ```
+
+## 核心思考问题
+1. 编译 测试 和 自动跳转功能
+2. paddle和flink看的顺序不一样，flink是java，可以根据package，横向拆解，一层层看代码，有简单模块，看向复杂模块。但是paddle是c++，横向拆解不够粗粒度，只能纵向拆解，先串通整个流程设计的概念，再从源码编译顺序看看怎么横向分层
+3. 
+
 ## 参考资料
 1. 飞桨框架v2.4 API新升级！全面支持稀疏计算、图学习、语音处理等任务：https://mp.weixin.qq.com/s/8IYYEbJqIjyWd2zO7TGGFw
 2. PaddleBox：百度基于GPU的超大规模离散DNN模型训练解决方案：https://mp.weixin.qq.com/s/o-ZoRnAMnINGHVALj7DQRA
 3. 大模型时代的异构计算平台：https://mp.weixin.qq.com/s/ZAP_8ZwkZ295I225QTh9Yw
-4. 
+4. 委员会
+   1. https://github.com/PaddlePaddle/community/tree/master/pposdwg
+5. 技术分享
+   1. 训练营：https://github.com/PFCCLab/Camp?tab=readme-ov-file
+   2. 代码串讲：https://github.com/PFCCLab/Camp
+   3. 读书会：https://github.com/PaddlePaddle/community/tree/master/pfcc/paddle-code-reading
+   4. pfcc：https://pfcc.blog/
+   5. 周会：https://github.com/PaddlePaddle/community/tree/master/pfcc
+   6. code reading：https://github.com/PaddlePaddle/community/tree/master/pfcc/paddle-code-reading
+6. 性能优化
+   1. 模型优化：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-performance-opt/model_perf.md
+   2. 编译器优化理论SSA
+7. blog
+   1. Zerorains：https://space.keter.top/docs/high_performance/%E7%AE%97%E5%AD%90%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/Histogram
+   2. State of PyTorch：https://pfcc.blog/posts/pytorch-conference-01
+8. 黑客松
+   1. Hackathon 1th：https://github.com/PaddlePaddle/Paddle/issues/35940
+   2. Hackathon 2th：https://github.com/PaddlePaddle/Paddle/issues/40234
+   3. Hackathon 3th：https://github.com/PaddlePaddle/Paddle/issues/43938
+   4. Hackathon 4th：https://github.com/PaddlePaddle/Paddle/issues/51281
+   5. Hackathon 5th：https://github.com/PaddlePaddle/docs/blob/release/2.5/docs/guides/10_contribution/hackathon_cn.md
+   6. Hackathon 6th：https://github.com/PaddlePaddle/Paddle/issues/62907
+   7. Hackathon 7th：https://github.com/PaddlePaddle/Paddle/issues/68242
+9.  人物经历
+    1. nknan：https://pfcc.blog/posts/nknan-story
+       1. https://github.com/NKNaN
+    2. https://pfcc.blog/posts/wangxin-story
+    3. https://pfcc.blog/posts/tao-story
+    4. https://pfcc.blog/posts/zhangyiqiao-story 说话挺搞笑的，哈哈哈
+    5. https://pfcc.blog/posts/sanbu-story
+
+
+## 文章分享
+1. Pir Parser实现分享：https://github.com/PFCCLab/Camp/blob/main/Docs/Hackathon_5th/01_PIR_OpTestFixingAndProgramTranslatorRefinement/pir_parser_implementation_sharing.md
+2. PIR 组网 API：https://github.com/PFCCLab/Camp/blob/main/Docs/Hackathon_5th/03_NewIRAPI_AutoDiffAndCoreComponentRefinement/CodeReading/Over_view_PIR_construct_API_As_CodeGen_perspective.md
+3. codegen：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/code_gen/code_gen_ops.md
+4. 算子组合机制：https://github.com/PFCCLab/Camp/blob/main/Docs/Hackathon_5th/04_TheUnityOfOperatorForwardAndBackwardInCombinationFeatures/CodeReading/the_unity_of_operator_forward_and_backward_in_combination_features.md
+5. Paddle静态图并行编排与执行流程：https://github.com/PFCCLab/Camp/blob/main/Docs/Hackathon_5th/10_StaticGraph_Semi-AutomaticParallel_ExecutionFrameworkUpgrade/CodeReading/1-paddle_static_graph_pipelining.md
+6. 代码层面熟悉 PIR：https://github.com/PFCCLab/Camp/blob/main/Docs/Hackathon_5th/19_PIR_Adapt_CINN/CodeReading/PIR_source_code_reading_guide.md
+7. ZB VPP 实现方案：https://github.com/PFCCLab/Camp/blob/main/Docs/Hackathon_6th/10_Static_Graph_semi-automatic_parallel_training_performance_optimization/zb_vpp_design.md
+
+
+### sonder blog
+1. 入门经历，按顺序看
+   1. https://space.keter.top/docs/high_performance/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A1%86%E6%9E%B6%E5%BC%80%E5%8F%91/Paddle%E9%85%8D%E7%BD%AETensorrt
+   2. https://space.keter.top/docs/high_performance/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A1%86%E6%9E%B6%E5%BC%80%E5%8F%91/Paddle%E7%AE%97%E5%AD%90%E5%BC%80%E5%8F%91
+   3. https://space.keter.top/docs/high_performance/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A1%86%E6%9E%B6%E5%BC%80%E5%8F%91/%E9%9D%99%E6%80%81%E5%9B%BE%E7%BB%84%E7%BD%91%E8%BF%87%E7%A8%8B
+   4. https://space.keter.top/docs/high_performance/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A1%86%E6%9E%B6%E5%BC%80%E5%8F%91/%E9%9D%99%E6%80%81%E5%9B%BE%E6%89%A7%E8%A1%8C%E8%BF%87%E7%A8%8B
+   5. https://space.keter.top/docs/high_performance/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A1%86%E6%9E%B6%E5%BC%80%E5%8F%91/TensorRT%E7%AE%97%E5%AD%90%E5%BC%80%E5%8F%91
+
+## paddle vs pytorch
+1. paddle所有运营活动在github，但是运营内容都是中文，没有通过微信或者官网得到很好关键词挖掘
+   1. 搜 paddle 技术串讲 在google和baidu是两个不一样的结果。中国人其实更容易学paddle，但是获取相关信息渠道出了问题
+2. 活动很多，但是没有统一首页管理
 
 ## 基本概念
 1. ao
@@ -53,6 +112,8 @@ PaddlePaddle + 公司项目
 10. sparse
 11. pruning
 
+
+
 ## 基本函数
 1. unsqueeze
 2. unique
@@ -61,6 +122,35 @@ PaddlePaddle + 公司项目
 5. arange
 6. clamp or clip
 7. no_grad 禁止梯度计算
+
+## pytorch字典
+1. https://openmlsys.github.io/chapter_backend_and_runtime/compute_schedule_and_execute.html
+
+
+## 流图
+
+### 程序语言角度
+
+
+
+### 数据流角度
+
+
+### 算子图角度
+
+
+### 数学公式角度
+
+
+### TorchScript
+1. ts教程：https://pytorch.org/tutorials/beginner/Intro_to_TorchScript_tutorial.html
+2. ts中文教程：https://pytorch.panchuang.net/EigthSection/torchScript/
+
+
+### onnx
+1. onnx文件及其结构：https://blog.csdn.net/Rolandxxx/article/details/127713806
+2. pd文件：https://gitcode.com/gh_mirrors/onn/onnx/blob/main/onnx/onnx.proto
+3. IR：https://github.com/onnx/onnx/blob/main/docs/IR.md
 
 ## 源码
 ### 编译
@@ -164,7 +254,408 @@ PaddlePaddle + 公司项目
    4. auto_schedule
    5. ir compiler runtime framework frontend
 
+### 横向拆解 - 第三方依赖
+1. extern_zlib
+2. extern_threadpool
+3. extern_dlpack
+4. extern_gflags
+5. extern_eigen3
+6. extern_mklml
+7. extern_mkldnn
 
+### 横向拆解 - 协议结构
+1. framework_proto
+2. phi_profiler_proto
+3. auto_parallel_proto
+
+
+### 横向拆解 - 基础能力 flags & errors & monitor & pretty_log
+
+
+### 横向拆解 - mkldnn
+
+### 横向拆解 - phi_place
+
+
+### 横向拆解 - data_type
+
+
+
+
+### 横向拆解 - activation_functions
+
+
+### 横向拆解 - phi_device_tracer
+
+
+### 横向拆解 - phi_c_place
+
+### 横向拆解 - eager_python_c_codegen
+
+### 横向拆解 - op_def_api
+
+
+### 横向拆解 - op_map_codegen
+
+
+### 横向拆解 - eager_codegen
+
+
+### 横向拆解 - tensor_base
+
+### 横向拆解 - prune
+
+
+### 横向拆解 - ddim
+
+
+### 横向拆解 - mlu_tracer
+
+
+
+
+### 纵向拆解 - 静态图执行
+1. https://github.com/PFCCLab/Camp/blob/main/WeeklyReports/Hackathon_5th/01_xingmingyyj/xingmingyyj2023.10.10-2023.10.24.md
+
+
+### 纵向拆解 - Pass 体系
+1. Pass 的核心是子图匹配和替换（即图变换），是将一个 Program 通过某种规则转换为另一个新的 Program。IR 中包含了计算图中全局信息，如上下游算子的邻接关系等，更有利于进行图优化，比如常量折叠、算子融合，Inplace 策略等：
+2. 提供了 2 种 Pass 开发范式：Pattern Rewriter 和 Declarative Rewrite Rule（简称 DRR）
+
+
+### 纵向拆解 - 常量折叠方案
+1. https://github.com/PFCCLab/Camp/blob/main/WeeklyReports/Hackathon_5th/02_zhangyuqin1998/%5BWeeklyReport%5D2023.11.10~2023.11.25.md
+
+
+### 纵向拆解 - Pir设计 paddle ir
+1. PIR 基本概念和开发：https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/paddle_v3_features/paddle_ir_cn.html 
+2. 技术文章
+   1. IR设计：https://github.com/PaddlePaddle/community/tree/master/pfcc/paddle-code-reading/IR_Dialect
+   2. Pir Parser实现分享：https://github.com/PFCCLab/Camp/blob/main/Docs/Hackathon_5th/01_PIR_OpTestFixingAndProgramTranslatorRefinement/pir_parser_implementation_sharing.md
+   3. 从 CodeGen 视角看 PIR 组网 API：
+3. 常见的深度学习 IR
+   1. MLIR，TVM relay，MindIR，XLA hlo，TorchScript等。
+4. 飞桨先后实现了两套 IR
+   1. 一套是 Program 
+   2. 一套是 Graph
+   3. 新设计
+      1. 坚持SSA(静态单赋值)原则，模型等价于一个有向无环图。 Operation 为节点，Value 为边
+      2. 算子分层，分类。通过将算子和类型定义在不同的 Dialect 来实现算子和类型的分层分类
+      3. 底层算子与算子库 Api 对齐
+      4. 通过yaml + python脚本的形式，生成算子的 C++ 定义
+   4. 优化
+      1. 类型的本质是对内存的一种抽象，不同的类型，会有不同的内存布局和内存分配的策略
+5. Operation 表示计算图中的节点：一个 Operation 表示一个算子，它里面包含了零个或多个 Region；Region 表示一个闭包，它里面包含了零个或多个 Block；Block 表示一个符合 SSA 的基本块，里面包含了零个或多个 Operation；三者循环嵌套，可以实现任意复杂的语法结构
+6. Value 表示计算图中的有向边：用来将两个 Operaton 关联起来，描述了程序中的 UD 链（即 Use-Define 链）；OpResult 表示定义端，定义了一个 Value，OpOperand 表示使用端，描述了对一个 Value 的使用
+7. 推理部署 ：简化抽象计算图，解决有环问题，降低 Pass 的开发成本
+8.  分布式侧 ：多 Dialect 管理算子，支持分布式属性的灵活标记
+9.  编译器侧 ：严格遵循 SSA 原则，灵活支撑编译优化鲁棒性
+10. 完备且鲁邦的语义表达能力、训推全架构统一表示和高效可插拔的性能优化策略（Pass）开发机制
+11. IR设计
+   1. 控制流表示：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/IR_Dialect/control_flow.md
+   2. 模型表示：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/IR_Dialect/ir_program.md
+   3. 数据类型表示：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/IR_Dialect/control_flow.md
+   4. 新 IR 适配编译器方案思路：https://github.com/PaddlePaddle/Paddle/issues/56879
+
+
+#### IR基础库
+1. Interface 、Trait、Type、Attribute、Op、Porgram
+2. 新 IR Program 可以逐步替换当前框架中的 Program、Graph、Cinn Program、Cinn Graph
+3. 支持List、Dict等复杂类型
+4. 定义相应的Trait， 对 inplace 算子以及 View 类算子进行合理的抽象描述
+5. 计算图严格遵守 SSA 原则
+6. IR 基础库会抽象出一套 Pass 基础组件
+7. 源码
+   1. paddle/pir/src/core
+
+#### 类型系统 - 对比Flink Spark Calcite
+
+#### 模型结构
+1. 问题
+   1. 代码复用性
+      1. 两种场景 Paddle 和 Cinn 。很多功能相能相同 Pass ，需要重复开发两次（ConstantFold、CSE等等）。
+      2. IR 元素和具体的场景强绑定在一起，场景无关逻辑无法复用。
+   2. 框架稳定性问题
+      1. 目前的 paddle 模型结构 Program 存在序列式 IR 的隐式依赖。所有可能破坏算子顺序的模块，都是不完备的，都是存在风险的。
+      2. 在 Pass中 ，图变换会对算子进行增删移动，改变算子顺序。因此，Pass 是存在风险的。
+      3. 新执行器中，会对算子进行多流并行调度，相当于改变了算子的顺序。因此，执行器也是存在风险的。
+   3. 能力不足
+      1. 框架对 IR 元素的抽象相对都比较朴素，表达能力不足。
+      2. 没有规范的类型系统，无法支持 List 、Dict等复杂类型，以及更近一步的类型嵌套表示。
+      3. 缺乏严谨的 Tensor 别名机制。目前可以通过输入&输出同名来标志 inplace 算子，但是对于 share_date 、reshape (编译器算子)...这类view 类的别名算子是无法表达的。
+      4. 计算图不符合 SSA 原则。编译器领域的很多成熟的优化理论无法直接应用。
+2. 解决思路
+   1. MLIR 的出现证明了可以用一套数据结构同时满足 Graph 和 Program 的功能，解决 Program & Graph 的二者同步问题。
+3. 模型表示层
+   1. Program 用来表示一个具体的模型。它包含两部分：计算图 和 权重 
+   2. Weight 用来对模型的权重参数进行单独存储，这也是深度学习框架和传统编译器不一样的地方。传统编译器会将数据段内嵌到程序里面。这是因为传统编译器里面，数据和代码是强绑定的，不可分割。但是对神经网络而言，一个计算图的每个 epoch 都会存在一份权重参数，多个计算图也有可能共同一份权重参数，二者不是强绑定的。
+   3. Value、Operation 用来对计算图进行抽象
+4. 模型优化
+   1. 图变换表示对一个 Program 进行优化，将其转换为另一个 Program 。里面包含了我们遇见的所有 Pass 。包括 Mapping``、Fusion、Pruning、Canonalization、CSE等等
+
+```
+
+```
+
+
+#### 高阶特性
+#### Pass升级
+1. framework::ProgramDesc  =>  ir::Graph   =>  frontend::Program (NetBuilder 层)   =>  hlir::Graph =>    
+Compute/Schedule()   =>  AST 层面   =>  Module::Builder  =>  CodeGen+NVRTC =>  Runtime::Program
+
+
+
+#### MLIR设计借鉴
+
+### 纵向拆解 - Program & Graph (CINN)
+1. cinn  Compiler Infrastructure for Neural Networks：https://github.com/PaddlePaddle/CINN
+2. Paddle 训练框架应用 CINN 进行编译优化加速：https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/cinn/paddle2cinn_intro_cn.html
+3. CINN 神经网络编译器：https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/paddle_v3_features/cinn_cn.html
+
+
+
+### 纵向拆解 - Codegen
+1. paddle代码自动生成机制讲解：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/code_gen/code_gen_ops.md
+2. 从 CodeGen 视角看 PIR 组网 API：https://github.com/PFCCLab/Camp/blob/main/Docs/Hackathon_5th/03_NewIRAPI_AutoDiffAndCoreComponentRefinement/CodeReading/Over_view_PIR_construct_API_As_CodeGen_perspective.md
+3. 框架静态图算子自动生成：https://github.com/PaddlePaddle/Paddle/issues/51842
+4. 算子定义生成体系建设--静态图算子自动生成：https://github.com/PaddlePaddle/Paddle/issues/53267
+5. 新 IR 下自动代码生成 ：https://github.com/PaddlePaddle/Paddle/issues/56849
+6. infer_meta + Yaml文件自动生成算子代码
+7. 存在三套 CodeGen 设计体系：即动态图、静态图、旧动态图，但旧动态图在完全退场后，旧动态图的CodeGen体系也预计会被完全清除。
+
+
+
+#### 调用链路
+1. python api -> python-c 转发 -> python-c 映射层 -> PIR op组网 API -> pir::Op 生成函数
+
+
+
+
+### 纵向拆解 - 算子设计
+1. 算子组合开发问题：https://github.com/PFCCLab/Camp/blob/main/Docs/Hackathon_5th/04_TheUnityOfOperatorForwardAndBackwardInCombinationFeatures/CodeReading/the_unity_of_operator_forward_and_backward_in_combination_features.md
+2. 组合机制设计文档：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/operator_decomposition_mechanism/design.md
+3. 问题背景
+   1. NVIDIA数据公布， GPT-3 175B 使用1024块A100 训练34天，需要强大分布式训练能力。
+   2. 科学计算微分方程求解如EulerBeam，前向运算四阶微分，加上一次反向传播过程，需要五阶微分。
+   3. 编译器加速、国产硬件支持也近期深度学习框架演进重要方向。
+4. 飞桨框架底层基于原生算子体系(1061个，正向 691个，反向 370个，且持续增长)构建，导致上述场景适配难度极大，具体原因如下：
+   1. 分布式：需要基于原生算子体系手写自动并行策略。
+   2. 高阶微分：需要手写高阶微分算子，如Matmul五阶代码行数超过3000。
+   3. 编译器：需要将原生大算子拆解成细粒度编译器小算子，才能进一步融合优化。
+   4. 新硬件：需要接入所有算子，才能正确运行。
+
+#### 算子注册体系
+
+
+#### PHI (Paddle HIgh reusability operator library)
+1. 飞桨高可复用算子库 PHI 设计文档：https://github.com/PaddlePaddle/docs/blob/develop/docs/design/phi/design_cn.md
+2. PHI注册：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/PHI_kernel_registration/PHI_kernel_registration.md
+
+### 纵向拆解 - 动态图
+1. 动态执行过程：https://www.paddlepaddle.org.cn/tutorials/projectdetail/4047189#anchor-7
+2. 新动态图前向调用过程代码详解：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/Dygraph/20221201_dygraph_forward.md
+3. 前向执行
+4. 反向执行
+
+
+
+### 纵向拆解 - 静态图
+1. 官方概念：https://www.paddlepaddle.org.cn/tutorials/projectdetail/4047189
+2. 执行过程：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/static_graph_execution/20221230_static_graph_execution.md
+
+#### 核心概念
+```
+Variable：表示网络中的数据。
+Operator：表示网络中的操作。
+Block：表示编程语言中的控制流结构，如条件结构（if-else）、循环结构（while）等。
+Program：基于Protobuf的序列化能力提供模型保存、加载功能。Protobuf是Google推出的一个结构化数据的序列化框架，可将结构化数据序列化为二进制流，或从二进制流中反序列化出结构化数据。飞桨模型的保存、加载功能依托于Protobuf的序列化和反序列化能力。
+Transpiler：可选的编译步骤，作用是将一个Program转换为另一个Program。
+Intermediate Representation：在执行前期，用户定义的Program会转换为一个统一的中间表达。
+Executor：用于快速调度 Operator ，完成网络训练/预测。
+
+```
+
+
+### 纵向拆解 - Inplace
+1. Inplace 介绍 & 使用介绍：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/Inplace/inplace_introduction.md
+2. Paddle Inplace 使用指南：https://github.com/AndSonder/community/blob/ae18ba0d0b3b4ddd5ebc814c8190cd8f7a42b1bc/rfcs/Article/20240321_guide_to_using_Inplace.md
+
+### 纵向拆解 - 微分规则 VJP
+
+### 纵向拆解 - 自动并行 分布式
+
+
+
+
+### 业务拆解 - 模型加载
+1. jit load
+
+#### paddle jit python模块
+```
+__init__.py: 这个文件通常用于将目录标记为Python包，可能还包含一些初始化代码。
+
+api.py: 定义了PaddlePaddle JIT功能的API接口，允许用户以编程方式访问JIT相关功能。
+
+dy2static 目录: 包含将动态图转换为静态图所需的工具和模块。
+
+__init__.py: 初始化dy2static包。
+ast_utils.py: 包含用于操作抽象语法树（AST）的实用工具。
+convert_call_func.py: 用于转换函数调用。
+convert_operators.py: 用于转换操作符。
+error.py: 定义了转换过程中可能遇到的错误类型。
+export_subgraph.py: 用于导出子图。
+function_spec.py: 包含函数规范的描述。
+logging_utils.py: 包含日志记录工具。
+origin_info.py: 包含原始信息处理工具。
+partial_program.py: 包含部分程序的表示。
+pir_partial_program.py: 包含Paddle Intermediate Representation（PIR）的部分程序表示。
+program_translator.py: 用于翻译程序的模块。
+py_layer.py: 包含Python层的表示。
+layer.py: 定义了深度学习层的抽象，这些层可以被JIT编译。
+
+
+pir_dy2static 目录: 包含Paddle Intermediate Representation（PIR）到静态图转换相关的模块。
+
+__init__.py: 初始化pir_dy2static包。
+parameter_recorder.py: 用于记录参数信息。
+sot 目录: 包含静态操作码翻译（Static Operation Translator）相关的模块。
+
+__init__.py: 初始化sot包。
+infer_meta.py: 用于推断元数据。
+opcode_translator 目录: 包含操作码翻译相关的模块。
+__init__.py: 初始化opcode_translator包。
+breakpoint.py: 可能用于处理断点。
+custom_code.py: 包含自定义代码的处理。
+eval_frame_callback.py: 包含评估帧回调的处理。
+executor 目录: 包含执行静态图所需的组件。
+__init__.py: 初始化executor包。
+其他文件包含执行器的内部组件，如分发函数、指令标志等。
+instruction_utils 目录: 包含指令分析和转换的工具。
+skip_files.py: 可能用于跳过某些文件的处理。
+profiler.py: 用于性能分析。
+psdb.py: 可能与性能数据库有关。
+symbolic 目录: 包含符号执行相关的模块。
+compile_cache.py: 可能用于编译缓存。
+export.py: 用于导出符号表示。
+interpreter.py: 包含解释器的实现。
+statement_ir.py: 包含语句的中间表示。
+symbolic_context.py: 包含符号执行上下文。
+translate.py: 用于翻译的模块。
+utils 目录: 包含实用工具。
+__init__.py: 初始化utils包。
+其他文件包含特定实用工具的实现。
+translated_layer.py: 包含被JIT编译后的层的表示。
+
+utils.py: 包含一些通用的实用工具。
+```
+
+#### TranslatedLayer
+
+
+### 业务拆解 - 训练
+1. 单机多卡与多机多卡组网示例：https://aistudio.baidu.com/projectdetail/1222066
+#### 单机单卡
+
+   
+#### 单机多卡 - 高层API
+1. 建议使用spawn方式
+```
+
+当调用paddle.Model高层API来实现训练时，想要启动单机多卡训练非常简单，代码不需要做任何修改，只需要在启动时增加一下参数-m paddle.distributed.launch。
+
+  #单机单卡启动，默认使用第0号卡
+  $ python train.py
+  
+  #单机多卡启动，默认使用当前可见的所有卡
+  $ python -m paddle.distributed.launch train.py
+
+  #单机多卡启动，设置当前使用的第0号和第1号卡
+  $ python -m paddle.distributed.launch --selected_gpus='0,1' train.py
+
+  #单机多卡启动，设置当前使用第0号和第1号卡
+  $ export CUDA_VISIABLE_DEVICES='0,1'
+  $ python -m paddle.distributed.launch train.py
+
+
+```
+
+#### 单机多卡 - 基础API
+```
+https://aistudio.baidu.com/projectdetail/1222066
+
+修改三处：
+
+#第1处改动，import库
+import paddle.distributed as dist
+
+#第2处改动，初始化并行环境
+dist.init_parallel_env()
+
+#第3处改动，增加paddle.DataParallel封装
+net = paddle.DataParallel(paddle.vision.models.LeNet())
+
+
+import paddle.distributed as dist
+   
+# 启动train多进程训练，默认使用所有可见的GPU卡
+if __name__ == '__main__':
+   dist.spawn(train)
+
+# 启动train函数2个进程训练，默认使用当前可见的前2张卡
+if __name__ == '__main__':
+   dist.spawn(train, nprocs=2)
+
+# 启动train函数2个进程训练，默认使用第4号和第5号卡
+if __name__ == '__main__':
+   dist.spawn(train, nprocs=2, selelcted_gpus='4,5')spawn方式
+
+总结
+spawn方式不需要去修改代码的内部部分，只是加上dist.spawn(train)这句，相当于给训练代码加了一个多进程的壳，简单方便，是推荐使用的单机多卡组网方式！
+
+spawn方式下在notebook里报错的情况，猜测应该是notebook进程管理限制导致的。在命令行情况下或者cell里加叹号运行的时候，就没有问题。
+
+在不支持spawn的情况下，再去考虑用launch方式启动单机多卡。
+
+```
+
+
+
+
+#### 多机多卡 - fleetrun启动分布式任务
+1. 使用Fleet分布式训练方式
+```
+GPU单机多卡训练
+若启动单机4卡的任务，只需通过--gpus指定空闲的4张卡即可。
+
+    fleetrun --gpus=0,1,2,3 train.py
+
+如果指定了export CUDA_VISIBLE_DEVICES=0,1,2,3，则可以直接使用：
+export CUDA_VISIBLE_DEVICES=0,1,2,3
+    fleetrun train.py
+
+
+
+[示例一] 2机8卡 (每个节点4卡)
+fleetrun --ips="xx.xx.xx.xx,yy.yy.yy.yy" --gpus=0,1,2,3 train.py
+
+
+[示例二] 2机16卡（每个节点8卡，假设每台机器均有8卡可使用）
+fleetrun --ips="xx.xx.xx.xx,yy.yy.yy.yy" train.py
+
+
+
+```
+
+
+### 业务拆解 - 模型预估
+1. TranslatedLayer
+
+
+
+
+
+
+## 其他设计
 ### 垃圾回收器
 1. github/Paddle/paddle/fluid/framework/new_executor/garbage_collector
 
@@ -175,89 +666,6 @@ PaddlePaddle + 公司项目
 ### 模型结构 和 可视化
 1. https://www.paddlepaddle.org.cn/inference/master/guides/export_model/visual_model.html
 2. 导出模型：https://www.paddlepaddle.org.cn/inference/master/guides/export_model/index_export_model.html
-
-
-
-## 测试开发流程
-1. 插件和编译器 - 参考vscode解决方案
-   1. 几乎无痛的VSCode+clangd+lldb+cmake配置C/C++开发环境指南 - 仿身泪滴的文章 - 知乎 https://zhuanlan.zhihu.com/p/566365173
-   2. apt install clang clangd lldb -y
-2. 编译注意 - 参考vscode解决方案
-   1. ccache 加速编译
-   2. cmake 必须加上 -DWITH_TESTING=ON，才能生成test目标文件
-3. 编译后的python包路径
-   1. Paddle/build/python/dist/paddlepaddle-0.0.0-cp38-cp38-linux_x86_64.whl
-   2. pip install paddlepaddle-0.0.0-cp38-cp38-linux_x86_64.whl
-4. 测试
-   1. paddle 2.3.0
-      1. 测试目录在 https://github.com/PaddlePaddle/Paddle/blob/v2.3.0/python/paddle/fluid/tests/unittests/test_accuracy_op.py
-   2. paddle 2.6.0
-      1. 测试目录在 https://github.com/PaddlePaddle/Paddle/blob/v2.6.0/test/legacy_test/test_accuracy_op.py
-5. 运行单元测试
-   1. cpp test bin路径 
-      1. /docker/root/projects/demo/github/Paddle/build/test/cpp    
-   2. python路径 根据 paddle版本来决定
-   3. build 目录下，以 ctest ${test_name} 的命令运行
-   4. ctest test_logsumexp
-   5. ctest -R test_logsumexp 可以运行所有以 test_logsumexp 开头的单测 target.
-   6. ctest -V -R test_logsumexp 单元测试输出更详细的信息以便 debug 时
-6. 附录文档
-   1. API 设计和命名规范：https://github.com/PaddlePaddle/docs/blob/develop/docs/dev_guides/api_contributing_guides/api_design_guidelines_standard_cn.md#api%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84%E8%A7%84%E8%8C%83
-   2. python端开发指南：https://www.paddlepaddle.org.cn/documentation/docs/zh/2.3/dev_guides/api_contributing_guides/new_python_api_cn.html
-   3. Op开发手册：https://github.com/PaddlePaddle/Paddle/wiki/Operator-Development-Manual-Index
-
-### ccache 是否真的工作
-```
-ccache -s
-cache directory                     /root/.ccache
-primary config                      /root/.ccache/ccache.conf
-secondary config      (readonly)    /etc/ccache.conf
-stats updated                       Sat May  4 03:14:18 2024
-cache hit (direct)                     0
-cache hit (preprocessed)               0
-cache miss                             0
-cache hit rate                      0.00 %
-no input file                          2
-cleanups performed                     0
-files in cache                         0
-cache size                           0.0 kB
-
-
-正常工作的情况
-ccache -s
-cache directory                     /root/.ccache
-primary config                      /root/.ccache/ccache.conf
-secondary config      (readonly)    /etc/ccache.conf
-stats updated                       Sat May  4 09:33:51 2024
-cache hit (direct)                  1058
-cache hit (preprocessed)               0
-cache miss                          2010
-cache hit rate                     34.49 %
-compile failed                         7
-ccache internal error                  6
-cache file missing                     1
-no input file                         12
-cleanups performed                   105
-files in cache                       166
-cache size                         625.6 MB
-max cache size                       1.0 GB
-
-```
-### 异常 - 无法import paddle
-```
-
-
-```
-
-### 快速验证 对比pytorch
-```
-python3.8
-
-pip install -i https://mirrors.aliyun.com/pypi/simple paddlepaddle==2.6.0
-
-pip install -i https://mirrors.aliyun.com/pypi/simple torch==2.3.0
-
-```
 
 
 
@@ -427,247 +835,45 @@ paddle  opt.clear_grad()
 
 
 
-## 模型加载
-1. jit load
+## 应用
 
-### paddle jit python模块
+### 稀疏计算 
+1. 稀疏计算 使用指南
+   1. https://github.com/AndSonder/community/blob/ae18ba0d0b3b4ddd5ebc814c8190cd8f7a42b1bc/rfcs/Article/20240412_guide_to_using_sparse.md
+   2. https://github.com/PaddlePaddle/community/pull/880/files?short_path=71ec981#diff-71ec9818e57cd303cbc56336bcc80d7d6aa2a50c91a38a57a997202bd68a99c1
+   3. https://github.com/PaddlePaddle/community/pull/883/files#diff-044bb5185eb6d238efea0f2eb7eb76648def35376960caea021c4dd6f9f2417d
+2. COO 与 CSR 稀疏矩阵存取格式：https://cloud.tencent.com/developer/article/1766995
+3. 存储效率：https://www.cnblogs.com/xbinworld/p/4273506.html
+4. paddle
+   1. 接口：paddle.sparse
+   2. https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/sparse/Overview_cn.html
+5. 结构：COO 与 CSR 稀疏矩阵存取格式
+   1. COO(Coordinate) 格式是最直接的稀疏存储方式,它将非零元素的值和对应的行列索引分别存储在两个向量中。
+   2. CSR(Compressed Sparse Row) 格式按行存储压缩矩阵的非零元素。每一行中的非零元素用连续的储存空间存储, 从而可以高效地访问矩阵中同一行的数据。
 ```
-__init__.py: 这个文件通常用于将目录标记为Python包，可能还包含一些初始化代码。
-
-api.py: 定义了PaddlePaddle JIT功能的API接口，允许用户以编程方式访问JIT相关功能。
-
-dy2static 目录: 包含将动态图转换为静态图所需的工具和模块。
-
-__init__.py: 初始化dy2static包。
-ast_utils.py: 包含用于操作抽象语法树（AST）的实用工具。
-convert_call_func.py: 用于转换函数调用。
-convert_operators.py: 用于转换操作符。
-error.py: 定义了转换过程中可能遇到的错误类型。
-export_subgraph.py: 用于导出子图。
-function_spec.py: 包含函数规范的描述。
-logging_utils.py: 包含日志记录工具。
-origin_info.py: 包含原始信息处理工具。
-partial_program.py: 包含部分程序的表示。
-pir_partial_program.py: 包含Paddle Intermediate Representation（PIR）的部分程序表示。
-program_translator.py: 用于翻译程序的模块。
-py_layer.py: 包含Python层的表示。
-layer.py: 定义了深度学习层的抽象，这些层可以被JIT编译。
-
-
-pir_dy2static 目录: 包含Paddle Intermediate Representation（PIR）到静态图转换相关的模块。
-
-__init__.py: 初始化pir_dy2static包。
-parameter_recorder.py: 用于记录参数信息。
-sot 目录: 包含静态操作码翻译（Static Operation Translator）相关的模块。
-
-__init__.py: 初始化sot包。
-infer_meta.py: 用于推断元数据。
-opcode_translator 目录: 包含操作码翻译相关的模块。
-__init__.py: 初始化opcode_translator包。
-breakpoint.py: 可能用于处理断点。
-custom_code.py: 包含自定义代码的处理。
-eval_frame_callback.py: 包含评估帧回调的处理。
-executor 目录: 包含执行静态图所需的组件。
-__init__.py: 初始化executor包。
-其他文件包含执行器的内部组件，如分发函数、指令标志等。
-instruction_utils 目录: 包含指令分析和转换的工具。
-skip_files.py: 可能用于跳过某些文件的处理。
-profiler.py: 用于性能分析。
-psdb.py: 可能与性能数据库有关。
-symbolic 目录: 包含符号执行相关的模块。
-compile_cache.py: 可能用于编译缓存。
-export.py: 用于导出符号表示。
-interpreter.py: 包含解释器的实现。
-statement_ir.py: 包含语句的中间表示。
-symbolic_context.py: 包含符号执行上下文。
-translate.py: 用于翻译的模块。
-utils 目录: 包含实用工具。
-__init__.py: 初始化utils包。
-其他文件包含特定实用工具的实现。
-translated_layer.py: 包含被JIT编译后的层的表示。
-
-utils.py: 包含一些通用的实用工具。
-```
-
-### TranslatedLayer
-
-
-## 训练
-1. 单机多卡与多机多卡组网示例：https://aistudio.baidu.com/projectdetail/1222066
-### 单机单卡
-
-
-### 单机多卡
-1. 建议使用spawn方式
-   
-#### 高层API
-```
-
-当调用paddle.Model高层API来实现训练时，想要启动单机多卡训练非常简单，代码不需要做任何修改，只需要在启动时增加一下参数-m paddle.distributed.launch。
-
-  #单机单卡启动，默认使用第0号卡
-  $ python train.py
-  
-  #单机多卡启动，默认使用当前可见的所有卡
-  $ python -m paddle.distributed.launch train.py
-
-  #单机多卡启动，设置当前使用的第0号和第1号卡
-  $ python -m paddle.distributed.launch --selected_gpus='0,1' train.py
-
-  #单机多卡启动，设置当前使用第0号和第1号卡
-  $ export CUDA_VISIABLE_DEVICES='0,1'
-  $ python -m paddle.distributed.launch train.py
-
-
-```
-
-#### 基础API
-```
-https://aistudio.baidu.com/projectdetail/1222066
-
-修改三处：
-
-#第1处改动，import库
-import paddle.distributed as dist
-
-#第2处改动，初始化并行环境
-dist.init_parallel_env()
-
-#第3处改动，增加paddle.DataParallel封装
-net = paddle.DataParallel(paddle.vision.models.LeNet())
-
-
-import paddle.distributed as dist
-   
-# 启动train多进程训练，默认使用所有可见的GPU卡
-if __name__ == '__main__':
-   dist.spawn(train)
-
-# 启动train函数2个进程训练，默认使用当前可见的前2张卡
-if __name__ == '__main__':
-   dist.spawn(train, nprocs=2)
-
-# 启动train函数2个进程训练，默认使用第4号和第5号卡
-if __name__ == '__main__':
-   dist.spawn(train, nprocs=2, selelcted_gpus='4,5')spawn方式
-
-总结
-spawn方式不需要去修改代码的内部部分，只是加上dist.spawn(train)这句，相当于给训练代码加了一个多进程的壳，简单方便，是推荐使用的单机多卡组网方式！
-
-spawn方式下在notebook里报错的情况，猜测应该是notebook进程管理限制导致的。在命令行情况下或者cell里加叹号运行的时候，就没有问题。
-
-在不支持spawn的情况下，再去考虑用launch方式启动单机多卡。
+待看
+https://zhuanlan.zhihu.com/p/188700729
+https://matteding.github.io/2019/04/25/sparse-matrices/
+https://xie.infoq.cn/article/41ebc9e8a53bf4ba5fa14acca
+https://github.com/PaddlePaddle/Paddle3D/blob/release/1.0/paddle3d/models/middle_encoders/sparse_resnet.py
+https://github.com/PaddlePaddle/Paddle3D/blob/develop/docs/models/centerpoint/README.md
 
 ```
 
 
-
-### 多机多卡
-1. 使用Fleet分布式训练方式
-
-#### fleetrun启动分布式任务
-```
-GPU单机多卡训练
-若启动单机4卡的任务，只需通过--gpus指定空闲的4张卡即可。
-
-    fleetrun --gpus=0,1,2,3 train.py
-
-如果指定了export CUDA_VISIBLE_DEVICES=0,1,2,3，则可以直接使用：
-export CUDA_VISIBLE_DEVICES=0,1,2,3
-    fleetrun train.py
+### 0维设计
+1. Paddle框架的0-D设计全表：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/ZeroDim/all_zero_dim_api.md
+2. 0维的判断标准：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/ZeroDim/judge_zero_dim.md
+3. 0-D Tensor：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/ZeroDim/zero_dim_concept.md
+4. 0-d Tensor 使用指南：https://github.com/PaddlePaddle/community/pull/860/files?short_path=97dfe85#diff-97dfe85948dba8115a1ff933b2ebc047005fcc8b2dc22db542039663f5c800f8
 
 
-
-[示例一] 2机8卡 (每个节点4卡)
-fleetrun --ips="xx.xx.xx.xx,yy.yy.yy.yy" --gpus=0,1,2,3 train.py
-
-
-[示例二] 2机16卡（每个节点8卡，假设每台机器均有8卡可使用）
-fleetrun --ips="xx.xx.xx.xx,yy.yy.yy.yy" train.py
-
-
-
-```
-
-
-## 模型预估
-1. TranslatedLayer
-
-## paddle 新增 FeatureAlphaDropout API
-1. 报名：https://github.com/PaddlePaddle/Paddle/issues/62905
-2. 新增流程：https://github.com/PaddlePaddle/community/blob/master/hackathon/hackathon_6th/%E3%80%90Hackathon%206th%E3%80%91%E5%BC%80%E6%BA%90%E8%B4%A1%E7%8C%AE%E4%B8%AA%E4%BA%BA%E6%8C%91%E6%88%98%E8%B5%9B%E6%A1%86%E6%9E%B6%E5%BC%80%E5%8F%91%E4%BB%BB%E5%8A%A1%E5%90%88%E9%9B%86.md#no8-%E4%B8%BA-paddle-%E6%96%B0%E5%A2%9E-featurealphadropout-api
-3. 参考pr：https://github.com/PaddlePaddle/community/pull/848
-4. 参考paddle 算子pr：https://github.com/PaddlePaddle/Paddle/pull/62934/files#diff-dd4ce82a4831b8c3f62aa1717373fce4dd62e1f42540bc8395df5e3c447a0475
-5. 代码修改：Python 实现代码 & 英文 API 文档，在 Paddle repo 的 python/paddle/nn/layer/common.py 中实现 FeatureAlphaDropout 类，并在 python/paddle/nn/layer/init.py、python/paddle/nn/init.py 添加对应调用。
-6. 单元测试：https://github.com/PaddlePaddle/Paddle/tree/develop/test
-7. 中文api：https://github.com/PaddlePaddle/docs/tree/develop/docs/api/paddle
-
-
-### dropout python冒烟调用
-```py
-import paddle
-paddle.seed(2023)
-x = paddle.to_tensor([[-1, 1], [-1, 1]], dtype="float32")
-m = paddle.nn.AlphaDropout(p=0.5)
-y_train = m(x)
-print(y_train)
-
-m.eval()  # switch the model to test phase
-y_test = m(x)
-print(y_test)
-
-```
-
-### paddle - dropout修改点
-1. 
-### dropout整理
-1. pytorch注册
-   1. dropout
-   2. alpha_dropout
-   3. feature_alpha_dropout
-   4. dropout1d
-   5. dropout2d
-   6. dropout3d
-   7. github/pytorch/aten/src/ATen/native/Dropout.cpp
-   8. github/pytorch/torch/include/ATen/ops/feature_alpha_dropout.h
-   9. github/pytorch/torch/include/ATen/ops/feature_alpha_dropout_ops.h
-   10. github/pytorch/torch/include/ATen/ops/feature_alpha_dropout_meta.h
-   11. github/pytorch/torch/include/ATen/ops/feature_alpha_dropout_native.h
-   12. github/pytorch/torch/include/ATen/ops/feature_alpha_dropout_compositeimplicitautograd_dispatch.h
-   13. github/pytorch/torch/include/torch/csrc/api/include/torch/nn/functional/dropout.h
-   14. github/pytorch/torch/include/ATen/core/aten_interned_strings.h
-   15. github/pytorch/torch/nn/modules/dropout.py
-   16. github/pytorch/torch/share/ATen/Declarations.yaml
-   17. github/pytorch/torch/onnx/symbolic_opset9.py
-   18. github/pytorch/torch/nn/functional.pyi.in
-   19. github/pytorch/torch/nn/functional.py
-   20. github/pytorch/aten/src/ATen/functorch/BatchRulesDecompositions.cpp
-   21. github/pytorch/aten/src/ATen/functorch/PyTorchOperatorHacks.cpp
-   22. github/pytorch/torch/csrc/autograd/generated/python_torch_functionsEverything.cpp
-   23. github/pytorch/aten/src/ATen/native/cuda/Dropout.cu
-   24. github/pytorch/torch/csrc/api/include/torch/nn/functional/dropout.h
-   25. github/pytorch/torch/csrc/api/include/torch/nn/options/dropout.h
-   26. github/pytorch/torch/csrc/api/src/nn/modules/dropout.cpp
-   27. github/pytorch/torch/nn/modules/__init__.py
-   28. github/pytorch/torch/nn/modules/dropout.py
-2. pytorch测试
-   1. github/pytorch/torch/testing/_internal/dynamo_test_failures.py
-   2. github/pytorch/torch/testing/_internal/jit_metaprogramming_utils.py
-   3. github/pytorch/torch/testing/_internal/common_methods_invocations.py
-   4. github/pytorch/test/functorch/test_vmap.py
-   5. github/pytorch/test/cpp/api/functional.cpp
-   6. github/pytorch/test/cpp/api/modules.cpp
-   7. github/pytorch/test/nn/test_dropout.py
-3. pytorch文档
-   1. https://pytorch.org/docs/stable/generated/torch.nn.FeatureAlphaDropout.html
-   2. https://pytorch.org/docs/stable/_modules/torch/nn/modules/dropout.html#FeatureAlphaDropout
-4. 具体实现
-   1. _dropout_impl 
-   2. ALIAS_SPECIALIZATION，它接受三个参数：ALIAS_NAME、IS_FEATURE 和 IS_ALPHA
-   3. _feature_alpha_dropout = IS_FEATURE=true IS_ALPHA=true
-
-
-
+### Paddle 概率分布基础及领域应用
+1. Paddle 线性代数基础及其领域应用
+   1. https://github.com/PaddlePaddle/community/pull/898/files?short_path=cf9bb59#diff-cf9bb59aeef3608b9a1a175149b7d583ba49fe4fd99febdc7577a9435bcfa351
+   2. https://github.com/PaddlePaddle/community/pull/867/files#diff-005b97daccba370e0a0fcf462c6a63028d009a7aa91ade244e282d96a169d292
+   3. https://github.com/PaddlePaddle/community/pull/861
+   4. https://github.com/PaddlePaddle/community/pull/868
 
 ## 附录
 ### 静态库编译顺序
