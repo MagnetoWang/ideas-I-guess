@@ -64,6 +64,7 @@ flink + 公司项目
    5. 轻量稳定的 Checkpointing 流程
    6. fs优化
    7. memory优化
+      1. BinaryRow 应用，高效索引
    8. io优化
 2. flink如何保证稳定性
    1. 回滚机制
@@ -1613,6 +1614,139 @@ public interface PullingAsyncDataInput<T> extends AvailabilityProvider {
 3. 图解flink sql应用提交方式（二）https://www.aboutyun.com/thread-31754-1-1.html
 4. 大量图解：https://mp.weixin.qq.com/s/ak9s2gUw6On7WwoiduEhYQ?
 
+### SQL 流程 - 示例
+1. flink-examples/flink-examples-table/src/main/java/org/apache/flink/table/examples/java/StreamSQLExample.java
+```java
+
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.flink.table.examples.java;
+
+import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.table.api.EnvironmentSettings;
+import org.apache.flink.table.api.Table;
+import org.apache.flink.table.api.java.StreamTableEnvironment;
+
+import java.util.Arrays;
+import java.util.Objects;
+
+/**
+ * Simple example for demonstrating the use of SQL on a Stream Table in Java.
+ *
+ * <p>Usage: <code>StreamSQLExample --planner &lt;blink|flink&gt;</code><br>
+ *
+ * <p>This example shows how to:
+ *  - Convert DataStreams to Tables
+ *  - Register a Table under a name
+ *  - Run a StreamSQL query on the registered Table
+ *
+ */
+public class StreamSQLExample {
+
+	// *************************************************************************
+	//     PROGRAM
+	// *************************************************************************
+
+	public static void main(String[] args) throws Exception {
+
+		final ParameterTool params = ParameterTool.fromArgs(args);
+		String planner = params.has("planner") ? params.get("planner") : "flink";
+
+		// set up execution environment
+		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+		StreamTableEnvironment tEnv;
+		if (Objects.equals(planner, "blink")) {	// use blink planner in streaming mode
+			EnvironmentSettings settings = EnvironmentSettings.newInstance()
+				.useBlinkPlanner()
+				.inStreamingMode()
+				.build();
+			tEnv = StreamTableEnvironment.create(env, settings);
+		} else if (Objects.equals(planner, "flink")) {	// use flink planner in streaming mode
+			tEnv = StreamTableEnvironment.create(env);
+		} else {
+			System.err.println("The planner is incorrect. Please run 'StreamSQLExample --planner <planner>', " +
+				"where planner (it is either flink or blink, and the default is flink) indicates whether the " +
+				"example uses flink planner or blink planner.");
+			return;
+		}
+
+		DataStream<Order> orderA = env.fromCollection(Arrays.asList(
+			new Order(1L, "beer", 3),
+			new Order(1L, "diaper", 4),
+			new Order(3L, "rubber", 2)));
+
+		DataStream<Order> orderB = env.fromCollection(Arrays.asList(
+			new Order(2L, "pen", 3),
+			new Order(2L, "rubber", 3),
+			new Order(4L, "beer", 1)));
+
+		// convert DataStream to Table
+		Table tableA = tEnv.fromDataStream(orderA, "user, product, amount");
+		// register DataStream as Table
+		tEnv.registerDataStream("OrderB", orderB, "user, product, amount");
+
+		// union the two tables
+		Table result = tEnv.sqlQuery("SELECT * FROM " + tableA + " WHERE amount > 2 UNION ALL " +
+						"SELECT * FROM OrderB WHERE amount < 2");
+
+		tEnv.toAppendStream(result, Order.class).print();
+
+		env.execute();
+	}
+
+	// *************************************************************************
+	//     USER DATA TYPES
+	// *************************************************************************
+
+	/**
+	 * Simple POJO.
+	 */
+	public static class Order {
+		public Long user;
+		public String product;
+		public int amount;
+
+		public Order() {
+		}
+
+		public Order(Long user, String product, int amount) {
+			this.user = user;
+			this.product = product;
+			this.amount = amount;
+		}
+
+		@Override
+		public String toString() {
+			return "Order{" +
+				"user=" + user +
+				", product='" + product + '\'' +
+				", amount=" + amount +
+				'}';
+		}
+	}
+}
+
+
+```
+
 ### SQL 流程 - 入口
 1. tEnv.sqlQuery("SELECT * FROM tableName");
 2. 整体流程大致为：sqlNode --> Operation --> RelNode --> 优化 --> execNode --> Transformation
@@ -1796,7 +1930,17 @@ PlannerBase.scala
 #### 原理解析
 
 ```
-sql -> relnode -> operation -> Table -> transformation -> StreamGraph
+sql -> sql node 
+-> Flink Table API
+-> org.apache.flink.table.operations.Operation
+-> relnode 
+-> Flink LogicalNode
+-> org.apache.flink.table.planner.plan.nodes.physical.stream.StreamExecCalcBase
+-> Transformation 
+-> StreamGraph
+-> JobGraph
+-> TaskGraph
+-> ExecutionGraph
 
 
 逻辑节点
@@ -1856,6 +2000,1687 @@ PlannerQueryOperation
 
 ```
 
+#### Flink Table Operation -> Calcite RelNode
+1. Operation：纯封装SqlNode节点，很粗粒度的operation信息
+2. ModifyOperation
+3. QueryOperation
+
+
+#### Schema - 透传流程
+1. Rel相关类
+   1. RelOptSchema
+   2. RelOptTable
+   3. RelDataType
+   4. RelDataTypeField
+   5. FieldInfo
+   6. FieldInfoBuilder
+   7. RelDataTypeFactory
+   8. RelDataTypeSystem
+   9. RelOptPlanner
+   10. RexNode
+   11. RelNode
+   12. Expression
+   13. ExpressionType
+   14. ColumnStrategy
+2. Flink基于Rel
+   1. FlinkTypeFactory
+   2. TypeMappingUtils
+   3. TableSchemaUtils
+   4. TypeStringUtils
+   5. org.apache.flink.table.api
+      1. TableSchema
+      2. TableColumn
+      3. Types
+   6. org.apache.flink.table.plan.schema
+      1. RowSchema
+      2. TableSinkTable
+      3. TableSourceTable
+      4. FlinkTableFunctionImpl
+3. flink Rule
+   1. StreamExecDataStreamScanRule 
+      1. Rule that converts [[FlinkLogicalDataStreamTableScan]] to [[StreamExecDataStreamScan]].
+   2. 规则集
+      1. FlinkStreamRuleSets
+      2. FlinkBatchRuleSets
+4. flink自带信息
+   1. WatermarkSpec
+5. 
+6. Source算子
+   1. TableScan
+      1. EnumerableTableScan
+      2. DataStreamScan
+      3. FlinkLogicalDataStreamScan
+      4. FlinkLogicalDataStreamTableScan
+      5. FlinkLogicalTableSourceScan
+      6. PhysicalTableSourceScan
+      7. StreamExecTableSourceScan
+      8. StreamExecDataStreamScan
+   2. Scan算子中Source信息
+      1. TableSourceTable
+      2. StreamTableSource -> TableSource
+         1. InputFormatTableSource -> StreamTableSource
+         2. KafkaSource
+         3. HbaseSource
+7. Processor算子
+   1. StreamExecUnion
+8. Sink算子
+   1. 
+
+#### Schema - Scan LogicalNode convert PhysicalNode
+1. FlinkLogicalDataStreamTableScan
+   1. StreamExecDataStreamScanRule
+2. StreamExecDataStreamScan
+   1. ScanUtil.convertToInternalRow
+   2. ExecNode.createOneInputTransformation
+3. Transformation[BaseRow]
+```
+
+/**
+  * Rule that converts [[FlinkLogicalDataStreamTableScan]] to [[StreamExecDataStreamScan]].
+  */
+class StreamExecDataStreamScanRule
+  extends ConverterRule(
+    classOf[FlinkLogicalDataStreamTableScan],
+    FlinkConventions.LOGICAL,
+    FlinkConventions.STREAM_PHYSICAL,
+    "StreamExecDataStreamScanRule") {
+
+  override def matches(call: RelOptRuleCall): Boolean = {
+    val scan: FlinkLogicalDataStreamTableScan = call.rel(0)
+    val dataStreamTable = scan.getTable.unwrap(classOf[DataStreamTable[Any]])
+    dataStreamTable != null
+  }
+
+  def convert(rel: RelNode): RelNode = {
+    val scan: FlinkLogicalDataStreamTableScan = rel.asInstanceOf[FlinkLogicalDataStreamTableScan]
+    val traitSet: RelTraitSet = rel.getTraitSet.replace(FlinkConventions.STREAM_PHYSICAL)
+
+    new StreamExecDataStreamScan(
+      rel.getCluster,
+      traitSet,
+      scan.getTable,
+      rel.getRowType
+    )
+  }
+}
+
+object StreamExecDataStreamScanRule {
+  val INSTANCE: RelOptRule = new StreamExecDataStreamScanRule
+}
+
+```
+
+#### Schema - Union LogicalNode convert PhysicalNode
+```
+
+class StreamExecUnionRule
+  extends ConverterRule(
+    classOf[FlinkLogicalUnion],
+    FlinkConventions.LOGICAL,
+    FlinkConventions.STREAM_PHYSICAL,
+    "StreamExecUnionRule") {
+
+  override def matches(call: RelOptRuleCall): Boolean = {
+    call.rel(0).asInstanceOf[FlinkLogicalUnion].all
+  }
+
+  def convert(rel: RelNode): RelNode = {
+    val union: FlinkLogicalUnion = rel.asInstanceOf[FlinkLogicalUnion]
+    val traitSet: RelTraitSet = rel.getTraitSet.replace(FlinkConventions.STREAM_PHYSICAL)
+    val newInputs = union.getInputs.map(RelOptRule.convert(_, FlinkConventions.STREAM_PHYSICAL))
+
+    new StreamExecUnion(
+      rel.getCluster,
+      traitSet,
+      newInputs,
+      union.all,
+      rel.getRowType)
+  }
+}
+
+object StreamExecUnionRule {
+  val INSTANCE: RelOptRule = new StreamExecUnionRule
+}
+
+```
+
+#### Schema - Sink LogicalNode convert PhysicalNode
+```
+class StreamExecSinkRule extends ConverterRule(
+    classOf[FlinkLogicalSink],
+    FlinkConventions.LOGICAL,
+    FlinkConventions.STREAM_PHYSICAL,
+    "StreamExecSinkRule") {
+
+  def convert(rel: RelNode): RelNode = {
+    val sinkNode = rel.asInstanceOf[FlinkLogicalSink]
+    val newTrait = rel.getTraitSet.replace(FlinkConventions.STREAM_PHYSICAL)
+    var requiredTraitSet = sinkNode.getInput.getTraitSet.replace(FlinkConventions.STREAM_PHYSICAL)
+    if (sinkNode.catalogTable != null && sinkNode.catalogTable.isPartitioned) {
+      sinkNode.sink match {
+        case partitionSink: PartitionableTableSink =>
+          partitionSink.setStaticPartition(sinkNode.staticPartitions)
+          val dynamicPartFields = sinkNode.catalogTable.getPartitionKeys
+              .filter(!sinkNode.staticPartitions.contains(_))
+
+          if (dynamicPartFields.nonEmpty) {
+            val dynamicPartIndices =
+              dynamicPartFields.map(partitionSink.getTableSchema.getFieldNames.indexOf(_))
+
+            if (partitionSink.configurePartitionGrouping(false)) {
+              throw new TableException("Partition grouping in stream mode is not supported yet!")
+            }
+
+            if (!partitionSink.isInstanceOf[DataStreamTableSink[_]]) {
+              requiredTraitSet = requiredTraitSet.plus(
+                FlinkRelDistribution.hash(dynamicPartIndices
+                    .map(Integer.valueOf), requireStrict = false))
+            }
+          }
+        case _ => throw new TableException("We need PartitionableTableSink to write data to" +
+            s" partitioned table: ${sinkNode.sinkName}")
+      }
+    }
+
+    val newInput = RelOptRule.convert(sinkNode.getInput, requiredTraitSet)
+
+    new StreamExecSink(
+      rel.getCluster,
+      newTrait,
+      newInput,
+      sinkNode.sink,
+      sinkNode.sinkName)
+  }
+}
+
+object StreamExecSinkRule {
+
+  val INSTANCE: RelOptRule = new StreamExecSinkRule
+
+}
+
+```
+
+#### 计划探查 - 打印物理节点
+```
+
+
+  override protected def translateToPlan(
+      execNodes: util.List[ExecNode[_, _]]): util.List[Transformation[_]] = {
+    execNodes.foreach(node => println(node.toString))
+    execNodes.map {
+      case node: StreamExecNode[_] => node.translateToPlan(this)
+      case _ =>
+        throw new TableException("Cannot generate DataStream due to an invalid logical plan. " +
+          "This is a bug and should not happen. Please file an issue.")
+    }
+  }
+
+
+  rel#350:StreamExecSink.STREAM_PHYSICAL.any.None: 0.true.AccRetract(input=StreamExecCalc#348,name=DataStreamTableSink,fields=EXPR$0, EXPR$1, EXPR$2, EXPR$3, EXPR$4)
+
+  rel#625:StreamExecCalc.STREAM_PHYSICAL.any.None: 0.false.Acc(input=StreamExecGroupAggregate#623,select=CASE(=($f2, 0), null:INTEGER, EXPR$0) AS EXPR$0, CAST(/(CASE(=($f2, 0), null:INTEGER, EXPR$0), $f2)) AS EXPR$1, EXPR$2, $f2 AS EXPR$3, EXPR$4)
+
+
+```
+
+#### 代码生成 - Express表达式
+1. FlinkRelBuilder -> StreamExecDataStreamScan.translateToPlanInternal -> StreamExecDataStreamScan.getRowtimeExpression -> ScanUtil.convertToInternalRow -> ExprCodeGenerator -> generateConverterResultExpression
+
+#### 代码生成 - StreamExecCalc
+1. filter 和 project生成：https://blog.csdn.net/nazeniwaresakini/article/details/121852775
+2. flink测试源码
+   1. flink-table/flink-table-planner-blink/src/test/scala/org/apache/flink/table/planner/codegen/ProjectionCodeGeneratorTest.scala
+   2. flink-table/flink-table-planner-blink/src/test/scala/org/apache/flink/table/planner/runtime/batch/table/CalcITCase.scala
+   3. flink-table/flink-table-planner-blink/src/test/scala/org/apache/flink/table/planner/runtime/stream/sql/CalcITCase.scala
+   4. flink-table/flink-table-planner-blink/src/test/scala/org/apache/flink/table/planner/runtime/stream/table/CalcITCase.scala
+```java
+
+  @Test
+   def testRowAndBaseRow(): Unit = {
+    val sqlQuery = "SELECT * FROM MyTableRow WHERE c < 3"
+
+    val data = List(
+      Row.of("Hello", "Worlds", Int.box(1)),
+      Row.of("Hello", "Hiden", Int.box(5)),
+      Row.of("Hello again", "Worlds", Int.box(2)))
+
+    implicit val tpe: TypeInformation[Row] = new RowTypeInfo(
+      Types.STRING,
+      Types.STRING,
+      Types.INT)
+
+    val ds = env.fromCollection(data)
+
+    val t = ds.toTable(tEnv, 'a, 'b', 'c)
+    tEnv.registerTable("MyTableRow", t)
+
+    val outputType = new BaseRowTypeInfo(
+      new VarCharType(VarCharType.MAX_LENGTH),
+      new VarCharType(VarCharType.MAX_LENGTH),
+      new IntType())
+
+    val result = tEnv.sqlQuery(sqlQuery).toAppendStream[BaseRow]
+    val sink = new TestingAppendBaseRowSink(outputType)
+    result.addSink(sink)
+    env.execute()
+
+    val expected = List("0|Hello,Worlds,1","0|Hello again,Worlds,2")
+    assertEquals(expected.sorted, sink.getAppendResults.sorted)
+  }
+
+
+
+
+  public class StreamExecCalc$8 extends org.apache.flink.table.runtime.operators.AbstractProcessStreamOperator
+          implements org.apache.flink.streaming.api.operators.OneInputStreamOperator {
+
+        private final Object[] references;
+        private final org.apache.flink.streaming.runtime.streamrecord.StreamRecord outElement = new org.apache.flink.streaming.runtime.streamrecord.StreamRecord(null);
+
+        public StreamExecCalc$8(
+            Object[] references,
+            org.apache.flink.streaming.runtime.tasks.StreamTask task,
+            org.apache.flink.streaming.api.graph.StreamConfig config,
+            org.apache.flink.streaming.api.operators.Output output) throws Exception {
+          this.references = references;
+          
+          this.setup(task, config, output);
+        }
+
+        @Override
+        public void open() throws Exception {
+          super.open();
+          
+        }
+
+        @Override
+        public void processElement(org.apache.flink.streaming.runtime.streamrecord.StreamRecord element) throws Exception {
+          java.util.Map<String, Object> functionResultCache = new java.util.HashMap<String, Object>();
+          org.apache.flink.table.dataformat.BaseRow in1 = (org.apache.flink.table.dataformat.BaseRow) element.getValue();
+          
+          int field$5;
+          boolean isNull$5;
+          boolean isNull$6;
+          boolean result$7;
+          
+          
+          isNull$5 = in1.isNullAt(2);
+          field$5 = -1;
+          if (!isNull$5) {
+            field$5 = in1.getInt(2);
+          }
+          
+          
+          
+          isNull$6 = isNull$5 || false;
+          result$7 = false;
+          if (!isNull$6) {
+            
+            result$7 = field$5 < ((int) 3);
+            
+          }
+          
+          if (result$7) {
+            output.collect(outElement.replace(in1));
+          }
+          
+        }
+
+        
+
+        @Override
+        public void close() throws Exception {
+           super.close();
+          
+        }
+
+        
+      }
+
+
+
+
+```
+
+
+#### 代码生成 - SQL包含UDF和Where
+```java
+
+SQL
+SELECT concat(a,b), c * 20 + 19 FROM MyTableRow WHERE c < 3
+
+
+CodeGen
+   public class StreamExecCalc$19 extends org.apache.flink.table.runtime.operators.AbstractProcessStreamOperator
+          implements org.apache.flink.streaming.api.operators.OneInputStreamOperator {
+
+        private final Object[] references;
+        private transient org.apache.flink.table.runtime.typeutils.BinaryStringSerializer typeSerializer$9;
+        final org.apache.flink.table.dataformat.BoxedWrapperRow out = new org.apache.flink.table.dataformat.BoxedWrapperRow(2);
+        private final org.apache.flink.streaming.runtime.streamrecord.StreamRecord outElement = new org.apache.flink.streaming.runtime.streamrecord.StreamRecord(null);
+
+        public StreamExecCalc$19(
+            Object[] references,
+            org.apache.flink.streaming.runtime.tasks.StreamTask task,
+            org.apache.flink.streaming.api.graph.StreamConfig config,
+            org.apache.flink.streaming.api.operators.Output output) throws Exception {
+          this.references = references;
+          typeSerializer$9 = (((org.apache.flink.table.runtime.typeutils.BinaryStringSerializer) references[0]));
+          this.setup(task, config, output);
+        }
+
+        @Override
+        public void open() throws Exception {
+          super.open();
+          
+        }
+
+        @Override
+        public void processElement(org.apache.flink.streaming.runtime.streamrecord.StreamRecord element) throws Exception {
+          java.util.Map<String, Object> functionResultCache = new java.util.HashMap<String, Object>();
+          org.apache.flink.table.dataformat.BaseRow in1 = (org.apache.flink.table.dataformat.BaseRow) element.getValue();
+          
+          int field$5;
+          boolean isNull$5;
+          boolean isNull$6;
+          boolean result$7;
+          org.apache.flink.table.dataformat.BinaryString field$8;
+          boolean isNull$8;
+          org.apache.flink.table.dataformat.BinaryString field$10;
+          org.apache.flink.table.dataformat.BinaryString field$11;
+          boolean isNull$11;
+          org.apache.flink.table.dataformat.BinaryString field$12;
+          boolean isNull$13;
+          org.apache.flink.table.dataformat.BinaryString result$14;
+          boolean isNull$15;
+          int result$16;
+          boolean isNull$17;
+          int result$18;
+          
+          
+          isNull$5 = in1.isNullAt(2);
+          field$5 = -1;
+          if (!isNull$5) {
+            field$5 = in1.getInt(2);
+          }
+          
+          
+          
+          isNull$6 = isNull$5 || false;
+          result$7 = false;
+          if (!isNull$6) {
+            
+            result$7 = field$5 < ((int) 3);
+            
+          }
+          
+          if (result$7) {
+            
+          isNull$8 = in1.isNullAt(0);
+          field$8 = org.apache.flink.table.dataformat.BinaryString.EMPTY_UTF8;
+          if (!isNull$8) {
+            field$8 = in1.getString(0);
+          }
+          field$10 = field$8;
+          if (!isNull$8) {
+            field$10 = (org.apache.flink.table.dataformat.BinaryString) (typeSerializer$9.copy(field$10));
+          }
+                  
+          
+          isNull$11 = in1.isNullAt(1);
+          field$11 = org.apache.flink.table.dataformat.BinaryString.EMPTY_UTF8;
+          if (!isNull$11) {
+            field$11 = in1.getString(1);
+          }
+          field$12 = field$11;
+          if (!isNull$11) {
+            field$12 = (org.apache.flink.table.dataformat.BinaryString) (typeSerializer$9.copy(field$12));
+          }
+                  
+            
+          out.setHeader(in1.getHeader());
+          
+          
+          
+          
+          
+          
+          result$14 = org.apache.flink.table.dataformat.BinaryStringUtil.concat(( isNull$8 ) ? null : (field$10), ( isNull$11 ) ? null : (field$12));
+          isNull$13 = (result$14 == null);
+          if (isNull$13) {
+            result$14 = org.apache.flink.table.dataformat.BinaryString.EMPTY_UTF8;
+          }
+                 
+          if (isNull$13) {
+            out.setNullAt(0);
+          } else {
+            out.setNonPrimitiveValue(0, result$14);
+          }
+                    
+          
+          
+          
+          
+          
+          isNull$15 = isNull$5 || false;
+          result$16 = -1;
+          if (!isNull$15) {
+            
+            result$16 = (int) (field$5 * ((int) 20));
+            
+          }
+          
+          
+          isNull$17 = isNull$15 || false;
+          result$18 = -1;
+          if (!isNull$17) {
+            
+            result$18 = (int) (result$16 + ((int) 19));
+            
+          }
+          
+          if (isNull$17) {
+            out.setNullAt(1);
+          } else {
+            out.setInt(1, result$18);
+          }
+                    
+                  
+          output.collect(outElement.replace(out));
+          
+          }
+          
+        }
+
+        
+
+        @Override
+        public void close() throws Exception {
+           super.close();
+          
+        }
+
+        
+      }
+
+
+
+```
+
+#### 代码生成 - AGG + Where + UDF
+```java
+
+  @Test
+  def testEmptyInputAggregation(): Unit = {
+    val data = new mutable.MutableList[(Int, Int)]
+    data .+= ((1, 1))
+    data .+= ((2, 2))
+    data .+= ((3, 3))
+
+    val t = failingDataSource(data).toTable(tEnv, 'a, 'b)
+    tEnv.registerTable("T", t)
+
+    val t1 = tEnv.sqlQuery(
+      "select sum(a), avg(a), min(a), count(a), count(1) from T where a > 9999 group by b")
+    val sink = new TestingRetractSink
+    t1.toRetractStream[Row].addSink(sink)
+    env.execute()
+    val expected = List()
+    assertEquals(expected, sink.getRetractResults)
+  }
+
+
+public class SourceConversion$3 extends org.apache.flink.table.runtime.operators.AbstractProcessStreamOperator
+          implements org.apache.flink.streaming.api.operators.OneInputStreamOperator {
+
+        private final Object[] references;
+        private transient org.apache.flink.table.dataformat.DataFormatConverters.CaseClassConverter converter$0;
+        final org.apache.flink.table.dataformat.GenericRow out = new org.apache.flink.table.dataformat.GenericRow(2);
+        private final org.apache.flink.streaming.runtime.streamrecord.StreamRecord outElement = new org.apache.flink.streaming.runtime.streamrecord.StreamRecord(null);
+
+        public SourceConversion$3(
+            Object[] references,
+            org.apache.flink.streaming.runtime.tasks.StreamTask task,
+            org.apache.flink.streaming.api.graph.StreamConfig config,
+            org.apache.flink.streaming.api.operators.Output output) throws Exception {
+          this.references = references;
+          converter$0 = (((org.apache.flink.table.dataformat.DataFormatConverters.CaseClassConverter) references[0]));
+          this.setup(task, config, output);
+        }
+
+        @Override
+        public void open() throws Exception {
+          super.open();
+          
+        }
+
+        @Override
+        public void processElement(org.apache.flink.streaming.runtime.streamrecord.StreamRecord element) throws Exception {
+          java.util.Map<String, Object> functionResultCache = new java.util.HashMap<String, Object>();
+          org.apache.flink.table.dataformat.BaseRow in1 = (org.apache.flink.table.dataformat.BaseRow) (org.apache.flink.table.dataformat.BaseRow) converter$0.toInternal((scala.Tuple2) element.getValue());
+          
+          int field$1;
+          boolean isNull$1;
+          int field$2;
+          boolean isNull$2;
+          isNull$1 = in1.isNullAt(0);
+          field$1 = -1;
+          if (!isNull$1) {
+            field$1 = in1.getInt(0);
+          }
+          isNull$2 = in1.isNullAt(1);
+          field$2 = -1;
+          if (!isNull$2) {
+            field$2 = in1.getInt(1);
+          }
+          
+          
+          
+          
+          
+          
+          if (isNull$1) {
+            out.setNullAt(0);
+          } else {
+            out.setField(0, field$1);;
+          }
+                    
+          
+          
+          if (isNull$2) {
+            out.setNullAt(1);
+          } else {
+            out.setField(1, field$2);;
+          }
+                    
+                  
+          output.collect(outElement.replace(out));
+          
+          
+        }
+
+        
+
+        @Override
+        public void close() throws Exception {
+           super.close();
+          
+        }
+
+        
+      }
+
+      public class StreamExecCalc$7 extends org.apache.flink.table.runtime.operators.AbstractProcessStreamOperator
+          implements org.apache.flink.streaming.api.operators.OneInputStreamOperator {
+
+        private final Object[] references;
+        private final org.apache.flink.streaming.runtime.streamrecord.StreamRecord outElement = new org.apache.flink.streaming.runtime.streamrecord.StreamRecord(null);
+
+        public StreamExecCalc$7(
+            Object[] references,
+            org.apache.flink.streaming.runtime.tasks.StreamTask task,
+            org.apache.flink.streaming.api.graph.StreamConfig config,
+            org.apache.flink.streaming.api.operators.Output output) throws Exception {
+          this.references = references;
+          
+          this.setup(task, config, output);
+        }
+
+        @Override
+        public void open() throws Exception {
+          super.open();
+          
+        }
+
+        @Override
+        public void processElement(org.apache.flink.streaming.runtime.streamrecord.StreamRecord element) throws Exception {
+          java.util.Map<String, Object> functionResultCache = new java.util.HashMap<String, Object>();
+          org.apache.flink.table.dataformat.BaseRow in1 = (org.apache.flink.table.dataformat.BaseRow) element.getValue();
+          
+          int field$4;
+          boolean isNull$4;
+          boolean isNull$5;
+          boolean result$6;
+          
+          
+          isNull$4 = in1.isNullAt(0);
+          field$4 = -1;
+          if (!isNull$4) {
+            field$4 = in1.getInt(0);
+          }
+          
+          
+          
+          isNull$5 = isNull$4 || false;
+          result$6 = false;
+          if (!isNull$5) {
+            
+            result$6 = field$4 > ((int) 9999);
+            
+          }
+          
+          if (result$6) {
+            output.collect(outElement.replace(in1));
+          }
+          
+        }
+
+        
+
+        @Override
+        public void close() throws Exception {
+           super.close();
+          
+        }
+
+        
+      }
+
+
+
+
+      public class KeyProjection$8 implements org.apache.flink.table.runtime.generated.Projection<org.apache.flink.table.dataformat.BaseRow, org.apache.flink.table.dataformat.BinaryRow> {
+
+         final org.apache.flink.table.dataformat.BinaryRow out = new org.apache.flink.table.dataformat.BinaryRow(1);
+         final org.apache.flink.table.dataformat.BinaryRowWriter outWriter = new org.apache.flink.table.dataformat.BinaryRowWriter(out);
+
+         public KeyProjection$8(Object[] references) throws Exception {
+            
+         }
+
+         @Override
+         public org.apache.flink.table.dataformat.BinaryRow apply(org.apache.flink.table.dataformat.BaseRow in1) {
+            int field$9;
+         boolean isNull$9;
+            
+
+
+
+         outWriter.reset();
+
+         isNull$9 = in1.isNullAt(1);
+         field$9 = -1;
+         if (!isNull$9) {
+         field$9 = in1.getInt(1);
+         }
+         if (isNull$9) {
+         outWriter.setNullAt(0);
+         } else {
+         outWriter.writeInt(0, field$9);
+         }
+                     
+         outWriter.complete();
+               
+               
+            return out;
+         }
+         }
+
+
+
+
+
+        public final class GroupAggsHandler$86 implements org.apache.flink.table.runtime.generated.AggsHandleFunction {
+
+          int agg0_sum;
+          boolean agg0_sumIsNull;
+          long agg1_count;
+          boolean agg1_countIsNull;
+          int agg2_min;
+          boolean agg2_minIsNull;
+          long agg3_count1;
+          boolean agg3_count1IsNull;
+
+          public GroupAggsHandler$86(java.lang.Object[] references) throws Exception {
+            
+          }
+
+          @Override
+          public void open(org.apache.flink.table.runtime.dataview.StateDataViewStore store) throws Exception {
+            
+          }
+
+          @Override
+          public void accumulate(org.apache.flink.table.dataformat.BaseRow accInput) throws Exception {
+            
+            int field$71;
+            boolean isNull$71;
+            boolean isNull$72;
+            int result$73;
+            boolean isNull$75;
+            long result$76;
+            boolean isNull$78;
+            boolean result$79;
+            boolean isNull$83;
+            long result$84;
+            isNull$71 = accInput.isNullAt(0);
+            field$71 = -1;
+            if (!isNull$71) {
+              field$71 = accInput.getInt(0);
+            }
+            
+            int result$74 = -1;
+            boolean isNull$74;
+            if (isNull$71) {
+              
+              isNull$74 = agg0_sumIsNull;
+              if (!isNull$74) {
+                result$74 = agg0_sum;
+              }
+            }
+            else {
+              
+            
+            
+            isNull$72 = agg0_sumIsNull || isNull$71;
+            result$73 = -1;
+            if (!isNull$72) {
+              
+              result$73 = (int) (agg0_sum + field$71);
+              
+            }
+            
+              isNull$74 = isNull$72;
+              if (!isNull$74) {
+                result$74 = result$73;
+              }
+            }
+            agg0_sum = result$74;;
+            agg0_sumIsNull = isNull$74;
+                   
+            
+            long result$77 = -1L;
+            boolean isNull$77;
+            if (isNull$71) {
+              
+              isNull$77 = agg1_countIsNull;
+              if (!isNull$77) {
+                result$77 = agg1_count;
+              }
+            }
+            else {
+              
+            
+            
+            isNull$75 = agg1_countIsNull || false;
+            result$76 = -1L;
+            if (!isNull$75) {
+              
+              result$76 = (long) (agg1_count + ((long) 1L));
+              
+            }
+            
+              isNull$77 = isNull$75;
+              if (!isNull$77) {
+                result$77 = result$76;
+              }
+            }
+            agg1_count = result$77;;
+            agg1_countIsNull = isNull$77;
+                   
+            
+            int result$82 = -1;
+            boolean isNull$82;
+            if (isNull$71) {
+              
+              isNull$82 = agg2_minIsNull;
+              if (!isNull$82) {
+                result$82 = agg2_min;
+              }
+            }
+            else {
+              int result$81 = -1;
+            boolean isNull$81;
+            if (agg2_minIsNull) {
+              
+              isNull$81 = isNull$71;
+              if (!isNull$81) {
+                result$81 = field$71;
+              }
+            }
+            else {
+              isNull$78 = isNull$71 || agg2_minIsNull;
+            result$79 = false;
+            if (!isNull$78) {
+              
+              result$79 = field$71 < agg2_min;
+              
+            }
+            
+            int result$80 = -1;
+            boolean isNull$80;
+            if (result$79) {
+              
+              isNull$80 = isNull$71;
+              if (!isNull$80) {
+                result$80 = field$71;
+              }
+            }
+            else {
+              
+              isNull$80 = agg2_minIsNull;
+              if (!isNull$80) {
+                result$80 = agg2_min;
+              }
+            }
+              isNull$81 = isNull$80;
+              if (!isNull$81) {
+                result$81 = result$80;
+              }
+            }
+              isNull$82 = isNull$81;
+              if (!isNull$82) {
+                result$82 = result$81;
+              }
+            }
+            agg2_min = result$82;;
+            agg2_minIsNull = isNull$82;
+                   
+            
+            
+            
+            
+            isNull$83 = agg3_count1IsNull || false;
+            result$84 = -1L;
+            if (!isNull$83) {
+              
+              result$84 = (long) (agg3_count1 + ((long) 1L));
+              
+            }
+            
+            agg3_count1 = result$84;;
+            agg3_count1IsNull = isNull$83;
+                   
+            
+          }
+
+          @Override
+          public void retract(org.apache.flink.table.dataformat.BaseRow retractInput) throws Exception {
+            
+            throw new java.lang.RuntimeException("This function not require retract method, but the retract method is called.");
+                 
+          }
+
+          @Override
+          public void merge(org.apache.flink.table.dataformat.BaseRow otherAcc) throws Exception {
+            
+            throw new java.lang.RuntimeException("This function not require merge method, but the merge method is called.");
+                 
+          }
+
+          @Override
+          public void setAccumulators(org.apache.flink.table.dataformat.BaseRow acc) throws Exception {
+            
+            int field$67;
+            boolean isNull$67;
+            long field$68;
+            boolean isNull$68;
+            int field$69;
+            boolean isNull$69;
+            long field$70;
+            boolean isNull$70;
+            isNull$67 = acc.isNullAt(0);
+            field$67 = -1;
+            if (!isNull$67) {
+              field$67 = acc.getInt(0);
+            }
+            isNull$68 = acc.isNullAt(1);
+            field$68 = -1L;
+            if (!isNull$68) {
+              field$68 = acc.getLong(1);
+            }
+            isNull$70 = acc.isNullAt(3);
+            field$70 = -1L;
+            if (!isNull$70) {
+              field$70 = acc.getLong(3);
+            }
+            isNull$69 = acc.isNullAt(2);
+            field$69 = -1;
+            if (!isNull$69) {
+              field$69 = acc.getInt(2);
+            }
+            
+            agg0_sum = field$67;;
+            agg0_sumIsNull = isNull$67;
+                     
+            
+            agg1_count = field$68;;
+            agg1_countIsNull = isNull$68;
+                     
+            
+            agg2_min = field$69;;
+            agg2_minIsNull = isNull$69;
+                     
+            
+            agg3_count1 = field$70;;
+            agg3_count1IsNull = isNull$70;
+                     
+                
+          }
+
+          @Override
+          public void resetAccumulators() throws Exception {
+            
+            
+            
+            
+            agg0_sum = ((int) 0);
+            agg0_sumIsNull = false;
+                     
+            
+            
+            agg1_count = ((long) 0L);
+            agg1_countIsNull = false;
+                     
+            
+            
+            agg2_min = ((int) -1);
+            agg2_minIsNull = true;
+                     
+            
+            
+            agg3_count1 = ((long) 0L);
+            agg3_count1IsNull = false;
+                     
+                
+          }
+
+          @Override
+          public org.apache.flink.table.dataformat.BaseRow getAccumulators() throws Exception {
+            
+            
+            
+            final org.apache.flink.table.dataformat.GenericRow acc$66 = new org.apache.flink.table.dataformat.GenericRow(4);
+            
+            
+            if (agg0_sumIsNull) {
+              acc$66.setNullAt(0);
+            } else {
+              acc$66.setField(0, agg0_sum);;
+            }
+                      
+            
+            
+            if (agg1_countIsNull) {
+              acc$66.setNullAt(1);
+            } else {
+              acc$66.setField(1, agg1_count);;
+            }
+                      
+            
+            
+            if (agg2_minIsNull) {
+              acc$66.setNullAt(2);
+            } else {
+              acc$66.setField(2, agg2_min);;
+            }
+                      
+            
+            
+            if (agg3_count1IsNull) {
+              acc$66.setNullAt(3);
+            } else {
+              acc$66.setField(3, agg3_count1);;
+            }
+                      
+                    
+            return acc$66;
+                
+          }
+
+          @Override
+          public org.apache.flink.table.dataformat.BaseRow createAccumulators() throws Exception {
+            
+            
+            
+            final org.apache.flink.table.dataformat.GenericRow acc$65 = new org.apache.flink.table.dataformat.GenericRow(4);
+            
+            
+            if (false) {
+              acc$65.setNullAt(0);
+            } else {
+              acc$65.setField(0, ((int) 0));;
+            }
+                      
+            
+            
+            if (false) {
+              acc$65.setNullAt(1);
+            } else {
+              acc$65.setField(1, ((long) 0L));;
+            }
+                      
+            
+            
+            if (true) {
+              acc$65.setNullAt(2);
+            } else {
+              acc$65.setField(2, ((int) -1));;
+            }
+                      
+            
+            
+            if (false) {
+              acc$65.setNullAt(3);
+            } else {
+              acc$65.setField(3, ((long) 0L));;
+            }
+                      
+                    
+            return acc$65;
+                
+          }
+
+          @Override
+          public org.apache.flink.table.dataformat.BaseRow getValue() throws Exception {
+            
+            
+            
+            final org.apache.flink.table.dataformat.GenericRow aggValue$85 = new org.apache.flink.table.dataformat.GenericRow(4);
+            
+            
+            if (agg0_sumIsNull) {
+              aggValue$85.setNullAt(0);
+            } else {
+              aggValue$85.setField(0, agg0_sum);;
+            }
+                      
+            
+            
+            if (agg1_countIsNull) {
+              aggValue$85.setNullAt(1);
+            } else {
+              aggValue$85.setField(1, agg1_count);;
+            }
+                      
+            
+            
+            if (agg2_minIsNull) {
+              aggValue$85.setNullAt(2);
+            } else {
+              aggValue$85.setField(2, agg2_min);;
+            }
+                      
+            
+            
+            if (agg3_count1IsNull) {
+              aggValue$85.setNullAt(3);
+            } else {
+              aggValue$85.setField(3, agg3_count1);;
+            }
+                      
+                    
+            return aggValue$85;
+                
+          }
+
+          @Override
+          public void cleanup() throws Exception {
+            
+            
+          }
+
+          @Override
+          public void close() throws Exception {
+            
+          }
+        }
+
+
+
+
+         public class KeyProjection$33 implements org.apache.flink.table.runtime.generated.Projection<org.apache.flink.table.dataformat.BaseRow, org.apache.flink.table.dataformat.BinaryRow> {
+
+                  final org.apache.flink.table.dataformat.BinaryRow out = new org.apache.flink.table.dataformat.BinaryRow(1);
+                  final org.apache.flink.table.dataformat.BinaryRowWriter outWriter = new org.apache.flink.table.dataformat.BinaryRowWriter(out);
+
+                  public KeyProjection$33(Object[] references) throws Exception {
+                     
+                  }
+
+                  @Override
+                  public org.apache.flink.table.dataformat.BinaryRow apply(org.apache.flink.table.dataformat.BaseRow in1) {
+                     int field$34;
+                  boolean isNull$34;
+                     
+
+
+
+                  outWriter.reset();
+
+                  isNull$34 = in1.isNullAt(1);
+                  field$34 = -1;
+                  if (!isNull$34) {
+                  field$34 = in1.getInt(1);
+                  }
+                  if (isNull$34) {
+                  outWriter.setNullAt(0);
+                  } else {
+                  outWriter.writeInt(0, field$34);
+                  }
+                              
+                  outWriter.complete();
+                        
+                        
+                     return out;
+                  }
+                  }
+
+
+
+      public class StreamExecCalc$49 extends org.apache.flink.table.runtime.operators.AbstractProcessStreamOperator
+          implements org.apache.flink.streaming.api.operators.OneInputStreamOperator {
+
+        private final Object[] references;
+        final org.apache.flink.table.dataformat.BoxedWrapperRow out = new org.apache.flink.table.dataformat.BoxedWrapperRow(5);
+        private final org.apache.flink.streaming.runtime.streamrecord.StreamRecord outElement = new org.apache.flink.streaming.runtime.streamrecord.StreamRecord(null);
+
+        public StreamExecCalc$49(
+            Object[] references,
+            org.apache.flink.streaming.runtime.tasks.StreamTask task,
+            org.apache.flink.streaming.api.graph.StreamConfig config,
+            org.apache.flink.streaming.api.operators.Output output) throws Exception {
+          this.references = references;
+          
+          this.setup(task, config, output);
+        }
+
+        @Override
+        public void open() throws Exception {
+          super.open();
+          
+        }
+
+        @Override
+        public void processElement(org.apache.flink.streaming.runtime.streamrecord.StreamRecord element) throws Exception {
+          java.util.Map<String, Object> functionResultCache = new java.util.HashMap<String, Object>();
+          org.apache.flink.table.dataformat.BaseRow in1 = (org.apache.flink.table.dataformat.BaseRow) element.getValue();
+          
+          long field$35;
+          boolean isNull$35;
+          boolean isNull$36;
+          boolean result$37;
+          int field$38;
+          boolean isNull$38;
+          boolean isNull$40;
+          boolean result$41;
+          boolean isNull$43;
+          long result$44;
+          boolean isNull$45;
+          int result$46;
+          int field$47;
+          boolean isNull$47;
+          long field$48;
+          boolean isNull$48;
+          
+          
+          isNull$35 = in1.isNullAt(2);
+          field$35 = -1L;
+          if (!isNull$35) {
+            field$35 = in1.getLong(2);
+          }
+          isNull$48 = in1.isNullAt(4);
+          field$48 = -1L;
+          if (!isNull$48) {
+            field$48 = in1.getLong(4);
+          }
+          isNull$38 = in1.isNullAt(1);
+          field$38 = -1;
+          if (!isNull$38) {
+            field$38 = in1.getInt(1);
+          }
+          isNull$47 = in1.isNullAt(3);
+          field$47 = -1;
+          if (!isNull$47) {
+            field$47 = in1.getInt(3);
+          }
+          
+          out.setHeader(in1.getHeader());
+          
+          
+          
+          isNull$36 = isNull$35 || false;
+          result$37 = false;
+          if (!isNull$36) {
+            
+            result$37 = field$35 == ((int) 0);
+            
+          }
+          
+          int result$39 = -1;
+          boolean isNull$39;
+          if (result$37) {
+            
+            isNull$39 = true;
+            if (!isNull$39) {
+              result$39 = ((int) -1);
+            }
+          }
+          else {
+            
+            isNull$39 = isNull$38;
+            if (!isNull$39) {
+              result$39 = field$38;
+            }
+          }
+          if (isNull$39) {
+            out.setNullAt(0);
+          } else {
+            out.setInt(0, result$39);
+          }
+                    
+          
+          
+          
+          isNull$40 = isNull$35 || false;
+          result$41 = false;
+          if (!isNull$40) {
+            
+            result$41 = field$35 == ((int) 0);
+            
+          }
+          
+          int result$42 = -1;
+          boolean isNull$42;
+          if (result$41) {
+            
+            isNull$42 = true;
+            if (!isNull$42) {
+              result$42 = ((int) -1);
+            }
+          }
+          else {
+            
+            isNull$42 = isNull$38;
+            if (!isNull$42) {
+              result$42 = field$38;
+            }
+          }
+          
+          isNull$43 = isNull$42 || isNull$35;
+          result$44 = -1L;
+          if (!isNull$43) {
+            
+            result$44 = (long) ((new java.lang.Integer(result$42)).longValue() / field$35);
+            
+          }
+          
+          isNull$45 = isNull$43;
+          result$46 = -1;
+          if (!isNull$45) {
+            
+            result$46 = (new java.lang.Long(result$44)).intValue();
+            
+          }
+          
+          if (isNull$45) {
+            out.setNullAt(1);
+          } else {
+            out.setInt(1, result$46);
+          }
+                    
+          
+          
+          if (isNull$47) {
+            out.setNullAt(2);
+          } else {
+            out.setInt(2, field$47);
+          }
+                    
+          
+          
+          if (isNull$35) {
+            out.setNullAt(3);
+          } else {
+            out.setLong(3, field$35);
+          }
+                    
+          
+          
+          if (isNull$48) {
+            out.setNullAt(4);
+          } else {
+            out.setLong(4, field$48);
+          }
+                    
+                  
+          output.collect(outElement.replace(out));
+          
+          
+        }
+
+        
+
+        @Override
+        public void close() throws Exception {
+           super.close();
+          
+        }
+
+        
+      }
+    
+      public class SinkConversion$54 extends org.apache.flink.table.runtime.operators.TableStreamOperator
+          implements org.apache.flink.streaming.api.operators.OneInputStreamOperator {
+
+        private final Object[] references;
+        private transient org.apache.flink.table.dataformat.DataFormatConverters.RowConverter converter$50;
+        private transient org.apache.flink.api.java.typeutils.runtime.TupleSerializerBase serializer$52;
+        private final org.apache.flink.streaming.runtime.streamrecord.StreamRecord outElement = new org.apache.flink.streaming.runtime.streamrecord.StreamRecord(null);
+
+        public SinkConversion$54(
+            Object[] references,
+            org.apache.flink.streaming.runtime.tasks.StreamTask task,
+            org.apache.flink.streaming.api.graph.StreamConfig config,
+            org.apache.flink.streaming.api.operators.Output output) throws Exception {
+          this.references = references;
+          converter$50 = (((org.apache.flink.table.dataformat.DataFormatConverters.RowConverter) references[0]));
+          serializer$52 = (((org.apache.flink.api.java.typeutils.runtime.TupleSerializerBase) references[1]));
+          this.setup(task, config, output);
+        }
+
+        @Override
+        public void open() throws Exception {
+          super.open();
+          
+        }
+
+        @Override
+        public void processElement(org.apache.flink.streaming.runtime.streamrecord.StreamRecord element) throws Exception {
+          java.util.Map<String, Object> functionResultCache = new java.util.HashMap<String, Object>();
+          org.apache.flink.table.dataformat.BaseRow in1 = (org.apache.flink.table.dataformat.BaseRow) element.getValue();
+          
+          
+          
+          
+          
+          
+          Object[] fields$53 = new Object[2];
+          fields$53[0] = org.apache.flink.table.dataformat.util.BaseRowUtil.isAccumulateMsg(in1);
+          fields$53[1] = (org.apache.flink.types.Row) converter$50.toExternal((org.apache.flink.table.dataformat.BaseRow) in1);
+          scala.Tuple2 result$51 = (scala.Tuple2) serializer$52.createInstance(fields$53);
+          output.collect(outElement.replace(result$51));
+                   
+          
+        }
+
+        
+
+        @Override
+        public void close() throws Exception {
+           super.close();
+          
+        }
+
+        
+      }
+```
+
+#### 代码生成 - ProjectionCodeGenerator
+
+```java
+
+// 代码打印
+  @Test
+  def testProjectionManyField(): Unit = {
+    val rowType = RowType.of((0 until 5).map(_ => new IntType()).toArray: _*)
+    val projection = ProjectionCodeGenerator.generateProjection(
+      new CodeGeneratorContext(new TableConfig),
+      "name",
+      rowType,
+      rowType,
+      (0 until 5).toArray
+    ).newInstance(classLoader).asInstanceOf[Projection[BaseRow, BinaryRow]]
+//    println((GeneratedClass[Projection[_ <: BaseRow, _ <: BaseRow]]))
+  }
+
+
+// 生成结果
+
+public class name$0 implements org.apache.flink.table.runtime.generated.Projection<org.apache.flink.table.dataformat.BaseRow, org.apache.flink.table.dataformat.BinaryRow> {
+
+  final org.apache.flink.table.dataformat.BinaryRow out = new org.apache.flink.table.dataformat.BinaryRow(5);
+final org.apache.flink.table.dataformat.BinaryRowWriter outWriter = new org.apache.flink.table.dataformat.BinaryRowWriter(out);
+
+  public name$0(Object[] references) throws Exception {
+    
+  }
+
+  @Override
+  public org.apache.flink.table.dataformat.BinaryRow apply(org.apache.flink.table.dataformat.BaseRow in1) {
+    int field$1;
+boolean isNull$1;
+int field$2;
+boolean isNull$2;
+int field$3;
+boolean isNull$3;
+int field$4;
+boolean isNull$4;
+int field$5;
+boolean isNull$5;
+    
+
+
+
+outWriter.reset();
+
+isNull$1 = in1.isNullAt(0);
+field$1 = -1;
+if (!isNull$1) {
+  field$1 = in1.getInt(0);
+}
+if (isNull$1) {
+  outWriter.setNullAt(0);
+} else {
+  outWriter.writeInt(0, field$1);
+}
+             
+
+isNull$2 = in1.isNullAt(1);
+field$2 = -1;
+if (!isNull$2) {
+  field$2 = in1.getInt(1);
+}
+if (isNull$2) {
+  outWriter.setNullAt(1);
+} else {
+  outWriter.writeInt(1, field$2);
+}
+             
+
+isNull$3 = in1.isNullAt(2);
+field$3 = -1;
+if (!isNull$3) {
+  field$3 = in1.getInt(2);
+}
+if (isNull$3) {
+  outWriter.setNullAt(2);
+} else {
+  outWriter.writeInt(2, field$3);
+}
+             
+
+isNull$4 = in1.isNullAt(3);
+field$4 = -1;
+if (!isNull$4) {
+  field$4 = in1.getInt(3);
+}
+if (isNull$4) {
+  outWriter.setNullAt(3);
+} else {
+  outWriter.writeInt(3, field$4);
+}
+             
+
+isNull$5 = in1.isNullAt(4);
+field$5 = -1;
+if (!isNull$5) {
+  field$5 = in1.getInt(4);
+}
+if (isNull$5) {
+  outWriter.setNullAt(4);
+} else {
+  outWriter.writeInt(4, field$5);
+}
+             
+outWriter.complete();
+        
+      
+    return out;
+  }
+}
+
+```
+
+
+#### 代码生成 - ExprCodeGenerator
+1. flink测试源码
+   1. flink-table/flink-table-planner-blink/src/test/scala/org/apache/flink/table/planner/expressions/SqlExpressionTest.scala
+```java
+
+
+//
+@Test
+  def testConditionalFunctions(): Unit = {
+    testSqlApi("CASE 2 WHEN 1, 2 THEN 2 ELSE 3 END", "2")
+    testSqlApi("CASE WHEN 1 = 2 THEN 2 WHEN 1 = 1 THEN 3 ELSE 3 END", "3")
+    testSqlApi("NULLIF(1, 1)", "null")
+    testSqlApi("COALESCE(NULL, 5)", "5")
+  }
+
+  private def addSqlTestExpr(sqlExpr: String, expected: String): Unit = {
+    // create RelNode from SQL expression
+    val parsed = parser.parse(s"SELECT $sqlExpr FROM $tableName")
+    val validated = calcitePlanner.validate(parsed)
+    val converted = calcitePlanner.rel(validated).rel
+    addTestExpr(converted, expected, sqlExpr)
+  }
+
+  private def addTestExpr(relNode: RelNode, expected: String, summaryString: String): Unit = {
+    val builder = new HepProgramBuilder()
+    builder.addRuleInstance(ProjectToCalcRule.INSTANCE)
+    val hep = new HepPlanner(builder.build())
+    hep.setRoot(relNode)
+    val optimized = hep.findBestExp()
+
+    // throw exception if plan contains more than a calc
+    if (!optimized.getInput(0).isInstanceOf[LogicalTableScan]) {
+      fail("Expression is converted into more than a Calc operation. Use a different test method.")
+    }
+
+    testExprs += ((summaryString, extractRexNode(optimized), expected))
+  }
+
+
+// 生成结果
+      public class TestFunction$6
+          extends org.apache.flink.api.common.functions.RichMapFunction {
+
+        final org.apache.flink.table.dataformat.BinaryRow out = new org.apache.flink.table.dataformat.BinaryRow(4);
+        final org.apache.flink.table.dataformat.BinaryRowWriter outWriter = new org.apache.flink.table.dataformat.BinaryRowWriter(out);
+
+        public TestFunction$6(Object[] references) throws Exception {
+          
+        }
+
+        
+
+        @Override
+        public void open(org.apache.flink.configuration.Configuration parameters) throws Exception {
+          
+        }
+
+        @Override
+        public Object map(Object _in1) throws Exception {
+          java.util.Map<String, Object> functionResultCache = new java.util.HashMap<String, Object>();
+          org.apache.flink.table.dataformat.BaseRow in1 = (org.apache.flink.table.dataformat.BaseRow) _in1;
+          
+          boolean isNull$0;
+          org.apache.flink.table.dataformat.BinaryString result$1;
+          boolean isNull$2;
+          org.apache.flink.table.dataformat.BinaryString result$3;
+          boolean isNull$4;
+          org.apache.flink.table.dataformat.BinaryString result$5;
+          
+          
+          
+          
+          outWriter.reset();
+          
+          
+          
+          isNull$0 = false;
+          result$1 = org.apache.flink.table.dataformat.BinaryString.EMPTY_UTF8;
+          if (!isNull$0) {
+            
+            result$1 = org.apache.flink.table.dataformat.BinaryString.fromString( "" + ((int) 2));
+            isNull$0 = (result$1 == null);
+          }
+          
+          if (isNull$0) {
+            outWriter.setNullAt(0);
+          } else {
+            outWriter.writeString(0, result$1);
+          }
+                       
+          
+          
+          
+          isNull$2 = false;
+          result$3 = org.apache.flink.table.dataformat.BinaryString.EMPTY_UTF8;
+          if (!isNull$2) {
+            
+            result$3 = org.apache.flink.table.dataformat.BinaryString.fromString( "" + ((int) 3));
+            isNull$2 = (result$3 == null);
+          }
+          
+          if (isNull$2) {
+            outWriter.setNullAt(1);
+          } else {
+            outWriter.writeString(1, result$3);
+          }
+                       
+          
+          
+          if (true) {
+            outWriter.setNullAt(2);
+          } else {
+            outWriter.writeString(2, ((org.apache.flink.table.dataformat.BinaryString) org.apache.flink.table.dataformat.BinaryString.EMPTY_UTF8));
+          }
+                       
+          
+          
+          
+          isNull$4 = false;
+          result$5 = org.apache.flink.table.dataformat.BinaryString.EMPTY_UTF8;
+          if (!isNull$4) {
+            
+            result$5 = org.apache.flink.table.dataformat.BinaryString.fromString( "" + ((int) 5));
+            isNull$4 = (result$5 == null);
+          }
+          
+          if (isNull$4) {
+            outWriter.setNullAt(3);
+          } else {
+            outWriter.writeString(3, result$5);
+          }
+                       
+          outWriter.complete();
+                  
+          return out;
+                  
+        }
+
+        @Override
+        public void close() throws Exception {
+          
+        }
+      }
+    
+
+
+```
 
 ### SQL 流程 - 执行
 1. Executor
@@ -2103,12 +3928,61 @@ class ScalarSqlFunction(
 
 ```
 
+### 语句翻译 - Flink 测试验证
+```
+
+def doVerifyPlan(
+      sql: String,
+      explainLevel: SqlExplainLevel,
+      withRetractTraits: Boolean,
+      withRowType: Boolean,
+      printPlanBefore: Boolean): Unit = {
+    val table = getTableEnv.sqlQuery(sql)
+    val relNode = TableTestUtil.toRelNode(table)
+    val optimizedPlan = getOptimizedPlan(
+      Array(relNode),
+      explainLevel,
+      withRetractTraits = withRetractTraits,
+      withRowType = withRowType)
+
+    assertEqualsOrExpand("sql", sql)
+
+    if (printPlanBefore) {
+      val planBefore = SystemUtils.LINE_SEPARATOR +
+        FlinkRelOptUtil.toString(
+          relNode,
+          SqlExplainLevel.DIGEST_ATTRIBUTES,
+          withRowType = withRowType)
+      assertEqualsOrExpand("planBefore", planBefore)
+    }
+
+    val actual = SystemUtils.LINE_SEPARATOR + optimizedPlan
+    assertEqualsOrExpand("planAfter", actual.toString, expand = false)
+  }
+
+```
+
 ### 语句翻译 - Where 翻译成 datastream 算子
 1. SqlToOperationConverter.convert
 2. PlannerQueryOperation toQueryOperation
 3. PlannerQueryOperation
 4. TableImpl 保存所有 RelNode信息
 
+
+### 语句翻译 - Filter 翻译成 datastream 算子
+1. 问题
+   1. 为什么filter算子在flink中就没有出现了呢，具体在哪里执行的呢
+2. calcite
+   1. Filter extends SingleRel
+   2. LogicalFilter extends Filter
+   3. EnumerableFilter extends Filter
+3. flink
+   1. 
+4. transform
+5. streamgraph
+6. filter相关测试源码
+   1. flink-table/flink-table-planner-blink/src/test/scala/org/apache/flink/table/planner/plan/rules/logical/SimplifyFilterConditionRuleTest.scala
+   2. flink-table/flink-table-planner-blink/src/test/scala/org/apache/flink/table/planner/plan/batch/sql/CalcTest.scala
 
 ### 语句翻译 - Select 翻译成 datastream 算子
 
@@ -2493,6 +4367,13 @@ FlinkUserCodeClassLoader
 
 ## 纵向拆解 - 性能优化
 
+### BinaryString
+1. 代码自动生成大量字符串UDF能力基于BinaryString
+1. 京东：Flink SQL 优化实战：https://xie.infoq.cn/article/c244a24c507888f92df72c7c5
+2. 同一任务的两个算子之间的数据交换最终将调用 BinaryString#copy，查看实现代码，可以发现 BinaryString#copy 需要复制底层 MemorySegment 的字节，通过启用对象重用来避免复制，可以有效提升效率。
+
+### BinaryRow & BinaryRowWriter 高效索引
+
 ### flink cpu分析
 1. ps + top + jstack 找热点进程和线程堆栈
 
@@ -2716,6 +4597,11 @@ https://zhuanlan.zhihu.com/p/694650448
 
 ```
 
+
+### 外接数据源如何保证一致性 exactly once
+1. 流式湖仓：https://developer.aliyun.com/article/1404268?spm=ffa.ffa-home.0.0.685e73f4Owa94n
+2. 流批一体架构在快手的实践和思考：http://47.98.188.209/article/detail/110131b6a6c6c707c647459726ef039a
+
 ### 分桶策略方案
 
 ### Partial-Update
@@ -2862,6 +4748,8 @@ CPU 开销下降了33%
 
 ### 磁盘 - compaction 优化，以及如何避免 compaction
 
+### 基于 LSM 树的广义增量检查点
+1. rocksdb 的数据压缩流程：https://juejin.cn/post/7061908056640061448
 
 ### 细粒度设置数据源ttl 和 分区数
 1. https://www.bilibili.com/video/BV1wD4y1Y7pB/?spm_id_from=333.337.search-card.all.click&vd_source=0f9d0e0a195e3352b97b5cb0ca3e57a2
