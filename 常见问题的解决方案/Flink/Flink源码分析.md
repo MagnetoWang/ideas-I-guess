@@ -1225,6 +1225,13 @@ public void testJoinPlain(){
 
 ### api - functions
 
+#### ProcessFunction
+1. processElement 处理元素
+2. context.output Emits a record to the side output identified by the {@link OutputTag}. 发送消息附带标记
+3. 技术文章
+   1. flink的侧输出(sideoutput)和OutputTag：https://blog.csdn.net/lijianqingfeng/article/details/109776421
+   2. 官方文档：https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/dev/datastream/side_output/
+
 ### api - Graph
 1. StreamGraph implements Pipeline
 2. 本质是pipeline 和 Transformation 是flink两大核心类，专门描述数据流
@@ -1836,6 +1843,104 @@ StreamOptimizeContext.scala
 
 ```
 
+#### relnode -> logicalplan -> physicalplan
+```java
+StreamOptimizer
+flink自定义流引擎优化过程
+
+def optimize(
+    relNode: RelNode,
+    updatesAsRetraction: Boolean,
+    relBuilder: RelBuilder): RelNode = {
+    val convSubQueryPlan = optimizeConvertSubQueries(relNode)
+    val expandedPlan = optimizeExpandPlan(convSubQueryPlan)
+    val decorPlan = RelDecorrelator.decorrelateQuery(expandedPlan, relBuilder)
+    val planWithMaterializedTimeAttributes =
+      RelTimeIndicatorConverter.convert(decorPlan, relBuilder.getRexBuilder)
+    val normalizedPlan = optimizeNormalizeLogicalPlan(planWithMaterializedTimeAttributes)
+    val logicalPlan = optimizeLogicalPlan(normalizedPlan)
+    val logicalRewritePlan = optimizeLogicalRewritePlan(logicalPlan)
+    val physicalPlan = optimizePhysicalPlan(logicalRewritePlan, FlinkConventions.DATASTREAM)
+    optimizeDecoratePlan(physicalPlan, updatesAsRetraction)
+  }
+  
+逻辑算子翻译成物理算子规则
+
+protected def getPhysicalOptRuleSet: RuleSet = {
+    materializedConfig.physicalOptRuleSet match {
+
+      case None =>
+        getBuiltInPhysicalOptRuleSet
+
+      case Some(ruleSet) =>
+        if (materializedConfig.replacesPhysicalOptRuleSet) {
+          ruleSet
+        } else {
+          RuleSets.ofList((getBuiltInPhysicalOptRuleSet.asScala ++ ruleSet.asScala).asJava)
+        }
+    }
+  }
+
+内置规则集
+  /**
+    * Returns the built-in optimization rules that are defined by the optimizer.
+    */
+  protected def getBuiltInPhysicalOptRuleSet: RuleSet = FlinkRuleSets.DATASTREAM_OPT_RULES
+
+    val DATASTREAM_OPT_RULES: RuleSet = RuleSets.ofList(
+    // translate to DataStream nodes
+    DataStreamSortRule.INSTANCE,
+    DataStreamGroupAggregateRule.INSTANCE,
+    DataStreamOverAggregateRule.INSTANCE,
+    DataStreamGroupWindowAggregateRule.INSTANCE,
+    DataStreamCalcRule.INSTANCE,
+    DataStreamScanRule.INSTANCE,
+    DataStreamUnionRule.INSTANCE,
+    DataStreamValuesRule.INSTANCE,
+    DataStreamCorrelateRule.INSTANCE,
+    DataStreamWindowJoinRule.INSTANCE,
+    DataStreamJoinRule.INSTANCE,
+    DataStreamTemporalTableJoinRule.INSTANCE,
+    StreamTableSourceScanRule.INSTANCE,
+    DataStreamMatchRule.INSTANCE,
+    DataStreamTableAggregateRule.INSTANCE,
+    DataStreamGroupWindowTableAggregateRule.INSTANCE,
+    DataStreamPythonCalcRule.INSTANCE
+  )
+
+
+规则引擎入口 定义 calcite Programs 即可
+protected def runVolcanoPlanner(
+    ruleSet: RuleSet,
+    input: RelNode,
+    targetTraits: RelTraitSet): RelNode = {
+    val optProgram = Programs.ofRules(ruleSet)
+
+    val output = try {
+      optProgram.run(planningConfigurationBuilder.getPlanner, input, targetTraits,
+        ImmutableList.of(), ImmutableList.of())
+    } catch {
+      case e: CannotPlanException =>
+        throw new TableException(
+          s"Cannot generate a valid execution plan for the given query: \n\n" +
+            s"${RelOptUtil.toString(input)}\n" +
+            s"This exception indicates that the query uses an unsupported SQL feature.\n" +
+            s"Please check the documentation for the set of currently supported SQL features.")
+      case t: TableException =>
+        throw new TableException(
+          s"Cannot generate a valid execution plan for the given query: \n\n" +
+            s"${RelOptUtil.toString(input)}\n" +
+            s"${t.getMessage}\n" +
+            s"Please check the documentation for the set of currently supported SQL features.")
+      case a: AssertionError =>
+        // keep original exception stack for caller
+        throw a
+    }
+    output
+  }
+
+```
+
 
 
 ### SQL 流程 - 转成 DataStream
@@ -2221,6 +2326,332 @@ object StreamExecSinkRule {
 
   rel#625:StreamExecCalc.STREAM_PHYSICAL.any.None: 0.false.Acc(input=StreamExecGroupAggregate#623,select=CASE(=($f2, 0), null:INTEGER, EXPR$0) AS EXPR$0, CAST(/(CASE(=($f2, 0), null:INTEGER, EXPR$0), $f2)) AS EXPR$1, EXPR$2, $f2 AS EXPR$3, EXPR$4)
 
+
+```
+
+#### 计划探查 - Flink规则遍历
+1. FlinkChainedProgram
+2. PlannerBase.optimize -> StreamCommonSubGraphBasedOptimizer.doOptimize -> optimizeTree -> FlinkStreamProgram.buildProgram
+3. relnode -> planner -> program -> FlinkVolcanoProgram -> planner.findBestExp -> match.onMatch() -> convert算子转换
+```
+
+Program 优化入口
+   /**
+    * Calling each program's optimize method in sequence.
+    */
+  def optimize(root: RelNode, context: OC): RelNode = {
+    programNames.foldLeft(root) {
+      (input, name) =>
+        val program = get(name).getOrElse(throw new TableException(s"This should not happen."))
+
+        val start = System.currentTimeMillis()
+        val result = program.optimize(input, context)
+        val end = System.currentTimeMillis()
+
+        if (LOG.isDebugEnabled) {
+          LOG.debug(s"optimize $name cost ${end - start} ms.\n" +
+            s"optimize result: \n${FlinkRelOptUtil.toString(result)}")
+        }
+
+        result
+    }
+  }
+
+
+建立 Program
+
+def buildProgram(config: Configuration): FlinkChainedProgram[StreamOptimizeContext] = {
+    val chainedProgram = new FlinkChainedProgram[StreamOptimizeContext]()
+
+    // rewrite sub-queries to joins
+    chainedProgram.addLast(
+      SUBQUERY_REWRITE,
+      FlinkGroupProgramBuilder.newBuilder[StreamOptimizeContext]
+        // rewrite QueryOperationCatalogViewTable before rewriting sub-queries
+        .addProgram(FlinkHepRuleSetProgramBuilder.newBuilder
+          .setHepRulesExecutionType(HEP_RULES_EXECUTION_TYPE.RULE_SEQUENCE)
+          .setHepMatchOrder(HepMatchOrder.BOTTOM_UP)
+          .add(FlinkStreamRuleSets.TABLE_REF_RULES)
+          .build(), "convert table references before rewriting sub-queries to semi-join")
+        .addProgram(FlinkHepRuleSetProgramBuilder.newBuilder
+          .setHepRulesExecutionType(HEP_RULES_EXECUTION_TYPE.RULE_SEQUENCE)
+          .setHepMatchOrder(HepMatchOrder.BOTTOM_UP)
+          .add(FlinkStreamRuleSets.SEMI_JOIN_RULES)
+          .build(), "rewrite sub-queries to semi-join")
+        .addProgram(FlinkHepRuleSetProgramBuilder.newBuilder
+          .setHepRulesExecutionType(HEP_RULES_EXECUTION_TYPE.RULE_COLLECTION)
+          .setHepMatchOrder(HepMatchOrder.BOTTOM_UP)
+          .add(FlinkStreamRuleSets.TABLE_SUBQUERY_RULES)
+          .build(), "sub-queries remove")
+        // convert RelOptTableImpl (which exists in SubQuery before) to FlinkRelOptTable
+        .addProgram(FlinkHepRuleSetProgramBuilder.newBuilder
+          .setHepRulesExecutionType(HEP_RULES_EXECUTION_TYPE.RULE_SEQUENCE)
+          .setHepMatchOrder(HepMatchOrder.BOTTOM_UP)
+          .add(FlinkStreamRuleSets.TABLE_REF_RULES)
+          .build(), "convert table references after sub-queries removed")
+        .build())
+
+    // rewrite special temporal join plan
+    chainedProgram.addLast(
+      TEMPORAL_JOIN_REWRITE,
+      FlinkGroupProgramBuilder.newBuilder[StreamOptimizeContext]
+        .addProgram(
+          FlinkHepRuleSetProgramBuilder.newBuilder
+            .setHepRulesExecutionType(HEP_RULES_EXECUTION_TYPE.RULE_SEQUENCE)
+            .setHepMatchOrder(HepMatchOrder.BOTTOM_UP)
+            .add(FlinkStreamRuleSets.EXPAND_PLAN_RULES)
+            .build(), "convert correlate to temporal table join")
+        .addProgram(
+          FlinkHepRuleSetProgramBuilder.newBuilder
+            .setHepRulesExecutionType(HEP_RULES_EXECUTION_TYPE.RULE_SEQUENCE)
+            .setHepMatchOrder(HepMatchOrder.BOTTOM_UP)
+            .add(FlinkStreamRuleSets.POST_EXPAND_CLEAN_UP_RULES)
+            .build(), "convert enumerable table scan")
+        .build())
+
+    // query decorrelation
+    chainedProgram.addLast(DECORRELATE, new FlinkDecorrelateProgram)
+
+    // convert time indicators
+    chainedProgram.addLast(TIME_INDICATOR, new FlinkRelTimeIndicatorProgram)
+
+    // default rewrite, includes: predicate simplification, expression reduction, window
+    // properties rewrite, etc.
+    chainedProgram.addLast(
+      DEFAULT_REWRITE,
+      FlinkHepRuleSetProgramBuilder.newBuilder
+        .setHepRulesExecutionType(HEP_RULES_EXECUTION_TYPE.RULE_SEQUENCE)
+        .setHepMatchOrder(HepMatchOrder.BOTTOM_UP)
+        .add(FlinkStreamRuleSets.DEFAULT_REWRITE_RULES)
+        .build())
+
+    // rule based optimization: push down predicate(s) in where clause, so it only needs to read
+    // the required data
+    chainedProgram.addLast(
+      PREDICATE_PUSHDOWN,
+      FlinkGroupProgramBuilder.newBuilder[StreamOptimizeContext]
+        .addProgram(
+          FlinkHepRuleSetProgramBuilder.newBuilder
+            .setHepRulesExecutionType(HEP_RULES_EXECUTION_TYPE.RULE_COLLECTION)
+            .setHepMatchOrder(HepMatchOrder.BOTTOM_UP)
+            .add(FlinkStreamRuleSets.FILTER_PREPARE_RULES)
+            .build(), "filter rules")
+        .addProgram(
+          FlinkHepRuleSetProgramBuilder.newBuilder
+            .setHepRulesExecutionType(HEP_RULES_EXECUTION_TYPE.RULE_SEQUENCE)
+            .setHepMatchOrder(HepMatchOrder.BOTTOM_UP)
+            .add(FlinkBatchRuleSets.FILTER_TABLESCAN_PUSHDOWN_RULES)
+            .build(), "push predicate into table scan")
+        .addProgram(
+          FlinkHepRuleSetProgramBuilder.newBuilder
+            .setHepRulesExecutionType(HEP_RULES_EXECUTION_TYPE.RULE_SEQUENCE)
+            .setHepMatchOrder(HepMatchOrder.BOTTOM_UP)
+            .add(FlinkStreamRuleSets.PRUNE_EMPTY_RULES)
+            .build(), "prune empty after predicate push down")
+        .build())
+
+    // join reorder
+    if (config.getBoolean(OptimizerConfigOptions.TABLE_OPTIMIZER_JOIN_REORDER_ENABLED)) {
+      chainedProgram.addLast(
+        JOIN_REORDER,
+        FlinkGroupProgramBuilder.newBuilder[StreamOptimizeContext]
+          .addProgram(FlinkHepRuleSetProgramBuilder.newBuilder
+            .setHepRulesExecutionType(HEP_RULES_EXECUTION_TYPE.RULE_COLLECTION)
+            .setHepMatchOrder(HepMatchOrder.BOTTOM_UP)
+            .add(FlinkStreamRuleSets.JOIN_REORDER_PREPARE_RULES)
+            .build(), "merge join into MultiJoin")
+          .addProgram(FlinkHepRuleSetProgramBuilder.newBuilder
+            .setHepRulesExecutionType(HEP_RULES_EXECUTION_TYPE.RULE_SEQUENCE)
+            .setHepMatchOrder(HepMatchOrder.BOTTOM_UP)
+            .add(FlinkStreamRuleSets.JOIN_REORDER_RULES)
+            .build(), "do join reorder")
+          .build())
+    }
+
+    // optimize the logical plan
+    chainedProgram.addLast(
+      LOGICAL,
+      FlinkVolcanoProgramBuilder.newBuilder
+        .add(FlinkStreamRuleSets.LOGICAL_OPT_RULES)
+        .setRequiredOutputTraits(Array(FlinkConventions.LOGICAL))
+        .build())
+
+    // logical rewrite
+    chainedProgram.addLast(
+      LOGICAL_REWRITE,
+      FlinkHepRuleSetProgramBuilder.newBuilder
+        .setHepRulesExecutionType(HEP_RULES_EXECUTION_TYPE.RULE_SEQUENCE)
+        .setHepMatchOrder(HepMatchOrder.BOTTOM_UP)
+        .add(FlinkStreamRuleSets.LOGICAL_REWRITE)
+        .build())
+
+    // optimize the physical plan
+    chainedProgram.addLast(
+      PHYSICAL,
+      FlinkVolcanoProgramBuilder.newBuilder
+        .add(FlinkStreamRuleSets.PHYSICAL_OPT_RULES)
+        .setRequiredOutputTraits(Array(FlinkConventions.STREAM_PHYSICAL))
+        .build())
+
+    // physical rewrite
+    chainedProgram.addLast(
+      PHYSICAL_REWRITE,
+      FlinkGroupProgramBuilder.newBuilder[StreamOptimizeContext]
+        .addProgram(new FlinkUpdateAsRetractionTraitInitProgram,
+          "init for retraction")
+        .addProgram(
+          FlinkHepRuleSetProgramBuilder.newBuilder
+            .setHepRulesExecutionType(HEP_RULES_EXECUTION_TYPE.RULE_SEQUENCE)
+            .setHepMatchOrder(HepMatchOrder.BOTTOM_UP)
+            .add(FlinkStreamRuleSets.RETRACTION_RULES)
+            .build(), "retraction rules")
+        .addProgram(new FlinkMiniBatchIntervalTraitInitProgram,
+          "Initialization for mini-batch interval inference")
+        .addProgram(
+          FlinkHepRuleSetProgramBuilder.newBuilder
+            .setHepRulesExecutionType(HEP_RULES_EXECUTION_TYPE.RULE_SEQUENCE)
+            .setHepMatchOrder(HepMatchOrder.TOP_DOWN)
+            .add(FlinkStreamRuleSets.MINI_BATCH_RULES)
+            .build(), "mini-batch interval rules")
+        .addProgram(
+          FlinkHepRuleSetProgramBuilder.newBuilder
+            .setHepRulesExecutionType(HEP_RULES_EXECUTION_TYPE.RULE_COLLECTION)
+            .setHepMatchOrder(HepMatchOrder.BOTTOM_UP)
+            .add(FlinkStreamRuleSets.PHYSICAL_REWRITE)
+            .build(), "physical rewrite")
+        .build())
+
+    chainedProgram
+  }
+
+match 找到最优计划
+public RelNode findBestExp() {
+        this.ensureRootConverters();
+        this.registerMaterializations();
+        int cumulativeTicks = 0;
+        VolcanoPlannerPhase[] var2 = VolcanoPlannerPhase.values();
+        int var3 = var2.length;
+
+        for(int var4 = 0; var4 < var3; ++var4) {
+            VolcanoPlannerPhase phase = var2[var4];
+            this.setInitialImportance();
+            RelOptCost targetCost = this.costFactory.makeHugeCost();
+            int tick = 0;
+            int firstFiniteTick = -1;
+            int splitCount = 0;
+            int giveUpTick = Integer.MAX_VALUE;
+
+            while(true) {
+                ++tick;
+                ++cumulativeTicks;
+                if (this.root.bestCost.isLe(targetCost)) {
+                    if (firstFiniteTick < 0) {
+                        firstFiniteTick = cumulativeTicks;
+                        this.clearImportanceBoost();
+                    }
+
+                    if (!this.ambitious) {
+                        break;
+                    }
+
+                    targetCost = this.root.bestCost.multiplyBy(0.9);
+                    ++splitCount;
+                    if (this.impatient) {
+                        if (firstFiniteTick < 10) {
+                            giveUpTick = cumulativeTicks + 25;
+                        } else {
+                            giveUpTick = cumulativeTicks + Math.max(firstFiniteTick / 10, 25);
+                        }
+                    }
+                } else {
+                    if (cumulativeTicks > giveUpTick) {
+                        break;
+                    }
+
+                    if (this.root.bestCost.isInfinite() && tick % 10 == 0) {
+                        this.injectImportanceBoost();
+                    }
+                }
+
+                LOGGER.debug("PLANNER = {}; TICK = {}/{}; PHASE = {}; COST = {}", new Object[]{this, cumulativeTicks, tick, phase.toString(), this.root.bestCost});
+                VolcanoRuleMatch match = this.ruleQueue.popMatch(phase);
+                if (match == null) {
+                    break;
+                }
+
+                assert match.getRule().matches(match);
+
+                match.onMatch();
+                this.root = this.canonize(this.root);
+            }
+
+            this.ruleQueue.phaseCompleted(phase);
+        }
+
+所有规则统一 onMatch匹配在调 convert
+convert 需要业务自定义实现
+matches 也需要业务自定义实现，用来判断能否调用convert
+
+    public abstract RelNode convert(RelNode var1);
+
+    public boolean isGuaranteed() {
+        return false;
+    }
+
+    public void onMatch(RelOptRuleCall call) {
+        RelNode rel = call.rel(0);
+        if (rel.getTraitSet().contains(this.inTrait)) {
+            RelNode converted = this.convert(rel);
+            if (converted != null) {
+                call.transformTo(converted);
+            }
+        }
+
+    }
+
+```
+
+
+
+#### 计划探查 - 合并算子
+1. FlinkCalcMergeRule
+```
+
+  override def onMatch(call: RelOptRuleCall): Unit = {
+    val topCalc: Calc = call.rel(0)
+    val bottomCalc: Calc = call.rel(1)
+
+    val topProgram = topCalc.getProgram
+    val rexBuilder = topCalc.getCluster.getRexBuilder
+    // Merge the programs together.
+    val mergedProgram = RexProgramBuilder.mergePrograms(
+      topCalc.getProgram, bottomCalc.getProgram, rexBuilder)
+    require(mergedProgram.getOutputRowType eq topProgram.getOutputRowType)
+
+    val newMergedProgram = if (mergedProgram.getCondition != null) {
+      val condition = mergedProgram.expandLocalRef(mergedProgram.getCondition)
+      val simplifiedCondition = FlinkRexUtil.simplify(rexBuilder, condition)
+      if (simplifiedCondition.toString == condition.toString) {
+        mergedProgram
+      } else {
+        val programBuilder = RexProgramBuilder.forProgram(mergedProgram, rexBuilder, true)
+        programBuilder.clearCondition()
+        programBuilder.addCondition(simplifiedCondition)
+        programBuilder.getProgram(true)
+      }
+    } else {
+      mergedProgram
+    }
+
+    val newCalc = topCalc.copy(topCalc.getTraitSet, bottomCalc.getInput, newMergedProgram)
+    if (newCalc.getDigest == bottomCalc.getDigest) {
+      // newCalc is equivalent to bottomCalc,
+      // which means that topCalc
+      // must be trivial. Take it out of the game.
+      call.getPlanner.setImportance(topCalc, 0.0)
+    }
+    call.transformTo(newCalc)
+  }
 
 ```
 

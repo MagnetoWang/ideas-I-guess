@@ -226,6 +226,29 @@ calcite只有 core和linq4j是核心代码
    1. flink自定义createTable：https://github.com/apache/flink/pull/8548#discussion_r287703560
    2. flink添加水位线：https://github.com/apache/flink/pull/9952
 
+
+### 代码块截图
+```java
+
+        SqlParser parser = SqlParser.create(sql,
+                SqlParser.configBuilder()
+                        .setParserFactory(SampleLakeSqlParserImpl.FACTORY)
+                        .setQuoting(Quoting.BACK_TICK)
+                        .setUnquotedCasing(Casing.TO_UPPER)
+                        .setQuotedCasing(Casing.UNCHANGED)
+                        .setConformance(SqlConformanceEnum.DEFAULT)
+                        .build());
+
+        try {
+            // 解析SQL语句
+            SqlNode sqlNode = parser.parseQuery();
+            // 输出解析后的SQL节点
+            System.out.println("Parsed SQL Node: " + sqlNode);
+        } catch (SqlParseException e) {
+            e.printStackTrace();
+        }
+```
+
 ## 横向拆解 - parser
 1. 实现一个upload jar语法：https://issues.apache.org/jira/browse/CALCITE-1384
    1. https://github.com/apache/calcite/pull/322
@@ -241,11 +264,11 @@ calcite只有 core和linq4j是核心代码
    2. 
 
 ### 配置文件
-```
+```shell
 ├── pom.xml
 └── src
     └── main
-        ├── codegen  // 模版代码
+        ├── codegen  // template code
         │   ├── config.fmpp
         │   ├── data
         │   │   ├── app.json
@@ -2157,9 +2180,452 @@ typeFactory.createMapType(nullableVarcharType, nullableIntegerType)
 
 ```
 
-## 纵向拆解 - RelBuilder 和 Rexbuilder
+
+## 纵向拆解 - RelNode
+
+### RelFactories -> RelBuilder -> RelNode
+1. 构建逻辑算子，业务可以继承这个类型，实现自己relnode工厂
+2. Contains factory interface and default implementation for creating various rel nodes.
+3. RelFactories
+   1. ProjectFactoryImpl
+   2. FilterFactoryImpl
+   3. CorrelateFactoryImpl
+4. 应用
+   1. 参考 FlinkLogicalRelFactories & FlinkRelFactories，flink继承这个方法 relNode -> flinkLogicalNode
+  
+### Where流程
+```
+SqlToRelConverter
 
 
+ /**
+   * Converts a WHERE clause.
+   *
+   * @param bb    Blackboard
+   * @param where WHERE clause, may be null
+   */
+  private void convertWhere(
+      final Blackboard bb,
+      final SqlNode where) {
+    if (where == null) {
+      return;
+    }
+    SqlNode newWhere = pushDownNotForIn(bb.scope, where);
+    replaceSubQueries(bb, newWhere, RelOptUtil.Logic.UNKNOWN_AS_FALSE);
+    final RexNode convertedWhere = bb.convertExpression(newWhere);
+    final RexNode convertedWhere2 =
+        RexUtil.removeNullabilityCast(typeFactory, convertedWhere);
+
+    // only allocate filter if the condition is not TRUE
+    if (convertedWhere2.isAlwaysTrue()) {
+      return;
+    }
+
+    final RelFactories.FilterFactory filterFactory =
+        RelFactories.DEFAULT_FILTER_FACTORY;
+    final RelNode filter = filterFactory.createFilter(bb.root, convertedWhere2);
+    final RelNode r;
+    final CorrelationUse p = getCorrelationUse(bb, filter);
+    if (p != null) {
+      assert p.r instanceof Filter;
+      Filter f = (Filter) p.r;
+      r = LogicalFilter.create(f.getInput(), f.getCondition(),
+          ImmutableSet.of(p.id));
+    } else {
+      r = filter;
+    }
+
+    bb.setRoot(r, false);
+  }
+
+
+
+```
+
+### Filter Node & FlinkLogicalCalc 
+1. calcite
+   1. RelNode Filter
+   2. LogicalFilter
+   3. EnumerableFilterRule
+   4. EnumerableFilter
+   5. EnumerableFilterToCalcRule
+   6. EnumerableCalc
+   7. 
+2. flink
+   1. 
+   2. FlinkLogicalRelFactories
+   3. FlinkLogicalCalc
+   4. StreamExecCalcRule
+   5. StreamExecCalc
+
+```
+
+
+
+
+```
+
+
+## 纵向拆解 - RexNode
+1. RexProgram：A collection of expressions which read inputs, compute output expressions and optionally use a condition to filter rows.
+### Rexbuilder
+1. 标量逻辑表达式
+2. 应用在
+   1. where/filter 的条件表达式
+   2. join on 条件表达式
+   3. udf 表达式
+
+
+### RexProgram & RexProgramBuilder
+1. 表达整个计算逻辑
+   1. A collection of expressions which read inputs, compute output expressions,and optionally use a condition to filter rows.
+2. sql
+   1. SELECT concat(a,b), c * 20 + 19 FROM MyTableRow WHERE c < 3
+   2. table schame a b c
+3. RexInputRef
+   1. 输入的字段 a=$0 b=$1 c=$2 
+4. RexCall 
+   1. 比如 $3=CONCAT($t0, $t1)
+5. RexLiteral
+   1. 比如 $4=20
+   2. $5=c * 20=*($t2, $t4)
+   3. $6=19
+   4. $7=c * 20 + 19=+($t5, $t6)
+   5. $8=3
+   6. $9=c < 3=<($t2, $t8)
+6. RexLocalRef
+   1. 输出字段 $3 $7
+
+## 纵向拆解 - RelOptRule
+1. RelOptRuleCall：是对一次优化规则执行参数的封装，它会作为优化规则方法matches和onMatch方法的参数。封装了当前调用需要的算子（rels），RelOptRuleOperand等执行规则的必要参数。
+2. VolcanoRuleCall
+3. DeferringRuleCall
+4. 优化规则的实现：https://guimy.tech/calcite/2021/04/05/RelOptRule-of-calcite.html
+5. RelOptRuleOperand：operand that determines whether a {@link RelOptRule}  can be applied to a particular expression.
+6. RelOptRuleOperandChildPolicy
+7. RelOptTableImpl
+
+### 算子应用 - 自定义流程
+1. 定义算子 业务自己实现
+2. 定义规则 业务自己实现
+3. 加载规则 calcite已实现
+4. 运行规则引擎 calcite已实现
+```java
+
+ /**
+   * Custom implementation of {@link Filter} for use
+   * in test case to verify that {@link FilterMultiJoinMergeRule}
+   * can be created with any {@link Filter} and not limited to
+   * {@link org.apache.calcite.rel.logical.LogicalFilter}
+   */
+  private static class MyFilter extends Filter {
+
+    MyFilter(
+        RelOptCluster cluster,
+        RelTraitSet traitSet,
+        RelNode child,
+        RexNode condition) {
+      super(cluster, traitSet, child, condition);
+    }
+
+    public MyFilter copy(RelTraitSet traitSet, RelNode input,
+        RexNode condition) {
+      return new MyFilter(getCluster(), traitSet, input, condition);
+    }
+
+  }
+
+
+  /**
+   * Rule to transform {@link LogicalFilter} into
+   * custom MyFilter
+   */
+  private static class MyFilterRule extends RelOptRule {
+    static final MyFilterRule INSTANCE =
+        new MyFilterRule(LogicalFilter.class, RelFactories.LOGICAL_BUILDER);
+
+    private MyFilterRule(Class<? extends Filter> clazz,
+        RelBuilderFactory relBuilderFactory) {
+      super(RelOptRule.operand(clazz, RelOptRule.any()), relBuilderFactory, null);
+    }
+
+    @Override public void onMatch(RelOptRuleCall call) {
+      final LogicalFilter logicalFilter = call.rel(0);
+      final RelNode input = logicalFilter.getInput();
+      final MyFilter myFilter = new MyFilter(input.getCluster(), input.getTraitSet(), input,
+          logicalFilter.getCondition());
+      call.transformTo(myFilter);
+    }
+  }
+  
+
+
+@Test public void testFilterAndProjectWithMultiJoin() throws Exception {
+    final HepProgram preProgram = new HepProgramBuilder()
+        .addRuleCollection(Arrays.asList(MyFilterRule.INSTANCE, MyProjectRule.INSTANCE))
+        .build();
+
+    final FilterMultiJoinMergeRule filterMultiJoinMergeRule =
+        new FilterMultiJoinMergeRule(MyFilter.class, RelFactories.LOGICAL_BUILDER);
+
+    final ProjectMultiJoinMergeRule projectMultiJoinMergeRule =
+        new ProjectMultiJoinMergeRule(MyProject.class, RelFactories.LOGICAL_BUILDER);
+
+    HepProgram program = new HepProgramBuilder()
+        .addRuleCollection(
+            Arrays.asList(
+                JoinToMultiJoinRule.INSTANCE,
+                filterMultiJoinMergeRule,
+                projectMultiJoinMergeRule))
+        .build();
+
+    sql("select * from emp e1 left outer join dept d on e1.deptno = d.deptno where d.deptno > 3")
+        .withPre(preProgram).with(program).check();
+  }
+
+
+  protected void checkPlanning(Tester tester, HepProgram preProgram,
+      RelOptPlanner planner, String sql, boolean unchanged) {
+    final DiffRepository diffRepos = getDiffRepos();
+    String sql2 = diffRepos.expand("sql", sql);
+    final RelRoot root = tester.convertSqlToRel(sql2);
+    final RelNode relInitial = root.rel;
+
+    assertTrue(relInitial != null);
+
+    List<RelMetadataProvider> list = new ArrayList<>();
+    list.add(DefaultRelMetadataProvider.INSTANCE);
+    planner.registerMetadataProviders(list);
+    RelMetadataProvider plannerChain =
+        ChainedRelMetadataProvider.of(list);
+    final RelOptCluster cluster = relInitial.getCluster();
+    cluster.setMetadataProvider(plannerChain);
+
+    RelNode relBefore;
+    if (preProgram == null) {
+      relBefore = relInitial;
+    } else {
+      HepPlanner prePlanner = new HepPlanner(preProgram);
+      prePlanner.setRoot(relInitial);
+      relBefore = prePlanner.findBestExp();
+    }
+
+    assertThat(relBefore, notNullValue());
+
+    final String planBefore = NL + RelOptUtil.toString(relBefore);
+    diffRepos.assertEquals("planBefore", "${planBefore}", planBefore);
+    SqlToRelTestBase.assertValid(relBefore);
+
+    planner.setRoot(relBefore);
+    RelNode r = planner.findBestExp();
+    if (tester.isLateDecorrelate()) {
+      final String planMid = NL + RelOptUtil.toString(r);
+      diffRepos.assertEquals("planMid", "${planMid}", planMid);
+      SqlToRelTestBase.assertValid(r);
+      final RelBuilder relBuilder =
+          RelFactories.LOGICAL_BUILDER.create(cluster, null);
+      r = RelDecorrelator.decorrelateQuery(r, relBuilder);
+    }
+    final String planAfter = NL + RelOptUtil.toString(r);
+    if (unchanged) {
+      assertThat(planAfter, is(planBefore));
+    } else {
+      diffRepos.assertEquals("planAfter", "${planAfter}", planAfter);
+      if (planBefore.equals(planAfter)) {
+        throw new AssertionError("Expected plan before and after is the same.\n"
+            + "You must use unchanged=true or call checkUnchanged");
+      }
+    }
+    SqlToRelTestBase.assertValid(r);
+  }
+
+```
+### 算子转换 - ConverterRule
+```java
+public ConverterRule(Class<? extends RelNode> clazz, RelTrait in,
+      RelTrait out, String description) {
+    this(clazz, (Predicate<RelNode>) r -> true, in, out,
+        RelFactories.LOGICAL_BUILDER, description);
+  }
+
+
+  public class EnumerableTableScanRule extends ConverterRule {
+
+  @Deprecated // to be removed before 2.0
+  public EnumerableTableScanRule() {
+    this(RelFactories.LOGICAL_BUILDER);
+  }
+
+  /**
+   * Creates an EnumerableTableScanRule.
+   *
+   * @param relBuilderFactory Builder for relational expressions
+   */
+  public EnumerableTableScanRule(RelBuilderFactory relBuilderFactory) {
+    super(LogicalTableScan.class, (Predicate<RelNode>) r -> true,
+        Convention.NONE, EnumerableConvention.INSTANCE, relBuilderFactory,
+        "EnumerableTableScanRule");
+  }
+
+  @Override public RelNode convert(RelNode rel) {
+    LogicalTableScan scan = (LogicalTableScan) rel;
+    final RelOptTable relOptTable = scan.getTable();
+    final Table table = relOptTable.unwrap(Table.class);
+    if (!EnumerableTableScan.canHandle(table)) {
+      return null;
+    }
+    final Expression expression = relOptTable.getExpression(Object.class);
+    if (expression == null) {
+      return null;
+    }
+    return EnumerableTableScan.create(scan.getCluster(), relOptTable);
+  }
+}
+
+
+
+
+```
+### 算子合并 - CalcMergeRule
+```java
+
+  public FilterCalcMergeRule(RelBuilderFactory relBuilderFactory) {
+    super(
+        operand(
+            Filter.class,
+            operand(LogicalCalc.class, any())),
+        relBuilderFactory, null);
+  }
+
+  //~ Methods ----------------------------------------------------------------
+
+  public void onMatch(RelOptRuleCall call) {
+    final LogicalFilter filter = call.rel(0);
+    final LogicalCalc calc = call.rel(1);
+
+    // Don't merge a filter onto a calc which contains windowed aggregates.
+    // That would effectively be pushing a multiset down through a filter.
+    // We'll have chance to merge later, when the over is expanded.
+    if (calc.getProgram().containsAggs()) {
+      return;
+    }
+
+    // Create a program containing the filter.
+    final RexBuilder rexBuilder = filter.getCluster().getRexBuilder();
+    final RexProgramBuilder progBuilder =
+        new RexProgramBuilder(
+            calc.getRowType(),
+            rexBuilder);
+    progBuilder.addIdentity();
+    progBuilder.addCondition(filter.getCondition());
+    RexProgram topProgram = progBuilder.getProgram();
+    RexProgram bottomProgram = calc.getProgram();
+
+    // Merge the programs together.
+    RexProgram mergedProgram =
+        RexProgramBuilder.mergePrograms(
+            topProgram,
+            bottomProgram,
+            rexBuilder);
+    final LogicalCalc newCalc =
+        LogicalCalc.create(calc.getInput(), mergedProgram);
+    call.transformTo(newCalc);
+  }
+}
+
+
+filter合并
+
+ @Test public void testMergeFilter() throws Exception {
+    HepProgram program = new HepProgramBuilder()
+        .addRuleInstance(FilterProjectTransposeRule.INSTANCE)
+        .addRuleInstance(FilterMergeRule.INSTANCE)
+        .build();
+
+    checkPlanning(program,
+        "select name from (\n"
+            + "  select *\n"
+            + "  from dept\n"
+            + "  where deptno = 10)\n"
+            + "where deptno = 10\n");
+  }
+
+
+union合并
+ @Test
+  public void testUnionMergeRule() throws Exception {
+    HepProgram program = new HepProgramBuilder()
+            .addRuleInstance(ProjectSetOpTransposeRule.INSTANCE)
+            .addRuleInstance(ProjectRemoveRule.INSTANCE)
+            .addRuleInstance(UnionMergeRule.INSTANCE)
+            .build();
+
+    checkPlanning(program,
+            "select * from (\n"
+                    + "select * from (\n"
+                    + "  select name, deptno from dept\n"
+                    + "  union all\n"
+                    + "  select name, deptno from\n"
+                    + "  (\n"
+                    + "    select name, deptno, count(1) from dept group by name, deptno\n"
+                    + "    union all\n"
+                    + "    select name, deptno, count(1) from dept group by name, deptno\n"
+                    + "  ) subq\n"
+                    + ") a\n"
+                    + "union all\n"
+                    + "select name, deptno from dept\n"
+                    + ") aa\n");
+  }
+
+```
+
+### 优化流程 - programm应用
+```java
+  @Test public void trimEmptyUnion32viaRelBuidler() throws Exception {
+    RelBuilder relBuilder = RelBuilder.create(RelBuilderTest.config().build());
+
+    // This somehow blows up (see trimEmptyUnion32, the second case)
+    // (values(1) union all select * from (values(3)) where false)
+    // union all values(2)
+
+    // Non-trivial filter is important for the test to fail
+    RelNode relNode = relBuilder
+        .values(new String[]{"x"}, "1")
+        .values(new String[]{"x"}, "3")
+        .filter(relBuilder.equals(relBuilder.field("x"), relBuilder.literal("30")))
+        .union(true)
+        .values(new String[]{"x"}, "2")
+        .union(true)
+        .build();
+
+    RelOptPlanner planner = relNode.getCluster().getPlanner();
+    RuleSet ruleSet =
+        RuleSets.ofList(
+            PruneEmptyRules.UNION_INSTANCE,
+            ValuesReduceRule.FILTER_INSTANCE,
+            EnumerableRules.ENUMERABLE_PROJECT_RULE,
+            EnumerableRules.ENUMERABLE_FILTER_RULE,
+            EnumerableRules.ENUMERABLE_VALUES_RULE,
+            EnumerableRules.ENUMERABLE_UNION_RULE);
+    Program program = Programs.of(ruleSet);
+
+    RelTraitSet toTraits = relNode.getTraitSet()
+        .replace(EnumerableConvention.INSTANCE);
+
+    RelNode output = program.run(planner, relNode, toTraits,
+        ImmutableList.of(), ImmutableList.of());
+
+    // Expected outcomes are:
+    // 1) relation is optimized to simple VALUES
+    // 2) the number of rule invocations is reasonable
+    // 3) planner does not throw OutOfMemoryError
+    assertThat("empty union should be pruned out of " + toString(relNode),
+        Util.toLinux(toString(output)),
+        equalTo("EnumerableUnion(all=[true])\n"
+            + "  EnumerableValues(type=[RecordType(INTEGER EXPR$0)], tuples=[[{ 1 }]])\n"
+            + "  EnumerableValues(type=[RecordType(INTEGER EXPR$0)], tuples=[[{ 2 }]])\n"));
+  }
+```
 
 ## 纵向拆解 - 视图的validate 和 计划图优化
 1. calcite 不支持DDL 包括创建view。但是有测试用例，从relnode层，扩展视图语法树
@@ -2177,7 +2643,7 @@ typeFactory.createMapType(nullableVarcharType, nullableIntegerType)
    3. 
 
 ### 视图注册
-```
+```java
 final SchemaPlus post =
           rootSchema.add(schema.schemaName, new AbstractSchema());
       post.add("EMP",
