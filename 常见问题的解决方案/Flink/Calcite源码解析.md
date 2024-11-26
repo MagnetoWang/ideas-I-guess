@@ -2296,6 +2296,361 @@ SqlToRelConverter
 6. RexLocalRef
    1. 输出字段 $3 $7
 
+
+### 表达式创建 - addExpr & makeCall
+```java
+
+ /**
+   * Creates a program, depending on variant:
+   *
+   * <ol>
+   * <li><code>select (x + y) + (x + 1) as a, (x + x) as b from t(x, y)</code>
+   * <li><code>select (x + y) + (x + 1) as a, (x + (x + 1)) as b
+   * from t(x, y)</code>
+   * <li><code>select (x + y) + (x + 1) as a, (x + x) as b from t(x, y)
+   * where ((x + y) &gt; 1) and ((x + y) &gt; 1)</code>
+   * <li><code>select (x + y) + (x + 1) as a, (x + x) as b from t(x, y)
+   * where not case
+   *           when x + 1 &gt; 5 then true
+   *           when y is null then null
+   *           else false
+   *           end</code>
+   * </ol>
+   */
+  private RexProgramBuilder createProg(int variant) {
+    assert variant >= 0 && variant <= 4;
+    List<RelDataType> types =
+        Arrays.asList(
+            typeFactory.createSqlType(SqlTypeName.INTEGER),
+            typeFactory.createSqlType(SqlTypeName.INTEGER));
+    List<String> names = Arrays.asList("x", "y");
+    RelDataType inputRowType = typeFactory.createStructType(types, names);
+    final RexProgramBuilder builder =
+        new RexProgramBuilder(inputRowType, rexBuilder);
+    // $t0 = x
+    // $t1 = y
+    // $t2 = $t0 + 1 (i.e. x + 1)
+    final RexNode i0 = rexBuilder.makeInputRef(
+        types.get(0), 0);
+    final RexLiteral c1 = rexBuilder.makeExactLiteral(BigDecimal.ONE);
+    final RexLiteral c5 = rexBuilder.makeExactLiteral(BigDecimal.valueOf(5L));
+    RexLocalRef t2 =
+        builder.addExpr(
+            rexBuilder.makeCall(
+                SqlStdOperatorTable.PLUS,
+                i0,
+                c1));
+    // $t3 = 77 (not used)
+    final RexLiteral c77 =
+        rexBuilder.makeExactLiteral(
+            BigDecimal.valueOf(77));
+    RexLocalRef t3 =
+        builder.addExpr(
+            c77);
+    Util.discard(t3);
+    // $t4 = $t0 + $t1 (i.e. x + y)
+    final RexNode i1 = rexBuilder.makeInputRef(
+        types.get(1), 1);
+    RexLocalRef t4 =
+        builder.addExpr(
+            rexBuilder.makeCall(
+                SqlStdOperatorTable.PLUS,
+                i0,
+                i1));
+    RexLocalRef t5;
+    final RexLocalRef t1;
+    switch (variant) {
+    case 0:
+    case 2:
+      // $t5 = $t0 + $t0 (i.e. x + x)
+      t5 = builder.addExpr(
+          rexBuilder.makeCall(
+              SqlStdOperatorTable.PLUS,
+              i0,
+              i0));
+      t1 = null;
+      break;
+    case 1:
+    case 3:
+    case 4:
+      // $tx = $t0 + 1
+      t1 =
+          builder.addExpr(
+              rexBuilder.makeCall(
+                  SqlStdOperatorTable.PLUS,
+                  i0,
+                  c1));
+      // $t5 = $t0 + $tx (i.e. x + (x + 1))
+      t5 =
+          builder.addExpr(
+              rexBuilder.makeCall(
+                  SqlStdOperatorTable.PLUS,
+                  i0,
+                  t1));
+      break;
+    default:
+      throw new AssertionError("unexpected variant " + variant);
+    }
+    // $t6 = $t4 + $t2 (i.e. (x + y) + (x + 1))
+    RexLocalRef t6 =
+        builder.addExpr(
+            rexBuilder.makeCall(
+                SqlStdOperatorTable.PLUS,
+                t4,
+                t2));
+    builder.addProject(t6.getIndex(), "a");
+    builder.addProject(t5.getIndex(), "b");
+
+    final RexLocalRef t7;
+    final RexLocalRef t8;
+    switch (variant) {
+    case 2:
+      // $t7 = $t4 > $i0 (i.e. (x + y) > 0)
+      t7 =
+          builder.addExpr(
+              rexBuilder.makeCall(
+                  SqlStdOperatorTable.GREATER_THAN,
+                  t4,
+                  i0));
+      // $t8 = $t7 AND $t7
+      t8 =
+          builder.addExpr(
+              and(t7, t7));
+      builder.addCondition(t8);
+      builder.addCondition(t7);
+      break;
+    case 3:
+    case 4:
+      // $t7 = 5
+      t7 = builder.addExpr(c5);
+      // $t8 = $t2 > $t7 (i.e. (x + 1) > 5)
+      t8 = builder.addExpr(gt(t2, t7));
+      // $t9 = true
+      final RexLocalRef t9 =
+          builder.addExpr(trueLiteral);
+      // $t10 = $t1 is not null (i.e. y is not null)
+      assert t1 != null;
+      final RexLocalRef t10 =
+          builder.addExpr(
+              rexBuilder.makeCall(SqlStdOperatorTable.IS_NOT_NULL, t1));
+      // $t11 = false
+      final RexLocalRef t11 =
+          builder.addExpr(falseLiteral);
+      // $t12 = unknown
+      final RexLocalRef t12 =
+          builder.addExpr(nullBool);
+      // $t13 = case when $t8 then $t9 when $t10 then $t11 else $t12 end
+      final RexLocalRef t13 =
+          builder.addExpr(case_(t8, t9, t10, t11, t12));
+      // $t14 = not $t13 (i.e. not case ... end)
+      final RexLocalRef t14 =
+          builder.addExpr(not(t13));
+      // don't add 't14 is true' - that is implicit
+      if (variant == 3) {
+        builder.addCondition(t14);
+      } else {
+        // $t15 = $14 is true
+        final RexLocalRef t15 =
+            builder.addExpr(
+                isTrue(t14));
+        builder.addCondition(t15);
+      }
+    }
+    return builder;
+  }
+
+```
+
+
+### 表达式合并 - programs
+```java
+
+
+/**
+   * Merges two programs together.
+   *
+   * <p>All expressions become common sub-expressions. For example, the query
+   *
+   * <blockquote><pre>SELECT x + 1 AS p, x + y AS q FROM (
+   *   SELECT a + b AS x, c AS y
+   *   FROM t
+   *   WHERE c = 6)}</pre></blockquote>
+   *
+   * <p>would be represented as the programs
+   *
+   * <blockquote><pre>
+   *   Calc:
+   *       Projects={$2, $3},
+   *       Condition=null,
+   *       Exprs={$0, $1, $0 + 1, $0 + $1})
+   *   Calc(
+   *       Projects={$3, $2},
+   *       Condition={$4}
+   *       Exprs={$0, $1, $2, $0 + $1, $2 = 6}
+   * </pre></blockquote>
+   *
+   * <p>The merged program is
+   *
+   * <blockquote><pre>
+   *   Calc(
+   *      Projects={$4, $5}
+   *      Condition=$6
+   *      Exprs={0: $0       // a
+   *             1: $1        // b
+   *             2: $2        // c
+   *             3: ($0 + $1) // x = a + b
+   *             4: ($3 + 1)  // p = x + 1
+   *             5: ($3 + $2) // q = x + y
+   *             6: ($2 = 6)  // c = 6
+   * </pre></blockquote>
+   *
+   * <p>Another example:</p>
+   *
+   * <blockquote>
+   * <pre>SELECT *
+   * FROM (
+   *   SELECT a + b AS x, c AS y
+   *   FROM t
+   *   WHERE c = 6)
+   * WHERE x = 5</pre>
+   * </blockquote>
+   *
+   * <p>becomes
+   *
+   * <blockquote>
+   * <pre>SELECT a + b AS x, c AS y
+   * FROM t
+   * WHERE c = 6 AND (a + b) = 5</pre>
+   * </blockquote>
+   *
+   * @param topProgram    Top program. Its expressions are in terms of the
+   *                      outputs of the bottom program.
+   * @param bottomProgram Bottom program. Its expressions are in terms of the
+   *                      result fields of the relational expression's input
+   * @param rexBuilder    Rex builder
+   * @param normalize     Whether to convert program to canonical form
+   * @return Merged program
+   */
+  public static RexProgram mergePrograms(
+      RexProgram topProgram,
+      RexProgram bottomProgram,
+      RexBuilder rexBuilder,
+      boolean normalize) {
+    // Initialize a program builder with the same expressions, outputs
+    // and condition as the bottom program.
+    assert bottomProgram.isValid(Litmus.THROW, null);
+    assert topProgram.isValid(Litmus.THROW, null);
+    final RexProgramBuilder progBuilder =
+        RexProgramBuilder.forProgram(bottomProgram, rexBuilder, false);
+
+    // Drive from the outputs of the top program. Register each expression
+    // used as an output.
+    final List<RexLocalRef> projectRefList =
+        progBuilder.registerProjectsAndCondition(topProgram);
+
+    // Switch to the projects needed by the top program. The original
+    // projects of the bottom program are no longer needed.
+    progBuilder.clearProjects();
+    final RelDataType outputRowType = topProgram.getOutputRowType();
+    for (Pair<RexLocalRef, String> pair
+        : Pair.zip(projectRefList, outputRowType.getFieldNames(), true)) {
+      progBuilder.addProject(pair.left, pair.right);
+    }
+    RexProgram mergedProg = progBuilder.getProgram(normalize);
+    assert mergedProg.isValid(Litmus.THROW, null);
+    assert mergedProg.getOutputRowType() == topProgram.getOutputRowType();
+    return mergedProg;
+  }
+
+```
+
+
+### 表达式反推到具体字段 - RexInputRef
+1. 行表达式：https://juejin.cn/post/7113828979567493133
+```java
+创建每个表达式的唯一标识
+ /**
+   * Creates a program that projects its input fields but with possibly
+   * different names for the output fields.
+   */
+  public static RexProgram createIdentity(
+      RelDataType rowType,
+      RelDataType outputRowType) {
+    if (rowType != outputRowType
+        && !Pair.right(rowType.getFieldList()).equals(
+            Pair.right(outputRowType.getFieldList()))) {
+      throw new IllegalArgumentException(
+          "field type mismatch: " + rowType + " vs. " + outputRowType);
+    }
+    final List<RelDataTypeField> fields = rowType.getFieldList();
+    final List<RexLocalRef> projectRefs = new ArrayList<>();
+    final List<RexInputRef> refs = new ArrayList<>();
+    for (int i = 0; i < fields.size(); i++) {
+      final RexInputRef ref = RexInputRef.of(i, fields);
+      refs.add(ref);
+      projectRefs.add(new RexLocalRef(i, ref.getType()));
+    }
+    return new RexProgram(rowType, refs, projectRefs, null, outputRowType);
+  }
+
+
+
+jon下推表达式
+ /**
+   * Test {@link RelOptUtil#pushDownJoinConditions(org.apache.calcite.rel.core.Join, RelBuilder)}
+   * where the join condition contains a complex expression
+   */
+  @Test public void testPushDownJoinConditionsWithExpandedIsNotDistinctUsingCase() {
+    int leftJoinIndex = empScan.getRowType().getFieldNames().indexOf("DEPTNO");
+    int rightJoinIndex = deptRow.getFieldNames().indexOf("DEPTNO");
+
+    RexInputRef leftKeyInputRef = RexInputRef.of(leftJoinIndex, empDeptJoinRelFields);
+    RexInputRef rightKeyInputRef =
+        RexInputRef.of(empRow.getFieldCount() + rightJoinIndex, empDeptJoinRelFields);
+    RexNode joinCond = relBuilder.call(SqlStdOperatorTable.CASE,
+        relBuilder.call(SqlStdOperatorTable.IS_NULL,
+            relBuilder.call(SqlStdOperatorTable.PLUS, leftKeyInputRef, relBuilder.literal(1))),
+        relBuilder.call(SqlStdOperatorTable.IS_NULL, rightKeyInputRef),
+        relBuilder.call(SqlStdOperatorTable.IS_NULL, rightKeyInputRef),
+        relBuilder.call(SqlStdOperatorTable.IS_NULL,
+            relBuilder.call(SqlStdOperatorTable.PLUS, leftKeyInputRef, relBuilder.literal(1))),
+        relBuilder.call(SqlStdOperatorTable.EQUALS,
+            relBuilder.call(SqlStdOperatorTable.PLUS, leftKeyInputRef, relBuilder.literal(1)),
+            rightKeyInputRef));
+
+
+    // Build the join operator and push down join conditions
+    relBuilder.push(empScan);
+    relBuilder.push(deptScan);
+    relBuilder.join(JoinRelType.INNER, joinCond);
+    Join join = (Join) relBuilder.build();
+    RelNode transformed = RelOptUtil.pushDownJoinConditions(join, relBuilder);
+
+    // Assert the new join operator
+    assertThat(transformed.getRowType(), is(join.getRowType()));
+    assertThat(transformed, is(instanceOf(Project.class)));
+    RelNode transformedInput = transformed.getInput(0);
+    assertThat(transformedInput, is(instanceOf(Join.class)));
+    Join newJoin = (Join) transformedInput;
+    assertThat(newJoin.getCondition().toString(),
+        is(
+            relBuilder.call(
+                SqlStdOperatorTable.IS_NOT_DISTINCT_FROM,
+                // Computed field is added at the end (and index start at 0)
+                RexInputRef.of(empRow.getFieldCount(), join.getRowType()),
+                // Right side is shifted by 1
+                RexInputRef.of(empRow.getFieldCount() + 1 + rightJoinIndex, join.getRowType()))
+              .toString()));
+    assertThat(newJoin.getLeft(), is(instanceOf(Project.class)));
+    Project leftInput = (Project) newJoin.getLeft();
+    assertThat(leftInput.getChildExps().get(empRow.getFieldCount()).toString(),
+        is(relBuilder.call(SqlStdOperatorTable.PLUS, leftKeyInputRef, relBuilder.literal(1))
+            .toString()));
+  }
+}
+
+```
+
 ## 纵向拆解 - RelOptRule
 1. RelOptRuleCall：是对一次优化规则执行参数的封装，它会作为优化规则方法matches和onMatch方法的参数。封装了当前调用需要的算子（rels），RelOptRuleOperand等执行规则的必要参数。
 2. VolcanoRuleCall
@@ -2487,7 +2842,15 @@ public ConverterRule(Class<? extends RelNode> clazz, RelTrait in,
 
 ```
 ### 算子合并 - CalcMergeRule
+1. 比较常见的 filter 和 project 算子合并到 calc计算算子中
+2. FilterToCalcRule
+3. ProjectToCalcRule
+4. FilterCalcMergeRule
+5. ProjectCalcMergeRule
+6. CalcMergeRule
 ```java
+
+filte 算子 和 calc合并
 
   public FilterCalcMergeRule(RelBuilderFactory relBuilderFactory) {
     super(
@@ -2551,6 +2914,32 @@ filter合并
   }
 
 
+project 算子 和 calc算子合并
+  /**
+   * Creates a ProjectToCalcRule.
+   *
+   * @param relBuilderFactory Builder for relational expressions
+   */
+  public ProjectToCalcRule(RelBuilderFactory relBuilderFactory) {
+    super(operand(LogicalProject.class, any()), relBuilderFactory, null);
+  }
+
+  //~ Methods ----------------------------------------------------------------
+
+  public void onMatch(RelOptRuleCall call) {
+    final LogicalProject project = call.rel(0);
+    final RelNode input = project.getInput();
+    final RexProgram program =
+        RexProgram.create(
+            input.getRowType(),
+            project.getProjects(),
+            null,
+            project.getRowType(),
+            project.getCluster().getRexBuilder());
+    final LogicalCalc calc = LogicalCalc.create(input, program);
+    call.transformTo(calc);
+  }
+
 union合并
  @Test
   public void testUnionMergeRule() throws Exception {
@@ -2575,6 +2964,56 @@ union合并
                     + "union all\n"
                     + "select name, deptno from dept\n"
                     + ") aa\n");
+  }
+
+```
+
+### 算子位置互换 - FilterProjectTransposeRule
+```java
+
+ public void onMatch(RelOptRuleCall call) {
+    final Filter filter = call.rel(0);
+    final Project project = call.rel(1);
+
+    if (RexOver.containsOver(project.getProjects(), null)) {
+      // In general a filter cannot be pushed below a windowing calculation.
+      // Applying the filter before the aggregation function changes
+      // the results of the windowing invocation.
+      //
+      // When the filter is on the PARTITION BY expression of the OVER clause
+      // it can be pushed down. For now we don't support this.
+      return;
+    }
+    // convert the filter to one that references the child of the project
+    RexNode newCondition =
+        RelOptUtil.pushPastProject(filter.getCondition(), project);
+
+    final RelBuilder relBuilder = call.builder();
+    RelNode newFilterRel;
+    if (copyFilter) {
+      final RelNode input = project.getInput();
+      final RelTraitSet traitSet = filter.getTraitSet()
+          .replaceIfs(RelCollationTraitDef.INSTANCE,
+              () -> Collections.singletonList(
+                      input.getTraitSet().getTrait(RelCollationTraitDef.INSTANCE)))
+          .replaceIfs(RelDistributionTraitDef.INSTANCE,
+              () -> Collections.singletonList(
+                      input.getTraitSet().getTrait(RelDistributionTraitDef.INSTANCE)));
+      newFilterRel = filter.copy(traitSet, input, simplifyFilterCondition(newCondition, call));
+    } else {
+      newFilterRel =
+          relBuilder.push(project.getInput()).filter(newCondition).build();
+    }
+
+    RelNode newProjRel =
+        copyProject
+            ? project.copy(project.getTraitSet(), newFilterRel,
+                project.getProjects(), project.getRowType())
+            : relBuilder.push(newFilterRel)
+                .project(project.getProjects(), project.getRowType().getFieldNames())
+                .build();
+
+    call.transformTo(newProjRel);
   }
 
 ```
