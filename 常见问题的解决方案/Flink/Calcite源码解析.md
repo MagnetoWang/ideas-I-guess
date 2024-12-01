@@ -1659,11 +1659,19 @@ LogicalSort(subset=[rel#118:RelSubset#6.ENUMERABLE.[1]], sort0=[$1], dir0=[ASC])
 
 ### calcite 可视化
 1. 静态方法：core/src/main/java/org/apache/calcite/plan/volcano/Dumpers.java#dumpGraphviz
-2. Graphviz 格式
+2. Graphvia 语法：https://leojhonsong.github.io/zh-CN/2020/03/12/Graphviz%E7%AE%80%E8%A6%81%E8%AF%AD%E6%B3%95/
+3. 手绘风格：https://sketchviz.com/new
+4. 可视化工具集合：https://graphviz.org/Gallery/directed/Genetic_Programming.html
+5. gvmap工具：https://graphviz.org/Gallery/undirected/gd_1994_2007.html
+6. 神经网络工具：https://github.com/ashishpatel26/Tools-to-Design-or-Visualize-Architecture-of-Neural-Network
+7. Graphviz 格式如下
 ```
 示例链接
 
 https://dreampuf.github.io/GraphvizOnline/#digraph%20G%20%7B%0A%20%20%20%20%09root%20%5Bstyle%3Dfilled%2Clabel%3D%22Root%22%5D%3B%0A%20%20%20%20%09subgraph%20cluster0%7B%0A%20%20%20%20%09%09label%3D%22Set%200%20RecordType(JavaType(int)%20empid%2C%20JavaType(int)%20deptno%2C%20JavaType(class%20java.lang.String)%20name%2C%20JavaType(int)%20salary%2C%20JavaType(class%20java.lang.Integer)%20commission)%22%3B%0A%20%20%20%20%09%09rel99%20%5Blabel%3D%22rel%2399%3ALogicalTableScan%5Cntable%3D%5Bhr%2C%20emps%5D%5Cnrows%3D4.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel120%20%5Blabel%3D%22rel%23120%3AEnumerableTableScan%5Cntable%3D%5Bhr%2C%20emps%5D%5Cnrows%3D4.0%2C%20cost%3D%7B4.0%20rows%2C%205.0%20cpu%2C%200.0%20io%7D%22%2Ccolor%3Dblue%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset106%20%5Blabel%3D%22rel%23106%3ARelSubset%230.NONE.%5B0%5D%22%5D%0A%20%20%20%20%09%09subset121%20%5Blabel%3D%22rel%23121%3ARelSubset%230.ENUMERABLE.%5B0%5D%22%5D%0A%20%20%20%20%09%7D%0A%20%20%20%20%09subgraph%20cluster1%7B%0A%20%20%20%20%09%09label%3D%22Set%201%20RecordType(JavaType(int)%20deptno%2C%20JavaType(class%20java.lang.String)%20name)%22%3B%0A%20%20%20%20%09%09rel100%20%5Blabel%3D%22rel%23100%3ALogicalTableScan%5Cntable%3D%5Bhr%2C%20depts%5D%5Cnrows%3D3.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel122%20%5Blabel%3D%22rel%23122%3AEnumerableTableScan%5Cntable%3D%5Bhr%2C%20depts%5D%5Cnrows%3D3.0%2C%20cost%3D%7B3.0%20rows%2C%204.0%20cpu%2C%200.0%20io%7D%22%2Ccolor%3Dblue%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset107%20%5Blabel%3D%22rel%23107%3ARelSubset%231.NONE.%5B0%5D%22%5D%0A%20%20%20%20%09%09subset123%20%5Blabel%3D%22rel%23123%3ARelSubset%231.ENUMERABLE.%5B0%5D%22%5D%0A%20%20%20%20%09%7D%0A%20%20%20%20%09subgraph%20cluster2%7B%0A%20%20%20%20%09%09label%3D%22Set%202%20RecordType(JavaType(int)%20deptno)%22%3B%0A%20%20%20%20%09%09rel108%20%5Blabel%3D%22rel%23108%3ALogicalProject%5Cninput%3DRelSubset%23107%2Cinputs%3D0%5Cnrows%3D3.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset109%20%5Blabel%3D%22rel%23109%3ARelSubset%232.NONE.%5B0%5D%22%5D%0A%20%20%20%20%09%7D%0A%20%20%20%20%09subgraph%20cluster3%7B%0A%20%20%20%20%09%09label%3D%22Set%203%20RecordType(JavaType(int)%20deptno)%22%3B%0A%20%20%20%20%09%09rel110%20%5Blabel%3D%22rel%23110%3ALogicalAggregate%5Cninput%3DRelSubset%23109%2Cgroup%3D%7B0%7D%5Cnrows%3D3.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset111%20%5Blabel%3D%22rel%23111%3ARelSubset%233.NONE.%5B%5D%22%5D%0A%20%20%20%20%09%7D%0A%20%20%20%20%09subgraph%20cluster4%7B%0A%20%20%20%20%09%09label%3D%22Set%204%20RecordType(JavaType(int)%20empid%2C%20JavaType(int)%20deptno%2C%20JavaType(class%20java.lang.String)%20name%2C%20JavaType(int)%20salary%2C%20JavaType(class%20java.lang.Integer)%20commission%2C%20JavaType(int)%20deptno0)%22%3B%0A%20%20%20%20%09%09rel112%20%5Blabel%3D%22rel%23112%3ALogicalJoin%5Cnleft%3DRelSubset%23106%2Cright%3DRelSubset%23111%2Ccondition%3D%3D(%241%2C%20%245)%2CjoinType%3Dinner%5Cnrows%3D1.7999999999999998%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel129%20%5Blabel%3D%22rel%23129%3ALogicalSort%5Cninput%3DRelSubset%23113%2Csort0%3D%240%2Cdir0%3DASC%5Cnrows%3D1.7999999999999998%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset113%20%5Blabel%3D%22rel%23113%3ARelSubset%234.NONE.%5B%5D%22%5D%0A%20%20%20%20%09%09subset131%20%5Blabel%3D%22rel%23131%3ARelSubset%234.NONE.%5B0%5D%22%5D%0A%20%20%20%20%09%09subset113%20-%3E%20subset131%3B%09%7D%0A%20%20%20%20%09subgraph%20cluster5%7B%0A%20%20%20%20%09%09label%3D%22Set%205%20RecordType(JavaType(int)%20deptno%2C%20JavaType(int)%20empid)%22%3B%0A%20%20%20%20%09%09rel114%20%5Blabel%3D%22rel%23114%3ALogicalProject%5Cninput%3DRelSubset%23113%2Cexprs%3D%5B%241%2C%20%240%5D%5Cnrows%3D1.7999999999999998%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel128%20%5Blabel%3D%22rel%23128%3ALogicalProject%5Cninput%3DRelSubset%23127%2Cexprs%3D%5B%241%2C%20%240%5D%5Cnrows%3D4.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset115%20%5Blabel%3D%22rel%23115%3ARelSubset%235.NONE.%5B%5D%22%5D%0A%20%20%20%20%09%7D%0A%20%20%20%20%09subgraph%20cluster6%7B%0A%20%20%20%20%09%09label%3D%22Set%206%20RecordType(JavaType(int)%20deptno%2C%20JavaType(int)%20empid)%22%3B%0A%20%20%20%20%09%09rel116%20%5Blabel%3D%22rel%23116%3ALogicalSort%5Cninput%3DRelSubset%23115%2Csort0%3D%241%2Cdir0%3DASC%5Cnrows%3D1.7999999999999998%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel119%20%5Blabel%3D%22rel%23119%3AAbstractConverter%5Cninput%3DRelSubset%23117%2Cconvention%3DENUMERABLE%2Csort%3D%5B1%5D%5Cnrows%3D1.7999999999999998%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel132%20%5Blabel%3D%22rel%23132%3ALogicalProject%5Cninput%3DRelSubset%23131%2Cexprs%3D%5B%241%2C%20%240%5D%5Cnrows%3D1.7999999999999998%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel136%20%5Blabel%3D%22rel%23136%3ALogicalProject%5Cninput%3DRelSubset%23135%2Cexprs%3D%5B%241%2C%20%240%5D%5Cnrows%3D4.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset117%20%5Blabel%3D%22rel%23117%3ARelSubset%236.NONE.%5B1%5D%22%5D%0A%20%20%20%20%09%09subset118%20%5Blabel%3D%22rel%23118%3ARelSubset%236.ENUMERABLE.%5B1%5D%22%2Ccolor%3Dred%5D%0A%20%20%20%20%09%7D%0A%20%20%20%20%09subgraph%20cluster7%7B%0A%20%20%20%20%09%09label%3D%22Set%207%20RecordType(JavaType(int)%20empid%2C%20JavaType(int)%20deptno%2C%20JavaType(class%20java.lang.String)%20name%2C%20JavaType(int)%20salary%2C%20JavaType(class%20java.lang.Integer)%20commission)%22%3B%0A%20%20%20%20%09%09rel126%20%5Blabel%3D%22rel%23126%3ALogicalJoin%5Cnleft%3DRelSubset%23106%2Cright%3DRelSubset%23109%2Ccondition%3D%3D(%241%2C%20%245)%2CjoinType%3Dsemi%5Cnrows%3D4.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09rel133%20%5Blabel%3D%22rel%23133%3ALogicalSort%5Cninput%3DRelSubset%23127%2Csort0%3D%240%2Cdir0%3DASC%5Cnrows%3D4.0%2C%20cost%3D%7Binf%7D%22%2Cshape%3Dbox%5D%0A%20%20%20%20%09%09subset127%20%5Blabel%3D%22rel%23127%3ARelSubset%237.NONE.%5B%5D%22%5D%0A%20%20%20%20%09%09subset135%20%5Blabel%3D%22rel%23135%3ARelSubset%237.NONE.%5B0%5D%22%5D%0A%20%20%20%20%09%09subset127%20-%3E%20subset135%3B%09%7D%0A%20%20%20%20%09root%20-%3E%20subset118%3B%0A%20%20%20%20%09subset106%20-%3E%20rel99%3B%0A%20%20%20%20%09subset121%20-%3E%20rel120%5Bcolor%3Dblue%5D%3B%0A%20%20%20%20%09subset107%20-%3E%20rel100%3B%0A%20%20%20%20%09subset123%20-%3E%20rel122%5Bcolor%3Dblue%5D%3B%0A%20%20%20%20%09subset109%20-%3E%20rel108%3B%20rel108%20-%3E%20subset107%3B%0A%20%20%20%20%09subset111%20-%3E%20rel110%3B%20rel110%20-%3E%20subset109%3B%0A%20%20%20%20%09subset113%20-%3E%20rel112%3B%20rel112%20-%3E%20subset106%5Blabel%3D%220%22%5D%3B%20rel112%20-%3E%20subset111%5Blabel%3D%221%22%5D%3B%0A%20%20%20%20%09subset131%20-%3E%20rel129%3B%20rel129%20-%3E%20subset113%3B%0A%20%20%20%20%09subset115%20-%3E%20rel114%3B%20rel114%20-%3E%20subset113%3B%0A%20%20%20%20%09subset115%20-%3E%20rel128%3B%20rel128%20-%3E%20subset127%3B%0A%20%20%20%20%09subset117%20-%3E%20rel116%3B%20rel116%20-%3E%20subset115%3B%0A%20%20%20%20%09subset118%20-%3E%20rel119%3B%20rel119%20-%3E%20subset117%3B%0A%20%20%20%20%09subset117%20-%3E%20rel132%3B%20rel132%20-%3E%20subset131%3B%0A%20%20%20%20%09subset117%20-%3E%20rel136%3B%20rel136%20-%3E%20subset135%3B%0A%20%20%20%20%09subset127%20-%3E%20rel126%3B%20rel126%20-%3E%20subset106%5Blabel%3D%220%22%5D%3B%20rel126%20-%3E%20subset109%5Blabel%3D%221%22%5D%3B%0A%20%20%20%20%09subset135%20-%3E%20rel133%3B%20rel133%20-%3E%20subset127%3B%0A%20%20%20%20%7D
+
+
+
 
 ```
 
@@ -2025,6 +2033,8 @@ public RelBuilder join(JoinRelType joinType, RexNode condition,
 
 ```
 
+
+
 ### RelBuilder 模块初始化，测试和修改
 1. core/src/test/java/org/apache/calcite/sql2rel/CorrelateProjectExtractorTest.java
 ```
@@ -2193,7 +2203,24 @@ typeFactory.createMapType(nullableVarcharType, nullableIntegerType)
 4. 应用
    1. 参考 FlinkLogicalRelFactories & FlinkRelFactories，flink继承这个方法 relNode -> flinkLogicalNode
   
-### Where流程
+### Where流程 -> Filter -> logicalFilter -> Calc算子（condition）
+1. Project & Filter Node 转成 FlinkLogicalCalc （input, expression, output and condition）
+2. Calc算子本质就是 输入字段，输出字段，字段之间的表达式和过滤表达式的集合，所以这些算子可以融合在一起
+2. Calc算子融合也就好理解了，就是为了做全局最优的表达式合并，减少中间结果集
+3. calcite
+   1. RelNode Filter
+   2. LogicalFilter
+   3. EnumerableFilterRule
+   4. EnumerableFilter
+   5. EnumerableFilterToCalcRule
+   6. EnumerableCalc
+   7. 
+4. flink
+   1. 
+   2. FlinkLogicalRelFactories
+   3. FlinkLogicalCalc
+   4. StreamExecCalcRule
+   5. StreamExecCalc
 ```
 SqlToRelConverter
 
@@ -2242,22 +2269,99 @@ SqlToRelConverter
 
 ```
 
-### Filter Node & FlinkLogicalCalc 
-1. calcite
-   1. RelNode Filter
-   2. LogicalFilter
-   3. EnumerableFilterRule
-   4. EnumerableFilter
-   5. EnumerableFilterToCalcRule
-   6. EnumerableCalc
-   7. 
-2. flink
-   1. 
-   2. FlinkLogicalRelFactories
-   3. FlinkLogicalCalc
-   4. StreamExecCalcRule
-   5. StreamExecCalc
 
+
+
+### Join算子流程
+1. sqlnode join -> logicalJoin -> EnumerableJoin
+2. EnumerableJoinRule
+3. EnumerableMergeJoinRule
+```
+  /**
+   * Implementation of {@link JoinFactory} that returns a vanilla
+   * {@link org.apache.calcite.rel.logical.LogicalJoin}.
+   */
+  private static class JoinFactoryImpl implements JoinFactory {
+    public RelNode createJoin(RelNode left, RelNode right,
+        RexNode condition, Set<CorrelationId> variablesSet,
+        JoinRelType joinType, boolean semiJoinDone) {
+      return LogicalJoin.create(left, right, condition, variablesSet, joinType,
+          semiJoinDone, ImmutableList.of());
+    }
+  }
+
+
+
+
+logical join可以转换多种join hash nested loop 等等
+
+@Override public RelNode convert(RelNode rel) {
+    LogicalJoin join = (LogicalJoin) rel;
+    List<RelNode> newInputs = new ArrayList<>();
+    for (RelNode input : join.getInputs()) {
+      if (!(input.getConvention() instanceof EnumerableConvention)) {
+        input =
+            convert(
+                input,
+                input.getTraitSet()
+                    .replace(EnumerableConvention.INSTANCE));
+      }
+      newInputs.add(input);
+    }
+    final RelOptCluster cluster = join.getCluster();
+    final RelNode left = newInputs.get(0);
+    final RelNode right = newInputs.get(1);
+    final JoinInfo info = JoinInfo.of(left, right, join.getCondition());
+    if (!info.isEqui() && join.getJoinType() != JoinRelType.INNER) {
+      // EnumerableJoinRel only supports equi-join. We can put a filter on top
+      // if it is an inner join.
+      try {
+        return EnumerableNestedLoopJoin.create(
+            left,
+            right,
+            join.getCondition(),
+            join.getVariablesSet(),
+            join.getJoinType());
+      } catch (InvalidRelException e) {
+        EnumerableRules.LOGGER.debug(e.toString());
+        return null;
+      }
+    } else {
+      RelNode newRel;
+      try {
+        newRel = EnumerableHashJoin.create(
+            left,
+            right,
+            info.getEquiCondition(left, right, cluster.getRexBuilder()),
+            join.getVariablesSet(),
+            join.getJoinType());
+      } catch (InvalidRelException e) {
+        EnumerableRules.LOGGER.debug(e.toString());
+        return null;
+      }
+      if (!info.isEqui()) {
+        newRel = new EnumerableFilter(cluster, newRel.getTraitSet(),
+            newRel, info.getRemaining(cluster.getRexBuilder()));
+      }
+      return newRel;
+    }
+  }
+
+
+
+判断join是 等价join还是不等价
+public static JoinInfo of(RelNode left, RelNode right, RexNode condition) {
+        List<Integer> leftKeys = new ArrayList();
+        List<Integer> rightKeys = new ArrayList();
+        List<Boolean> filterNulls = new ArrayList();
+        RexNode remaining = RelOptUtil.splitJoinCondition(left, right, condition, leftKeys, rightKeys, filterNulls);
+        return (JoinInfo)(remaining.isAlwaysTrue() ? new EquiJoinInfo(ImmutableIntList.copyOf(leftKeys), ImmutableIntList.copyOf(rightKeys)) : new NonEquiJoinInfo(ImmutableIntList.copyOf(leftKeys), ImmutableIntList.copyOf(rightKeys), remaining));
+    }
+
+```
+
+
+### Union算子流程
 ```
 
 
@@ -2270,14 +2374,15 @@ SqlToRelConverter
 1. RexProgram：A collection of expressions which read inputs, compute output expressions and optionally use a condition to filter rows.
 ### Rexbuilder
 1. 标量逻辑表达式
-2. 应用在
+2. 存放整个UDF函数表，用于构建表达式
+3. 应用在
    1. where/filter 的条件表达式
    2. join on 条件表达式
    3. udf 表达式
 
 
 ### RexProgram & RexProgramBuilder
-1. 表达整个计算逻辑
+1. RexProgram：表达整个计算逻辑 获取输入字段，输出字段，并整合成表达式
    1. A collection of expressions which read inputs, compute output expressions,and optionally use a condition to filter rows.
 2. sql
    1. SELECT concat(a,b), c * 20 + 19 FROM MyTableRow WHERE c < 3
@@ -2295,6 +2400,7 @@ SqlToRelConverter
    6. $9=c < 3=<($t2, $t8)
 6. RexLocalRef
    1. 输出字段 $3 $7
+7. 
 
 
 ### 表达式创建 - addExpr & makeCall
@@ -2461,8 +2567,34 @@ SqlToRelConverter
 
 ```
 
+### 表达式映射 - Select 映射 输入表和输出表
+1. 输入表字段 15个 RelDataType
+2. 表达式描述 8个 RexNode
+3. 输出表字段 8个 = 表达式描述个数 RelDataType
+4. RexProgramBuilder 融合 表达式和输出表字段名
+5. RexBuilder RexProgram不再需要RexBuilder了 
+   1. RexNode 已经足够描述整个表达式描述信息了
+6. RexProgram
+```
 
-### 表达式合并 - programs
+ProjectToCalcRule 会把rowtype 合并到 rexprogram
+  public void onMatch(RelOptRuleCall call) {
+    final LogicalProject project = call.rel(0);
+    final RelNode input = project.getInput();
+    final RexProgram program =
+        RexProgram.create(
+            input.getRowType(),
+            project.getProjects(),
+            null,
+            project.getRowType(),
+            project.getCluster().getRexBuilder());
+    final LogicalCalc calc = LogicalCalc.create(input, program);
+    call.transformTo(calc);
+  }
+
+```
+
+### 表达式合并 - RexProgramBuilder
 ```java
 
 
@@ -2715,6 +2847,7 @@ jon下推表达式
   
 
 
+filter 和 project 规则应用
 @Test public void testFilterAndProjectWithMultiJoin() throws Exception {
     final HepProgram preProgram = new HepProgramBuilder()
         .addRuleCollection(Arrays.asList(MyFilterRule.INSTANCE, MyProjectRule.INSTANCE))
@@ -3018,7 +3151,9 @@ union合并
 
 ```
 
-### 优化流程 - programm应用
+
+
+### 优化流程 - program应用
 ```java
   @Test public void trimEmptyUnion32viaRelBuidler() throws Exception {
     RelBuilder relBuilder = RelBuilder.create(RelBuilderTest.config().build());
@@ -3065,6 +3200,21 @@ union合并
             + "  EnumerableValues(type=[RecordType(INTEGER EXPR$0)], tuples=[[{ 2 }]])\n"));
   }
 ```
+### 应用 - 在SQL中嵌入一个样本算子
+1. RexProgramTest 行表达式如何构建
+2. RelBuilder
+```
+
+
+
+
+```
+
+### 应用 - 在SQL中嵌入一个触发器算子
+
+
+### 应用 - 实现一个算子类似count(*)
+
 
 ## 纵向拆解 - 视图的validate 和 计划图优化
 1. calcite 不支持DDL 包括创建view。但是有测试用例，从relnode层，扩展视图语法树
