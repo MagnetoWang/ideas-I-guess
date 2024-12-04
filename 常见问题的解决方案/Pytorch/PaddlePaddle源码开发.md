@@ -209,3 +209,118 @@ print(y_test)
    1. _dropout_impl 
    2. ALIAS_SPECIALIZATION，它接受三个参数：ALIAS_NAME、IS_FEATURE 和 IS_ALPHA
    3. _feature_alpha_dropout = IS_FEATURE=true IS_ALPHA=true
+
+
+## 模型开发
+
+|     | Paddle | Pytorch | Numpy | TensorFlow |
+| --- | ------ | ------- | ----- | ---------- |
+|     |        |         |       |            |
+| LTR |        |         |       |            |
+|     |        |         |       |            |
+|     |        |         |       |            |
+|     |        |         |       |            |
+|     |        |         |       |            |
+|     |        |         |       |            |
+|     |        |         |       |            |
+|     |        |         |       |            |
+|     |        |         |       |            |
+|     |        |         |       |            |
+|     |        |         |       |            |
+|     |        |         |       |            |
+|     |        |         |       |            |
+|     |        |         |       |            |
+|     |        |         |       |            |
+|     |        |         |       |            |
+
+
+
+
+### 模型开发 - LTR
+1. https://github.com/PaddlePaddle/Research/blob/master/NLP/ACL2019-ARNOR/README.md
+
+
+### 模型开发 - NLP
+
+
+### 模型开发 - CV
+
+
+### 模型开发 - DNN
+1. https://aistudio.baidu.com/bd-cpu-01/user/707853/8622870/notebooks/8622870.ipynb
+```
+
+cd PaddleRec/models/rank/dnn
+训练
+python -u ../../../tools/trainer.py -m config.yaml
+
+推理
+
+
+产出结果
+-rw-r--r-- 1 aistudio aistudio  71M Dec  3 20:16 rec.pdopt
+-rw-r--r-- 1 aistudio aistudio  36M Dec  3 20:16 rec.pdparams
+-rw-r--r-- 1 aistudio aistudio 321K Dec  3 19:42 rec_static.pdmodel
+-rw-r--r-- 1 aistudio aistudio  73M Dec  3 19:42 rec_static.pdopt
+-rw-r--r-- 1 aistudio aistudio  36M Dec  3 19:42 rec_static.pdparams
+
+
+```
+
+#### 训练
+```
+
+2024-12-03 20:16:32,184 - INFO - epoch: 2, batch_id: 0, auc:1.000000, loss:0.1101168, avg_reader_cost: 0.00158 sec, avg_batch_cost: 0.07763 sec, avg_samples: 1.00000, ips: 12.88137 ins/s
+2024-12-03 20:16:32,481 - INFO - epoch: 2, batch_id: 2, auc:1.000000, loss:0.3321312, avg_reader_cost: 0.00031 sec, avg_batch_cost: 0.14499 sec, avg_samples: 2.00000, ips: 13.79408 ins/s
+2024-12-03 20:16:32,777 - INFO - epoch: 2, batch_id: 4, auc:0.937500, loss:0.7722418, avg_reader_cost: 0.00031 sec, avg_batch_cost: 0.14477 sec, avg_samples: 2.00000, ips: 13.81498 ins/s
+2024-12-03 20:16:33,072 - INFO - epoch: 2, batch_id: 6, auc:0.969697, loss:0.06091949, avg_reader_cost: 0.00032 sec, avg_batch_cost: 0.14414 sec, avg_samples: 2.00000, ips: 13.87510 ins/s
+2024-12-03 20:16:33,368 - INFO - epoch: 2, batch_id: 8, auc:0.977778, loss:0.23176083, avg_reader_cost: 0.00037 sec, avg_batch_cost: 0.14511 sec, avg_samples: 2.00000, ips: 13.78244 ins/s
+2024-12-03 20:16:33,663 - INFO - epoch: 2, batch_id: 10, auc:0.972222, loss:0.056122, avg_reader_cost: 0.00032 sec, avg_batch_cost: 0.14408 sec, avg_samples: 2.00000, ips: 13.88147 ins/s
+2024-12-03 20:16:33,958 - INFO - epoch: 2, batch_id: 12, auc:0.971429, loss:0.11332353, avg_reader_cost: 0.00031 sec, avg_batch_cost: 0.14444 sec, avg_samples: 2.00000, ips: 13.84703 ins/s
+2024-12-03 20:16:34,254 - INFO - epoch: 2, batch_id: 14, auc:0.976000, loss:0.0185627, avg_reader_cost: 0.00033 sec, avg_batch_cost: 0.14462 sec, avg_samples: 2.00000, ips: 13.82909 ins/s
+2024-12-03 20:16:34,549 - INFO - epoch: 2, batch_id: 16, auc:0.976190, loss:0.01627696, avg_reader_cost: 0.00031 sec, avg_batch_cost: 0.14433 sec, avg_samples: 2.00000, ips: 13.85735 ins/s
+2024-12-03 20:16:34,843 - INFO - epoch: 2, batch_id: 18, auc:0.979167, loss:0.03180037, avg_reader_cost: 0.00030 sec, avg_batch_cost: 0.14413 sec, avg_samples: 2.00000, ips: 13.87613 ins/s
+2024-12-03 20:16:35,141 - INFO - epoch: 2, batch_id: 20, auc:0.979592, loss:0.00985625, avg_reader_cost: 0.00034 sec, avg_batch_cost: 0.14558 sec, avg_samples: 2.00000, ips: 13.73837 ins/s
+2024-12-03 20:16:35,436 - INFO - epoch: 2, batch_id: 22, auc:0.960961, loss:1.0787587, avg_reader_cost: 0.00034 sec, avg_batch_cost: 0.14424 sec, avg_samples: 2.00000, ips: 13.86541 ins/s
+2024-12-03 20:16:35,730 - INFO - epoch: 2, batch_id: 24, auc:0.967500, loss:0.00558221, avg_reader_cost: 0.00030 sec, avg_batch_cost: 0.14391 sec, avg_samples: 2.00000, ips: 13.89747 ins/s
+2024-12-03 20:16:36,027 - INFO - epoch: 2, batch_id: 26, auc:0.972516, loss:0.11313634, avg_reader_cost: 0.00042 sec, avg_batch_cost: 0.14514 sec, avg_samples: 2.00000, ips: 13.78027 ins/s
+2024-12-03 20:16:36,321 - INFO - epoch: 2, batch_id: 28, auc:0.975194, loss:0.75446916, avg_reader_cost: 0.00032 sec, avg_batch_cost: 0.14436 sec, avg_samples: 2.00000, ips: 13.85426 ins/s
+2024-12-03 20:16:36,617 - INFO - epoch: 2, batch_id: 30, auc:0.978261, loss:0.04946108, avg_reader_cost: 0.00031 sec, avg_batch_cost: 0.14483 sec, avg_samples: 2.00000, ips: 13.80919 ins/s
+2024-12-03 20:16:36,912 - INFO - epoch: 2, batch_id: 32, auc:0.980792, loss:0.18857269, avg_reader_cost: 0.00031 sec, avg_batch_cost: 0.14400 sec, avg_samples: 2.00000, ips: 13.88848 ins/s
+2024-12-03 20:16:37,206 - INFO - epoch: 2, batch_id: 34, auc:0.979592, loss:0.7345889, avg_reader_cost: 0.00027 sec, avg_batch_cost: 0.14407 sec, avg_samples: 2.00000, ips: 13.88209 ins/s
+2024-12-03 20:16:37,501 - INFO - epoch: 2, batch_id: 36, auc:0.981643, loss:0.06374952, avg_reader_cost: 0.00031 sec, avg_batch_cost: 0.14394 sec, avg_samples: 2.00000, ips: 13.89511 ins/s
+2024-12-03 20:16:37,793 - INFO - epoch: 2, batch_id: 38, auc:0.983399, loss:0.00642101, avg_reader_cost: 0.00031 sec, avg_batch_cost: 0.14285 sec, avg_samples: 2.00000, ips: 14.00105 ins/s
+2024-12-03 20:16:37,943 - INFO - epoch: 2 done, auc: 0.983982,loss:0.01648083, epoch time: 5.92 s
+2024-12-03 20:16:38,974 - INFO - Already save model in output_model_dnn/2
+
+```
+
+#### 推理
+```
+
+
+2024-12-03 20:19:34,752 - INFO - load model epoch 2
+2024-12-03 20:19:34,752 - INFO - start load model from output_model_dnn/2
+2024-12-03 20:19:34,922 - INFO - epoch: 2, batch_id: 0, auc: 0.864940, avg_reader_cost: 0.00135 sec, avg_batch_cost: 0.00535 sec, avg_samples: 2.00000, ips: 22.42 ins/s
+2024-12-03 20:19:34,936 - INFO - epoch: 2, batch_id: 2, auc: 0.869480, avg_reader_cost: 0.00021 sec, avg_batch_cost: 0.00462 sec, avg_samples: 2.00000, ips: 289.71 ins/s
+2024-12-03 20:19:34,950 - INFO - epoch: 2, batch_id: 4, auc: 0.874829, avg_reader_cost: 0.00024 sec, avg_batch_cost: 0.00451 sec, avg_samples: 2.00000, ips: 293.25 ins/s
+2024-12-03 20:19:34,963 - INFO - epoch: 2, batch_id: 6, auc: 0.880327, avg_reader_cost: 0.00019 sec, avg_batch_cost: 0.00438 sec, avg_samples: 2.00000, ips: 300.39 ins/s
+2024-12-03 20:19:34,977 - INFO - epoch: 2, batch_id: 8, auc: 0.884037, avg_reader_cost: 0.00020 sec, avg_batch_cost: 0.00436 sec, avg_samples: 2.00000, ips: 301.14 ins/s
+2024-12-03 20:19:34,990 - INFO - epoch: 2, batch_id: 10, auc: 0.888939, avg_reader_cost: 0.00020 sec, avg_batch_cost: 0.00435 sec, avg_samples: 2.00000, ips: 302.15 ins/s
+2024-12-03 20:19:35,004 - INFO - epoch: 2, batch_id: 12, auc: 0.893537, avg_reader_cost: 0.00020 sec, avg_batch_cost: 0.00477 sec, avg_samples: 2.00000, ips: 284.50 ins/s
+2024-12-03 20:19:35,018 - INFO - epoch: 2, batch_id: 14, auc: 0.896600, avg_reader_cost: 0.00019 sec, avg_batch_cost: 0.00459 sec, avg_samples: 2.00000, ips: 292.05 ins/s
+2024-12-03 20:19:35,032 - INFO - epoch: 2, batch_id: 16, auc: 0.900460, avg_reader_cost: 0.00019 sec, avg_batch_cost: 0.00444 sec, avg_samples: 2.00000, ips: 297.94 ins/s
+2024-12-03 20:19:35,045 - INFO - epoch: 2, batch_id: 18, auc: 0.903188, avg_reader_cost: 0.00020 sec, avg_batch_cost: 0.00436 sec, avg_samples: 2.00000, ips: 301.93 ins/s
+2024-12-03 20:19:35,058 - INFO - epoch: 2, batch_id: 20, auc: 0.906927, avg_reader_cost: 0.00020 sec, avg_batch_cost: 0.00436 sec, avg_samples: 2.00000, ips: 302.38 ins/s
+2024-12-03 20:19:35,072 - INFO - epoch: 2, batch_id: 22, auc: 0.909934, avg_reader_cost: 0.00021 sec, avg_batch_cost: 0.00435 sec, avg_samples: 2.00000, ips: 302.43 ins/s
+2024-12-03 20:19:35,085 - INFO - epoch: 2, batch_id: 24, auc: 0.913265, avg_reader_cost: 0.00018 sec, avg_batch_cost: 0.00435 sec, avg_samples: 2.00000, ips: 302.17 ins/s
+2024-12-03 20:19:35,099 - INFO - epoch: 2, batch_id: 26, auc: 0.916415, avg_reader_cost: 0.00022 sec, avg_batch_cost: 0.00437 sec, avg_samples: 2.00000, ips: 301.61 ins/s
+2024-12-03 20:19:35,112 - INFO - epoch: 2, batch_id: 28, auc: 0.921896, avg_reader_cost: 0.00018 sec, avg_batch_cost: 0.00437 sec, avg_samples: 2.00000, ips: 300.63 ins/s
+2024-12-03 20:19:35,126 - INFO - epoch: 2, batch_id: 30, auc: 0.924597, avg_reader_cost: 0.00021 sec, avg_batch_cost: 0.00437 sec, avg_samples: 2.00000, ips: 301.12 ins/s
+2024-12-03 20:19:35,139 - INFO - epoch: 2, batch_id: 32, auc: 0.927159, avg_reader_cost: 0.00018 sec, avg_batch_cost: 0.00432 sec, avg_samples: 2.00000, ips: 303.48 ins/s
+2024-12-03 20:19:35,152 - INFO - epoch: 2, batch_id: 34, auc: 0.931508, avg_reader_cost: 0.00020 sec, avg_batch_cost: 0.00439 sec, avg_samples: 2.00000, ips: 300.45 ins/s
+2024-12-03 20:19:35,165 - INFO - epoch: 2, batch_id: 36, auc: 0.933735, avg_reader_cost: 0.00018 sec, avg_batch_cost: 0.00394 sec, avg_samples: 2.00000, ips: 321.80 ins/s
+2024-12-03 20:19:35,176 - INFO - epoch: 2, batch_id: 38, auc: 0.935855, avg_reader_cost: 0.00021 sec, avg_batch_cost: 0.00307 sec, avg_samples: 2.00000, ips: 373.17 ins/s
+2024-12-03 20:19:35,184 - INFO - epoch: 2 done, auc: 0.936605, epoch time: 0.43 s
+
+```
