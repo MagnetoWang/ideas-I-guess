@@ -40,6 +40,10 @@
 - 把
 - sudo ln -s /Applications/calibre.app/Contents/MacOS/ebook-convert /usr/bin
 
+## 图床解决方案
+1. 路径配置：https://blog.csdn.net/LT_admin/article/details/135136872
+2. 重命名：https://juejin.cn/post/7244809769794289721
+
 ## 画图工具
 
 - 思维导图：https://blog.csdn.net/wangyaninglm/article/details/52887045

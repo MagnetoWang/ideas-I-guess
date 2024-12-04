@@ -16,7 +16,76 @@ make -j10 > paddle_compile_v1.log &
 
 ## 虚拟环境
 ### win11 - 默认pytorch开发环境
+1.  win11 wsl vscode开启
+    1. 安装插件 wsl
+    2. 输入命令
+       1. wsl
+       2. cd 任意目录
+       3. code .
+2. python 开发
+   1. pyrcharm
+3. c++
+### wslconfig 配置
 ```
+
+[wsl2]
+memory=16G  #配置虚拟机最大使用内存，按需，默认Windows主机内存的1/2
+networkingMode=mirrored # 开启镜像网络
+dnsTunneling=true # 开启 DNS Tunneling
+firewall=true # 开启 Windows 防火墙
+autoProxy=true  # 开启自动同步代理
+localhostForwarding=true  # 是否启用 localhost 转发
+sparseVhd=true # 开启自动释放 WSL2 虚拟硬盘空间
+
+[experimental]
+# requires dnsTunneling but are also OPTIONAL
+bestEffortDnsParsing=true
+useWindowsDnsCache=true
+```
+
+### 网络配置
+```
+
+网络配置
+ .wslconfig 文件配置 WSL2
+ [experimental]
+networkingMode=mirrored
+dnsTunneling=true
+firewall=true
+autoProxy=true
+
+
+win11 git代理加速 在clash代理机器上面看
+git config --global http.proxy "http://127.0.0.1:7890"
+git config --global https.proxy "http://127.0.0.1:7890"
+
+wsl 需要通过win11访问
+win11Ip=$(cat /etc/resolv.conf | grep -oP '(?<=nameserver\ ).*')
+export HTTP_PROXY="http://${win11Ip}:7890"
+export HTTPS_PROXY="http://${win11Ip}:7890"
+
+不要设置 all_proxy就能git clone成本
+export ALL_PROXY="http://${win11Ip}:7890"
+
+
+
+curl http://172.24.112.1:7890
+curl http://localhost
+
+git config --global http.proxy "http://172.24.112.1:7890"
+git config --global https.proxy "http://172.24.112.1:7890"
+
+
+
+
+
+取消代理
+git config --global --unset http.proxy
+git config --global --unset https.proxy
+
+export ALL_PROXY=
+export HTTP_PROXY=
+export HTTPS_PROXY=
 
 sudu  apt install python3.10-venv -y
 
@@ -40,6 +109,43 @@ source paddleDev/bin/activate
 ### 镜像安装
 1. docker：https://space.keter.top/docs/high_performance/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A1%86%E6%9E%B6%E5%BC%80%E5%8F%91/Paddle%E9%85%8D%E7%BD%AETensorrt
 
+
+### 安装异常
+1. https://blog.csdn.net/Desecrater/article/details/133581868
+2. https://zhuanlan.zhihu.com/p/659727636
+3. 代理配置：https://blog.csdn.net/eeemmm/article/details/136999284
+4. wsl访问win11服务：https://www.cnblogs.com/netWild/p/18503950
+   1. https://github.com/microsoft/WSL/issues/10753
+   2. https://gist.github.com/libChan/3a804a46b532cc326a2ee55b27e8ac19?permalink_comment_id=4841732
+5. 有代理的情况下
+   1. 本机git要设置代理
+   2. wsl环境也要设置
+
+```
+(myml) root@MagnetoWang:~/develop# git clone https://github.com/d2l-ai/d2l-zh.git
+Cloning into 'd2l-zh'...
+fatal: unable to access 'https://github.com/d2l-ai/d2l-zh.git/': Failed to connect to github.com port 443 after 49 ms: Connection refused
+
+
+wslconfig 配置自动同步代理
+[wsl2]
+memory=16G  #配置虚拟机最大使用内存，按需，默认Windows主机内存的1/2
+networkingMode=mirrored # 开启镜像网络
+dnsTunneling=true # 开启 DNS Tunneling
+firewall=true # 开启 Windows 防火墙
+autoProxy=true  # 开启自动同步代理
+localhostForwarding=true  # 是否启用 localhost 转发
+sparseVhd=true # 开启自动释放 WSL2 虚拟硬盘空间
+autoMemoryReclaim=gradual  # gradual  | dropcache | disabled
+
+
+在wsl2 设置win11的代理ip和端口，但是不要设置 all_proxy
+export hostip=$(ip route show | grep -i default | awk '{ print $3}')
+export https_proxy="http://${hostip}:7890"
+export http_proxy="http://${hostip}:7890"
+
+
+```
 
 ## 
 
@@ -324,3 +430,8 @@ python -u ../../../tools/trainer.py -m config.yaml
 2024-12-03 20:19:35,184 - INFO - epoch: 2 done, auc: 0.936605, epoch time: 0.43 s
 
 ```
+
+
+## 应用开发
+1. 课程
+   1. 李宏毅课程-机器学习：https://aistudio.baidu.com/course/introduce/1978
