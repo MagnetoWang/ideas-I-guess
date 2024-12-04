@@ -679,6 +679,17 @@ https://www.cnblogs.com/sammyliu/p/5878973.html
  
  export LC_ALL="en_US.UTF-8"
 export LANGUAGE="en_US.UTF-8"
+
+
+安装VNC viewer
+https://www.realvnc.com/en/connect/download/viewer/?lai_vid=dPx2b3bXRhrjv&lai_sr=0-4&lai_sl=l&lai_p=1
+
+安装VNC Server
+yum groups install "GNOME Desktop" -y
+
+
+
+
 ```
 
 ### 机器诊断
@@ -2464,6 +2475,20 @@ find . -maxdepth 2 -type d -name "confu-deps"
 ### 递归打印文件路径
 ```
 hdfs dfs -ls -R viewfs://hadoop-meituan/user/hadoop-search > search_paths.txt
+
+
+```
+
+### 修改配置如何系统级生效，比如开启代理
+```
+
+注意拷贝源文件
+
+代理配置复制到 /ect/profile 文件中
+执行
+source /ect/profile
+
+系统级别生效
 
 
 ```

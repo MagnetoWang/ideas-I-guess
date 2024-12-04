@@ -13,6 +13,10 @@
 ## 导出pdf
 1. obsidian 和 notion 可以将markdown导出pdf
 
+## 排版工具
+1. marktext：https://github.com/marktext/marktext
+2. 内容创作者必读：Marscode 写作效率倍增法 - 程序员安仔的文章 - 知乎 https://zhuanlan.zhihu.com/p/10154299174
+
 ## 添加目录树
 
 - [TOC]独占一行才行
@@ -43,6 +47,22 @@
 ## 图床解决方案
 1. 路径配置：https://blog.csdn.net/LT_admin/article/details/135136872
 2. 重命名：https://juejin.cn/post/7244809769794289721
+
+### vscode自带粘贴工具
+```
+**/*.md assets/${documentBaseName}-${fileName}
+
+```
+
+### 照片粘贴 - 这个插件废弃
+1. https://www.cnblogs.com/dotnetcrazy/p/16884534.html
+2. 更新快捷键 ctrl + 1
+```
+"pasteImage.path": "${currentFileDir}/assets/${currentFileNameWithoutExt}",
+"pasteImage.defaultName": "YMMDDHHmmss",
+"pasteImage.namePrefix": "img-"
+```
+
 
 ## 画图工具
 

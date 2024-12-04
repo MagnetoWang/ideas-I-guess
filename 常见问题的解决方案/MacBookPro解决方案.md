@@ -401,6 +401,10 @@ mac 每次打开PPT都会出现一个自动保存的文件，不知道这个文�
 ```
 
 
+### idea查看函数调用 导致mac频繁重启问题
+1. https://youtrack.jetbrains.com/issue/JBR-6451/Window-server-crash-when-using-Go-To-related-actions-after-upgrading-to-Sonoma
+2. https://youtrack.jetbrains.com/issue/IDEA-343168/IDEA-2023.3.2mac-os
+
 
 ## 终端
 

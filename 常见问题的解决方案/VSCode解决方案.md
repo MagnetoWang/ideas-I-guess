@@ -64,71 +64,6 @@ systemctl restart sshd
 - 插件：fileheader
 - 输入命令fileheader即可
 
-### c++ clangd集成高效开发
-1. 机器安装clangd 和 cmake
-2. 项目能源码编译 cmake命令
-3. vscode安装插件，然后配置clangd cmake 和 项目源码路径
-4. 最终实现跳转功能
-```shell
-apt-get update
-apt install sudo -y
-apt install clang clangd lldb ccache -y
-
-# cmake
-cur_dir=/docker/root/projects/demo/package
-export PATH="$cur_dir/cmake-3.24.0-linux-x86_64/bin:$PATH"
-export PATH="$cur_dir/lib:$cur_dir/bin:$PATH"
-
-
-# 项目源码需要生成 compile_commands.json
-cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 xxxxxx
-
-# 也可以在cmakelist中添加
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-# set(CMAKE_EXPORT_COMPILE_COMMANDS "/docker/root/projects/demo/github/Paddle2ONNX/compile_commands.json")
-
-
-['/tmp/build-env-a8ndnare/bin/cmake', '-DPYTHON_INCLUDE_DIR=/usr/include/python3.8', '-DPYTHON_EXECUTABLE=/tmp/build-env-a8ndnare/bin/python', '-DBUILD_PADDLE2ONNX_PYTHON=ON', '-DCMAKE_EXPORT_COMPILE_COMMANDS=ON', '-DONNX_NAMESPACE=paddle2onnx', '-DPY_EXT_SUFFIX=.cpython-38-x86_64-linux-gnu.so', '-DCMAKE_BUILD_TYPE=Release', '/tmp/build-via-sdist-wc_x9_nz/paddle2onnx-1.2.1']
-
-# 查看cmake所有变量
-cmake -LAH
-
-VSCODE操作
-# 下载插件 clangd
-"clangd.arguments": [
-        "--compile-commands-dir=/docker/root/projects/demo/github/Paddle/build",
-        "-log=verbose",
-        "-pretty",
-        "--background-index",
-        "-j=12",
-        "--all-scopes-completion",
-        "--completion-style=detailed",
-        "--clang-tidy",
-        "--query-driver=clang++"
-    ],
-    "clangd.path": "/usr/bin/clangd"
-
-# 下载 cmake 插件
-    
-    "cmake.cmakePath": "/docker/root/projects/demo/package/cmake-3.24.0-linux-x86_64/bin/cmake"
-    
-
-# 下载 cmake tools插件
-# 配置build目录
-    "cmake.additionalCompilerSearchDirs": [
-        "/docker/root/projects/demo/github/Paddle"
-    ],
-    "cmake.buildDirectory": "/docker/root/projects/demo/github/Paddle/build",
- 
-
-
-```
-
-### c++ 加速编译过程 ccache
-1. apt install ccache -y   
-2. /usr/bin/ccache
-3. ccache -M 0
-
 
 
 ### 快捷键总结
@@ -224,6 +159,79 @@ https://code.visualstudio.com/docs/cpp/faq-cpp
 ### 修改行首和行尾快捷键
 1. https://blog.csdn.net/Cordinate_cra/article/details/137251948
 
+
+
+## C++ IDE环境
+### c++ clangd集成高效开发
+1. 机器安装clangd 和 cmake
+2. 项目能源码编译 cmake命令
+3. vscode安装插件，然后配置clangd cmake 和 项目源码路径
+4. 最终实现跳转功能
+```shell
+apt-get update
+apt install sudo -y
+apt install clang clangd lldb ccache -y
+
+# centos
+sudo -i
+yum install clang clangd lldb ccache -y
+
+# cmake
+cur_dir=/docker/root/projects/demo/package
+export PATH="$cur_dir/cmake-3.24.0-linux-x86_64/bin:$PATH"
+export PATH="$cur_dir/lib:$cur_dir/bin:$PATH"
+
+
+# 项目源码需要生成 compile_commands.json
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 xxxxxx
+
+# 也可以在cmakelist中添加
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+# set(CMAKE_EXPORT_COMPILE_COMMANDS "/docker/root/projects/demo/github/Paddle2ONNX/compile_commands.json")
+
+
+['/tmp/build-env-a8ndnare/bin/cmake', '-DPYTHON_INCLUDE_DIR=/usr/include/python3.8', '-DPYTHON_EXECUTABLE=/tmp/build-env-a8ndnare/bin/python', '-DBUILD_PADDLE2ONNX_PYTHON=ON', '-DCMAKE_EXPORT_COMPILE_COMMANDS=ON', '-DONNX_NAMESPACE=paddle2onnx', '-DPY_EXT_SUFFIX=.cpython-38-x86_64-linux-gnu.so', '-DCMAKE_BUILD_TYPE=Release', '/tmp/build-via-sdist-wc_x9_nz/paddle2onnx-1.2.1']
+
+# 查看cmake所有变量
+cmake -LAH
+
+VSCODE操作
+# 下载插件 clangd
+"clangd.arguments": [
+        "--compile-commands-dir=/docker/root/projects/demo/github/Paddle/build",
+        "-log=verbose",
+        "-pretty",
+        "--background-index",
+        "-j=12",
+        "--all-scopes-completion",
+        "--completion-style=detailed",
+        "--clang-tidy",
+        "--query-driver=clang++"
+    ],
+    "clangd.path": "/usr/bin/clangd"
+
+# 下载 cmake 插件
+    
+    "cmake.cmakePath": "/docker/root/projects/demo/package/cmake-3.24.0-linux-x86_64/bin/cmake"
+    
+
+# 下载 cmake tools插件
+# 配置build目录
+    "cmake.additionalCompilerSearchDirs": [
+        "/docker/root/projects/demo/github/Paddle"
+    ],
+    "cmake.buildDirectory": "/docker/root/projects/demo/github/Paddle/build",
+ 
+
+
+```
+
+### c++ 加速编译过程 ccache
+1. apt install ccache -y   
+2. /usr/bin/ccache
+3. ccache -M 0
+4. 
+
 ## 超级好用
 
 ### 支持excel的表格模式的复制
@@ -299,3 +307,8 @@ win：alt+shift+鼠标拖动
     "mcopilot.jsUnitTestFramework": "Jest"
 }
 ```
+
+
+## IDEA
+### 在debug中，支持把变量复制出来，生成代码放在单元测试中
+1. https://youtrack.jetbrains.com/issue/IDEA-134919?_gl=1*nzfwkj*_gcl_au*MTAwNzE1OTQ3My4xNzI3MzMzNzcw*FPAU*MTAwNzE1OTQ3My4xNzI3MzMzNzcw*_ga*MTIxNzU5ODI0OS4xNzI3MzMzNzQw*_ga_9J976DJZ68*MTczMjM3NjUyNy4yMC4xLjE3MzIzNzY1MjkuNTguMC4w
