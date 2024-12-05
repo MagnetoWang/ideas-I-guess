@@ -1944,7 +1944,7 @@ CalciteSchema extends SchemaPlus extends Schema
 ```
 
 ### RelBuilder 新建scan算子
-```
+```java
   public RelBuilder scan(Iterable<String> tableNames) {
     final List<String> names = ImmutableList.copyOf(tableNames);
     requireNonNull(relOptSchema, "relOptSchema");
@@ -1970,7 +1970,7 @@ CalciteSchema extends SchemaPlus extends Schema
 ```
 
 ### RelBuilder 新建join算子
-```
+```java
 public RelBuilder join(JoinRelType joinType, RexNode condition,
       Set<CorrelationId> variablesSet) {
     Frame right = stack.pop();
@@ -3152,6 +3152,232 @@ union合并
 ```
 
 
+### 算子拆分 - CalcSplitRule
+1. 插入算子需要借助 relbuilder
+2. JoinProjectTransposeRule
+3. JoinAddRedundantSemiJoinRule
+4. 
+```java
+
+calc被拆分 project filter
+public class CalcSplitRule extends RelOptRule {
+  public static final CalcSplitRule INSTANCE =
+      new CalcSplitRule(RelFactories.LOGICAL_BUILDER);
+
+  /**
+   * Creates a CalcSplitRule.
+   *
+   * @param relBuilderFactory Builder for relational expressions
+   */
+  public CalcSplitRule(RelBuilderFactory relBuilderFactory) {
+    super(operand(Calc.class, any()), relBuilderFactory, null);
+  }
+
+  @Override public void onMatch(RelOptRuleCall call) {
+    final Calc calc = call.rel(0);
+    final Pair<ImmutableList<RexNode>, ImmutableList<RexNode>> projectFilter =
+        calc.getProgram().split();
+    final RelBuilder relBuilder = call.builder();
+    relBuilder.push(calc.getInput());
+    relBuilder.filter(projectFilter.right);
+    relBuilder.project(projectFilter.left, calc.getRowType().getFieldNames());
+    call.transformTo(relBuilder.build());
+  }
+}
+
+
+JoinProjectTransposeRule
+join 和 project 互换
+
+
+
+  // finally, create the projection on top of the join
+    final RelBuilder relBuilder = call.builder();
+    relBuilder.push(newJoinRel);
+    relBuilder.project(newProjExprs, joinRel.getRowType().getFieldNames());
+    // if the join was outer, we might need a cast after the
+    // projection to fix differences wrt nullability of fields
+    if (joinType.isOuterJoin()) {
+      relBuilder.convert(joinRel.getRowType(), false);
+    }
+
+    call.transformTo(relBuilder.build());
+
+
+JoinAddRedundantSemiJoinRule
+ public JoinAddRedundantSemiJoinRule(Class<? extends Join> clazz,
+      RelBuilderFactory relBuilderFactory) {
+    super(operand(clazz, any()), relBuilderFactory, null);
+  }
+
+  //~ Methods ----------------------------------------------------------------
+
+  public void onMatch(RelOptRuleCall call) {
+    Join origJoinRel = call.rel(0);
+    if (origJoinRel.isSemiJoinDone()) {
+      return;
+    }
+
+    // can't process outer joins using semijoins
+    if (origJoinRel.getJoinType() != JoinRelType.INNER) {
+      return;
+    }
+
+    // determine if we have a valid join condition
+    final JoinInfo joinInfo = origJoinRel.analyzeCondition();
+    if (joinInfo.leftKeys.size() == 0) {
+      return;
+    }
+
+    RelNode semiJoin =
+        LogicalJoin.create(origJoinRel.getLeft(),
+            origJoinRel.getRight(),
+            origJoinRel.getCondition(),
+            ImmutableSet.of(),
+            JoinRelType.SEMI);
+
+    RelNode newJoinRel =
+        origJoinRel.copy(
+            origJoinRel.getTraitSet(),
+            origJoinRel.getCondition(),
+            semiJoin,
+            origJoinRel.getRight(),
+            JoinRelType.INNER,
+            true);
+
+    call.transformTo(newJoinRel);
+  }
+
+```
+
+### 算子关联 - 基于 RelBuilder
+```java
+
+  /**
+   * Sometimes the stack becomes so deeply nested it gets confusing. To keep
+   * things straight, you can remove expressions from the stack. For example,
+   * here we are building a bushy join:
+   *
+   * <blockquote><pre>
+   *                join
+   *              /      \
+   *         join          join
+   *       /      \      /      \
+   * CUSTOMERS ORDERS LINE_ITEMS PRODUCTS
+   * </pre></blockquote>
+   *
+   * <p>We build it in three stages. Store the intermediate results in variables
+   * `left` and `right`, and use `push()` to put them back on the stack when it
+   * is time to create the final `Join`.
+   */
+  private RelBuilder example4(RelBuilder builder) {
+    final RelNode left = builder
+        .scan("CUSTOMERS")
+        .scan("ORDERS")
+        .join(JoinRelType.INNER, "ORDER_ID")
+        .build();
+
+    final RelNode right = builder
+        .scan("LINE_ITEMS")
+        .scan("PRODUCTS")
+        .join(JoinRelType.INNER, "PRODUCT_ID")
+        .build();
+
+    return builder
+        .push(left)
+        .push(right)
+        .join(JoinRelType.INNER, "ORDER_ID");
+  }
+
+
+
+栈维护node顺序，join 关联栈的前两个node
+  /** Creates a {@link Join} with correlating
+   * variables. */
+  public RelBuilder join(JoinRelType joinType, RexNode condition,
+      Set<CorrelationId> variablesSet) {
+    Frame right = stack.pop();
+    final Frame left = stack.pop();
+    final RelNode join;
+    final boolean correlate = variablesSet.size() == 1;
+    RexNode postCondition = literal(true);
+    if (simplify) {
+      // Normalize expanded versions IS NOT DISTINCT FROM so that simplifier does not
+      // transform the expression to something unrecognizable
+      if (condition instanceof RexCall) {
+        condition = RelOptUtil.collapseExpandedIsNotDistinctFromExpr((RexCall) condition,
+            getRexBuilder());
+      }
+      condition = simplifier.simplifyUnknownAsFalse(condition);
+    }
+    if (correlate) {
+      final CorrelationId id = Iterables.getOnlyElement(variablesSet);
+      final ImmutableBitSet requiredColumns =
+          RelOptUtil.correlationColumns(id, right.rel);
+      if (!RelOptUtil.notContainsCorrelation(left.rel, id, Litmus.IGNORE)) {
+        throw new IllegalArgumentException("variable " + id
+            + " must not be used by left input to correlation");
+      }
+      switch (joinType) {
+      case LEFT:
+        // Correlate does not have an ON clause.
+        // For a LEFT correlate, predicate must be evaluated first.
+        // For INNER, we can defer.
+        stack.push(right);
+        filter(condition.accept(new Shifter(left.rel, id, right.rel)));
+        right = stack.pop();
+        break;
+      default:
+        postCondition = condition;
+      }
+      join = correlateFactory.createCorrelate(left.rel, right.rel, id,
+          requiredColumns, joinType);
+    } else {
+      join = joinFactory.createJoin(left.rel, right.rel, condition,
+          variablesSet, joinType, false);
+    }
+    final ImmutableList.Builder<Field> fields = ImmutableList.builder();
+    fields.addAll(left.fields);
+    fields.addAll(right.fields);
+    stack.push(new Frame(join, fields.build()));
+    filter(postCondition);
+    return this;
+  }
+
+栈维护node顺序，union关联整个栈列表node
+ private RelBuilder setOp(boolean all, SqlKind kind, int n) {
+    List<RelNode> inputs = new LinkedList<>();
+    for (int i = 0; i < n; i++) {
+      inputs.add(0, build());
+    }
+    switch (kind) {
+    case UNION:
+    case INTERSECT:
+    case EXCEPT:
+      if (n < 1) {
+        throw new IllegalArgumentException(
+            "bad INTERSECT/UNION/EXCEPT input count");
+      }
+      break;
+    default:
+      throw new AssertionError("bad setOp " + kind);
+    }
+    switch (n) {
+    case 1:
+      return push(inputs.get(0));
+    default:
+      return push(setOpFactory.createSetOp(kind, inputs, all));
+    }
+  }
+
+```
+
+### 算子描述 - 实现一个ToString
+1. calcite有digest，目的就是描述算子基本信息
+```
+
+
+```
 
 ### 优化流程 - program应用
 ```java
@@ -3203,20 +3429,126 @@ union合并
 ### 应用 - 在SQL中嵌入一个样本算子
 1. RexProgramTest 行表达式如何构建
 2. RelBuilder
+```java
+参考
+public void onMatch(RelOptRuleCall call) {
+    final Join join = call.rel(0);
+
+    if (join.getJoinType() != JoinRelType.INNER) {
+      return;
+    }
+
+    if (join.getCondition().isAlwaysTrue()) {
+      return;
+    }
+
+    if (!join.getSystemFieldList().isEmpty()) {
+      // FIXME Enable this rule for joins with system fields
+      return;
+    }
+
+    final RelBuilder builder = call.builder();
+
+    // NOTE jvs 14-Mar-2006:  See JoinCommuteRule for why we
+    // preserve attribute semiJoinDone here.
+
+    final RelNode cartesianJoin =
+        join.copy(
+            join.getTraitSet(),
+            builder.literal(true),
+            join.getLeft(),
+            join.getRight(),
+            join.getJoinType(),
+            join.isSemiJoinDone());
+
+    builder.push(cartesianJoin)
+        .filter(join.getCondition());
+
+    call.transformTo(builder.build());
+  }
+
+
+remove
+public AggregateJoinJoinRemoveRule(
+      Class<? extends Aggregate> aggregateClass,
+      Class<? extends Join> joinClass, RelBuilderFactory relBuilderFactory) {
+    super(
+        operand(aggregateClass,
+            operandJ(joinClass, null,
+                join -> join.getJoinType() == JoinRelType.LEFT,
+                operandJ(joinClass, null,
+                    join -> join.getJoinType() == JoinRelType.LEFT, any()))),
+        relBuilderFactory, null);
+  }
+
+    final RelBuilder relBuilder = call.builder();
+    RexNode condition = RexUtil.shift(topJoin.getCondition(),
+        leftBottomChildSize, -offset);
+    RelNode join = relBuilder.push(bottomJoin.getLeft())
+        .push(topJoin.getRight())
+        .join(topJoin.getJoinType(), condition)
+        .build();
+    RelNode newAggregate = relBuilder.push(join)
+        .aggregate(relBuilder.groupKey(groupSet), aggCalls.build())
+        .build();
+
+
+
+
+ public AggregateJoinRemoveRule(
+      Class<? extends Aggregate> aggregateClass,
+      Class<? extends Join> joinClass, RelBuilderFactory relBuilderFactory) {
+    super(
+        operand(aggregateClass,
+            operandJ(joinClass, null,
+                join -> join.getJoinType() == JoinRelType.LEFT
+                    || join.getJoinType() == JoinRelType.RIGHT, any())),
+        relBuilderFactory, null);
+  }
+
+
+
+  public ProjectJoinJoinRemoveRule(
+      Class<? extends Project> projectClass,
+      Class<? extends Join> joinClass, RelBuilderFactory relBuilderFactory) {
+    super(
+        operand(projectClass,
+            operandJ(joinClass, null,
+                join -> join.getJoinType() == JoinRelType.LEFT,
+                operandJ(joinClass, null,
+                    join -> join.getJoinType() == JoinRelType.LEFT, any()))),
+        relBuilderFactory, null);
+  }
 ```
 
 
-
-
-```
 
 ### 应用 - 在SQL中嵌入一个触发器算子
+
 
 
 ### 应用 - 实现一个算子类似count(*)
 
 
-## 纵向拆解 - 视图的validate 和 计划图优化
+## 纵向拆解 - 计划图优化
+1. RBO 规则：https://strongduanmu.com/blog/deep-understand-of-apache-calcite-hep-planner.html
+### HepPlanner
+1. HepPlanner：基于规则的启发式优化器，实现了 RelOptPlanner 优化器接口；
+2. HepProgram：提供了维护各种类型 HepInstruction 的容器，并支持指定 HepInstruction 被 HepPlanner 优化时处理的顺序；
+3. HepProgramBuilder：用于创建 HepProgram；
+4. HepInstruction：代表了 HepProgram 中的一个指令，目前包含了许多实现类，具体实现类的用途如下表所示：
+5. hep维护自己vertex节点关系图，和 relnode完全不一样，两者结合有许多要注意的
+   1. 比如 算子转化，算子新增在 hepPlanner中需要用 transformTo
+
+
+### HepPlanner - 算子转换流程
+1. RelNode -> HepRelVertex
+
+### HepPlanner - transformTo 原理
+
+
+
+## 纵向拆解 - 视图的validate
 1. calcite 不支持DDL 包括创建view。但是有测试用例，从relnode层，扩展视图语法树
 2. 参考源码
    1. ServerParserTest：Tests SQL parser extensions for DDL. 视图的测试用例

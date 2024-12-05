@@ -179,6 +179,45 @@ codegen
 ```
 
 
+## 动态加载代码 JaninoCompiler
+1. sparkadapt 需要加载calcite代码
+```
+
+ public ArrayBindable compile(ClassDeclaration expr, String s) {
+    final String className = "CalciteProgram" + classId.getAndIncrement();
+    final String classFileName = className + ".java";
+    String source = "public class " + className + "\n"
+        + "    implements " + ArrayBindable.class.getName()
+        + ", " + Serializable.class.getName()
+        + " {\n"
+        + s + "\n"
+        + "}\n";
+
+    if (CalciteSystemProperty.DEBUG.value()) {
+      Util.debugCode(System.out, source);
+    }
+
+    JaninoCompiler compiler = new JaninoCompiler();
+    compiler.getArgs().setDestdir(CLASS_DIR.getAbsolutePath());
+    compiler.getArgs().setSource(source, classFileName);
+    compiler.getArgs().setFullClassName(className);
+    compiler.compile();
+    try {
+      @SuppressWarnings("unchecked")
+      final Class<ArrayBindable> clazz =
+          (Class<ArrayBindable>) Class.forName(className);
+      final Constructor<ArrayBindable> constructor = clazz.getConstructor();
+      return constructor.newInstance();
+    } catch (ClassNotFoundException | InstantiationException
+        | IllegalAccessException | NoSuchMethodException
+        | InvocationTargetException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+```
+
+
 
 ## 版本总结
 1. 展望Flink各版本及新特性：https://blog.csdn.net/qq_36470898/article/details/130451864 
@@ -196,7 +235,10 @@ codegen
 ```
 
 
-
+## 流计算组件
+1. fluss：https://github.com/alibaba/fluss
+2. paimon：https://github.com/apache/paimon
+3. Flash向量化引擎：
 ### 
 ```
 

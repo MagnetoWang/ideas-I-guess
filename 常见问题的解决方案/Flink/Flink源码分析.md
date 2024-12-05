@@ -103,6 +103,7 @@ flink + 公司项目
    2. Flink 在风控场景实时特征落地实战 - 是咕咕鸡的文章 - 知乎 https://zhuanlan.zhihu.com/p/477262244
    3. 微信安全基于 Flink 实时特征开发平台实践 - Flink 中文社区的文章 - 知乎https://zhuanlan.zhihu.com/p/646114539
    4. 腾讯基于 Flink SQL 的功能扩展与深度优化实践：https://juejin.cn/post/6924868645537792008
+   5. flink2024云相册地址：http://live.jimage.cn/gti/36dfd2e4?from=groupmessage
 ```
 xiaogang shi
 动态数据流上的实时迭代计算
@@ -361,6 +362,22 @@ Watermarked
    14. 优化规则
    15. 表达式设计
 
+### 流图参考
+1. 语法：https://graphviz.org/docs/attr-types/style/
+
+```graphviz
+digraph G {
+ 30 [style=filled,label="ExecFg-30"];
+36 -> 40;
+43 [style=filled,label="ExecConvert-43"];
+36 [style=filled,label="KafkaSource-36"];
+40 -> 43;
+43 -> 30;
+40 [style=filled,label="ExecSample-40"]; 
+} 
+```
+
+
 
 ### Flink SQL 流图
 1. SqlClient 纯sql提交器和基础正则解析拆分SQL
@@ -413,6 +430,55 @@ Watermarked
       1. 进一步封装core能力
 6. Flink Table的数据结构
    1. 
+
+```graphviz
+digraph G {
+  // 用户视角
+  SQL [style=filled,label="SQL"];
+  SQLNode [style=filled];
+  UnResolvedRelNode [style=filled];
+  RelNode [style=filled,label="RelNode"];
+  FlinkLogicalNode [style=filled];
+  FlinkPhysicalNode [style=filled];
+  CodeGen [style=filled, label="CodeGen 生成DataStream和UDF代码"];
+
+DataStream [style=rounded,label="DataStream#JavaAPI"];
+
+ Transformation [style=filled,label="Transformation"];
+ StreamGraph [style=filled,label="StreamGraph"];
+ JobGraph [style=filled,label="JobGraph"];
+ExecuteGraph [style=filled,label="ExecuteGraph"]; 
+
+SQL -> SQLNode;
+SQLNode -> UnResolvedRelNode;
+UnResolvedRelNode -> RelNode;
+RelNode -> FlinkLogicalNode;
+FlinkLogicalNode -> FlinkPhysicalNode;
+FlinkPhysicalNode -> CodeGen;
+CodeGen -> DataStream;
+DataStream -> Transformation;
+Transformation -> StreamGraph;
+JobGraph -> ExecuteGraph;
+StreamGraph -> JobGraph;
+
+
+// 实体代码
+Op [style=filled,label="数据结构视角"];
+Code [style=filled,label="代码实现视角"];
+Coding [style=filled,label="用户编写SQL"];
+Op -> SQL;
+// Op -> Code;
+Code -> Coding;
+
+
+// DataStream 底层实现
+DataStream -> MultiFunctions;
+DataStream -> MultiStream;
+
+
+
+} 
+```
 
 
 ### Flink DataStream 流图
@@ -946,6 +1012,7 @@ public void testJoinPlain(){
    2. 中间结果集和唯一ID
    3. 算子和唯一ID
    4. savepoint配置参数 
+5. job如何存放函数和物理信息的，打印的job图，只有算子直接的关系，没有输入输出schema，以及字段udf操作
 
 #### 启动Job任务 - jobmaster
 1. 创建调度器
@@ -1219,11 +1286,74 @@ public void testJoinPlain(){
 5. runtime
    1. 核心设计 流元素 流状态 分区 窗口算子以及checkpoint的io
 
-### api
+### api - StreamExecutionEnvironment
+1. 对外输出的接口，通过 StreamExecutionEnvironment 可以任意组合datastream的流操作
+2. 读取source 启动流
+3. 配置checkpoint
 
-### api - datastream
+### api - Datastream
+1. 启动流后，一切action，在 datastream 实现
+2. 参考源码
+   1. flink-streaming-java/src/test/java/org/apache/flink/streaming/api/DataStreamTest.java
+3. DataStream的八种物理分区逻辑：https://www.jianshu.com/p/9e9c087bafc1
+4. Flink的operator chain：https://blog.csdn.net/nazeniwaresakini/article/details/107081244
+```
+union(DataStream<T>...): DataStream<T>
+split(OutputSelector<T>): SplitStream<T>
+connect(DataStream<R>): ConnectedStreams<T, R>
+connect(BroadcastStream<R>): BroadcastConnectedStream<T, R>
+keyBy(KeySelector<T, K>): KeyedStream<T, K>
+keyBy(KeySelector<T, K>, TypeInformation<K>): KeyedStream<T, K>
+keyBy(int...): KeyedStream<T, Tuple>
+keyBy(String...): KeyedStream<T, Tuple>
+keyBy(Keys<T>): KeyedStream<T, Tuple>
+localWindowAggregate(AggregateFunction<T, ACC, OUT>, WindowAssigner<T, W>, KeySelector<T, K>): SingleOutputStreamOperator<OUT>
+partitionCustom(Partitioner<K>, int): DataStream<T>
+partitionCustom(Partitioner<K>, String): DataStream<T>
+partitionCustom(Partitioner<K>, KeySelector<T, K>): DataStream<T>
+partitionCustom(Partitioner<K>, Keys<T>): DataStream<T>
+broadcast(): DataStream<T>
+broadcast(MapStateDescriptor<?, ?>...): BroadcastStream<T>
+shuffle(): DataStream<T>
+forward(): DataStream<T>
+rebalance(): DataStream<T>
+rescale(): DataStream<T>
+global(): DataStream<T>
+iterate(): IterativeStream<T>
+iterate(long): IterativeStream<T>
+map(MapFunction<T, R>): SingleOutputStreamOperator<R>
+map(MapFunction<T, R>, TypeInformation<R>): SingleOutputStreamOperator<R>
+flatMap(FlatMapFunction<T, R>): SingleOutputStreamOperator<R>
+flatMap(FlatMapFunction<T, R>, TypeInformation<R>): SingleOutputStreamOperator<R>
+process(ProcessFunction<T, R>): SingleOutputStreamOperator<R>
+process(ProcessFunction<T, R>, TypeInformation<R>): SingleOutputStreamOperator<R>
+filter(FilterFunction<T>): SingleOutputStreamOperator<T>
+project(int...): SingleOutputStreamOperator<R>
+coGroup(DataStream<T2>): CoGroupedStreams<T, T2>
+join(DataStream<T2>): JoinedStreams<T, T2>
+timeWindowAll(Time): AllWindowedStream<T, TimeWindow>
+timeWindowAll(Time, Time): AllWindowedStream<T, TimeWindow>
+countWindowAll(long): AllWindowedStream<T, GlobalWindow>
+countWindowAll(long, long): AllWindowedStream<T, GlobalWindow>
+windowAll(WindowAssigner<? super T, W>): AllWindowedStream<T, W>
+assignTimestampsAndWatermarks(WatermarkStrategy<T>): SingleOutputStreamOperator<T>
+assignTimestampsAndWatermarks(AssignerWithPeriodicWatermarks<T>): SingleOutputStreamOperator<T>
+assignTimestampsAndWatermarks(AssignerWithPunctuatedWatermarks<T>): SingleOutputStreamOperator<T>
 
-### api - functions
+
+
+
+writeAsText(String): DataStreamSink<T>
+writeAsText(String, WriteMode): DataStreamSink<T>
+writeAsCsv(String): DataStreamSink<T>
+writeAsCsv(String, WriteMode): DataStreamSink<T>
+writeAsCsv(String, WriteMode, String, String): DataStreamSink<T>
+writeToSocket(String, int, SerializationSchema<T>): DataStreamSink<T>
+writeUsingOutputFormat(OutputFormat<T>): DataStreamSink<T>
+```
+
+
+
 
 #### ProcessFunction
 1. processElement 处理元素
@@ -1239,14 +1369,152 @@ public void testJoinPlain(){
 4. Flink源码解析(八)——JobGraph生成过程解析：https://www.cnblogs.com/GeQian-hq/p/17880647.html
 5. Flink源码解析(九)——ExecutionGraph生成过程解析：https://www.cnblogs.com/GeQian-hq/p/17911407.html
 6. Flink源码解析(十四)——Flink On Yarn ExecutionGraph调度及TaskManager启动过程解析：https://www.cnblogs.com/GeQian-hq/p/18005142
+7. 核心生成器
+   1. StreamGraphGenerator#transform
+      1. Transformation -> StreamGraph  
+   2. StreamingJobGraphGenerator#createChain
+      1. StreamGraph -> JobGraph
 ```
 StreamGraph
 
 ```
 
-### api - operators
+#### Transformation -> StreamGraph 原理
+1. Transformation 类型
+   1. OneInputTransformation
+   2. TwoInputTransformation
+   3. UnionTransformation
+   4. SourceTransformation
+   5. SinkTransformation
+   6. SplitTransformation
+   7. SelectTransformation
+   8. FeedbackTransformation
+   9. CoFeedbackTransformation
+   10. PartitionTransformation
+   11. SideOutputTransformation
+2. 函数 - 来自业务 flink只需要抽象传递即可
+   1. getOperatorFactory
+3. 输入输出 - 来自业务 flink只需要抽象传递即可
+   1. getInputType
+   2. getOutputType
+4. 通用类型
+   1. id 并发数 分片，机器slot等等
+```
+StreamGraphGenerator
 
-### api - windowing
+if (transform instanceof OneInputTransformation<?, ?>) {
+			transformedIds = transformOneInputTransform((OneInputTransformation<?, ?>) transform);
+		} else if (transform instanceof TwoInputTransformation<?, ?, ?>) {
+			transformedIds = transformTwoInputTransform((TwoInputTransformation<?, ?, ?>) transform);
+		} else if (transform instanceof SourceTransformation<?>) {
+			transformedIds = transformSource((SourceTransformation<?>) transform);
+		} else if (transform instanceof SinkTransformation<?>) {
+			transformedIds = transformSink((SinkTransformation<?>) transform);
+		} else if (transform instanceof UnionTransformation<?>) {
+			transformedIds = transformUnion((UnionTransformation<?>) transform);
+		} else if (transform instanceof SplitTransformation<?>) {
+			transformedIds = transformSplit((SplitTransformation<?>) transform);
+		} else if (transform instanceof SelectTransformation<?>) {
+			transformedIds = transformSelect((SelectTransformation<?>) transform);
+		} else if (transform instanceof FeedbackTransformation<?>) {
+			transformedIds = transformFeedback((FeedbackTransformation<?>) transform);
+		} else if (transform instanceof CoFeedbackTransformation<?>) {
+			transformedIds = transformCoFeedback((CoFeedbackTransformation<?>) transform);
+		} else if (transform instanceof PartitionTransformation<?>) {
+			transformedIds = transformPartition((PartitionTransformation<?>) transform);
+		} else if (transform instanceof SideOutputTransformation<?>) {
+			transformedIds = transformSideOutput((SideOutputTransformation<?>) transform);
+		} else {
+			throw new IllegalStateException("Unknown transformation: " + transform);
+		}
+
+```
+
+#### Source 读取 function 和 type
+1. 参考 FlinkKafkaConsumer010
+   1. KafkaSourceSampleFunction
+   2. FlinkKafkaConsumerBase extends RichParallelSourceFunction
+2. 类型工厂
+   1. 解析class，提取返回值
+   2. TypeExtractor
+   3. privateCreateTypeInfo
+```
+
+/**
+	 * Ads a data source with a custom type information thus opening a
+	 * {@link DataStream}. Only in very special cases does the user need to
+	 * support type information. Otherwise use
+	 * {@link #addSource(org.apache.flink.streaming.api.functions.source.SourceFunction)}
+	 *
+	 * @param function
+	 * 		the user defined function
+	 * @param sourceName
+	 * 		Name of the data source
+	 * @param <OUT>
+	 * 		type of the returned stream
+	 * @param typeInfo
+	 * 		the user defined type information for the stream
+	 * @return the data stream constructed
+	 */
+	@SuppressWarnings("unchecked")
+	public <OUT> DataStreamSource<OUT> addSource(SourceFunction<OUT> function, String sourceName, TypeInformation<OUT> typeInfo) {
+
+		if (function instanceof ResultTypeQueryable) {
+			typeInfo = ((ResultTypeQueryable<OUT>) function).getProducedType();
+		}
+		if (typeInfo == null) {
+			try {
+				typeInfo = TypeExtractor.createTypeInfo(
+						SourceFunction.class,
+						function.getClass(), 0, null, null);
+			} catch (final InvalidTypesException e) {
+				typeInfo = (TypeInformation<OUT>) new MissingTypeInfo(sourceName, e);
+			}
+		}
+
+		boolean isParallel = function instanceof ParallelSourceFunction;
+
+		clean(function);
+
+		final StreamSource<OUT, ?> sourceOperator = new StreamSource<>(function);
+		return new DataStreamSource<>(this, typeInfo, sourceOperator, isParallel, sourceName);
+	}
+
+```
+
+#### StreamGraph 核心结构
+1. 全局配置
+   1. ExecutionConfig
+   2. CheckpointConfig
+   3. ScheduleMode
+   4. StateBackend
+2. dag基本结构
+   1. streamNodes source sink
+3. 核心函数
+   1. addNode
+   2. addVirtualSelectNode
+   3. addEdge
+   4. addOperator addSink addSource
+   5. addVirtualPartitionNode
+
+
+#### StreamGraph -> JobGraph
+1. StreamingJobGraphGenerator原理：https://matt33.com/2019/12/09/flink-job-graph-3/
+2. 如何判断算子是否可以 Chain 在一起
+   1. slotSharingGroup 和 edge.getPartitioner()。
+3. 如何创建 JobVertex 节点
+   1. connect() 创建 JobEdge 和 IntermediateDataSet 对象
+4. setPhysicalEdges(): 将每个 JobVertex 的入边集合也序列化到该 JobVertex 的 StreamConfig 中 (出边集合已经在 setChaining 的时候写入了)；
+5. setSlotSharingAndCoLocation(): 为每个 JobVertex 指定所属的 SlotSharingGroup 以及设置 CoLocationGroup；
+6. JobGraphGenerator.addUserArtifactEntries(): 用户依赖的第三方包就是在这里（cacheFile）传给 JobGraph；
+
+#### JobGraph 结构
+1. StreamConfig: 它会记录一个 StreamOperator 的配置信息，它保存了这个 StreamOperator 的基本信息，在这里它会将 StreamGraph 中的 StreamNode 的详细信息同步到它对应的 StreamConfig 对象中；
+2. JobVertex: JobVertex 相当于是 JobGraph 的顶点，跟 StreamNode 的区别是，它是 Operator Chain 之后的顶点，会包含多个 StreamNode；
+3. IntermediateDataSet: 它是由一个 Operator（可能是 source，也可能是某个中间算子）产生的一个中间数据集；
+4. IntermediateDataSet 的抽象主要是为了后面 ExecutionGraph 的生成。
+5. JobEdge: 它相当于是 JobGraph 中的边（连接通道），这个边连接的是一个 IntermediateDataSet 跟一个要消费的 JobVertex。
+6. 
 
 
 
@@ -1287,6 +1555,19 @@ Transformation关键成员变量说明
    private Optional<SlotSharingGroup> slotSharingGroup;　　//Slot共享组标识
 
 ```
+
+### api - functions
+1. function作为独立的包，大量自定义的函数，都用于描述 不同类型datastream，比如windowstream keystream
+2. 同时也用来完善 datastream接口
+3. function是datastream处理每一条消息的具体逻辑！
+
+### api - operators
+1. op是更好描述算子的结构，里面有多个funciotn，会根据分区策略，是否shufflle等，来判断哪些function可以在一个op里
+2. 同时也会分配到不同task和slot，与runtime执行层进行最终的对接
+3. Flink的operator chain：https://blog.csdn.net/nazeniwaresakini/article/details/107081244
+4. op共享slot：https://blog.csdn.net/wangchunbo_1989/article/details/103195920
+
+### api - windowing
 
 ### api - watermark
 
@@ -1843,7 +2124,7 @@ StreamOptimizeContext.scala
 
 ```
 
-#### relnode -> logicalplan -> physicalplan
+#### 算子优化流程 - relnode -> logicalplan -> physicalplan
 ```java
 StreamOptimizer
 flink自定义流引擎优化过程
@@ -1940,6 +2221,175 @@ protected def runVolcanoPlanner(
   }
 
 ```
+
+
+#### 规则集参考列表 - calcite relnode -> logical
+1. FlinkRuleSets
+```
+
+val LOGICAL_OPT_RULES: RuleSet = RuleSets.ofList(
+
+    // push a filter into a join
+    FilterJoinRule.FILTER_ON_JOIN,
+    // push filter into the children of a join
+    FilterJoinRule.JOIN,
+    // push filter through an aggregation
+    FilterAggregateTransposeRule.INSTANCE,
+    // push filter through set operation
+    FilterSetOpTransposeRule.INSTANCE,
+    // push project through set operation
+    ProjectSetOpTransposeRule.INSTANCE,
+
+    // aggregation and projection rules
+    AggregateProjectMergeRule.INSTANCE,
+    AggregateProjectPullUpConstantsRule.INSTANCE,
+    // push a projection past a filter or vice versa
+    ProjectFilterTransposeRule.INSTANCE,
+    FilterProjectTransposeRule.INSTANCE,
+    // push a projection to the children of a join
+    // push all expressions to handle the time indicator correctly
+    new ProjectJoinTransposeRule(PushProjector.ExprCondition.FALSE, RelFactories.LOGICAL_BUILDER),
+    // merge projections
+    ProjectMergeRule.INSTANCE,
+    // remove identity project
+    ProjectRemoveRule.INSTANCE,
+    // reorder sort and projection
+    SortProjectTransposeRule.INSTANCE,
+    ProjectSortTransposeRule.INSTANCE,
+
+    // join rules
+    JoinPushExpressionsRule.INSTANCE,
+
+    // remove union with only a single child
+    UnionEliminatorRule.INSTANCE,
+    // convert non-all union into all-union + distinct
+    UnionToDistinctRule.INSTANCE,
+
+    // remove aggregation if it does not aggregate and input is already distinct
+    AggregateRemoveRule.INSTANCE,
+    // push aggregate through join
+    AggregateJoinTransposeRule.EXTENDED,
+    // aggregate union rule
+    AggregateUnionAggregateRule.INSTANCE,
+
+    // reduce aggregate functions like AVG, STDDEV_POP etc.
+    AggregateReduceFunctionsRule.INSTANCE,
+    WindowAggregateReduceFunctionsRule.INSTANCE,
+
+    // remove unnecessary sort rule
+    SortRemoveRule.INSTANCE,
+
+    // prune empty results rules
+    PruneEmptyRules.AGGREGATE_INSTANCE,
+    PruneEmptyRules.FILTER_INSTANCE,
+    PruneEmptyRules.JOIN_LEFT_INSTANCE,
+    PruneEmptyRules.JOIN_RIGHT_INSTANCE,
+    PruneEmptyRules.PROJECT_INSTANCE,
+    PruneEmptyRules.SORT_INSTANCE,
+    PruneEmptyRules.UNION_INSTANCE,
+
+    // calc rules
+    FilterCalcMergeRule.INSTANCE,
+    ProjectCalcMergeRule.INSTANCE,
+    FilterToCalcRule.INSTANCE,
+    ProjectToCalcRule.INSTANCE,
+    CalcMergeRule.INSTANCE,
+
+    // scan optimization
+    PushProjectIntoTableSourceScanRule.INSTANCE,
+    PushFilterIntoTableSourceScanRule.INSTANCE,
+
+    // unnest rule
+    LogicalUnnestRule.INSTANCE,
+
+    // translate to flink logical rel nodes
+    FlinkLogicalAggregate.CONVERTER,
+    FlinkLogicalWindowAggregate.CONVERTER,
+    FlinkLogicalOverWindow.CONVERTER,
+    FlinkLogicalCalc.CONVERTER,
+    FlinkLogicalCorrelate.CONVERTER,
+    FlinkLogicalIntersect.CONVERTER,
+    FlinkLogicalJoin.CONVERTER,
+    FlinkLogicalTemporalTableJoin.CONVERTER,
+    FlinkLogicalMinus.CONVERTER,
+    FlinkLogicalSort.CONVERTER,
+    FlinkLogicalUnion.CONVERTER,
+    FlinkLogicalValues.CONVERTER,
+    FlinkLogicalTableSourceScan.CONVERTER,
+    FlinkLogicalTableFunctionScan.CONVERTER,
+    FlinkLogicalMatch.CONVERTER,
+    FlinkLogicalTableAggregate.CONVERTER,
+    FlinkLogicalWindowTableAggregate.CONVERTER
+  )
+
+
+
+
+```
+
+#### 规则集参考列表 - logical -> flink physical node
+1. FlinkRuleSets
+```
+
+
+/**
+    * RuleSet to normalize plans for stream / DataStream execution
+    */
+  val DATASTREAM_NORM_RULES: RuleSet = RuleSets.ofList(
+    // Transform window to LogicalWindowAggregate
+    DataStreamLogicalWindowAggregateRule.INSTANCE,
+    WindowPropertiesRule.INSTANCE,
+    WindowPropertiesHavingRule.INSTANCE,
+
+    ExtendedAggregateExtractProjectRule.INSTANCE,
+    // simplify expressions rules
+    ReduceExpressionsRule.FILTER_INSTANCE,
+    ReduceExpressionsRule.PROJECT_INSTANCE,
+    ReduceExpressionsRule.CALC_INSTANCE,
+    ProjectToWindowRule.PROJECT,
+
+    // merge a cascade of predicates to IN or NOT_IN
+    ConvertToNotInOrInRule.IN_INSTANCE,
+    ConvertToNotInOrInRule.NOT_IN_INSTANCE
+  )
+
+  /**
+    * RuleSet to optimize plans for stream / DataStream execution
+    */
+  val DATASTREAM_OPT_RULES: RuleSet = RuleSets.ofList(
+    // translate to DataStream nodes
+    DataStreamSortRule.INSTANCE,
+    DataStreamGroupAggregateRule.INSTANCE,
+    DataStreamOverAggregateRule.INSTANCE,
+    DataStreamGroupWindowAggregateRule.INSTANCE,
+    DataStreamCalcRule.INSTANCE,
+    DataStreamScanRule.INSTANCE,
+    DataStreamUnionRule.INSTANCE,
+    DataStreamValuesRule.INSTANCE,
+    DataStreamCorrelateRule.INSTANCE,
+    DataStreamWindowJoinRule.INSTANCE,
+    DataStreamJoinRule.INSTANCE,
+    DataStreamTemporalTableJoinRule.INSTANCE,
+    StreamTableSourceScanRule.INSTANCE,
+    DataStreamMatchRule.INSTANCE,
+    DataStreamTableAggregateRule.INSTANCE,
+    DataStreamGroupWindowTableAggregateRule.INSTANCE,
+    DataStreamPythonCalcRule.INSTANCE
+  )
+
+  /**
+    * RuleSet to decorate plans for stream / DataStream execution
+    */
+  val DATASTREAM_DECO_RULES: RuleSet = RuleSets.ofList(
+    // retraction rules
+    DataStreamRetractionRules.DEFAULT_RETRACTION_INSTANCE,
+    DataStreamRetractionRules.UPDATES_AS_RETRACTION_INSTANCE,
+    DataStreamRetractionRules.ACCMODE_INSTANCE
+  )
+
+```
+
+
 
 
 
@@ -2652,6 +3102,115 @@ matches 也需要业务自定义实现，用来判断能否调用convert
     }
     call.transformTo(newCalc)
   }
+
+```
+
+
+#### 计划探查 - 图内插入新算子
+```
+
+
+
+
+
+```
+
+
+#### 计划探查 - 头尾新增算子 
+1. LogicalSink -> FlinkLogicalSinkConverter
+```
+判断insert类型，创建不同的sink算子
+ private[flink] def translateToRel(modifyOperation: ModifyOperation): RelNode = {
+    modifyOperation match {
+      case s: UnregisteredSinkModifyOperation[_] =>
+        val input = getRelBuilder.queryOperation(s.getChild).build()
+        val sinkSchema = s.getSink.getTableSchema
+        // validate query schema and sink schema, and apply cast if possible
+        val query = validateSchemaAndApplyImplicitCast(input, sinkSchema, getTypeFactory)
+        LogicalSink.create(
+          query,
+          s.getSink,
+          "UnregisteredSink",
+          ConnectorCatalogTable.sink(s.getSink, !isStreamingMode))
+
+      case catalogSink: CatalogSinkModifyOperation =>
+        val input = getRelBuilder.queryOperation(modifyOperation.getChild).build()
+        val identifier = catalogSink.getTableIdentifier
+        getTableSink(identifier).map { case (table, sink) =>
+          // check the logical field type and physical field type are compatible
+          val queryLogicalType = FlinkTypeFactory.toLogicalRowType(input.getRowType)
+          // validate logical schema and physical schema are compatible
+          validateLogicalPhysicalTypesCompatible(table, sink, queryLogicalType)
+          // validate TableSink
+          validateTableSink(catalogSink, identifier, sink, table.getPartitionKeys)
+          // validate query schema and sink schema, and apply cast if possible
+          val query = validateSchemaAndApplyImplicitCast(
+            input,
+            TableSchemaUtils.getPhysicalSchema(table.getSchema),
+            getTypeFactory,
+            Some(catalogSink.getTableIdentifier.asSummaryString()))
+          LogicalSink.create(
+            query,
+            sink,
+            identifier.toString,
+            table,
+            catalogSink.getStaticPartitions.toMap)
+        } match {
+          case Some(sinkRel) => sinkRel
+          case None =>
+            throw new TableException(s"Sink ${catalogSink.getTableIdentifier} does not exists")
+        }
+
+      case outputConversion: OutputConversionModifyOperation =>
+        val input = getRelBuilder.queryOperation(outputConversion.getChild).build()
+        val (updatesAsRetraction, withChangeFlag) = outputConversion.getUpdateMode match {
+          case UpdateMode.RETRACT => (true, true)
+          case UpdateMode.APPEND => (false, false)
+          case UpdateMode.UPSERT => (false, true)
+        }
+        val typeInfo = LegacyTypeInfoDataTypeConverter.toLegacyTypeInfo(outputConversion.getType)
+        val inputLogicalType = FlinkTypeFactory.toLogicalRowType(input.getRowType)
+        val sinkPhysicalSchema = inferSinkPhysicalSchema(
+          outputConversion.getType,
+          inputLogicalType,
+          withChangeFlag)
+        // validate query schema and sink schema, and apply cast if possible
+        val query = validateSchemaAndApplyImplicitCast(input, sinkPhysicalSchema, getTypeFactory)
+        val tableSink = new DataStreamTableSink(
+          FlinkTypeFactory.toTableSchema(query.getRowType),
+          typeInfo,
+          updatesAsRetraction,
+          withChangeFlag)
+        LogicalSink.create(
+          query,
+          tableSink,
+          "DataStreamTableSink",
+          ConnectorCatalogTable.sink(tableSink, !isStreamingMode))
+
+      case _ =>
+        throw new TableException(s"Unsupported ModifyOperation: $modifyOperation")
+    }
+  }
+
+
+private class FlinkLogicalSinkConverter
+  extends ConverterRule(
+    classOf[LogicalSink],
+    Convention.NONE,
+    FlinkConventions.LOGICAL,
+    "FlinkLogicalSinkConverter") {
+
+  override def convert(rel: RelNode): RelNode = {
+    val sink = rel.asInstanceOf[LogicalSink]
+    val newInput = RelOptRule.convert(sink.getInput, FlinkConventions.LOGICAL)
+    FlinkLogicalSink.create(
+      newInput,
+      sink.sink,
+      sink.sinkName,
+      sink.catalogTable,
+      sink.staticPartitions)
+  }
+}
 
 ```
 
@@ -5250,6 +5809,10 @@ https://github.com/rickyxume/TianChi_RecSys_AntiSpam
 
 ```
 
+## 相同框架能力对比
+1. TiDB 优化器丨执行计划和 SQL 算子解读最佳实践 - PingCAP的文章 - 知乎 https://zhuanlan.zhihu.com/p/873614834
+2. TiDB 关联子查询及半连接的优化实践 - PingCAP的文章 - 知乎 https://zhuanlan.zhihu.com/p/9555949379
+3. TiKV Raft Store 内存管理的原理与实现丨TiKV 源码解读（二十三） - PingCAP的文章 - 知乎 https://zhuanlan.zhihu.com/p/8385743298
 
 ## flink 功能维度分析
 ## flink序列化和反序列化章节
