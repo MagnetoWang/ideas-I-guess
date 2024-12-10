@@ -55,8 +55,9 @@ PaddlePaddle + 公司项目
    1. 模型优化：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-performance-opt/model_perf.md
    2. 编译器优化理论SSA
 7. blog
-   1. Zerorains：https://space.keter.top/docs/high_performance/%E7%AE%97%E5%AD%90%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/Histogram
-   2. State of PyTorch：https://pfcc.blog/posts/pytorch-conference-01
+   1. yeyupiaoling：https://github.com/yeyupiaoling
+   2. Zerorains：https://space.keter.top/docs/high_performance/%E7%AE%97%E5%AD%90%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/Histogram
+   3. State of PyTorch：https://pfcc.blog/posts/pytorch-conference-01
 8. 黑客松
    1. Hackathon 1th：https://github.com/PaddlePaddle/Paddle/issues/35940
    2. Hackathon 2th：https://github.com/PaddlePaddle/Paddle/issues/40234
@@ -484,8 +485,47 @@ Executor：用于快速调度 Operator ，完成网络训练/预测。
 
 ### 纵向拆解 - 自动并行 分布式
 
+### 算法视角 - paddle
 
 
+### 算法视角 - paddle.nn
+
+
+### 算法视角 - paddle.nn.functional
+
+
+### 算法视角 - paddle.io
+
+### 算法视角 - paddle.static
+
+### 算法视角 - paddle.optimizer
+
+### 算法视角 - paddle.distributed.fleet
+1. paddle.distributed.fleet.data_generator
+
+### 算法视角 - paddle_serving_client
+
+### 算法视角 - paddle.inference
+
+### 算法视角 - 低频接口
+1. paddle.onnx
+2. paddle.pir
+   1. https://github.com/PaddlePaddle/Paddle2ONNX
+3. paddle.jit
+   1. https://github.com/PaddlePaddle/PaddleClas
+   2. https://github.com/PaddlePaddle/PaddleVideo
+   3. https://github.com/PaddlePaddle/PaddleDetection
+4. paddle.sparse
+   1. https://github.com/PaddlePaddle/Paddle3D
+   2. https://github.com/ApolloAuto/apollo-model-centerpoint
+   3. https://github.com/ROCm
+
+### 算法视角 - 内部paddle才会使用接口
+1. 
+
+### 工程视角 - python层
+
+### 
 
 ### 业务拆解 - 模型加载
 1. jit load

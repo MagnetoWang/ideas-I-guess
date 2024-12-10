@@ -2,6 +2,22 @@
 1. 收集大量应用代码
 2. 收集大量测试代码
 3. 收集大量比赛代码
+4. 学习路径
+   1. 已知公式
+   2. 已知数据如何拟合公式
+   3. 模型结构能拿到
+      1. 依赖哪些paddle对外接口
+      2. 仅仅几个接口，是如何串联整个paddle架构的
+      3. 区分对外用户常用接口和不常用
+      4. 在区分哪些就是内部使用的接口
+      5. 高频接口链路梳理，并查看中间生成的代码
+      6. 中低频接口按需梳理
+      7. 类似方法整理pytorch，看看pytorch有没有一些不一样的地方
+   4. 数据构造也能拿到
+   5. 模型训练和推理都能跑 在 aistudio
+   6. 怎么应用到业务场景，怎么优化指标
+   7. 建模思想，每个模型设计总结
+   8. 
 ```
 git clone https://github.com/PaddlePaddle/Paddle.git
 cd Paddle
@@ -13,6 +29,11 @@ make -j10 > paddle_compile_v1.log &
 
 
 ```
+
+### 应用代码
+1. 推荐：https://github.com/PaddlePaddle/PaddleRec
+2. 推理：https://github.com/PaddlePaddle/Paddle-Inference-Demo
+3. learnpaddle：https://github.com/yeyupiaoling/LearnPaddle
 
 ## 虚拟环境
 ### win11 - 默认pytorch开发环境
@@ -103,6 +124,112 @@ deactivate
 python3 -m venv paddleDev
 source paddleDev/bin/activate
 
+
+```
+
+
+### win11 - wsl2 - docker 一站式开发环境
+1. 按照文档安装docker即可：https://docs.docker.com/engine/install/ubuntu/
+2. cuda容器工具：https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
+3. 以paddle为基础镜像：https://www.paddlepaddle.org.cn/documentation/docs/zh/install/docker/linux-docker.html
+4. 解决 c++ go python rust 开发调试
+5. https://docs.docker.com/desktop/features/wsl/
+6. docker 无法启动：https://askubuntu.com/questions/1379425/system-has-not-been-booted-with-systemd-as-init-system-pid-1-cant-operate
+7.  sudo service docker start 
+    1.  docker: unrecognized service
+    2.  https://askubuntu.com/questions/1380051/docker-unrecognized-service-when-installing-cuda
+```shell
+前置条件 卸载历史不兼容docker包
+开启 在 wslconfig
+systemd=true
+
+
+wsl
+wsl --shutdown
+
+
+
+二次加工
+cuda工具安装
+sudo apt-get update
+sudo apt-get install -y nvidia-container-toolkit
+
+ssh服务
+apt-get install openssh-client -y
+apt-get install openssh-server -y
+
+启动ssh服务
+/etc/init.d/ssh start
+
+/etc/init.d/ssh restart
+
+以paddle为base
+docker pull registry.baidubce.com/paddlepaddle/paddle:3.0.0b1-gpu-cuda12.3-cudnn9.0-trt8.6
+
+
+docker pull registry.baidubce.com/paddlepaddle/paddle:3.0.0b2-gpu-cuda11.8-cudnn8.6-trt8.5
+
+docker 
+
+
+
+
+
+
+```
+
+
+### paddle-cuda 源码开发环境 docker-compose.yml 
+1. cpp 自动补全 + debug
+   1. 加速编译速度：https://www.zhihu.com/question/266766131/answer/49321031151
+2. python 自动补全 + debug
+3. go 自动补全 + debug
+4. coredump配置 --privileged
+5. gpu配置
+```
+启动命令
+docker-compose up -d
+
+nvidia-docker pull registry.baidubce.com/paddlepaddle/paddle:latest-dev-cuda11.2-cuDNN8-gcc82
+
+
+
+```
+
+
+### paddle-cuda 纯python应用环境 docker-compose.yml 
+```
+
+version: "3"
+services:
+  one-develop:
+    build: .
+    image: registry.baidubce.com/paddlepaddle/paddle:3.0.0b1-gpu-cuda12.3-cudnn9.0-trt8.6
+    container_name: paddle-cuda
+    privileged: true
+    ulimits:
+      nproc: 65535
+      nofile:
+         soft: 40000
+         hard: 80000
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    # 使用vscode的remote-container无需设置ports,它将自动代理端口,可直接访问。
+    # ports:
+    #   - 3000:3000
+    working_dir: /develop
+    network_mode: host  # 使用host网络模式
+    volumes:
+      - ".:/develop"
+      - "./..:/wsl"
+      - "./../project:/project"
+    stdin_open: true   # 相当于-d 允许后台运行
+    tty: true  # 相当于-i  允许交互
 
 ```
 
@@ -435,3 +562,584 @@ python -u ../../../tools/trainer.py -m config.yaml
 ## 应用开发
 1. 课程
    1. 李宏毅课程-机器学习：https://aistudio.baidu.com/course/introduce/1978
+
+
+
+## 开发异常
+
+### core dump
+1. https://github.com/PaddlePaddle/Paddle/issues/69003
+2. 用户的CPU对AVX的支持是不一样的，从AVX/AVX2/AVX 512都有可能。
+3. 虽然在服务器CPU上AVX512非常常见，但是Intel桌面端CPU从13代开始，已经默认不支持AVX512了，只支持AVX2了。
+4. https://github.com/PaddlePaddle/Paddle/issues/43181
+```
+
+Python 3.10.14 (main, Apr  6 2024, 18:45:05) [GCC 9.4.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import paddle
+Illegal instruction (core dumped)
+
+
+查了一下，仅支持avx2
+λ docker-desktop /develop lscpu | grep -o 'avx[^ ]*'
+grep: warning: GREP_OPTIONS is deprecated; please use an alias or script
+avx
+avx2
+avx_vnni
+
+临时包
+https://paddle-qa.bj.bcebos.com/paddle-pipeline/CompileServicing-LinuxCentos-Commit-Cuda123-WITH_PIP_CUDA_LIBRARIES_ON-WITH_AVX_OFF/59dba7a7b8b3f0f7cfa7cc4e5b4dd28a38b1f431/paddlepaddle_gpu-0.0.0-cp310-cp310-linux_x86_64.whl
+```
+
+
+
+### ImportError: libcuda.so.1: cannot open shared object file: No such file or directory
+```
+https://blog.csdn.net/SpadgerZ/article/details/127528618
+
+添加 --gpus all 即可
+
+```
+
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+
+###
+```
+
+
+```
+
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+
+###
+```
+
+
+```
+
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+
+###
+```
+
+
+```
+
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+
+###
+```
+
+
+```
+
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
+
+###
+```
+
+
+```
