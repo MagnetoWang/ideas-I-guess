@@ -36,7 +36,48 @@ PaddlePaddle + 公司项目
 ## 核心思考问题
 1. 编译 测试 和 自动跳转功能
 2. paddle和flink看的顺序不一样，flink是java，可以根据package，横向拆解，一层层看代码，有简单模块，看向复杂模块。但是paddle是c++，横向拆解不够粗粒度，只能纵向拆解，先串通整个流程设计的概念，再从源码编译顺序看看怎么横向分层
-3. 
+3. 代码拆解
+   1. python 维度，大量业务用了哪些接口
+   2. c++ 维度，不同包直接的依赖，依赖程度情况
+      1. fluid
+      2. pir
+      3. phi
+   3. 编译顺序，横向拆解
+   4. 目录角度，纵向拆解
+4. 理论角度：有了工具，就需要找业务问题，有多少场景，每个场景为什么有这个模型，不同模型的收益是怎么样的。每篇论文提出的背景是什么，假设是什么，解决的问题是什么，改造点在哪里就让原始数据集有效果提升。
+5. 现实角度：这么算法和论文，哪些才是长久跑到线上，哪些是重投入的，哪些是暴力出效果的
+6. 关键词搜索  
+   1. paddle op
+   2. paddle program 设计
+   3. paddle ir 设计
+   4. paddle 前向图 设计
+   5. paddle 反向图 设计
+   6. 分布式设计
+   7. StaticRNN
+   8. DynamicRNN
+   9. place是什么
+   10. PlaceGroup
+   11. Executor
+   12. pserver
+   13. CompiledProgram 
+   14. Transpiler
+   15. op分配到硬件
+   16. DistributedBlock
+   17. DistributeTranspiler
+   18. MemoryOptimizationTranspiler
+   19. ExecutorRole
+   20. Momentum
+   21. paddle 源码分析
+   22. 对比pytorch语料太少了，运营不给力啊
+   23. 挖issue 挖docs 挖comment 挖commit 挖核心开发人员的开发路径 大功能迭代
+   24. jacquesqiao
+   25. 
+7. paddle理解历程
+   1. 横向结构看，太难，看不下去
+   2. 纵向结构拆解，稍微有点思路
+   3. cpp理解，太难，看不下去
+   4. python + 横向拆解 稍微有点思路
+   5. 关键词尽可能搜网上设计文档 稍微有点思路
 
 ## 参考资料
 1. 飞桨框架v2.4 API新升级！全面支持稀疏计算、图学习、语音处理等任务：https://mp.weixin.qq.com/s/8IYYEbJqIjyWd2zO7TGGFw
@@ -45,20 +86,24 @@ PaddlePaddle + 公司项目
 4. 委员会
    1. https://github.com/PaddlePaddle/community/tree/master/pposdwg
 5. 技术分享
-   1. 训练营：https://github.com/PFCCLab/Camp?tab=readme-ov-file
-   2. 代码串讲：https://github.com/PFCCLab/Camp
-   3. 读书会：https://github.com/PaddlePaddle/community/tree/master/pfcc/paddle-code-reading
-   4. pfcc：https://pfcc.blog/
-   5. 周会：https://github.com/PaddlePaddle/community/tree/master/pfcc
-   6. code reading：https://github.com/PaddlePaddle/community/tree/master/pfcc/paddle-code-reading
-6. 性能优化
+   1. pfcc会议链接：https://github.com/PaddlePaddle/community/blob/62cb010a432155cb9265c6f98f0aa3d28cee3a0a/pfcc/meetings/2024/2024-11-14-meeting-minutes.md
+   2. 训练营：https://github.com/PFCCLab/Camp?tab=readme-ov-file
+   3. 代码串讲：https://github.com/PFCCLab/Camp
+   4. 读书会：https://github.com/PaddlePaddle/community/tree/master/pfcc/paddle-code-reading
+   5. pfcc：https://pfcc.blog/
+   6. 周会：https://github.com/PaddlePaddle/community/tree/master/pfcc
+   7. code reading：https://github.com/PaddlePaddle/community/tree/master/pfcc/paddle-code-reading
+6. 模型库
+   1. https://github.com/PaddlePaddle/models
+   2. https://www.paddlepaddle.org.cn/modelbase
+7. 性能优化
    1. 模型优化：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-performance-opt/model_perf.md
    2. 编译器优化理论SSA
-7. blog
+8. blog
    1. yeyupiaoling：https://github.com/yeyupiaoling
    2. Zerorains：https://space.keter.top/docs/high_performance/%E7%AE%97%E5%AD%90%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/Histogram
    3. State of PyTorch：https://pfcc.blog/posts/pytorch-conference-01
-8. 黑客松
+9. 黑客松
    1. Hackathon 1th：https://github.com/PaddlePaddle/Paddle/issues/35940
    2. Hackathon 2th：https://github.com/PaddlePaddle/Paddle/issues/40234
    3. Hackathon 3th：https://github.com/PaddlePaddle/Paddle/issues/43938
@@ -66,13 +111,15 @@ PaddlePaddle + 公司项目
    5. Hackathon 5th：https://github.com/PaddlePaddle/docs/blob/release/2.5/docs/guides/10_contribution/hackathon_cn.md
    6. Hackathon 6th：https://github.com/PaddlePaddle/Paddle/issues/62907
    7. Hackathon 7th：https://github.com/PaddlePaddle/Paddle/issues/68242
-9.  人物经历
+10. 人物经历
     1. nknan：https://pfcc.blog/posts/nknan-story
        1. https://github.com/NKNaN
     2. https://pfcc.blog/posts/wangxin-story
     3. https://pfcc.blog/posts/tao-story
     4. https://pfcc.blog/posts/zhangyiqiao-story 说话挺搞笑的，哈哈哈
     5. https://pfcc.blog/posts/sanbu-story
+11. 课程
+   1. 李宏毅课程-机器学习：https://aistudio.baidu.com/course/introduce/1978
 
 
 ## 文章分享
@@ -83,6 +130,14 @@ PaddlePaddle + 公司项目
 5. Paddle静态图并行编排与执行流程：https://github.com/PFCCLab/Camp/blob/main/Docs/Hackathon_5th/10_StaticGraph_Semi-AutomaticParallel_ExecutionFrameworkUpgrade/CodeReading/1-paddle_static_graph_pipelining.md
 6. 代码层面熟悉 PIR：https://github.com/PFCCLab/Camp/blob/main/Docs/Hackathon_5th/19_PIR_Adapt_CINN/CodeReading/PIR_source_code_reading_guide.md
 7. ZB VPP 实现方案：https://github.com/PFCCLab/Camp/blob/main/Docs/Hackathon_6th/10_Static_Graph_semi-automatic_parallel_training_performance_optimization/zb_vpp_design.md
+8. PaddlePaddle inference 源码分析
+   1. 三 Operator定义注册机制：https://www.cnblogs.com/zl1991/p/15712940.html
+   2. 四 预测处理的流程：https://www.cnblogs.com/zl1991/p/15728406.html
+   3. 五 graph和pass：https://www.cnblogs.com/zl1991/p/16010209.html
+9.  PaddleDetection源码解析：https://aistudio.baidu.com/projectdetail/1327454
+10. 超大规模稀疏参数(DistributedLookupTable)的本地预测+增量使用
+    1.  https://github.com/PaddlePaddle/Paddle/issues/16360
+    2.  https://github.com/PaddlePaddle/Paddle/issues/14291
 
 
 ### sonder blog
@@ -153,7 +208,528 @@ PaddlePaddle + 公司项目
 2. pd文件：https://gitcode.com/gh_mirrors/onn/onnx/blob/main/onnx/onnx.proto
 3. IR：https://github.com/onnx/onnx/blob/main/docs/IR.md
 
-## 源码
+### 模型结构图
+
+
+## Python 源码
+
+### 纵向拆解 - layer
+1. 神经网络模型的Program，由多个Block（控制流结构）构成，每个Block是由Operator（算子）和数据表示Variable（变量）构成
+2. 思考问题
+   1. 自定义layer
+   2. 自定义op
+   3. 自定义program
+   4. 自定义block
+   5. python测试用例 如何验证以上关键类
+3. LayerHelper
+   1. create_variable_for_type_inference 变量类型推导
+   2. append_op op管理
+4. 核心类
+   1. framework.py 引入 libpaddle c++
+      1. Program
+   2. core.py 引入 libpaddle c++
+   3. compiler.py
+   4. backward.py
+   5. executor.py
+   6. fluid
+5. 概念
+   1. trt
+
+#### 基本概念
+1. 前端编程界面：用户使用框架的方式是基于API定义网络结构（前向计算逻辑），并控制训练过程。所以，API的设计是用户最直接感受产品是否好用的触点。
+2. 自动微分机制：自动完成反向逻辑，这是深度学习框架与Numpy科学计算库的本质区别。如果只是进行数学运算，大量的科学计算库均能满足需求。深度学习框架的特色是根据用户设定的前向计算逻辑，自动生产反向计算的逻辑，使得用户不用操心模型的训练过程。
+3. 内部表达IR：统一表达有两个用处，一方面便于进行算子融合等计算优化，另一方面便于序列化，用于对接不同的硬件以及进行分布式训练等，即接下来的第4步和第5步。
+4. 计算图优化：可以用户手工优化，也可以框架根据策略自动优化，当然后者对用户更加友好。
+5. 算子序列执行：单机单卡的训练是比较简单的，根据前向和后向计算逻辑顺序执行就好。但对于单机多卡和多机多卡的分布式训练，如何并发、异步执行计算流程，并调度异构设备等问题就需要在这个环节仔细设计。
+6. 算子库：框架产品最好有完备的算子库，对于99%以上的模型均有高效实现的算子可以直接使用。但由于科学的不断前进，总有新创造的模型可能会用一些新的计算函数，所以框架要允许易添加用户自定义的算子也是同样重要的，用户添加的算子同时要具备原生算子一样的训练和推理能力，并且可以在广泛的硬件上部署。
+7. 后端硬件接入：框架需要与众多种类的训练和预测硬件完成对接，这些硬件接口开放的层次往往也是不同的，典型有IR子图的高层接入方式和底层编程接口接入方式，目前最新的AI编译器技术也在尝试解决这个问题。
+
+
+
+#### core.py - 引入 libpaddle
+```python
+    # custom device
+    from .libpaddle import (  # noqa: F401
+        CustomDeviceEvent,
+        CustomDeviceStream,
+        _get_current_custom_device_stream,
+        _set_current_custom_device_stream,
+        _synchronize_custom_device,
+    )
+
+```
+
+#### framwork 结构
+1. fluid包关联
+```
+
+/Paddle/paddle/fluid/framework/framework.proto
+
+data_feed.proto
+distributed_strategy.proto
+framework.proto
+heter_service.proto
+op_def.proto
+op_proto_maker.cc
+op_proto_maker.h
+op_version_proto.cc
+op_version_proto.h
+pass_desc.proto
+proto_desc.h
+trainer_desc.proto
+
+```
+
+### 纵向拆解 - Program
+#### Program 结构
+1. 一个Program的集合通常包含初始化程序（startup_program）与主程序(main_program)，默认情况下，飞桨的神经网络模型都包括两个program，分别是static.default_startup_program()以及static.default_main_program()，它们共享参数。 default_startup_program 只运行一次来初始化参数，训练时，default_main_program 在每个batch中运行并更新权重。
+2. 图描述调研：https://github.com/PaddlePaddle/docs/blob/develop/docs/design/others/graph_survey.md
+3. 设计：https://www.paddlepaddle.org.cn/documentation/api/paddle/static/Program_cn.html
+4. block设计
+   1. https://github.com/PaddlePaddle/docs/blob/develop/docs/design/concepts/block.md
+   2. https://www.paddlepaddle.org.cn/documentation/api_guides/low_level/program.html#api-guide-block
+5. Block
+   1. a Program is consistence of multi-Block, and Block stores VarDesc and OpDes
+   2. Block 是高级语言中变量作用域的概念，在编程语言中，Block 是一对大括号，其中包含局部变量定义和一系列指令或操作符
+   3. Block 描述了一组以顺序、选择或是循环执行的 Operator 以及 Operator 操作的对象：Tensor。
+6. 控制流
+   1. ifelse
+   2. switch
+   3. while
+   4. DynamicRNN
+   5. StaticRNN
+
+
+#### ProgramDesc
+1. describes the process and is conceptually like an abstract syntax tree.
+2. 
+3. BlockDesc
+4. VarDesc 变量描述
+5. OpDesc 算子描述
+```proto
+message ProgramDesc {
+  reserved 2, 3; // For backward compatibility.
+  repeated BlockDesc blocks = 1;
+  optional Version version = 4;
+  optional OpVersionMap op_version_map = 5;
+}
+
+
+message BlockDesc {
+  required int32 idx = 1;
+  required int32 parent_idx = 2;
+  repeated VarDesc vars = 3;
+  repeated OpDesc ops = 4;
+  optional int32 forward_block_idx = 5 [ default = -1 ];
+}
+
+
+message VarDesc {
+
+  message Attr {
+    required string name = 1;
+    required AttrType type = 2;
+    optional int32 i = 3;
+    optional string s = 4;
+    repeated int32 ints = 5;
+  };
+
+  required string name = 1;
+  required VarType type = 2;
+  optional bool persistable = 3 [ default = false ];
+  // True if the variable is an input data and
+  // have to check the feed data shape and dtype
+  optional bool need_check_feed = 4 [ default = false ];
+  optional bool is_parameter = 5 [ default = false ];
+  optional bool stop_gradient = 6 [ default = false ];
+  repeated Attr attrs = 7;
+}
+
+
+message OpDesc {
+
+  message Attr {
+    required string name = 1;
+    required AttrType type = 2;
+    optional int32 i = 3;
+    optional float f = 4;
+    optional string s = 5;
+    repeated int32 ints = 6;
+    repeated float floats = 7;
+    repeated string strings = 8;
+    optional bool b = 10;
+    repeated bool bools = 11;
+    optional int32 block_idx = 12;
+    optional int64 l = 13;
+    repeated int32 blocks_idx = 14;
+    repeated int64 longs = 15;
+    repeated double float64s = 16;
+    optional string var_name = 17;
+    repeated string vars_name = 18;
+    optional double float64 = 19;
+    optional Scalar scalar = 20;
+    repeated Scalar scalars = 21;
+  };
+
+  message Var {
+    required string parameter = 1;
+    repeated string arguments = 2;
+  };
+
+  required string type = 3;
+  repeated Var inputs = 1;
+  repeated Var outputs = 2;
+  repeated Attr attrs = 4;
+  optional bool is_target = 5 [ default = false ];
+};
+```
+
+#### 打印program结构
+```
+import paddle
+import paddle.static as static
+
+paddle.enable_static()
+
+ # 当输入为单个张量时
+train_program = static.Program()
+start_program = static.Program()
+
+places = static.cpu_places()
+with static.program_guard(train_program, start_program):
+    data = static.data(name="data1", shape=[2, 3], dtype="float32")
+    data2 = static.data(name="data2", shape=[3, 4], dtype="float32")
+    res = paddle.matmul(data, data2)
+    print(static.default_main_program())
+
+
+结构如下
+{ // block 0
+    var data1 : LOD_TENSOR.shape(2, 3).dtype(float32).stop_gradient(True)
+    var data2 : LOD_TENSOR.shape(3, 4).dtype(float32).stop_gradient(True)
+    var matmul_v2_0.tmp_0 : LOD_TENSOR.shape(2, 4).dtype(float32).stop_gradient(False)
+
+    {Out=['matmul_v2_0.tmp_0']} = matmul_v2(inputs={X=['data1'], Y=['data2']}, fused_reshape_Out = [], fused_reshape_X = [], fused_reshape_Y = [], fused_transpose_Out = [], fused_transpose_X = [], fused_transpose_Y = [], mkldnn_data_type = float32, op_device = , op_namescope = /, op_role = 0, op_role_var = [], trans_x = False, trans_y = False, use_mkldnn = False, with_quant_attr = False)
+}
+
+
+结构拆解 program呈现字典形式的结构：
+blocks{
+    vars{
+        """vars attribute"""
+    }
+    vars{
+        """vars attribute"""
+    }
+    ops{
+        """opeartors attribute"""
+    }
+    version{
+        """other information"""
+    }
+}
+```
+
+#### 打印内置 program
+```
+import paddle
+import paddle.static as static
+
+paddle.enable_static()
+
+ # 当输入为单个张量时
+train_program = static.Program()
+start_program = static.Program()
+
+places = static.cpu_places()
+with static.program_guard(train_program, start_program):
+    data = static.data(name="data1", shape=[2, 3], dtype="float32")
+    data2 = static.data(name="data2", shape=[3, 4], dtype="float32")
+    res = paddle.matmul(data, data2)
+    print(static.default_main_program(), file=open("program.txt", 'w'))
+
+```
+
+
+#### _C_ops 导出 c形式op
+1. python/paddle/_C_ops.py
+2. core.eager.ops
+3. core.pir.ops
+
+
+#### 手动建模型
+1. test/ir/inference/program_config.py
+   1. create_fake_model
+   2. create_quant_model
+```
+
+```
+
+#### Program 拆分
+1. 对于 opt_op, 他做了 Placement, 将 opt_op 放到了 pserver program 中;
+2. 对于 backward_op 和 forward_op, 他做了 Replication, 每一个 trainer program 都有这些 op;
+3. 对于 var, 他既有 Placement, 又有 Replication;
+
+#### Program 修改
+
+#### CompiledProgram
+1. 用于把程序转化为不同的优化组合：https://www.paddlepaddle.org.cn/documentation/zh/api_guides/low_level/compiled_program.html#api-guide-compiled-program
+```
+# 首先创建 Executor。
+place = fluid.CUDAPlace(0) if use_cuda else fluid.CPUPlace()
+exe = fluid.Executor(place)
+# 运行启动程序仅一次。
+exe.run(fluid.default_startup_program())
+
+# 直接运行主程序，无需编译。
+loss = exe.run(fluid.default_main_program(),
+                feed=feed_dict,
+                fetch_list=[loss.name])
+
+# 或者编译程序后用优化过的 Program 运行模型。
+build_strategy = fluid.BuildStrategy()
+build_strategy.memory_optimize = True if memory_opt else False
+compiled_prog = compiler.CompiledProgram(
+    fluid.default_main_program(),
+    build_strategy=build_strategy)
+loss, = exe.run(compiled_prog,
+                feed=feed_dict,
+                fetch_list=[loss.name])
+
+
+```
+
+### 纵向拆解 - 动态图 & 静态图
+1. 调用链路：
+   1. https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/Dygraph/20221201_dygraph_forward.md
+   2. https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/Dygraph/20221201_dygraph_backward.md
+   3. https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/Dygraph/20221201_dygraph_autodifferentiation_datastructure.md
+2. 用户端；python框架端；python-c映射层；dygraph_function层；c++api层；c++kernel层
+3. 反向图相关类
+   1. AbstractAutogradMeta
+   2. TensorWrapper
+   3. GradNodeBase
+   4. GradTensorHolder
+4. paddle 动态图和静态图的区别
+   1. 静态图模式的思想是以程序代码完整描述一个网络结构和训练过程，然后将模型封装成一个Program交予执行器进行执行
+   2. 动态图的模式则会使用Python原生的控制流语句，实时解释执行模型训练过程
+   3. 代码组织方式不同
+      1. 在使用静态图实现算法训练时，需要使用很多代码完成预定义的过程，包括program声明，执行器Executor执行program等等。但是在动态图中，动态图的代码是实时解释执行的，训练过程也更加容易调试。
+   4. 代码执行方式不同
+      1. 在静态图模式下，完整的网络结构在执行前是已知的，因此图优化分析的灵活性比较大，往往执行性能更佳，但调试难度大。
+#### 设计
+1. 动态执行过程：https://www.paddlepaddle.org.cn/tutorials/projectdetail/4047189#anchor-7
+2. 图的设计思想：https://www.paddlepaddle.org.cn/tutorials/projectdetail/3991882
+3. 新动态图前向调用过程代码详解：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/Dygraph/20221201_dygraph_forward.md
+4. 官方概念：https://www.paddlepaddle.org.cn/tutorials/projectdetail/4047189
+5. 执行过程：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/static_graph_execution/20221230_static_graph_execution.md
+6. 动态图
+   1. 在动态图模式下，Operator 是即时执行的，即用户每调用一个飞桨API，API均会马上执行返回结果
+   2. 在模型训练过程中，在运行前向 Operator 的同时，框架底层会自动记录对应的反向 Operator 所需的信息，即一边执行前向网络，另一边同时构建反向计算图。
+   3. 在动态图模式下，执行器并不是先掌握完整的网络全图，再按照固定模式批量执行。而是根据Python的原生控制流代码，逐条执行前向计算过程和后向计算过程，其中后向计算的逻辑飞桨框架会在前向计算的时候自动化构建，不需要用户再操心。
+
+
+#### 核心概念
+```
+Variable：表示网络中的数据。
+Operator：表示网络中的操作。
+Block：表示编程语言中的控制流结构，如条件结构（if-else）、循环结构（while）等。
+Program：基于Protobuf的序列化能力提供模型保存、加载功能。Protobuf是Google推出的一个结构化数据的序列化框架，可将结构化数据序列化为二进制流，或从二进制流中反序列化出结构化数据。飞桨模型的保存、加载功能依托于Protobuf的序列化和反序列化能力。
+Transpiler：可选的编译步骤，作用是将一个Program转换为另一个Program。
+Intermediate Representation：在执行前期，用户定义的Program会转换为一个统一的中间表达。
+Executor：用于快速调度 Operator ，完成网络训练/预测。
+
+```
+
+
+
+### 纵向拆解 - Funcional
+
+
+### 纵向拆解 - Tensor
+1. python/paddle/tensor
+2. 矩阵运算，线性运行和常见数学运算
+3. 真正的实体是在cpp实现，python提供一个接口透传运算逻辑到cpp中
+```
+tensor.py 其实没有用，只需把计算逻辑传给cpp即可
+
+array.py
+attribute.py
+creation.py
+einsum.py
+layer_function_generator.py
+linalg.py
+logic.py
+manipulation.py
+math.py
+ops.py
+random.py
+search.py
+stat.py
+tensor.prototype.pyi
+to_string.py
+```
+
+#### TensorDesc
+1. DenseTensorDesc
+2. DenseTensorArrayDesc
+3. SparseCooTensor
+4. SparseCsrTensor
+```
+ message TensorDesc {
+    // Should only be PODType. Is enforced in C++
+    required Type data_type = 1;
+    repeated int64 dims = 2; // [UNK, 640, 480] is saved as [-1, 640, 480]
+  }
+
+
+```
+
+### 纵向拆解 - 算子执行
+1. 执行问题：https://github.com/PaddlePaddle/Paddle/issues/11771
+   1. 把opt op移入到pserver program里去;
+   2. 根据pserver数量对是Grad类型的Variable进行切分, 并且加上split_op;
+   3. 对切分过后的Variable加上send_op;
+   4. 对是Param类型的Variable进行切分, 并且加上concat_op;
+   5. 对切分过后的Variable加上recv_op;
+   6. 另外我们还要为pserver program加上listen_and_serv_op;
+   7. 最后, 我们还要考虑到所有被opt_op依赖的lr_decay_op, 还有lr_decay_op所引入的所有sub_blocks...
+   8. What's more, 以上的任意一步, 只要逻辑发生改变, 我们就得对Transpiler进行大动...
+2. Dist-Transpiler
+   1. 修改当前的 Program, 直到能运行在分布式环境下;
+   2. 把当前的 Program 拆成两个或多个 Program;
+   3. 针对这些 Program, 再做出一些修改, 用以适配pserver的模式;
+3. ParallelExecutor：https://www.paddlepaddle.org.cn/documentation/zh/api_guides/low_level/parallel_executor.html#api-guide-parallel-executor
+4. memory reuse
+5. 内存分配api：https://github.com/PaddlePaddle/docs/blob/develop/docs/dev_guides/custom_device_docs/memory_api_cn.md
+6. 新硬件接入：https://github.com/PaddlePaddle/docs/blob/develop/docs/dev_guides/custom_device_docs/custom_device_example_cn.md
+7. 训练硬件 Custom Device 接入方案介绍：https://github.com/PaddlePaddle/docs/blob/develop/docs/dev_guides/custom_device_docs/custom_device_overview_cn.md
+
+#### 性能优化
+1. 优化接口：https://github.com/PaddlePaddle/docs/blob/develop/docs/dev_guides/custom_device_docs/profiler_api_cn.md
+
+#### 硬件分配
+1. https://github.com/PaddlePaddle/Paddle/issues/11771
+2. PlaceGroup 硬件描述
+3. Executor 执行器 pserver
+4. 分配每个node到指定机器节点
+```
+#  message ProgramDesc {  
+#    block[0] = Block {                   
+#      vars = [
+#        x: {
+#          attr: {
+#            place: PlaceGroup {  
+#              roles[0] = ExecutorRole.trainer,
+#              nodes[0] = Node {  
+#                ip = 192.168.10.1,
+#                port = 7164
+#              },
+#            }
+#          }
+#        }, 
+#
+#        w: {
+#          attr: {
+#            place: PlaceGroup {  
+#              roles[0] = ExecutorRole.pserver,
+#              nodes[0] = Node {  
+#                ip = 127.0.0.1,
+#                port = 7164
+#              },
+#            }
+#          }
+#        }, 
+#
+#        b: {
+#          attr: {
+#            place: PlaceGroup {  
+#              roles[0] = ExecutorRole.pserver,
+#              nodes[0] = Node {  
+#                ip = 127.0.0.1,
+#                port = 7164
+#              },
+#            }
+#          }
+#        }, 
+# 
+#        y: {
+#          attr: {
+#            place: PlaceGroup {  
+#              roles[0] = ExecutorRole.trainer,
+#              nodes[0] = Node {  
+#                ip = 192.168.10.1,
+#                port = 7164
+#              },
+#            }
+#          }
+#        }, 
+# 
+#        w@GRAD: {
+#          attr: {
+#            place: PlaceGroup {  
+#              roles[0] = ExecutorRole.trainer,
+#              nodes[0] = Node {  
+#                ip = 127.0.0.1,
+#                port = 7164
+#              },
+#            }
+#          }
+#        }, 
+# 
+#        b@GRAD: {
+#          attr: {
+#            place: PlaceGroup {  
+#              roles[0] = ExecutorRole.trainer,
+#              nodes[0] = Node {  
+#                ip = 127.0.0.1,
+#                port = 7164
+#              },
+#            }
+#          }
+#        }, 
+# 
+#        lr: {
+#          attr: {
+#            place: PlaceGroup {  
+#              roles[0] = ExecutorRole.pserver,
+#              nodes[0] = Node {  
+#                ip = 127.0.0.1,
+#                port = 7164
+#              },
+#            }
+#          }
+#        }, 
+#      ]
+```
+
+
+#### DistributedBlock Design
+1. https://github.com/PaddlePaddle/Paddle/issues/11609
+
+#### 本地执行图
+1. https://github.com/PaddlePaddle/docs/blob/develop/docs/design/dist_train/src/local-graph.png
+
+#### 分布式执行图
+1. https://github.com/PaddlePaddle/docs/blob/develop/docs/design/dist_train/src/dist-graph.png
+2. https://github.com/PaddlePaddle/docs/blob/develop/docs/design/dist_train/src/distributed_lookup_table.jpeg
+3. https://github.com/PaddlePaddle/docs/blob/develop/docs/design/dist_train/src/distributed_architecture.png
+
+
+#### 远程执行器
+1. https://github.com/PaddlePaddle/docs/blob/develop/docs/design/dist_train/src/remote_executor.png
+2. https://github.com/PaddlePaddle/docs/blob/develop/docs/design/dist_train/src/sync_distributed_training.png
+
+#### 通信能力
+1. https://github.com/PaddlePaddle/docs/blob/develop/docs/design/dist_train/src/mpi_module.png
+2. 通信api：https://github.com/PaddlePaddle/docs/blob/develop/docs/dev_guides/custom_device_docs/ccl_api_cn.md
+
+#### 同步异步训练
+1. https://github.com/PaddlePaddle/docs/blob/develop/docs/design/dist_train/distributed_traing_review.md
+
+
+
+## C++ 源码
 ### 编译
 参考 机器学习解决方案
 
@@ -313,6 +889,113 @@ PaddlePaddle + 公司项目
 ### 横向拆解 - mlu_tracer
 
 
+### 横向拆解 - Program model
+1. https://www.paddlepaddle.org.cn/inference/master/guides/introduction/design.html
+
+### 横向拆解 - IR Graph
+
+### 横向拆解 - Runtime Program
+
+
+### 横向拆解 - Excutor
+
+
+
+
+### 纵向拆解 - Paddle Inference
+1. 介绍：https://github.com/PaddlePaddle/Paddle-Inference-Demo/tree/master
+2. 源码分析1：https://www.cnblogs.com/zl1991/p/15688005.html
+3. 源码分析2：https://www.cnblogs.com/zl1991/p/15688762.html
+
+#### 目录分析
+```
+--cmake #cmake编译脚本以及编译链接的第三方库等
+--doc
+--paddle #c++代码
+    -fluid
+        -distributed #分布式相关代码，主要为训练使用，包括模型内all_reduce进行跨卡通信、跨机通信等
+        -extension #
+        -framework #基础组件代码
+        -imperative #分布式通信相关代码，包括nccl、all_reduce、bkcl等
+        -inference #预测相关代码以及api定义
+        -memory
+        -operators #算子
+        -platform #平台相关代码
+        -pybind #pybind接口定义
+        -string
+    -scripts
+    -testing
+    -utils
+--patches
+--python #python部分代码
+--r
+--tools
+--CMakeLists.txt #编译脚本，包括大部分编译参数、三方库依赖等逻辑
+
+```
+
+
+
+### 纵向拆解 - fluid
+1. API不用看，未来会下线这个模块
+2. 飞桨框架 2.5 版本开始：https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/fluid/Overview_cn.html
+3. paddle_inference_api
+
+### 纵向拆解 - phi
+1. 飞桨高可复用算子库 PHI (Paddle HIgh reusability operator library)，或者我们也称之为函数式算子库，支持基于已有的算子内核以及 Kernel Primitives API 组合实现新的算子，支持插件式接入新硬件或者新加速库。
+2. 以贡献飞桨框架API为例，手把手教你从User进阶到Contributor - 飞桨PaddlePaddle的文章 - 知乎 https://zhuanlan.zhihu.com/p/592130623
+3. 设计背景：https://github.com/PaddlePaddle/docs/blob/develop/docs/design/phi/design_cn.md
+4. 按运算设备拆分编译
+   1. 例如：仅编译 cpu 的，或者仅编译 gpu 的
+5. 按训练和推理场景拆分编译
+   1. 例如：推理不编译反向相关 kernel，也不编译带有 Intermediate 输出的前向 kernel
+6. 按移动端设备实际使用算子精准裁剪编译（目前尚未支持）
+   1. 例如：一个模型只用了 add 和 mul，极致情况下应该能裁到仅剩 2 个 kernel
+
+#### ops分类
+
+
+#### 目录设计 - api
+1. 对外api和capi
+```
+
+paddle/phi
+./api (对外暴露的高层 API 及其实现)
+    ./include（对外暴露的高层 API 头文件）
+    ./lib（对外暴露 API 的实现）
+./capi (对外暴露的 C API 及其实现)
+    ./include
+    ./lib
+./common (内外部均会使用到的基础数据结构)
+./core (基础组件，比如基础 Tensor 相关接口，kernel 注册接口，管理单元等)
+./backends (各设备及后端的基础组件，下设 cpu，gpu 等后端目录)
+./infermeta (shape、dtype、layout 等 meta 信息的推导函数)
+./kernels (各设备及后端的 kernel 实现)
+./ops (各 Op 的定义，后续采取自动生成的方式完成大部分工作，目前仅有兼容用的代码)
+./tests (单元测试)
+
+```
+
+
+#### 目录设计 - kernels
+```
+paddle/phi/kernels
+./ (放置设备无关的 kernel 声明和实现)
+./cpu（仅放置 cpu 后端的 kernel 实现）
+./gpu
+./xpu
+./onednn
+./gpudnn
+./impl (考虑到现状，放置原先 Kernel 在 CPU 和 GPU 或其他设备一致的实现，便于复用)
+./funcs（放置原 fluid operators 下一些支持多设备的 functor 和 funcs）
+./primitive（放置 Kernel Primitive API 的基础实现）
+...
+```
+
+#### 目录设计 - backends
+1. 硬件相关功能 cpu xpu gpu
+2. 设备管理器等
+
 
 
 ### 纵向拆解 - 静态图执行
@@ -398,8 +1081,9 @@ PaddlePaddle + 公司项目
 
 ```
 
+#### Partitioned IR切分 
 
-#### 高阶特性
+
 #### Pass升级
 1. framework::ProgramDesc  =>  ir::Graph   =>  frontend::Program (NetBuilder 层)   =>  hlir::Graph =>    
 Compute/Schedule()   =>  AST 层面   =>  Module::Builder  =>  CodeGen+NVRTC =>  Runtime::Program
@@ -407,6 +1091,7 @@ Compute/Schedule()   =>  AST 层面   =>  Module::Builder  =>  CodeGen+NVRTC => 
 
 
 #### MLIR设计借鉴
+1. MLIR 文章视频汇总 - 法斯特豪斯的文章 - 知乎 https://zhuanlan.zhihu.com/p/141256429
 
 ### 纵向拆解 - Program & Graph (CINN)
 1. cinn  Compiler Infrastructure for Neural Networks：https://github.com/PaddlePaddle/CINN
@@ -452,29 +1137,8 @@ Compute/Schedule()   =>  AST 层面   =>  Module::Builder  =>  CodeGen+NVRTC => 
 1. 飞桨高可复用算子库 PHI 设计文档：https://github.com/PaddlePaddle/docs/blob/develop/docs/design/phi/design_cn.md
 2. PHI注册：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/PHI_kernel_registration/PHI_kernel_registration.md
 
-### 纵向拆解 - 动态图
-1. 动态执行过程：https://www.paddlepaddle.org.cn/tutorials/projectdetail/4047189#anchor-7
-2. 新动态图前向调用过程代码详解：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/Dygraph/20221201_dygraph_forward.md
-3. 前向执行
-4. 反向执行
 
 
-
-### 纵向拆解 - 静态图
-1. 官方概念：https://www.paddlepaddle.org.cn/tutorials/projectdetail/4047189
-2. 执行过程：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/static_graph_execution/20221230_static_graph_execution.md
-
-#### 核心概念
-```
-Variable：表示网络中的数据。
-Operator：表示网络中的操作。
-Block：表示编程语言中的控制流结构，如条件结构（if-else）、循环结构（while）等。
-Program：基于Protobuf的序列化能力提供模型保存、加载功能。Protobuf是Google推出的一个结构化数据的序列化框架，可将结构化数据序列化为二进制流，或从二进制流中反序列化出结构化数据。飞桨模型的保存、加载功能依托于Protobuf的序列化和反序列化能力。
-Transpiler：可选的编译步骤，作用是将一个Program转换为另一个Program。
-Intermediate Representation：在执行前期，用户定义的Program会转换为一个统一的中间表达。
-Executor：用于快速调度 Operator ，完成网络训练/预测。
-
-```
 
 
 ### 纵向拆解 - Inplace
@@ -485,7 +1149,14 @@ Executor：用于快速调度 Operator ，完成网络训练/预测。
 
 ### 纵向拆解 - 自动并行 分布式
 
+### 纵向拆解 - Parameter Server
+1. https://github.com/PaddlePaddle/docs/blob/develop/docs/design/dist_train/parameter_server.md
+2. 参考tf：TensorFlow: Large-Scale Machine Learning on Heterogeneous Distributed Systems
+3. PaddlePaddle源代码解析之：Parameter切分逻辑分析：https://github.com/PaddlePaddle/Paddle/issues/1994
+
+
 ### 算法视角 - paddle
+
 
 
 ### 算法视角 - paddle.nn
@@ -914,6 +1585,10 @@ https://github.com/PaddlePaddle/Paddle3D/blob/develop/docs/models/centerpoint/RE
    2. https://github.com/PaddlePaddle/community/pull/867/files#diff-005b97daccba370e0a0fcf462c6a63028d009a7aa91ade244e282d96a169d292
    3. https://github.com/PaddlePaddle/community/pull/861
    4. https://github.com/PaddlePaddle/community/pull/868
+
+
+
+
 
 ## 附录
 ### 静态库编译顺序
