@@ -34,6 +34,7 @@ make -j10 > paddle_compile_v1.log &
 1. 推荐：https://github.com/PaddlePaddle/PaddleRec
 2. 推理：https://github.com/PaddlePaddle/Paddle-Inference-Demo
 3. learnpaddle：https://github.com/yeyupiaoling/LearnPaddle
+4. 机器学习框架排名：https://paperswithcode.com/trends
 
 ## 虚拟环境
 ### win11 - 默认pytorch开发环境
@@ -292,6 +293,8 @@ export http_proxy="http://${hostip}:7890"
       1. 测试目录在 https://github.com/PaddlePaddle/Paddle/blob/v2.3.0/python/paddle/fluid/tests/unittests/test_accuracy_op.py
    2. paddle 2.6.0
       1. 测试目录在 https://github.com/PaddlePaddle/Paddle/blob/v2.6.0/test/legacy_test/test_accuracy_op.py
+   2. ci测试
+      1. https://www.paddlepaddle.org.cn/documentation/docs/zh/dev_guides/git_guides/paddle_ci_manual_cn.html
 5. 运行单元测试
    1. cpp test bin路径 
       1. /docker/root/projects/demo/github/Paddle/build/test/cpp    
@@ -304,6 +307,20 @@ export http_proxy="http://${hostip}:7890"
    1. API 设计和命名规范：https://github.com/PaddlePaddle/docs/blob/develop/docs/dev_guides/api_contributing_guides/api_design_guidelines_standard_cn.md#api%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84%E8%A7%84%E8%8C%83
    2. python端开发指南：https://www.paddlepaddle.org.cn/documentation/docs/zh/2.3/dev_guides/api_contributing_guides/new_python_api_cn.html
    3. Op开发手册：https://github.com/PaddlePaddle/Paddle/wiki/Operator-Development-Manual-Index
+
+### 运行python脚本
+```
+
+
+```
+
+### cpp 编译加速
+1. ccache
+2. Distcc 
+3. 技术文章 
+   1. C++服务编译耗时优化原理及实践：https://tech.meituan.com/2020/12/10/apache-kylin-practice-in-meituan.html
+   2. Include-What-You-Use：
+
 
 ### ccache 是否真的工作
 ```
@@ -342,6 +359,10 @@ cache size                         625.6 MB
 max cache size                       1.0 GB
 
 ```
+
+
+
+
 ### 异常 - 无法import paddle
 ```
 
@@ -358,6 +379,26 @@ pip install -i https://mirrors.aliyun.com/pypi/simple torch==2.3.0
 
 ```
 
+### 环境变量
+```
+        required_envs = {
+            "FLAGS_fraction_of_gpu_memory_to_use": "0.15",
+            "FLAGS_eager_delete_tensor_gb": "0.0",
+            "PATH": os.getenv("PATH"),
+            "PYTHONPATH": os.getenv("PYTHONPATH", ""),
+            "LD_LIBRARY_PATH": os.getenv("LD_LIBRARY_PATH", ""),
+            "LD_PRELOAD": os.getenv("LD_PRELOAD", ""),
+            "FLAGS_call_stack_level": "2",
+            "GLOG_v": "0", // 可以打印更详细的日志
+            "NCCL_P2P_DISABLE": "1",
+            "PADDLE_WITH_GLOO": "0",
+            "BACKEND": backend,
+            "PADDLE_DISTRI_BACKEND": backend,
+            "PADDLE_USE_GPU": "1",
+        }
+
+
+```
 
 ## 性能优化
 1. 模型性能分析方法：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-performance-opt/model_perf.md
@@ -365,6 +406,351 @@ pip install -i https://mirrors.aliyun.com/pypi/simple torch==2.3.0
    1. Paddle2.0.0-rc0的模型预测效率比Torch低很多：https://github.com/PaddlePaddle/Paddle/issues/28774
       1. 调度的耗时占比确实会比较明显
 3. 
+
+
+## cinn测试
+
+### 测试日志参考
+1. /develop/Paddle/test/prim/model/test_bert_cinn.py
+```
+λ docker-desktop /develop/Paddle/test/prim/model python test_bert_cinn.py 
+grep: warning: GREP_OPTIONS is deprecated; please use an alias or script
+Hint: Your machine support AVX, but the installed paddlepaddle doesn't have avx core. Hence, no-avx core with worse performance will be imported.
+If you like, you could reinstall paddlepaddle by 'python -m pip install --force-reinstall paddlepaddle-gpu[==version]' to get better performance.
+Cache file /root/.cache/paddle/dataset/test_bert_prim_cinn/bert_training_data.npz not found, downloading https://paddle-ci.gz.bcebos.com/prim_cinn/bert_training_data.npz 
+Begin to download
+item 21/21 [============================>.] - ETA: 0s - 10ms/item 
+Download finished
+W1215 12:32:29.050781  2736 gpu_resources.cc:119] Please NOTE: device: 0, GPU Compute Capability: 8.9, Driver API Version: 12.6, Runtime API Version: 12.3
+W1215 12:32:29.056697  2736 gpu_resources.cc:164] device: 0, cuDNN Version: 9.0.
+<frozen importlib._bootstrap>:914: ImportWarning: _SixMetaPathImporter.find_spec() not found; falling back to find_module()
+W1215 12:32:29.792915  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 10 times
+W1215 12:32:29.871755  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.872679  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.874212  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.874294  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.874372  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.874436  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.874886  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.874986  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.875038  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.875061  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.875378  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.875969  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.876085  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.876204  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.876276  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.876332  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.876412  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.876482  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.876495  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.876684  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.877157  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.877266  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.877382  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.877451  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.877506  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.877568  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.877633  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.877660  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.877846  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.878314  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.878415  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.878531  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.878598  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.878676  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.878753  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.878844  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.878857  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.879024  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.879489  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.879592  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.879707  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.879779  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.879851  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.879935  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.880004  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.880030  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.880208  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.880678  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.880782  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.880896  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.880967  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.881042  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.881124  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:29.881189  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+I1215 12:32:29.890808  2736 add_cinn_pass.cc:279] FusionOp count before lowering : *****[ 66 ]*****
+I1215 12:32:34.385857  2736 add_cinn_pass.cc:293] Time of lowering and compiling program: ***** [ 4 ] ***** seconds.
+I1215 12:32:34.385896  2736 add_cinn_pass.cc:297] Number of ops in the original program is: 538, after lowering it becomes: 482. (compression ratio: 482/538 = 0.895911)
+W1215 12:32:34.420579  2736 shape_analysis.cc:533] pd_op.layer_norm_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420619  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420626  2736 shape_analysis.cc:533] pd_op.dropout_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420629  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420632  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420636  2736 shape_analysis.cc:533] pd_op.gelu_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420639  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420642  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420655  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:34.420714  2736 shape_analysis.cc:533] pd_op.layer_norm_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420730  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420737  2736 shape_analysis.cc:533] pd_op.dropout_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420739  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420743  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420747  2736 shape_analysis.cc:533] pd_op.reshape_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420751  2736 shape_analysis.cc:533] pd_op.transpose_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420754  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420759  2736 shape_analysis.cc:533] pd_op.dropout_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420763  2736 shape_analysis.cc:533] pd_op.softmax_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420765  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420768  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420780  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:34.420802  2736 shape_analysis.cc:533] pd_op.transpose_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420858  2736 shape_analysis.cc:533] pd_op.transpose_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420863  2736 shape_analysis.cc:533] pd_op.reshape_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420868  2736 shape_analysis.cc:533] pd_op.transpose_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420871  2736 shape_analysis.cc:533] pd_op.reshape_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420874  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420878  2736 shape_analysis.cc:533] pd_op.reshape_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420881  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420886  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420893  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420898  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420917  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.420943  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:34.421079  2736 shape_analysis.cc:533] pd_op.layer_norm_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421097  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421104  2736 shape_analysis.cc:533] pd_op.dropout_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421108  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421111  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421115  2736 shape_analysis.cc:533] pd_op.gelu_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421118  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421121  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421130  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:34.421198  2736 shape_analysis.cc:533] pd_op.layer_norm_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421214  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421222  2736 shape_analysis.cc:533] pd_op.dropout_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421226  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421229  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421234  2736 shape_analysis.cc:533] pd_op.reshape_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421237  2736 shape_analysis.cc:533] pd_op.transpose_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421241  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421247  2736 shape_analysis.cc:533] pd_op.dropout_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421249  2736 shape_analysis.cc:533] pd_op.softmax_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421252  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421257  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421267  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:34.421275  2736 shape_analysis.cc:533] pd_op.transpose_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421362  2736 shape_analysis.cc:533] pd_op.transpose_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421381  2736 shape_analysis.cc:533] pd_op.reshape_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421397  2736 shape_analysis.cc:533] pd_op.transpose_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421451  2736 shape_analysis.cc:533] pd_op.reshape_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421500  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421521  2736 shape_analysis.cc:533] pd_op.reshape_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421546  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421578  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421624  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421643  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421648  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421691  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:34.421967  2736 shape_analysis.cc:533] pd_op.layer_norm_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.421993  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422011  2736 shape_analysis.cc:533] pd_op.dropout_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422015  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422020  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422025  2736 shape_analysis.cc:533] pd_op.gelu_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422029  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422032  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422044  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:34.422310  2736 shape_analysis.cc:533] pd_op.layer_norm_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422320  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422325  2736 shape_analysis.cc:533] pd_op.dropout_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422328  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422331  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422397  2736 shape_analysis.cc:533] pd_op.reshape_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422420  2736 shape_analysis.cc:533] pd_op.transpose_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422425  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422431  2736 shape_analysis.cc:533] pd_op.dropout_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422434  2736 shape_analysis.cc:533] pd_op.softmax_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422438  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422441  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422466  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:34.422482  2736 shape_analysis.cc:533] pd_op.transpose_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422614  2736 shape_analysis.cc:533] pd_op.transpose_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422657  2736 shape_analysis.cc:533] pd_op.reshape_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422677  2736 shape_analysis.cc:533] pd_op.transpose_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422736  2736 shape_analysis.cc:533] pd_op.reshape_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422757  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422763  2736 shape_analysis.cc:533] pd_op.reshape_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422767  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422771  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422776  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422780  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422784  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.422850  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:34.423092  2736 shape_analysis.cc:533] pd_op.layer_norm_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.423116  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.423123  2736 shape_analysis.cc:533] pd_op.dropout_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.423126  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.423130  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.423135  2736 shape_analysis.cc:533] pd_op.gelu_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.423151  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.423156  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.423179  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:34.423367  2736 shape_analysis.cc:533] pd_op.layer_norm_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.423393  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.423413  2736 shape_analysis.cc:533] pd_op.dropout_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.423447  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.423524  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.423640  2736 shape_analysis.cc:533] pd_op.reshape_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.423660  2736 shape_analysis.cc:533] pd_op.transpose_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.423664  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.423728  2736 shape_analysis.cc:533] pd_op.dropout_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.423846  2736 shape_analysis.cc:533] pd_op.softmax_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.423996  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.424126  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.424194  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:34.424232  2736 shape_analysis.cc:533] pd_op.transpose_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.424408  2736 shape_analysis.cc:533] pd_op.transpose_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.424454  2736 shape_analysis.cc:533] pd_op.reshape_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.424471  2736 shape_analysis.cc:533] pd_op.transpose_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.424476  2736 shape_analysis.cc:533] pd_op.reshape_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.424494  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.424510  2736 shape_analysis.cc:533] pd_op.reshape_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.424526  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.424542  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.424548  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.424553  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.424557  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.424572  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:34.424820  2736 shape_analysis.cc:533] pd_op.layer_norm_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.424849  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.424867  2736 shape_analysis.cc:533] pd_op.dropout_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.424871  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.424888  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.424906  2736 shape_analysis.cc:533] pd_op.gelu_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.424911  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.424914  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.424923  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:34.424999  2736 shape_analysis.cc:533] pd_op.layer_norm_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425016  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425022  2736 shape_analysis.cc:533] pd_op.dropout_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425026  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425029  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425033  2736 shape_analysis.cc:533] pd_op.reshape_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425037  2736 shape_analysis.cc:533] pd_op.transpose_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425040  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425069  2736 shape_analysis.cc:533] pd_op.dropout_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425074  2736 shape_analysis.cc:533] pd_op.softmax_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425078  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425082  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425093  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:34.425240  2736 shape_analysis.cc:533] pd_op.transpose_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425452  2736 shape_analysis.cc:533] pd_op.transpose_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425472  2736 shape_analysis.cc:533] pd_op.reshape_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425499  2736 shape_analysis.cc:533] pd_op.transpose_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425518  2736 shape_analysis.cc:533] pd_op.reshape_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425534  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425550  2736 shape_analysis.cc:533] pd_op.reshape_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425567  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425573  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425578  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425582  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425587  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425612  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:34.425802  2736 shape_analysis.cc:533] pd_op.layer_norm_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425823  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425830  2736 shape_analysis.cc:533] pd_op.dropout_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425833  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425837  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425843  2736 shape_analysis.cc:533] pd_op.gelu_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425845  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425849  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425858  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:34.425938  2736 shape_analysis.cc:533] pd_op.layer_norm_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425967  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.425989  2736 shape_analysis.cc:533] pd_op.dropout_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.426005  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.426023  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.426028  2736 shape_analysis.cc:533] pd_op.reshape_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.426095  2736 shape_analysis.cc:533] pd_op.transpose_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.426115  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.426134  2736 shape_analysis.cc:533] pd_op.dropout_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.426151  2736 shape_analysis.cc:533] pd_op.softmax_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.426157  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.426162  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.426175  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+W1215 12:32:34.426242  2736 shape_analysis.cc:533] pd_op.transpose_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.426468  2736 shape_analysis.cc:533] pd_op.transpose_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.426487  2736 shape_analysis.cc:533] pd_op.reshape_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.426492  2736 shape_analysis.cc:533] pd_op.transpose_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.426496  2736 shape_analysis.cc:533] pd_op.reshape_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.426499  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.426503  2736 shape_analysis.cc:533] pd_op.reshape_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.426506  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.426510  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.426514  2736 shape_analysis.cc:533] pd_op.add_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.426518  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.426522  2736 shape_analysis.cc:533] pd_op.matmul_grad DOES NOT have InferSymbolicShapeInterface!
+W1215 12:32:34.426535  2736 pattern_rewrite_driver.cc:225] The pattern rewrite did not converge after scanning 1 times
+I1215 12:32:34.427999  2736 add_cinn_pass.cc:279] FusionOp count before lowering : *****[ 18 ]*****
+I1215 12:32:34.993058  2736 add_cinn_pass.cc:293] Time of lowering and compiling program: ***** [ 0 ] ***** seconds.
+I1215 12:32:34.993103  2736 add_cinn_pass.cc:297] Number of ops in the original program is: 319, after lowering it becomes: 307. (compression ratio: 307/319 = 0.962382)
+I1215 12:32:35.009244  2736 pir_interpreter.cc:1570] New Executor is Running ...
+I1215 12:32:35.017033  2736 pir_interpreter.cc:1594] pir interpreter is running by multi-thread mode ...
+I1215 12:32:35.471349  2736 pir_interpreter.cc:1591] pir interpreter is running by trace mode ...
+step: 0, loss: 11.010979652404785, batch_cost: 6.4238
+step: 1, loss: 10.31498908996582, batch_cost: 0.025815
+step: 2, loss: 10.321041107177734, batch_cost: 0.011979
+step: 3, loss: 10.267436027526855, batch_cost: 0.012836
+step: 4, loss: 10.227202415466309, batch_cost: 0.016567
+step: 5, loss: 10.16740608215332, batch_cost: 0.011665
+step: 6, loss: 10.133904457092285, batch_cost: 0.010533
+step: 7, loss: 10.06168270111084, batch_cost: 0.010892
+step: 8, loss: 10.091561317443848, batch_cost: 0.010146
+step: 9, loss: 9.947517395019531, batch_cost: 0.010192
+[11.010979652404785, 10.31498908996582, 10.321041107177734, 10.267436027526855, 10.227202415466309, 10.16740608215332, 10.133904457092285, 10.06168270111084, 10.091561317443848, 9.947517395019531]
+F
+======================================================================
+FAIL: test_cinn (__main__.TestBert)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/develop/Paddle/test/prim/model/test_bert_cinn.py", line 136, in test_cinn
+    np.testing.assert_allclose(dy2st_cinn, DY2ST_CINN_GT, rtol=1e-5)
+  File "/usr/local/lib/python3.10/dist-packages/numpy/testing/_private/utils.py", line 1504, in assert_allclose
+    assert_array_compare(compare, actual, desired, err_msg=str(err_msg),
+  File "/usr/lib/python3.10/contextlib.py", line 79, in inner
+    return func(*args, **kwds)
+  File "/usr/local/lib/python3.10/dist-packages/numpy/testing/_private/utils.py", line 797, in assert_array_compare
+    raise AssertionError(msg)
+AssertionError: 
+Not equal to tolerance rtol=1e-05, atol=0
+
+Mismatched elements: 10 / 10 (100%)
+Max absolute difference: 0.3613472
+Max relative difference: 0.03393049
+ x: array([11.01098 , 10.314989, 10.321041, 10.267436, 10.227202, 10.167406,
+       10.133904, 10.061683, 10.091561,  9.947517])
+ y: array([10.649632, 10.333406, 10.335412, 10.260544, 10.219606, 10.176885,
+       10.1247  , 10.07262 , 10.112164,  9.969394])
+
+----------------------------------------------------------------------
+Ran 1 test in 8.275s
+
+
+```
+
+### pir 打印log
+1. https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/paddle_v3_features/cinn_cn.html#sanshiyongshili
+
+### AST IR 打印示例
+```
+集合：语句实例 & 内存单元
+  映射：
+   访存关系：语句实例 <---> 内存单元
+   依赖关系：语句实例 <---> 语句实例
+   执行顺序：语句实例 -----> 语句实例
+
+```
 
 
 ## 算子开发
@@ -559,13 +945,29 @@ python -u ../../../tools/trainer.py -m config.yaml
 ```
 
 
+
+
+
+## Paddle Serving
+1. 源码：https://github.com/PaddlePaddle/Serving/tree/v0.9.0
+2. 设计：https://github.com/PaddlePaddle/Serving/blob/v0.9.0/doc/Serving_Design_CN.md#21-%E8%AE%BE%E8%AE%A1%E9%80%89%E5%9E%8B
+3. C++，参考《从零开始写一个预测服务》：https://github.com/PaddlePaddle/Serving/blob/v0.9.0/doc/C++_Serving/Creat_C++Serving_CN.md
+4. Java，参考《Paddle Serving Client Java SDK》
+5. CTR服务：https://github.com/PaddlePaddle/Serving/blob/v0.9.0/doc/Cube_Local_CN.md
+
 ## 应用开发
-1. 课程
-   1. 李宏毅课程-机器学习：https://aistudio.baidu.com/course/introduce/1978
+1. 案例：https://aistudio.baidu.com/projectoverview/public
+
+
+
+
 
 
 
 ## 开发异常
+
+### 梯度爆炸
+1. https://aistudio.baidu.com/paddle/forum/topic/show/957441
 
 ### core dump
 1. https://github.com/PaddlePaddle/Paddle/issues/69003
