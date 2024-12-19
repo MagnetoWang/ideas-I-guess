@@ -1,0 +1,139 @@
+query:
+    values
+  | WITH withItem [ , withItem ]* query
+  | {
+        select
+      | selectWithoutFrom
+      | query UNION [ ALL ] query
+      | query EXCEPT query
+      | query INTERSECT query
+    }
+    [ ORDER BY orderItem [, orderItem ]* ]
+    [ LIMIT { count | ALL } ]
+    [ OFFSET start { ROW | ROWS } ]
+    [ FETCH { FIRST | NEXT } [ count ] { ROW | ROWS } ONLY]
+
+withItem:
+    name
+    [ '(' column [, column ]* ')' ]
+    AS '(' query ')'
+
+orderItem:
+    expression [ ASC | DESC ]
+
+select:
+    SELECT [ ALL | DISTINCT ]
+    { * | projectItem [, projectItem ]* }
+    FROM tableExpression
+    [ WHERE booleanExpression ]
+    [ GROUP BY { groupItem [, groupItem ]* } ]
+    [ HAVING booleanExpression ]
+    [ WINDOW windowName AS windowSpec [, windowName AS windowSpec ]* ]
+
+selectWithoutFrom:
+    SELECT [ ALL | DISTINCT ]
+    { * | projectItem [, projectItem ]* }
+
+projectItem:
+    expression [ [ AS ] columnAlias ]
+  | tableAlias . *
+
+tableExpression:
+    tableReference [, tableReference ]*
+  | tableExpression [ NATURAL ] [ LEFT | RIGHT | FULL ] JOIN tableExpression [ joinCondition ]
+
+joinCondition:
+    ON booleanExpression
+  | USING '(' column [, column ]* ')'
+
+tableReference:
+    tablePrimary
+    [ matchRecognize ]
+    [ [ AS ] alias [ '(' columnAlias [, columnAlias ]* ')' ] ]
+
+tablePrimary:
+    [ TABLE ] tablePath [ dynamicTableOptions ] [systemTimePeriod] [[AS] correlationName]
+  | LATERAL TABLE '(' functionName '(' expression [, expression ]* ')' ')'
+  | [ LATERAL ] '(' query ')'
+  | UNNEST '(' expression ')'
+
+tablePath:
+    [ [ catalogName . ] databaseName . ] tableName
+
+systemTimePeriod:
+    FOR SYSTEM_TIME AS OF dateTimeExpression
+
+dynamicTableOptions:
+    /*+ OPTIONS(key=val [, key=val]*) */
+
+key:
+    stringLiteral
+
+val:
+    stringLiteral
+
+values:
+    VALUES expression [, expression ]*
+
+groupItem:
+    expression
+  | '(' ')'
+  | '(' expression [, expression ]* ')'
+  | CUBE '(' expression [, expression ]* ')'
+  | ROLLUP '(' expression [, expression ]* ')'
+  | GROUPING SETS '(' groupItem [, groupItem ]* ')'
+
+windowRef:
+    windowName
+  | windowSpec
+
+windowSpec:
+    [ windowName ]
+    '('
+    [ ORDER BY orderItem [, orderItem ]* ]
+    [ PARTITION BY expression [, expression ]* ]
+    [
+        RANGE numericOrIntervalExpression {PRECEDING}
+      | ROWS numericExpression {PRECEDING}
+    ]
+    ')'
+
+matchRecognize:
+    MATCH_RECOGNIZE '('
+    [ PARTITION BY expression [, expression ]* ]
+    [ ORDER BY orderItem [, orderItem ]* ]
+    [ MEASURES measureColumn [, measureColumn ]* ]
+    [ ONE ROW PER MATCH ]
+    [ AFTER MATCH
+      ( SKIP TO NEXT ROW
+      | SKIP PAST LAST ROW
+      | SKIP TO FIRST variable
+      | SKIP TO LAST variable
+      | SKIP TO variable )
+    ]
+    PATTERN '(' pattern ')'
+    [ WITHIN intervalLiteral ]
+    DEFINE variable AS condition [, variable AS condition ]*
+    ')'
+
+measureColumn:
+    expression AS alias
+
+pattern:
+    patternTerm [ '|' patternTerm ]*
+
+patternTerm:
+    patternFactor [ patternFactor ]*
+
+patternFactor:
+    variable [ patternQuantifier ]
+
+patternQuantifier:
+    '*'
+  | '*?'
+  | '+'
+  | '+?'
+  | '?'
+  | '??'
+  | '{' { [ minRepeat ], [ maxRepeat ] } '}' ['?']
+  | '{' repeat '}'
