@@ -89,10 +89,33 @@ calcite + 公司项目
 
 
 
-### 入门概念
+### 概念地图
 1. 概念图解：https://www.cnblogs.com/wcgstudy/p/11795886.html
 2. 物化视图-数据格框架(Lattice Framework)：https://cloud.tencent.com/developer/article/2450528
-3. 
+3. Thunk：程序地址
+4. RexNode：行表达式（标量表达式），蕴含的是对一行数据的处理逻辑。每个行表达式都有数据的类型
+   1. RexProgram：表达式管理 组件 可以做到全局表达式融合
+   2. RexBuilder：构建RexNode 组件
+   3. RexUtil：类型推导工具
+   4. RexShuttle：
+   5. RexLiteral
+   6. RexVariable
+   7. RexCall
+   8. 
+5. SqlToRelConverter：sql转换关系表达式 组件
+   1. SubQueryConverter：子查询转换器 组件
+   2. SqlNodeToRexConverter：sql转换标量表达式 组件 抽象接口
+   3. SqlNodeToRexConverterImpl：sql转换标量表达式 组件 具体实现逻辑
+   4. SqlRexConvertlet：sql转换标量表达式 抽象接口
+   5. SqlRexConvertletTable：sql转换标量表达式 表 抽象接口
+   6. ReflectiveConvertletTable：sql转换标量表达式 表 通过反射机制实现
+      1. 反射是为了调用UDF函数，UDF也属于表达式一个计算逻辑
+   7. StandardConvertletTable：sql转换标量表达式 表 内置表达式实现 比如 加减乘除
+6. RelDataType 关系表达式数据类型
+   1. SqlOperandTypeChecker
+   2. Consistency：Strategy used to make arguments consistent
+   3. SqlOperandTypeInference
+   4. SqlReturnTypeInference
 ```
 
 
@@ -101,7 +124,7 @@ calcite + 公司项目
 ConverterRule：它是 RelOptRule 的子类，专门用来做 数据源之间的转换（Calling convention），ConverterRule 一般会调用对应的 Converter 来完成工作，比如说：JdbcToSparkConverterRule 调用 JdbcToSparkConverter 来完成对 JDBC Table 到 Spark RDD 的转换。
 RelNode：relational expression，which contains input RelNode。代表了对数据的一个处理操作，常见的操作有 Sort、Join、Project、Filter、Scan 等。它蕴含的是对整个 Relation 的操作，而不是对具体数据的处理逻辑。
 Converter： 用来把一种 RelTrait 转换为另一种 RelTrait 的 RelNode。如 JdbcToSparkConverter 可以把 JDBC 里的 table 转换为 Spark RDD。如果需要在一个 RelNode 中处理来源于异构系统的逻辑表，Calcite 要求先用 Converter 把异构系统的逻辑表转换为同一种 Convention。
-RexNode： 行表达式（标量表达式），蕴含的是对一行数据的处理逻辑。每个行表达式都有数据的类型。这是因为在 Valdiation 的过程中，编译器会推导出表达式的结果类型。常见的行表达式包括字面量 RexLiteral， 变量 RexVariable， 函数或操作符调用 RexCall 等。 RexNode 通过 RexBuilder 进行构建。
+
 RelTrait： 用来定义逻辑表的物理相关属性（physical property），三种主要的 trait 类型是：Convention、RelCollation、RelDistribution；
 Convention：继承自 RelTrait，类型很少，代表一个单一的数据源，一个 relational expression 必须在同一个 convention 中；
 RelTraitDef：主要有三种： ConventionTraitDef：用来代表数据源。 RelCollationTraitDef：用来定义参与排序的字段。 RelDistributionTraitDef：用来定义数据在物理存储上的分布方式（比如：single、hash、range、random 等）；
@@ -2404,6 +2427,8 @@ public static JoinInfo of(RelNode left, RelNode right, RexNode condition) {
 
 
 ### 表达式创建 - addExpr & makeCall
+1. 关键实现方法
+   1. 构建program：createProg
 ```java
 
  /**
@@ -2696,6 +2721,31 @@ ProjectToCalcRule 会把rowtype 合并到 rexprogram
 
 ```
 
+### 表达式简化 - program.normalize(rexBuilder, simplify)
+```java
+
+  /**
+   * Tests how the condition is simplified.
+   */
+  @Test public void testSimplifyCondition() {
+    final RexProgram program = createProg(3).getProgram(false);
+    assertThat(program.toString(),
+        is("(expr#0..1=[{inputs}], expr#2=[+($0, 1)], expr#3=[77], "
+            + "expr#4=[+($0, $1)], expr#5=[+($0, 1)], expr#6=[+($0, $t5)], "
+            + "expr#7=[+($t4, $t2)], expr#8=[5], expr#9=[>($t2, $t8)], "
+            + "expr#10=[true], expr#11=[IS NOT NULL($t5)], expr#12=[false], "
+            + "expr#13=[null:BOOLEAN], expr#14=[CASE($t9, $t10, $t11, $t12, $t13)], "
+            + "expr#15=[NOT($t14)], a=[$t7], b=[$t6], $condition=[$t15])"));
+
+    assertThat(program.normalize(rexBuilder, simplify).toString(),
+        is("(expr#0..1=[{inputs}], expr#2=[+($t0, $t1)], expr#3=[1], "
+            + "expr#4=[+($t0, $t3)], expr#5=[+($t2, $t4)], "
+            + "expr#6=[+($t0, $t4)], expr#7=[5], expr#8=[<=($t4, $t7)], "
+            + "a=[$t5], b=[$t6], $condition=[$t8])"));
+  }
+
+```
+
 
 ### 表达式反推到具体字段 - RexInputRef
 1. 行表达式：https://juejin.cn/post/7113828979567493133
@@ -2781,6 +2831,41 @@ jon下推表达式
   }
 }
 
+```
+
+
+### 业务自定义表达式 - 字段映射
+1. 输入字段12个，输出字段12个，实现一个简单映射的表达式
+```java
+RelDataType inputRowType = typeFactory.createStructType(types, names);
+
+final RexProgramBuilder builder =
+        new RexProgramBuilder(inputRowType, rexBuilder);
+
+// 简单映射 x -> 字段第0个
+final RexNode i0 = rexBuilder.makeInputRef(
+        types.get(0), 0);
+// 定义常量 1 -> 字段第1个
+final RexLiteral c1 = rexBuilder.makeExactLiteral(BigDecimal.ONE);
+
+// x + 1 -> 字段第2个
+RexLocalRef t2 =
+        builder.addExpr(
+            rexBuilder.makeCall(
+                SqlStdOperatorTable.PLUS,
+                i0,
+                c1));
+
+
+字段映射如下
+            for (int i = 0; i < inputRowType.getFieldList().size(); i++) {
+                RelDataTypeField field = (RelDataTypeField) inputRowType.getFieldList().get(i);
+                final RexNode i0 = rexBuilder.makeInputRef(field.getType(), i);
+                builder.addProject(i0, field.getName());
+            }
+
+//            RexNode rexNode =
+            RexProgram program = builder.getProgram();
 ```
 
 ## 纵向拆解 - RelOptRule
@@ -3632,6 +3717,160 @@ ViewTableMacro vtm = ViewTable.viewMacro(rootSchema, viewSql, ImmutableList.of()
 ```
 
 
+## 纵向拆解 - SqlToRelConverter 
+1. 基本组件
+   1. SqlValidator 负责校验
+   2. RexBuilder 表达式解析器
+   3. RelBuilder node构建器
+   4. CatalogReader 对接元数据
+   5. RelOptCluster 物理节点信息
+   6. SqlOperatorTable 全局函数表
+   7. RelDataTypeFactory 数据类型工厂
+   8. ViewExpander 视图管理器
+2. 翻译组件
+   1. SubQueryConverter 子查询转换器
+   2. SqlNodeToRexConverter 表达式转换器
+   3. Blackboard Workspace for translating an individual SELECT statement (or sub-SELECT).
+3. 对外输出API能力 - convert主线
+   1. convertQuery
+   2. convertQueryRecursive
+   3. requiredCollation
+   4. checkConvertedType
+   5. getValidatedNodeType
+   6. RelRoot 最终输出的结果
+      1. RelNode RelDataType（经过校验生成的结果） SqlKind RelCollation 组合而成
+
+
+### visit设计模式 - 获取sqlnode信息
+```
+visit(SqlIdentifier): Void
+visit(SqlNodeList): Void
+visit(SqlLiteral): Void
+visit(SqlDataTypeSpec): Void
+visit(SqlDynamicParam): Void
+visit(SqlIntervalQualifier): Void
+visit(SqlCall): Void
+
+```
+
+### convert能力
+```
+convertAgg(Blackboard, SqlSelect, List<SqlNode>): void
+convertCollectionTable(Blackboard, SqlCall): void
+convertColumnList(SqlInsert, RelNode): RelNode
+convertCursor(Blackboard, SubQuery): RelNode
+convertDelete(SqlDelete): RelNode
+convertDynamicParam(SqlDynamicParam): RexDynamicParam
+convertExists(SqlNode, SubQueryType, Logic, boolean, RelDataType): Exists
+convertExpression(SqlNode): RexNode
+convertExpression(SqlNode, Map<String, RexNode>): RexNode
+convertExtendedExpression(SqlNode, Blackboard): RexNode
+convertFrom(Blackboard, SqlNode): void
+convertIdentifier(Blackboard, SqlIdentifier): RexNode
+convertIdentifier(Blackboard, SqlIdentifier, SqlNodeList): void
+convertInsert(SqlInsert): RelNode
+convertInToOr(Blackboard, List<RexNode>, SqlNodeList, SqlInOperator): RexNode
+convertJoinCondition(Blackboard, SqlValidatorNamespace, SqlValidatorNamespace, SqlNode, JoinConditionType, RelNode, RelNode): RexNode
+convertJoinType(JoinType): JoinRelType
+convertLiteralInValuesList(SqlNode, Blackboard, RelDataType, int): RexLiteral
+convertMatchRecognize(Blackboard, SqlCall): void
+convertMerge(SqlMerge): RelNode
+convertMultisets(List<SqlNode>, Blackboard): RelNode
+convertNonCorrelatedSubQuery(SubQuery, Blackboard, RelNode, boolean): boolean
+convertOrder(SqlSelect, Blackboard, RelCollation, List<SqlNode>, SqlNode, SqlNode): void
+convertOrderItem(SqlSelect, SqlNode, List<SqlNode>, Direction, NullDirection): RelFieldCollation
+convertOver(Blackboard, SqlNode): RexNode
+convertQuery(SqlNode, boolean, boolean): RelRoot
+convertQueryOrInList(Blackboard, SqlNode, RelDataType): RelNode
+convertQueryRecursive(SqlNode, boolean, RelDataType): RelRoot
+convertRowConstructor(Blackboard, SqlCall): RelNode
+convertRowValues(Blackboard, SqlNode, Collection<SqlNode>, boolean, RelDataType): RelNode
+convertSelect(SqlSelect, boolean): RelNode
+convertSelectImpl(Blackboard, SqlSelect): void
+convertSelectList(Blackboard, SqlSelect, List<SqlNode>): void
+convertSetOp(SqlCall): RelNode
+convertToSingleValueSubq(SqlNode, RelNode): RelNode
+convertUpdate(SqlUpdate): RelNode
+convertUsing(SqlValidatorNamespace, SqlValidatorNamespace, List<String>): RexNode
+convertValues(SqlCall, RelDataType): RelNode
+convertValuesImpl(Blackboard, SqlCall, RelDataType): void
+convertWhere(Blackboard, SqlNode): void
+convertWith(SqlWith, boolean): RelRoot
+
+
+Blackboard
+  convertExpression(SqlNode): RexNode
+  convertInterval(SqlIntervalQualifier): RexNode
+  convertLiteral(SqlLiteral): RexNode
+  convertSortExpression(SqlNode, Direction, NullDirection): RexFieldCollation
+
+SqlNodeToRexConverter
+  convertCall(SqlRexContext, SqlCall): RexNode
+  convertInterval(SqlRexContext, SqlIntervalQualifier): RexLiteral
+  convertLiteral(SqlRexContext, SqlLiteral): RexNode
+
+```
+
+
+### 构建相关组件
+```
+
+createAggImpl(Blackboard, AggConverter, SqlNodeList, SqlNodeList, SqlNode, List<SqlNode>): void
+createAggregate(Blackboard, ImmutableBitSet, ImmutableList<ImmutableBitSet>, List<AggregateCall>): RelNode
+createBlackboard(SqlValidatorScope, Map<String, RexNode>, boolean): Blackboard
+createInsertBlackboard(RelOptTable, RexNode, List<String>): Blackboard
+createJoin(Blackboard, RelNode, RelNode, RexNode, JoinRelType): RelNode
+createModify(RelOptTable, RelNode): RelNode
+createSource(RelOptTable, RelNode, ModifiableView, RelDataType): RelNode
+createToRelContext(): ToRelContext
+
+```
+
+
+### 一个异常栈看 调用链路和函数执行顺序
+```
+sql = select xx join on conditon
+
+Caused by: java.lang.RuntimeException: while converting CONCAT(`event`.`llsid`, '_', `event`.`device_id`) = `ad_pv_context_entity`.`user_hash`
+	at org.apache.calcite.sql2rel.ReflectiveConvertletTable.lambda$registerNodeTypeMethod$0(ReflectiveConvertletTable.java:86)
+	at org.apache.calcite.sql2rel.SqlNodeToRexConverterImpl.convertCall(SqlNodeToRexConverterImpl.java:63)
+	at org.apache.calcite.sql2rel.SqlToRelConverter$Blackboard.visit(SqlToRelConverter.java:4708)
+	at org.apache.calcite.sql2rel.SqlToRelConverter$Blackboard.visit(SqlToRelConverter.java:4013)
+	at org.apache.calcite.sql.SqlCall.accept(SqlCall.java:138)
+	at org.apache.calcite.sql2rel.SqlToRelConverter$Blackboard.convertExpression(SqlToRelConverter.java:4577)
+	at org.apache.calcite.sql2rel.SqlToRelConverter.convertJoinCondition(SqlToRelConverter.java:2627)
+	at org.apache.calcite.sql2rel.SqlToRelConverter.convertFrom(SqlToRelConverter.java:2060)
+	at org.apache.calcite.sql2rel.SqlToRelConverter.convertSelectImpl(SqlToRelConverter.java:646)
+	at org.apache.calcite.sql2rel.SqlToRelConverter.convertSelect(SqlToRelConverter.java:627)
+	at org.apache.calcite.sql2rel.SqlToRelConverter.convertQueryRecursive(SqlToRelConverter.java:3100)
+	at org.apache.calcite.sql2rel.SqlToRelConverter.convertQuery(SqlToRelConverter.java:563)
+	at org.apache.calcite.prepare.PlannerImpl.rel(PlannerImpl.java:235)
+	at com.kuaishou.kaiworks.table.planner.delegation.PlannerContext.rel(PlannerContext.java:130)
+	at com.kuaishou.kaiworks.sql.parser.impl.InsertParser.parseSql(InsertParser.java:83)
+	... 26 more
+Caused by: java.lang.AssertionError
+	at org.apache.calcite.sql2rel.SqlToRelConverter$Blackboard.getRootField(SqlToRelConverter.java:4369)
+	at org.apache.calcite.sql2rel.SqlToRelConverter.adjustInputRef(SqlToRelConverter.java:3682)
+	at org.apache.calcite.sql2rel.SqlToRelConverter.convertIdentifier(SqlToRelConverter.java:3654)
+	at org.apache.calcite.sql2rel.SqlToRelConverter.access$2100(SqlToRelConverter.java:217)
+	at org.apache.calcite.sql2rel.SqlToRelConverter$Blackboard.visit(SqlToRelConverter.java:4717)
+	at org.apache.calcite.sql2rel.SqlToRelConverter$Blackboard.visit(SqlToRelConverter.java:4013)
+	at org.apache.calcite.sql.SqlIdentifier.accept(SqlIdentifier.java:334)
+	at org.apache.calcite.sql2rel.SqlToRelConverter$Blackboard.convertExpression(SqlToRelConverter.java:4577)
+	at org.apache.calcite.sql2rel.StandardConvertletTable.convertCast(StandardConvertletTable.java:518)
+	at org.apache.calcite.sql2rel.SqlNodeToRexConverterImpl.convertCall(SqlNodeToRexConverterImpl.java:63)
+	at org.apache.calcite.sql2rel.SqlToRelConverter$Blackboard.visit(SqlToRelConverter.java:4708)
+	at org.apache.calcite.sql2rel.SqlToRelConverter$Blackboard.visit(SqlToRelConverter.java:4013)
+	at org.apache.calcite.sql.SqlCall.accept(SqlCall.java:138)
+	at org.apache.calcite.sql2rel.SqlToRelConverter$Blackboard.convertExpression(SqlToRelConverter.java:4577)
+	at org.apache.calcite.sql2rel.StandardConvertletTable.convertExpressionList(StandardConvertletTable.java:790)
+	at org.apache.calcite.sql2rel.StandardConvertletTable.convertCall(StandardConvertletTable.java:766)
+	at org.apache.calcite.sql2rel.StandardConvertletTable.convertCall(StandardConvertletTable.java:750)
+	... 45 more
+```
+
+
+## 纵向拆解 - RelToSqlConverter
 
 ## 竞品对比
 ### anltr 和 javacc 区别
