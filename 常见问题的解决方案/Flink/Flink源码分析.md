@@ -66,34 +66,57 @@ flink + 公司项目
    7. memory优化
       1. BinaryRow 应用，高效索引
    8. io优化
-2. flink如何保证稳定性
+2. flink内存管理
+   1. flink中在自定义自己的内存组件，中间有哪些内存泄漏的情况，不可能一次性写的无bug
+   2. 这类case需要积累下来，都是经验
+3. flink如何保证稳定性
    1. 回滚机制
    2. 资源申请与释放
    3. 机器节点故障排查
    4. 状态恢复机制
-3. flink设计
+4. flink设计
    1. dag 描述符 pipeline 和 Transformation
    2. op ，function ， input 和 output 的父类和所有子类关系
    3. 状态的应用
    4. 时间水位线的应用
-4. flink如何高效开发，测试，迭代和发布
+5. flink如何高效开发，测试，迭代和发布
    1. 代码如果看的越熟，开发效率越快。本身项目非常复杂，要想短时间内提高效率，那就只能多看代码解析的文章，帮助自己加速理解代码设计
    2. 从这个文章2023年7月10号到今天 2024年11月18号，我算是勉强能上手并开发flink代码，所以整个过程还是比较漫长的，门槛有一定要求
    3. 理解的过程中，直接看代码基本不现实，我是结合业务逻辑，业务报的异常，网络上的文章，不同公司落地视频分享，收集一些对flink的问题，spark和flink的异同点，流批一体的设计点和平时与同事的沟通聊天中
    4. 整理了许多问题，这些问题是多角度的，带着问题作为入口再去看flink，就能一点点撕开flink的整个设计流程，最终又像网状结构耦合在一起。
    5. 如果有人带是最好的，帮助你分析每个模块作用，模块与模块之间关系，甚至具体到类与类之间关系，以及类的设计含义，同时还能告诉你先看哪个模块，再看哪个模块，这样效率就能提高很多
-5. 进一步高效深入理解flink，需要结合峰会主题分享，挖掘高价值问题
+6. flink技术问题
+   1. task 数据如何交换
+   2. streamgraph jobgraph exegraph 映射图
+   3. checkpoint如何实现
+   4. OperatorChain
+7. 进一步高效深入理解flink，需要结合峰会主题分享，挖掘高价值问题
    1. 带着高价值问题，再深入找重要技术细节
+   2. flink issue https://issues.apache.org/jira/projects/FLINK/issues/FLINK-36867?filter=allopenissues
+      1. 找找有价值优化思路 和 排查问题的手段
+   3. 
 
 
 ### 参考资料
 1. 官方分享：https://space.bilibili.com/33807709
-2. Calcite剖析：https://cloud.tencent.com/developer/column/102596?from_column=20421&from=20421
-3. [源码分析] 带你梳理 Flink SQL / Table API内部执行流程：https://www.cnblogs.com/rossiXYZ/p/12770436.html
-4. Flink专家blog
+   1. 深入解析 Flink 细粒度资源管理：https://mp.weixin.qq.com/s/Rs5RWeSNf9n1wTo0M93s8w
+   2. Flink 大规模作业调度性能优化：https://mp.weixin.qq.com/s/bcSgHty9h7GYsGVTjKQ2-Q
+   3. parquet：https://mp.weixin.qq.com/s/KktmGLBoXoHeM9E1H_5r9w
+   4. Flink Remote Shuffle：https://mp.weixin.qq.com/s/3O_DVY9U7r-sRMhs1DH4IA
+   5. Calcite剖析：https://cloud.tencent.com/developer/column/102596?from_column=20421&from=20421
+   6. [源码分析] 带你梳理 Flink SQL / Table API内部执行流程：https://www.cnblogs.com/rossiXYZ/p/12770436.html
+   7. Apache Hudi 中自定义序列化和数据写入逻辑：https://mp.weixin.qq.com/s/-xeLfuoL28EO7gqQMLeKTw
+   8. Flink Sort-Shuffle 实现简介：https://mp.weixin.qq.com/s/y7okSgf7vFB5JMwvaWZl5g
+   9. HBase 读链路解析：https://mp.weixin.qq.com/s/yQ8Cg3dgPnJp9AtYSm5A2A
+2. Flink2024 峰会
+   1. 并行度全托管 过低过高或者固定
+   2. 高效扩缩容
+3. Flink专家blog
    1. https://liebing.org.cn/
    2. https://cloud.tencent.com/developer/user/1350579
    3. https://cloud.tencent.com/developer/user/1207538
+4. 选品（选优质文章）的公众号
+   1. HBase技术社区
 5. OLAP
    1. 多维分析概念：https://cloud.tencent.com/developer/article/2434642
    2. 解读Implementing data cubes efficiently：https://cloud.tencent.com/developer/article/2450528
@@ -104,6 +127,7 @@ flink + 公司项目
    3. 微信安全基于 Flink 实时特征开发平台实践 - Flink 中文社区的文章 - 知乎https://zhuanlan.zhihu.com/p/646114539
    4. 腾讯基于 Flink SQL 的功能扩展与深度优化实践：https://juejin.cn/post/6924868645537792008
    5. flink2024云相册地址：http://live.jimage.cn/gti/36dfd2e4?from=groupmessage
+   6. 
 ```
 xiaogang shi
 动态数据流上的实时迭代计算
@@ -151,15 +175,60 @@ flink dag用法
 ```
 
 ## flink前沿技术更新
-1. Flink 2.0
+1. 版本迭代：https://cwiki.apache.org/confluence/display/FLINK/1.18+Release
+2. 展望Flink各版本及新特性：https://blog.csdn.net/qq_36470898/article/details/130451864 
+3. Flink 2.0
    1. 由于RocksDB中LSM结构的周期性 Compaction 导致计算资源尖峰的问题
    2. 大规模状态快速扩缩容的挑战
    3. 容器化环境下计算节点受本地磁盘大小限制的问题
    4. 原生的轻量级和快速检查点
-2. Benchmark
+4. Flink 1.19
+   1. https://mp.weixin.qq.com/s/DxoI38o7TpzpMXto8ep6ow
+   2. 源表自定义并行度
+   3. 使用 SQL 提示配置不同的状态 TTL
+   4. 函数和存储过程支持命名参数
+   5. Window TVF 聚合支持处理更新流
+   6. 新的 UDF 类型：AsyncScalarFunction
+   7. Regular Join 支持 MiniBatch 优化
+   8. Source 反压时支持使用更大的 Checkpointing 间隔
+   9. CheckpointsCleaner 并行清理单个检查点状态
+   10. 与 Source API 一致的 SinkV2 新接口
+   11. 用于跟踪Committables状态的新Committer指标
+5. Flink 1.18
+6. Flink 1.17
+   1. https://developer.aliyun.com/article/1226832
+   2. 对 TM 的网络层配置做了很多简化，新增了多个核心特性，提高了 Runtime 层面网络的开箱即用
+   3. 在 SQL 层面引入了 PLAN ADVICE 功能
+   4. Batch 作业的全链路都支持了预测执行
+   5. local hash agg
+   6. 消除虚函数调用
+7. Flink 1.16
+   1. https://developer.aliyun.com/article/1173732
+   2. Slow Task Detector 的组件。这个组件会周期性的查看是否有一些慢任务以及慢任务对应的热点机器
+   3. 一个是 Pipelined Shuffle，另一个是 Blocking Shuffle。Hybrid Shuffle 在数据落盘方面，有两套策略。一套是全落盘，另一套是选择性落盘。
+   4. Protobuf Format 的支持
+   5. 引入了 RateLimitingStrategy
+8. Flink 1.15
+   1. https://mp.weixin.qq.com/s/eTPq_P0oPthgUCGe3SqTRA
+   2. JSON Plan 计划
+   3. 基于 Changelog 的状态存储
+   4. 澄清 Checkpoint 与 Savepoint 语义
+   5. 基于 Reactive 模式与自适应调度器的弹性伸缩
+   6. 跨源节点的 Watermark 对齐
+9. Flink 1.14
+   1. https://mp.weixin.qq.com/s/Gy3RYfQ_qFTXsJvufOng4g
+   2. 同一个应用当中混合使用有界流和无界流
+   3. 有界流 Checkpoint 机制
+   4. DataStream 和 Table/SQL 混合应用的批执行模式
+   5. 缓冲区去膨胀
+   6. 细粒度资源管理
+   7. Facebook 流式数据处理的报告
+   8. 阿里巴巴使用 Apache Flink 生成统一的、一致的业务报告的文章
+10. Benchmark
    1. https://github.com/nexmark/nexmark
-3. flink 向量化引擎 flash
+11. flink 向量化引擎 flash
    1. https://developer.aliyun.com/article/1634363
+
 
 
 
@@ -1567,10 +1636,11 @@ Transformation关键成员变量说明
 3. Flink的operator chain：https://blog.csdn.net/nazeniwaresakini/article/details/107081244
 4. op共享slot：https://blog.csdn.net/wangchunbo_1989/article/details/103195920
 
+
 ### api - windowing
 
 ### api - watermark
-
+1. WatermarkGauge
 
 ### api - timeservice
 1. TimerService extends ProcessingTimeService
@@ -1605,7 +1675,6 @@ AbstractTwoInputStreamTask.java
 
 
 ```
-
 
 #### Transform -> Task
 ```
@@ -1811,6 +1880,12 @@ protected void createInputProcessor(
 	}
 
 ```
+
+
+#### Task 拆解
+1. StreamTask
+
+
 
 ### runtime - reocord传输
 
@@ -2393,7 +2468,7 @@ val LOGICAL_OPT_RULES: RuleSet = RuleSets.ofList(
 
 
 
-### SQL 流程 - 转成 DataStream
+### SQL 流程 - 转成 DataStream Node
 1. 核心类
    1. TableEnvironmentImpl 封装了paser planner 和 executor
    2. SQL层函数
@@ -2442,9 +2517,9 @@ val LOGICAL_OPT_RULES: RuleSet = RuleSets.ofList(
       3. void apply(List<Transformation<?>> transformations);
       4. Pipeline createPipeline(String name)
       5. Plan createProgramPlan(String jobName)
-5. sql到flink 算子：https://blog.jrwang.me/2019/flink-source-code-sql-overview/
-6. 官方文档：https://nightlies.apache.org/flink/flink-docs-master/docs/dev/table/sql/queries/overview/
-7.  测试用例
+6. sql到flink 算子：https://blog.jrwang.me/2019/flink-source-code-sql-overview/
+7. 官方文档：https://nightlies.apache.org/flink/flink-docs-master/docs/dev/table/sql/queries/overview/
+8.  测试用例
    1. flink-table/flink-table-planner-blink/src/test/java/org/apache/flink/table/planner/catalog/CatalogStatisticsTest.java
 
 #### Demo
@@ -3213,6 +3288,15 @@ private class FlinkLogicalSinkConverter
 }
 
 ```
+### SQL 流程 - Datastream代码生成
+1. Flink SQL代码生成：https://cloud.tencent.com/developer/article/1956581
+2. 
+3. 
+
+#### 代码生成结构
+1. AggsHandlerCodeGenerator——负责生成普通聚合函数
+
+
 
 #### 代码生成 - Express表达式
 1. FlinkRelBuilder -> StreamExecDataStreamScan.translateToPlanInternal -> StreamExecDataStreamScan.getRowtimeExpression -> ScanUtil.convertToInternalRow -> ExprCodeGenerator -> generateConverterResultExpression
@@ -4672,6 +4756,12 @@ outWriter.complete();
 
 ```
 
+#### 代码生成 - Limit
+1. 参考codegen目录
+
+
+
+
 ### SQL 流程 - 执行
 1. Executor
    1. StreamExecutor
@@ -4988,6 +5078,13 @@ def doVerifyPlan(
 ### 语句翻译 - View 翻译成 datastream 算子
 
 
+### 语句翻译 - Limit 翻译成 datastream 算子
+1. StreamExecLimit
+2. StreamExecLimitRule
+3. EqualiserCodeGenerator
+4. EqualiserCodeGeneratorTest
+5. LimitFilterFunction
+
 
 ## 纵向拆解 - Graph
 1. API/SQL -> Transformation -> StreamGraph -> JobGraph -> ExecutionGraph
@@ -5008,6 +5105,137 @@ def doVerifyPlan(
 ## 纵向拆解 - ML
 
 ## 纵向拆解 - Flink TTL
+
+## 纵向拆解 - 
+
+## 纵向拆解 - JobGraph ExecutionGraph OperatorChain
+1. Flink 会尽可能把能够 chaining 到一起的算子串联在一起，形成 OperatorChain，对应一个 JobVertex。
+2. 串联在一起的条件：isChainable
+3. JobGraph 在 JobManager 中进一步被转换为可供调度的并行化版本的 ExecutionGraph
+4. JobVertex 被展开为并行化版本的 ExecutionVertex
+5. OperatorChain 可能包含多个 Operator，也可能只有一个 Operator
+
+### OperatorChain 生命周期
+```
+  // initialization phase
+    OPERATOR::setup
+        UDF::setRuntimeContext
+    OPERATOR::initializeState
+    OPERATOR::open
+        UDF::open
+
+    // processing phase (called on every element/watermark)
+    OPERATOR::processElement
+        UDF::run
+    OPERATOR::processWatermark
+    
+    // checkpointing phase (called asynchronously on every checkpoint)
+    OPERATOR::snapshotState
+
+    // notify the operator about the end of processing records
+    OPERATOR::finish
+
+    // termination phase
+    OPERATOR::close
+        UDF::close
+
+```
+
+## 纵向拆解 - Checkpoint
+
+## 纵向拆解 - Task
+1. Task数据输出：https://blog.csdn.net/zhanglong_4444/article/details/117036108
+2. 数据交换：https://cwiki.apache.org/confluence/display/FLINK/Data+exchange+between+tasks
+3. 中间数据集：https://blog.jrwang.me/2019/flink-source-code-data-exchange/#intermediatedataset
+4. 生命周期：https://blog.jrwang.me/2019/flink-source-code-task-lifecycle/
+5. task_lifecycle：https://nightlies.apache.org/flink/flink-docs-master/docs/internals/task_lifecycle/
+6. Task 运行期间的主要处理逻辑对应一个 OperatorChain
+7. 一个 Task 是一个独立的线程，多个算子的计算逻辑是依次执行的，那么很直观的想法就是直接通过函数调用的参数来数据
+8. 数据传输模式
+   1. BLOCKING：非流水线模式，无反压，不限制使用的网络缓冲的数量
+   2. PIPELINED：流水线模式，有反压，不限制使用的网络缓冲的数量
+   3. PIPELINED_BOUNDED：流水线模式，有反压，限制使用的网络缓冲的数量
+9. 核心类
+   1. Task
+   2. StreamTask
+   3. TaskExecutor
+
+### Task结构
+1. op关系
+2. checkpoint关系
+3. watermark关系
+
+
+
+
+#### 初始化
+```
+StreamTask(Environment)
+StreamTask(Environment, TimerService)
+StreamTask(Environment, TimerService, UncaughtExceptionHandler)
+StreamTask(Environment, TimerService, UncaughtExceptionHandler, SynchronizedStreamTaskActionExecutor)
+StreamTask(Environment, TimerService, UncaughtExceptionHandler, SynchronizedStreamTaskActionExecutor, TaskMailbox)
+
+```
+
+
+#### 触发cp
+1. AsyncCheckpointRunnable
+2. CheckpointingOperation
+```
+triggerCheckpoint(CheckpointMetaData, CheckpointOptions, boolean): boolean
+triggerCheckpointAsync(CheckpointMetaData, CheckpointOptions, boolean): Future<Boolean>
+triggerCheckpointOnBarrier(CheckpointMetaData, CheckpointOptions, CheckpointMetrics): void
+
+```
+
+#### 对外功能
+```
+createRecordWriter(StreamEdge, int, Environment, String, long): RecordWriter<SerializationDelegate<StreamRecord<OUT>>>
+createRecordWriterDelegate(StreamConfig, Environment): RecordWriterDelegate<SerializationDelegate<StreamRecord<OUT>>>
+createRecordWriters(StreamConfig, Environment): List<RecordWriter<SerializationDelegate<StreamRecord<OUT>>>>
+createStateBackend(): StateBackend
+createStreamTaskStateInitializer(): StreamTaskStateInitializer
+```
+
+### Task调用Op
+```
+ *  -- invoke()
+ *        |
+ *        +----> Create basic utils (config, etc) and load the chain of operators
+ *        +----> operators.setup()
+ *        +----> task specific init()
+ *        +----> initialize-operator-states()
+ *        +----> open-operators()
+ *        +----> run()
+ *        +----> close-operators()
+ *        +----> dispose-operators()
+ *        +----> common cleanup
+ *        +----> task specific cleanup()
+
+```
+### task 生命周期
+```
+
+  TASK::setInitialState
+    TASK::invoke
+        create basic utils (config, etc) and load the chain of operators
+        setup-operators
+        task-specific-init
+        initialize-operator-states
+        open-operators
+        run
+        finish-operators
+        wait for the final checkpoint completed (if enabled)
+        close-operators
+        task-specific-cleanup
+        common-cleanup
+
+```
+
+### AbstractTwoInputStreamTask
+
+
 
 
 ### CompactionFilter
@@ -5357,6 +5585,16 @@ FlinkUserCodeClassLoader
 
 ## 纵向拆解 - 性能优化
 
+### flink + arrow + jni + cpp 有没有搞头
+1. jni：安卓应用最多，优化实践也比较多
+   1. https://cloud.tencent.com/developer/article/2450506
+2. 堆外内存 jni可以直接调用，无需内存copy
+
+
+### flink 内存模型
+1. 内存模型与内存结构：https://cloud.tencent.com/developer/article/1880475
+2. 
+
 ### BinaryString
 1. 代码自动生成大量字符串UDF能力基于BinaryString
 1. 京东：Flink SQL 优化实战：https://xie.infoq.cn/article/c244a24c507888f92df72c7c5
@@ -5522,6 +5760,21 @@ Total: reserved=7628020KB, committed=6443532KB
 ```
 
 
+### 网络优化 - 数据流传输模式
+1. 避免shuffle
+2. 避免不同task网络传输
+3. local 计算，local 内存传输效率最高
+4. 传输四个模式
+   1. 前向（forward）策略：从一个task发送数据到另一个接受task。如果两个task均在一个机器上，则可以避免网络传输
+   2. 广播（broadcast）策略：数据发送到所有并行task中。此策略涉及到数据复制及网络传输，所以较为消耗资源
+   3. key-based 策略：根据key做partition，使具有相同key 的条目可以被同一个task处理
+   4. 随机（random）策略：随机均匀分布数据到task中，均衡集群计算负载
+
+
+### Join优化
+1. https://cloud.tencent.com/developer/article/2013323
+
+### Scan优化
 
 ## 痛点
 ```
@@ -6377,33 +6630,34 @@ https://blog.csdn.net/AnameJL/article/details/133795190
 3. RowData
 
 ## flink 数据交换 exchange
-1. RecordWriter面向的是StreamRecord
-2. ResultPatitionWriter面向的是Buffer，起到承上启下的作用
-3. RecordWriter类负责将StreamRecord进行序列化，调用SpaningRecordSerializer，再调用BufferBuilder写入MemorySegment中（每个Task都有自己的LocalBufferPool，LocalBufferPool中包含了多个MemorySegment
-4. 单播和广播 写入
+1. 数据交换 = 数据网络传输 = 网络开销成本
+2. RecordWriter面向的是StreamRecord
+3. ResultPatitionWriter面向的是Buffer，起到承上启下的作用
+4. RecordWriter类负责将StreamRecord进行序列化，调用SpaningRecordSerializer，再调用BufferBuilder写入MemorySegment中（每个Task都有自己的LocalBufferPool，LocalBufferPool中包含了多个MemorySegment
+5. 单播和广播 写入
    1. 单播 ChannelSelector，对数据流中的每一条数据记录进行选路，有选择地写入一个输出通道的ResultSubPartition中，适用于非BroadcastPartition
    2. 广播就是向下游所有的Task发送相同的数据，在所有的 ResultSubPartition 中写入N份相同数据。
    3. 实际不会真的写入N份，而是从编号0的ResultSubPartition读数据
-5. 数据记录序列化器
+6. 数据记录序列化器
    1. SpanningRecordSerializer是一种支持跨内存段的序列化器，其实现借助于中间缓冲区来缓存序列化后的数据，然后再往真正的目标Buffer里写，在写的时候会维护两个“指针”​：
    2. 一个是表示目标Buffer内存段长度的limit
    3. 一个是表示其当前写入位置的position
-6. 两个结果子分区视图
+7. 两个结果子分区视图
    1. PipelinedSubPartitionView：用来读取PipelinedSubPartition中的数据
    2. BoundedBlockingSubPartitionReader：用来读取BoundedBlockingSubPartition中的数据
-7. 数据输出
+8. 数据输出
    1. WatermarkGaugeExposingOutput
    2. RecordWriterOutput
    3. ChainingOutput & CopyingChainingOutput
    4. DirectedOutput & CopyingDirectedOutput
    5. BroadcastingOutputCollector & CopyingBroadcastingOutputCollector
    6. CountingOutpu
-8. 本地线程内的数据交换
+9. 本地线程内的数据交换
    1. 引用传递即可
-9.  本地线程之间的数据传递
+10. 本地线程之间的数据传递
     1. 调用LocalInputChannel从LocalBuffer中读取数据
     2. 有序列化和反序列化开销 
-10. 跨网络的数据交换
+11. 跨网络的数据交换
 
 ## flink 内存章节
 1. flink-core
