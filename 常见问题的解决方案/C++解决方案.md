@@ -20,7 +20,70 @@
 - 看文档的时候，学习英语四六级快速阅读的技巧。找关键词
 - 学习c++应该采取非线性思维，类似于给你一堆零碎的图片，而你要做的是贴图
 
+
+## 思考
+1. 为什么C/C++等少数编程语言要区分左右值？ - 腾讯技术工程的回答 - 知乎 https://www.zhihu.com/question/428340896/answer/2913419725
+
 ## C++解决方案
+
+### 版本迭代
+1. C++11/14/17/20/23新特性，哪些是必须掌握的，哪些基本用得不多？ - xiaokang的回答 - 知乎 https://www.zhihu.com/question/474664436/answer/3624228368
+#### 11
+```
+auto 允许编译器推断变量类型，减少代码冗余
+
+nullptr
+
+std::vector<int> v1 = {1, 2, 3};
+std::vector<int> v2 = std::move(v1); // 移动语义，避免拷贝
+
+C++11 为我们提供了标准的线程支持（std::thread）和同步机制（std::mutex、std::condition_variable）
+
+```
+
+#### 14
+```
+auto lambda = [](auto x) { return x + x; };
+
+
+推荐掌握。C++14 为我们提供了 std::make_unique，与 std::make_shared 类似，它是创建 unique_ptr 的最佳方式，避免手动管理 new 关键字。
+
+```
+
+
+#### 17
+```
+std::optional
+
+std::pair<int, std::string> p = {1, "hello"};
+auto [id, name] = p;  // 结构化绑定
+
+
+std::variant 是一个类型安全的联合体，用来存储多个可能类型的值。配合 std::visit 使用，可以替代传统的 union，适用于需要存储不同类型数据的场景。
+
+```
+
+
+
+#### 20
+```
+Modules
+Coroutines
+concepts
+ranges
+
+
+```
+
+
+#### 23
+```
+std::expected 、std::ranges::to
+std::stacktrace
+
+```
+
+
 
 ### 规范
 

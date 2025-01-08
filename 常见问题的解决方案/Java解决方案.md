@@ -34,80 +34,7 @@ export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib
 export PATH=$PATH:$JAVA_HOME/bin
 ```
 
-
-
-## JAVA版本的区别
-```
-package javafx.util does not exist
-openJDK 没用这个包
-改成oracle1.8 201解决
-
-jdk11 以下不支持 repeat方法
-separator += "-".repeat(width) + "-+-";
-
-```
-### 异常
-
-#### 异常介绍
-
-- https://www.geeksforgeeks.org/checked-vs-unchecked-exceptions-in-java/
-
-#### 只读异常
-
-- ReadOnlyBufferException
-- Unchecked exception thrown when a content-mutation method such as `put` or `compact` is invoked upon a read-only buffer.
-- **1) Checked:** are the exceptions that are checked at compile time. If some code within a method throws a checked exception, then the method must either handle the exception or it must specify the exception using *throws* keyword.
-- **2) Unchecked** are the exceptions that are not checked at compiled time. In C++, all exceptions are unchecked, so it is not forced by the compiler to either handle or specify the exception. It is up to the programmers to be civilized, and specify or catch the exceptions.
-- In Java exceptions under *Error* and *RuntimeException* classes are unchecked exceptions, everything else under throwable is checked.
-- Throwable
-  - Error:unchecked
-  - Exception
-    - checked
-    - RuntimeException:
-    
-#### 打印异常栈
-```
-import org.apache.commons.lang3.exception.ExceptionUtils;
-
-String r = ExceptionUtils.getStackTrace(e);
-
-```
-
-#### 打印异常栈的版本号
-```
-
-
-```
-
-#### 并发
-
-- java.util.concurrent.TimeoutException
-  - http://www.blogjava.net/xylz/archive/2011/07/12/354206.html	
-  - 此异常是用来描述任务执行时间超过了期望等待时间，也许是一直没有获取到锁，也许是还没有执行完成。
-
-### 代码规范
-
-- 类名：每个单词首字母大写
-  - ToPdf
-- 文件名：同类名
-- 方法名：动词+名词，动词小写，名词首字母大写
-- 变量名：名词，首字母小写，多个单词的话，在后面单词每个首字母大写
-
-### 编写规范
-
-- 头脑要清醒
-- 在引用jar包的时候，要保证jar包的内容不影响目前的项目
-  - 创建文件的例子，因为jar里面也在创建文件，所有导致总是有某名的文件跟着一起创建，影响开发和差错
-- 不要随意在finally里填写想当然的代码
-  - 在文件打开的时候，然后又close文件，这个操作非常愚蠢，因为你不知道其他哪个地方需要继续调用这个文件
-- 在多个项目编程，特别容易弄混编译哪个jar包
-  - 在command 引用jar包总是编译了另一个包，浪费了大量 的无效时间
-  - 配置太多，后面要定个编写流程规范，每一步都应该到位才行
-- 函数参数
-  - 参数的数据类型，就是表示你要输入的数据类型应该是什么，不要模糊了数据类型，也不要随意强制转型
-- 数据类的定义
-  - 不要重复定义两个功能相同的类，后面调用真的很麻烦麻烦
-  - schema.ColumnDesc
+## Maven
 
 ### 命令行下的maven
 
@@ -610,6 +537,102 @@ filters 可以过滤掉下载的依赖包里面，不要哪些资源。需要把
 
 
 
+## Gradle
+1. 深入了解gradle和maven的区别：https://cloud.tencent.com/developer/article/1787010
+2. gradle跑测试用例：https://www.jetbrains.com/help/idea/work-with-tests-in-gradle.html
+
+### 安装编译运行
+```
+加上代理如
+systemProp.http.proxyHost=xx.74.xx.8
+systemProp.http.proxyPort=xxx
+systemProp.http.nonProxyHosts=localhost,127.0.0.1,localaddress
+systemProp.https.proxyHost=xxx.74.xxx.xxx
+systemProp.https.proxyPort=xxx
+
+```
+
+
+## JAVA版本的区别
+1. java 17优势
+   1. 语法变化：https://juejin.cn/post/7019952895999246366 
+2. java 15优势
+   1. 语法变化：https://www.cnblogs.com/javastack/p/13683220.html
+3. java 11优势
+   1. 语法变化：https://segmentfault.com/a/1190000016537503
+```
+package javafx.util does not exist
+openJDK 没用这个包
+改成oracle1.8 201解决
+
+jdk11 以下不支持 repeat方法
+separator += "-".repeat(width) + "-+-";
+
+```
+### 异常
+
+#### 异常介绍
+
+- https://www.geeksforgeeks.org/checked-vs-unchecked-exceptions-in-java/
+
+#### 只读异常
+
+- ReadOnlyBufferException
+- Unchecked exception thrown when a content-mutation method such as `put` or `compact` is invoked upon a read-only buffer.
+- **1) Checked:** are the exceptions that are checked at compile time. If some code within a method throws a checked exception, then the method must either handle the exception or it must specify the exception using *throws* keyword.
+- **2) Unchecked** are the exceptions that are not checked at compiled time. In C++, all exceptions are unchecked, so it is not forced by the compiler to either handle or specify the exception. It is up to the programmers to be civilized, and specify or catch the exceptions.
+- In Java exceptions under *Error* and *RuntimeException* classes are unchecked exceptions, everything else under throwable is checked.
+- Throwable
+  - Error:unchecked
+  - Exception
+    - checked
+    - RuntimeException:
+    
+#### 打印异常栈
+```
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
+String r = ExceptionUtils.getStackTrace(e);
+
+```
+
+#### 打印异常栈的版本号
+```
+
+
+```
+
+#### 并发
+
+- java.util.concurrent.TimeoutException
+  - http://www.blogjava.net/xylz/archive/2011/07/12/354206.html	
+  - 此异常是用来描述任务执行时间超过了期望等待时间，也许是一直没有获取到锁，也许是还没有执行完成。
+
+### 代码规范
+
+- 类名：每个单词首字母大写
+  - ToPdf
+- 文件名：同类名
+- 方法名：动词+名词，动词小写，名词首字母大写
+- 变量名：名词，首字母小写，多个单词的话，在后面单词每个首字母大写
+
+### 编写规范
+
+- 头脑要清醒
+- 在引用jar包的时候，要保证jar包的内容不影响目前的项目
+  - 创建文件的例子，因为jar里面也在创建文件，所有导致总是有某名的文件跟着一起创建，影响开发和差错
+- 不要随意在finally里填写想当然的代码
+  - 在文件打开的时候，然后又close文件，这个操作非常愚蠢，因为你不知道其他哪个地方需要继续调用这个文件
+- 在多个项目编程，特别容易弄混编译哪个jar包
+  - 在command 引用jar包总是编译了另一个包，浪费了大量 的无效时间
+  - 配置太多，后面要定个编写流程规范，每一步都应该到位才行
+- 函数参数
+  - 参数的数据类型，就是表示你要输入的数据类型应该是什么，不要模糊了数据类型，也不要随意强制转型
+- 数据类的定义
+  - 不要重复定义两个功能相同的类，后面调用真的很麻烦麻烦
+  - schema.ColumnDesc
+
+
 ### 命令行下的Java
 
 ```
@@ -722,7 +745,7 @@ version 指定了myapp项目的当前版本，SNAPSHOT意为快照，说明该�
 name 声明了一个对于用户更为友好的项目名称，不是必须的，推荐为每个pom声明name，以方便信息交流。 
 ```
 
-#### 日志
+#### 日志配置
 
 ```
 log4j.rootLogger=INFO,console
@@ -739,6 +762,28 @@ log4j.appender.console.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} [%p] %C{
 # spark log
 log4j.logger.org.apache.spark=ERROR,console
 log4j.logger.org.spark_project.jetty=ERROR,console
+
+
+
+
+
+```
+
+#### 日志 在idea上不生效
+```
+    private static final Logger LOG = LoggerFactory.getLogger(PlannerTest.class);
+
+加pom依赖，然后再试试
+ <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.30</version>
+        </dependency>
+        <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+            <version>1.7.30</version>
+        </dependency>
 
 ```
 
@@ -922,22 +967,6 @@ log4j.appender.E.layout.ConversionPattern = %-d{yyyy-MM-dd HH:mm:ss}  [ %t:%r ] 
   - 只在写的时候执行延时懒惰策略
   - 读的时候不加锁
 
-### Gradle
-
-#### 参考链接
-
-- 安装页面：<https://gradle.org/install/>
-
-#### 安装编译运行
-
-```
-mac平台
-brew install gradle
-
-编译
-chmod +x gradlew
-./gradlew
-```
 
 ### 文件读写
 
@@ -1276,6 +1305,12 @@ public static Set<Class> getClassesFromJarFile(File jarFile) throws IOException,
 provide会导致找不到环境变量的包
 ```
 
+### 第三方包，多版本共存
+```
+
+
+
+```
 
 
 ## 并发编程
@@ -2294,7 +2329,7 @@ Map<String, Object> map = new HashMap<String, Object>() {
 
 ### List
 
-```
+```java
 list包含数组形式和链表形式，因为Java把方法封装成一样的
 
 增加
@@ -2442,6 +2477,35 @@ https://blog.csdn.net/qq_27093465/article/details/52180865
 
 ```
 
+## Java 测试
+### 模版
+```
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+
+public class CalculatorTest {
+
+    @DataProvider(name = "testData")
+    public Object[][] createData() {
+        return new Object[][] {
+            { 1, 2, 3 },
+            { -1, 1, 0 },
+            { 0, 0, 0 },
+            { 100, 200, 300 }
+        };
+    }
+
+    @Test(dataProvider = "testData")
+    public void testAdd(int a, int b, int expected) {
+        Calculator calculator = new Calculator();
+        int result = calculator.add(a, b);
+        assertEquals(result, expected, "Expected " + expected + " but got " + result);
+    }
+}
+
+```
+
 ## JDK8
 
 ### getOrDefault
@@ -2457,6 +2521,45 @@ https://blog.csdn.net/qq_27093465/article/details/52180865
 ```
 
 
+## IDEA
+### IDEA设置不自动生成import *
+1. https://www.cnblogs.com/mrgavin/p/13039124.html
+```
+
+File  --  Settings  --  Editor  --  Code Style  --  Java  -- Imports，将图示区域中的数值修改大一点并应用。
+
+
+
+```
+
+### java import顺序
+```
+File  --  Settings  --  Editor  --  Code Style  --  Java  -- Imports 设置顺序
+
+在 code - reformat code 可以所有文件自动调整
+
+statis other module
+java
+javax
+org
+com
+other module
+
+     <module name="ImportOrder">
+            <property name="groups" value="java,javax,org,com"/>
+            <property name="ordered" value="true"/>
+            <property name="separated" value="true"/>
+            <property name="option" value="top"/>
+            <property name="sortStaticImportsAlphabetically" value="true"/>
+        </module>
+```
+
+### idea 自动换行
+1. https://blog.csdn.net/weixin_44874132/article/details/125682334
+
+
+### idea debug运行特别慢
+1. 关闭所有断点：https://www.cnblogs.com/Vincent-yuan/p/16485913.html
 
 
 ## Redis
@@ -3175,6 +3278,1043 @@ ImportOrder
 ```
 
 
+### Kotlin: Language version 1.2 is no longer supported; please, use version 1.3 or greater.
+```
+
+Kotlin: Language version 1.2 is no longer supported; please, use version 1.3 or greater.
+Errors occurred while compiling module 'tests of calcite-core'
+
+
+
+
+
+```
+
+
+### [ERROR] Failed to execute goal org.apache.maven.plugins:maven-enforcer-plugin:3.1.0:enforce (enforce-maven) on project flink-parent: Some Enforcer rules have failed. Look above for specific messages explaining why the rule failed. -> [Help 1]
+```
+
+暂无解决方案
+
+
+```
+
+
+### package sun.util does not exist
+```
+
+java 11很多底层被orcle屏蔽了，因为版权问题
+
+```
+
+### [ERROR] Failed to execute goal org.apache.rat:apache-rat-plugin:0.12:check (default) on project flink-parent: Too many files with unapproved license: 132 See RAT report in: /home/clouddev/kwai-flink/target/rat.txt -> [Help 1]
+```
+skip 这个插件
+
+```
+
+
+
+### java: Cannot run program "/usr/java/jdk1.8.0_181/bin/java" (in directory "/home/clouddev/.cache/JetBrains/RemoteDev-IU/_home_clouddev_kaiworks-stream/compile-server"): error=0, Failed to exec spawn helper: pid: 880983, signal: 11
+
+```
+idea 远程开发会出现的问题
+
+解决
+https://blog.csdn.net/qq_44768464/article/details/135868229
+https://youtrack.jetbrains.com/issue/IDEA-304440/Cannot-run-program-java-failed-to-exec-spawn-helper-exit-value-1
+
+
+Alternatively, you may try to configure JDK to use older launching mechanism by adding flag to File | Settings | Build, Execution, Deployment | Compiler | * build process VM options text field
+
+-Djdk.lang.Process.launchMechanism=vfork
+
+
+
+```
+
+
+### scala: No JDK in module flink-sql-parser
+```
+
+用命令行没问题，idea就有问题
+只能重新编译
+
+```
+
+
+
+
+
+### java: warning source release 11 requires target release 11
+```
+全部改成1.8 重编译 重编译
+
+```
+
+
+
+### Too many files with unapproved license: 131 See RAT report in: /home/clouddev/kwai-flink/target/rat.txt
+
+```
+加参数跳过
+mvn clean install -DskipTests -Dcheckstyle.skip=true  -Pskip-webui-build -Drat.skip=true
+
+```
+
+
+
+### scalac: Scala compiler JARs not found (module 'flink-runtime_2.11'): /home/clouddev/.m2/repository/org/scala-lang/modules/scala-parser-combinators_2.11/1.0.4/scala-parser-combinators_2.11-1.0.4.jar
+
+```
+scala版本问题，命令行重新编译，scala代码不要再动了。idea不适合从源头编译
+
+
+```
+
+
+
+### javac 8 was used to compile java sources
+```
+Errors occurred while compiling module 'xxxx'
+javac 8 was used to compile java sources
+
+
+ 确保您的 Java 文件编码与 JDK 支持的编码一致。通常，UTF-8 编码是推荐使用的。
+ mvn clean install 重新编译吧
+```
+
+
+
+### Invalid signature file digest for Manifest main attributes
+```
+shade打包，包含第三方配置文件
+需要删除无用文件
+
+shade加上配置
+ <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+
+
+
+java.lang.SecurityException: Invalid signature file digest for Manifest main attributes
+
+	at sun.security.util.SignatureFileVerifier.processImpl(SignatureFileVerifier.java:330)
+	at sun.security.util.SignatureFileVerifier.process(SignatureFileVerifier.java:263)
+	at java.util.jar.JarVerifier.processEntry(JarVerifier.java:318)
+	at java.util.jar.JarVerifier.update(JarVerifier.java:230)
+	at java.util.jar.JarFile.initializeVerifier(JarFile.java:383)
+	at java.util.jar.JarFile.getInputStream(JarFile.java:450)
+	at sun.misc.URLClassPath$JarLoader$2.getInputStream(URLClassPath.java:977)
+	at sun.misc.Resource.cachedInputStream(Resource.java:77)
+	at sun.misc.Resource.getByteBuffer(Resource.java:160)
+	at java.net.URLClassLoader.defineClass(URLClassLoader.java:454)
+	at java.net.URLClassLoader.access$100(URLClassLoader.java:73)
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:368)
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:362)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:361)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:349)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	at java.lang.Class.getDeclaredMethods0(Native Method)
+	at java.lang.Class.privateGetDeclaredMethods(Class.java:2701)
+	at java.lang.Class.privateGetMethodRecursive(Class.java:3048)
+	at java.lang.Class.getMethod0(Class.java:3018)
+	at java.lang.Class.getMethod(Class.java:1784)
+	at org.junit.internal.builders.SuiteMethodBuilder.hasSuiteMethod(SuiteMethodBuilder.java:18)
+	at org.junit.internal.builders.SuiteMethodBuilder.runnerForClass(SuiteMethodBuilder.java:10)
+	at org.junit.runners.model.RunnerBuilder.safeRunnerForClass(RunnerBuilder.java:59)
+	at org.junit.internal.builders.AllDefaultPossibilitiesBuilder.runnerForClass(AllDefaultPossibilitiesBuilder.java:26)
+	at org.junit.runners.model.RunnerBuilder.safeRunnerForClass(RunnerBuilder.java:59)
+	at org.junit.internal.requests.ClassRequest.getRunner(ClassRequest.java:33)
+	at org.junit.internal.requests.FilterRequest.getRunner(FilterRequest.java:36)
+	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:50)
+	at com.intellij.rt.junit.IdeaTestRunner$Repeater$1.execute(IdeaTestRunner.java:38)
+	at com.intellij.rt.execution.junit.TestsRepeater.repeat(TestsRepeater.java:11)
+	at com.intellij.rt.junit.IdeaTestRunner$Repeater.startRunnerWithArgs(IdeaTestRunner.java:35)
+	at com.intellij.rt.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:232)
+	at com.intellij.rt.junit.JUnitStarter.main(JUnitStarter.java:55)
+
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+### 
+```
+
+
+```
+
+
+
+
 
 ## 自动化脚本
 
@@ -3185,6 +4325,10 @@ mkdir java
 cd java
 wget http://pkg.4paradigm.com/jdk/jdk-8u141-linux-x64.tar.gz
 tar -zxvf jdk-8u141-linux-x64.tar.gz
+
+
+wget https://github.com/Tencent/TencentKona-8/releases/download/8.0.19-GA/TencentKona8.0.19.b1_jdk_linux-x86_64_8u422.tar.gz
+
 
 
 echo 'export JAVA_HOME=/home/wangzixian/java/jdk1.8.0_141'>>~/.bash_profile
@@ -3369,6 +4513,46 @@ byte[] userActionProtos = ua.toByteArray();
 Base64.getDecoder().decode(Base64.getEncoder().encodeToString(userActionProtos))
 
 
+
+```
+
+
+### 从类名找到具体jar包名 （autosroll from source)
+1. https://www.baeldung.com/java-full-path-of-jar-from-class
+
+```
+
+
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Paths;
+public class Demo {
+    public static void main(String[] args) throws URISyntaxException {
+        String jarPath = byGetProtectionDomain(XXXXXXXXXXXXXXXXXXXXX.class);
+        System.out.println(jarPath);
+    }
+
+    static String byGetProtectionDomain(Class clazz) throws URISyntaxException {
+        URL url = clazz.getProtectionDomain().getCodeSource().getLocation();
+        return Paths.get(url.toURI()).toString();
+    }
+}
+
+```
+
+### 消除编译的无效警告（该对象没有被使用的警告）
+```
+
+  /**
+   * Does nothing with its argument. Call this method when you have a value
+   * you are not interested in, but you don't want the compiler to warn that
+   * you are not using it.
+   */
+  public static void discard(Object o) {
+    if (false) {
+      discard(o);
+    }
+  }
 
 ```
 
@@ -4241,6 +5425,7 @@ MethodSpec dismiss = MethodSpec.methodBuilder("dismiss")
 使用 `$T` 可以自动导入类型的引用
 
 ## IDEA使用
+1. 所有版本：https://www.jetbrains.com/zh-cn/idea/download/other.html
 
 ### 自动生成注释模板
 

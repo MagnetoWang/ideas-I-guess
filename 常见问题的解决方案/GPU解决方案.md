@@ -6,6 +6,7 @@
    2. 如何系统地学习CUDA？ - Kedreamix的回答 - 知乎 https://www.zhihu.com/question/263832290/answer/3322864217
    3. https://github.com/Kedreamix/pytorch-cppcuda-tutorial
    4. cuda编程示例：https://face2ai.com/program-blog/#GPU%E7%BC%96%E7%A8%8B%EF%BC%88CUDA%EF%BC%89
+   5. CUDATutorial：https://cuda.keter.top/
 2. 优化
    1. [CUDA 学习笔记] GEMM 优化: 双缓冲 (Prefetch) 和 Bank Conflict 解决 - PeakCrosser的文章 - 知乎 https://zhuanlan.zhihu.com/p/696844342
 ```
@@ -221,7 +222,8 @@ print("所有可用的设备：", available_devices)
 raven显卡：http://www.fishheadscanada.net/raven-t4/
 ```
 
-### 并行计算
+### GPU 和 Cuda关系
+1. gpu不是cuda，cuda是gpu的编程语言
 
 ```
 cuda介绍：https://zhuanlan.zhihu.com/p/34587739
@@ -577,36 +579,21 @@ https://github.com/microsoft/AI-System/blob/main/Textbook/%E7%AC%AC6%E7%AB%A0-%E
 1. Spmv（稀疏矩阵乘）
 
 ## 性能分析
+1. 【模型分析】Nsight Systems使用 - Arthur的文章 - 知乎 https://zhuanlan.zhihu.com/p/721868054
+2. 【模型分析】Nsight Compute使用入门 - Arthur的文章 - 知乎 https://zhuanlan.zhihu.com/p/721868889
+3. 利用Nsight System 和 Nsight Compute进行性能优化分析 - 进击的Killua的文章 - 知乎 https://zhuanlan.zhihu.com/p/673282220
+4. 【推理引擎】NN模型部署框架/推理引擎总结 - eyesighting的文章 - 知乎 https://zhuanlan.zhihu.com/p/672617025
+5. Optimize softmax cuda kernel https://github.com/Oneflow-Inc/oneflow/pull/4058
+6. 【分布式训练技术分享七】聊聊字节 AML 万卡工作 MegaScale: Scaling Large Language Model Training to More Than 10,000 GPUs - 无恶不作的文章 - 知乎 https://zhuanlan.zhihu.com/p/684619370
+7. 混合输入矩阵乘法的性能优化 - OneFlow的文章 - 知乎 https://zhuanlan.zhihu.com/p/685893061
+8. DeepSpeed-FastGen：通过 MII 和 DeepSpeed-Inference 实现 LLM 高吞吐量文本生成 - 微软DeepSpeed的文章 - 知乎 https://zhuanlan.zhihu.com/p/665494115
+9. [Transformer 101系列] LLM模型量化世界观(上) - aaronxic的文章 - 知乎 https://zhuanlan.zhihu.com/p/686232369
+10. 利用Nsight System 和 Nsight Compute进行性能优化分析 - 进击的Killua的文章 - 知乎 https://zhuanlan.zhihu.com/p/673282220
+11. 大白话解说Continous Batching - Gnuey Iup的文章 - 知乎 https://zhuanlan.zhihu.com/p/680123256
 ```
 
 
-利用Nsight System 和 Nsight Compute进行性能优化分析 - 进击的Killua的文章 - 知乎
-https://zhuanlan.zhihu.com/p/673282220
 
-
-【推理引擎】NN模型部署框架/推理引擎总结 - eyesighting的文章 - 知乎
-https://zhuanlan.zhihu.com/p/672617025
-
-
-Optimize softmax cuda kernel
-https://github.com/Oneflow-Inc/oneflow/pull/4058
-
-
-【分布式训练技术分享七】聊聊字节 AML 万卡工作 MegaScale: Scaling Large Language Model Training to More Than 10,000 GPUs - 无恶不作的文章 - 知乎
-https://zhuanlan.zhihu.com/p/684619370
-
-
-混合输入矩阵乘法的性能优化 - OneFlow的文章 - 知乎
-https://zhuanlan.zhihu.com/p/685893061
-
-
-
-DeepSpeed-FastGen：通过 MII 和 DeepSpeed-Inference 实现 LLM 高吞吐量文本生成 - 微软DeepSpeed的文章 - 知乎
-https://zhuanlan.zhihu.com/p/665494115
-
-
-[Transformer 101系列] LLM模型量化世界观(上) - aaronxic的文章 - 知乎
-https://zhuanlan.zhihu.com/p/686232369
 
 
 ```

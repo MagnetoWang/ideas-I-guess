@@ -2,6 +2,12 @@
 
 [TOC]
 
+### 个人介绍
+1. https://github.com/WangRongsheng/WangRongsheng/blob/master/README.md?plain=1
+2. https://github.com/samarjitsahoo
+3. https://github.com/BEPb?tab=overview&from=2023-12-01&to=2023-12-31
+4. https://github.com/Aurelius84
+
 ### 命令清单
 
 - http://www.ruanyifeng.com/blog/2015/12/git-cheat-sheet.html
@@ -33,28 +39,31 @@ git stash pop 如果没有冲突，会自动merge
 
 ```
 
-### Git rebase 合并commit
 
+### 多个 commit 合并成一个
 ```
-git rebase --edit-todo
 
-合并某个分支，但是没有commit
-git rebase xxx 
+git rebase -i HEAD~3
 
-出现冲突，先修改，然后
-git add xxxx
-再执行
-git rebase --continue
-重复上面两个操作
+pick 保持原有commit不变
+squash 需要合并的commit
 
-修复冲突后继续更改
-git rebase --continue
+比如
+合并逻辑 3c4d5e6 + 1f2g3h7 -> e3a1b35
+pick e3a1b35 第一个提交的信息
+squash 3c4d5e6 第二个提交的信息
+squash 1f2g3h7 第三个提交的信息
 
 
-放弃更改
-git rebase --abort  
+合并逻辑 e3a1b35 + 3c4d5e6 -> 1f2g3h7
+squash e3a1b35 第一个提交的信息
+squash 3c4d5e6 第二个提交的信息
+pick 1f2g3h7 第三个提交的信息
 
-使用说明：https://zhuanlan.zhihu.com/p/34197548
+然后退出编辑，git自动合并
+
+出现新的编辑本，需要你修改commit message，也可以不改，直接保存即可
+
 
 ```
 
@@ -172,22 +181,7 @@ git push origin HEAD:远程新branchName
 
 
 
-### 分支与分支之间的合并merge
 
-```
-在idea直接merge，非常方便，还会显示冲突直接选择
-
-在命令行下
-比如现在你有分支a
-你要合并分支b
-
-最好先更新分支b的内容，然后直接合并！
-git checkout b
-git pull
-
-git checkout a
-git merge b
-```
 ### 合并某个commit功能
 ```
 
@@ -238,6 +232,7 @@ https://docs.github.com/cn/pull-requests/committing-changes-to-your-project/crea
 ```
 
 ### 回滚 - 撤销push远端的代码
+1. 强制覆盖远程代码
 
 ```
 git reset --soft <版本号>
@@ -250,11 +245,7 @@ https://blog.csdn.net/xs20691718/article/details/51901161
 
 
 
-### 解决冲突问题
 
-- 出现confilct
-- 在当前分支执行 git merge origin/远程的主分支
-- merge之后将会出现，冲突的代码，然后手动删除就行了
 
 ### 无法rm文件
 
@@ -497,6 +488,73 @@ go build -i -v -ldflags "${LD_FLAGS}" -o output/bin/${RUN_NAME}
 
 
 ```
+
+## 代码合并
+1. 代码合并不是分支合并，代码合并 可以是cherry-pick 也可以merge,也可以是pull远程合并到本地
+
+### 分支与分支之间的合并merge
+
+```
+在idea直接merge，非常方便，还会显示冲突直接选择
+
+在命令行下
+比如现在你有分支a
+你要合并分支b
+
+最好先更新分支b的内容，然后直接合并！
+git checkout b
+git pull
+
+git checkout a
+git merge b
+```
+
+### 解决冲突问题
+
+- 出现confilct
+- 在当前分支执行 git merge origin/远程的主分支
+- merge之后将会出现，冲突的代码，然后手动删除就行了
+
+
+### Git rebase 合并commit
+
+```
+git rebase --edit-todo
+
+合并某个分支，但是没有commit
+git rebase xxx 
+
+出现冲突，先修改，然后
+git add xxxx
+再执行
+git rebase --continue
+重复上面两个操作
+
+修复冲突后继续更改
+git rebase --continue
+
+
+放弃更改
+git rebase --abort  
+
+使用说明：https://zhuanlan.zhihu.com/p/34197548
+
+```
+
+
+### 分支与分支之间不合并，但是能看到冲突文件，并人工修正避开冲突文件
+1. merge 会合并两个分支的开发路径，互相污染对方分支代码，有时候只是希望冲突解决即可，而不是历史commit合并
+2. 避免 ugly merge commits
+3. 避免 "pollute" my branch B
+4. just add changes from branchA to unstaged changes.
+5. git: Solve merge conflicts without performing a merge：https://stackoverflow.com/questions/38616937/git-solve-merge-conflicts-without-performing-a-merge
+6. https://stackoverflow.com/questions/76181131/how-to-resolve-merge-conflict-without-merging-branch
+7. Applying the changes from branch A to B, without merging or adding commits：https://stackoverflow.com/questions/20045946/applying-the-changes-from-branch-a-to-b-without-merging-or-adding-commits
+8. 提问方式
+   1. multi branch merge but without ugly merge history
+   2. Why do some people obsess over having a linear commit history or get upset about merge commits?
+   3. How to resolve merge conflict without merging branch
+9. 
 
 ## CICD
 
