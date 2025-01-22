@@ -137,15 +137,34 @@ FlinkCDC + 公司项目
    1. yamlparser
    2. TransformParser
 2. composer + connector
-   1. 
+   1. 组件定义 Def
+      1. ModelDef
+      2. PipelineDef.java
+      3. RouteDef.java
+      4. SinkDef.java
+      5. SourceDef.java
+      6. TransformDef.java
+      7. UdfDef.java
+   2. connector 外接数据源
+      1. doris kafka
 3. runtime
-   1. 
+   1. TransformParser 解析层
+   2. function函数层
+   3. op 算子层
+   4. 分区传输层
 4. pipeline model + udf
-   1. 
 5. flink runtime
    1. 转成 DataStream 逻辑，然后执行
-6. 数据实体
-   1. event StreamRecord<Event>
+6. common
+   1. 数据实体 数据结构
+      1. org.apache.flink.cdc.common.event
+         1. event StreamRecord<Event>
+         2. DataChangeEvent
+         3. FlushEvent
+         4. RenameColumnEvent
+         5. AddColumnEvent
+   2. schema
+      1. Column MetadataColumn PhysicalColumn
 7. 计算逻辑
    1. PostTransformOperator extends AbstractStreamOperator
    2. PreTransformOperator extends AbstractStreamOperator
@@ -153,3 +172,34 @@ FlinkCDC + 公司项目
 
 
 ### 纵向拆解 - 性能优化
+
+
+
+### 纵向拆解 - filter解析
+1. yaml支持任意filter，语法对齐SQL
+2. 解析的时候，用了一个巧思，先构造sqk，再获取里面的 filter算子即可
+3. 同理 project算子也是
+```Java
+    public static SqlSelect parseFilterExpression(String filterExpression) {
+        StringBuilder statement = new StringBuilder();
+        statement.append("SELECT * FROM ");
+        statement.append(DEFAULT_TABLE);
+        if (!isNullOrWhitespaceOnly(filterExpression)) {
+            statement.append(" WHERE ");
+            statement.append(filterExpression);
+        }
+        return parseSelect(statement.toString());
+    }
+
+
+   
+   private static SqlSelect parseProjectionExpression(String projection) {
+        StringBuilder statement = new StringBuilder();
+        statement.append("SELECT ");
+        statement.append(projection);
+        statement.append(" FROM ");
+        statement.append(DEFAULT_TABLE);
+        return parseSelect(statement.toString());
+    }
+
+```
