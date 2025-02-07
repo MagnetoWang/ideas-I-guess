@@ -36,6 +36,10 @@ PaddlePaddle + 公司项目
 ## 核心思考问题
 1. 编译 测试 和 自动跳转功能
 2. paddle和flink看的顺序不一样，flink是java，可以根据package，横向拆解，一层层看代码，有简单模块，看向复杂模块。但是paddle是c++，横向拆解不够粗粒度，只能纵向拆解，先串通整个流程设计的概念，再从源码编译顺序看看怎么横向分层
+   1. 还有一点就是flink我看不懂的时候，就是网上搜，网上的资料也能加速理解
+   2. paddle这方面资料太欠缺了，不能一路打通这个问题
+   3. 代码分析工具，各个类依赖图
+   4. 整个项目太复杂了！！！找到核心问题，针对问题去理解底层实现
 3. 代码拆解
    1. python 维度，大量业务用了哪些接口
    2. c++ 维度，不同包直接的依赖，依赖程度情况
@@ -68,42 +72,107 @@ PaddlePaddle + 公司项目
    19. ExecutorRole
    20. Momentum
    21. paddle 源码分析
-   22. 对比pytorch语料太少了，运营不给力啊
-   23. 挖issue 挖docs 挖comment 挖commit 挖核心开发人员的开发路径 大功能迭代
-   24. jacquesqiao
-   25. 
+   22. 自动混合精度 amp
+   23. 对比pytorch语料太少了，运营不给力啊
+   24. 挖issue 挖docs 挖comment 挖commit 挖核心开发人员的开发路径 大功能迭代
+   25. 搜人
+       1. jacquesqiao
+   26. 搜视频
+       1. decomp vjp
+       2. decomp rule
+       3. drrpattern base
+       4. source pattern
+       5. result patter
+       6. register_ir_pass
+       7. passmanager addpass runpass
+       8. glog_v=2 可以非常非常详细的日志
+       9. build strategy
+       10. replicate 分布式行切，列切
+       11. reshard 流水线并行
 7. paddle理解历程
    1. 横向结构看，太难，看不下去
    2. 纵向结构拆解，稍微有点思路
    3. cpp理解，太难，看不下去
    4. python + 横向拆解 稍微有点思路
    5. 关键词尽可能搜网上设计文档 稍微有点思路
+   6. 20241212 正好今天paddle发了7个框架视频解说
+      1. 也就是今天我稍微有思路拆解paddle源码，commit提交内容比较多
+
+### todolist
+1. 阅读顺序
+   1. test/dygraph_to_static
+
+### paddle vs pytorch
+1. paddle所有运营活动在github，但是运营内容都是中文，没有通过微信或者官网得到很好关键词挖掘
+   1. 搜 paddle 技术串讲 在google和baidu是两个不一样的结果。中国人其实更容易学paddle，但是获取相关信息渠道出了问题
+2. 活动很多，但是没有统一首页管理
+3. paddle为什么生态没有pytorch繁荣
+   1. paddle易用性不如torch
+   2. paddle 稳定性
+   3. 算法之间口口相传
+   4. 教程 论文 成了宣传入口点
+   5. pytorch如何出圈
+   6. paddle大量资料没发被搜索出来，没法在视频网站，公众号被分发
+   7. pytorch民间大量文章，被曝光远远大于paddle
+   8. 算法用pytorch写论文复现
+   9. 工程研究和优化pytorch底层源码
+   10. 新的模型架构，优先pytorch支持
+   11. 大量模型实现遇到bug，pytorch都能第一个先测试出来，然后优化
+   12. 多语言文档
+   13. benchmark
+4. paddle有办法超越pytorch吗
+   1. 从科研人习惯来说，很难。
+   2. 从曝光量来说，可以，做爆品视频
+   3. 从工程角度来说，没任何问题，甚至在中国可以取代tf
+   4. 建立世界范围内模型评测和回归测试，类似SQL评测，所有数据库经过SQL benchmark和逻辑校验，就能评估打平老牌数据库
+   5. 模型榜单 + 深度集成 hugging face + vllm + trion
+   6. cinn vs tvm vs Halide vs loopy vs theano
+   7. 小米式发布会：feature number one
+   8. 数签子 数楼层 数人头
+5. 还在浪费时间折腾环境？试试paddle吧
+
+### 模型评测 & 排行榜
+1. https://ai-bot.cn/sites/5435.html
+2. https://ai-bot.cn/favorites/llm-benchmarks/
+3. https://github.com/PaddlePaddle/benchmark
+4. https://pytorch.org/tutorials/recipes/recipes/benchmark.html
 
 ## 参考资料
 1. 飞桨框架v2.4 API新升级！全面支持稀疏计算、图学习、语音处理等任务：https://mp.weixin.qq.com/s/8IYYEbJqIjyWd2zO7TGGFw
 2. PaddleBox：百度基于GPU的超大规模离散DNN模型训练解决方案：https://mp.weixin.qq.com/s/o-ZoRnAMnINGHVALj7DQRA
 3. 大模型时代的异构计算平台：https://mp.weixin.qq.com/s/ZAP_8ZwkZ295I225QTh9Yw
-4. 委员会
+4. 版本迭代
+   1. 3.0：https://www.paddlepaddle.org.cn/documentation/docs/zh/release_note_cn.html#jichuzhixingjiagou
+   2. 2.6：https://www.paddlepaddle.org.cn/documentation/docs/zh/2.6/release_note_cn.html
+   3. 2.5：https://www.paddlepaddle.org.cn/documentation/docs/zh/2.5/release_note_cn.html#id81
+5. 委员会
    1. https://github.com/PaddlePaddle/community/tree/master/pposdwg
-5. 技术分享
+6. 技术分享
    1. pfcc会议链接：https://github.com/PaddlePaddle/community/blob/62cb010a432155cb9265c6f98f0aa3d28cee3a0a/pfcc/meetings/2024/2024-11-14-meeting-minutes.md
    2. 训练营：https://github.com/PFCCLab/Camp?tab=readme-ov-file
    3. 代码串讲：https://github.com/PFCCLab/Camp
    4. 读书会：https://github.com/PaddlePaddle/community/tree/master/pfcc/paddle-code-reading
-   5. pfcc：https://pfcc.blog/
-   6. 周会：https://github.com/PaddlePaddle/community/tree/master/pfcc
-   7. code reading：https://github.com/PaddlePaddle/community/tree/master/pfcc/paddle-code-reading
-6. 模型库
+   5. 论文阅读：https://github.com/PaddlePaddle/PaddleRec/tree/master/paper
+   6. pfcc：https://pfcc.blog/
+   7. 周会：https://github.com/PaddlePaddle/community/tree/master/pfcc
+   8. code reading：https://github.com/PaddlePaddle/community/tree/master/pfcc/paddle-code-reading
+   9. awesome：https://github.com/PaddlePaddle/awesome-DeepLearning
+7. 视频分享
+   1. 手把手教你用基础算子组合你需要的复杂算子：https://www.bilibili.com/video/BV1FZqbY7Et6?spm_id_from=333.788.videopod.sections&vd_source=0f9d0e0a195e3352b97b5cb0ca3e57a2
+   2. pir实现pass：
+   3. 全程带练习：https://www.bilibili.com/video/BV1dUUoYjEwv/?spm_id_from=333.999.0.0&vd_source=0f9d0e0a195e3352b97b5cb0ca3e57a2
+   4. 开发者说：https://www.bilibili.com/video/BV1eN4y1j7AS?spm_id_from=333.788.videopod.sections&vd_source=0f9d0e0a195e3352b97b5cb0ca3e57a2
+8. 模型库
    1. https://github.com/PaddlePaddle/models
    2. https://www.paddlepaddle.org.cn/modelbase
-7. 性能优化
+9.  性能优化
    1. 模型优化：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-performance-opt/model_perf.md
    2. 编译器优化理论SSA
-8. blog
+10. blog
    1. yeyupiaoling：https://github.com/yeyupiaoling
    2. Zerorains：https://space.keter.top/docs/high_performance/%E7%AE%97%E5%AD%90%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/Histogram
    3. State of PyTorch：https://pfcc.blog/posts/pytorch-conference-01
-9. 黑客松
+11. 黑客松
    1. Hackathon 1th：https://github.com/PaddlePaddle/Paddle/issues/35940
    2. Hackathon 2th：https://github.com/PaddlePaddle/Paddle/issues/40234
    3. Hackathon 3th：https://github.com/PaddlePaddle/Paddle/issues/43938
@@ -111,18 +180,18 @@ PaddlePaddle + 公司项目
    5. Hackathon 5th：https://github.com/PaddlePaddle/docs/blob/release/2.5/docs/guides/10_contribution/hackathon_cn.md
    6. Hackathon 6th：https://github.com/PaddlePaddle/Paddle/issues/62907
    7. Hackathon 7th：https://github.com/PaddlePaddle/Paddle/issues/68242
-10. 人物经历
+12. 人物经历
     1. nknan：https://pfcc.blog/posts/nknan-story
        1. https://github.com/NKNaN
     2. https://pfcc.blog/posts/wangxin-story
     3. https://pfcc.blog/posts/tao-story
     4. https://pfcc.blog/posts/zhangyiqiao-story 说话挺搞笑的，哈哈哈
     5. https://pfcc.blog/posts/sanbu-story
-11. 课程
+13. 课程
    1. 李宏毅课程-机器学习：https://aistudio.baidu.com/course/introduce/1978
 
 
-## 文章分享
+### 文章分享
 1. Pir Parser实现分享：https://github.com/PFCCLab/Camp/blob/main/Docs/Hackathon_5th/01_PIR_OpTestFixingAndProgramTranslatorRefinement/pir_parser_implementation_sharing.md
 2. PIR 组网 API：https://github.com/PFCCLab/Camp/blob/main/Docs/Hackathon_5th/03_NewIRAPI_AutoDiffAndCoreComponentRefinement/CodeReading/Over_view_PIR_construct_API_As_CodeGen_perspective.md
 3. codegen：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/code_gen/code_gen_ops.md
@@ -148,10 +217,7 @@ PaddlePaddle + 公司项目
    4. https://space.keter.top/docs/high_performance/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A1%86%E6%9E%B6%E5%BC%80%E5%8F%91/%E9%9D%99%E6%80%81%E5%9B%BE%E6%89%A7%E8%A1%8C%E8%BF%87%E7%A8%8B
    5. https://space.keter.top/docs/high_performance/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A1%86%E6%9E%B6%E5%BC%80%E5%8F%91/TensorRT%E7%AE%97%E5%AD%90%E5%BC%80%E5%8F%91
 
-## paddle vs pytorch
-1. paddle所有运营活动在github，但是运营内容都是中文，没有通过微信或者官网得到很好关键词挖掘
-   1. 搜 paddle 技术串讲 在google和baidu是两个不一样的结果。中国人其实更容易学paddle，但是获取相关信息渠道出了问题
-2. 活动很多，但是没有统一首页管理
+
 
 ## 基本概念
 1. ao
@@ -211,20 +277,57 @@ PaddlePaddle + 公司项目
 ### 模型结构图
 
 
+## 大框
+1. python
+   1. nn
+      1. layer
+      2. funcion
+      3. op
+   2. autograd
+      1. tensor 保存，计算梯度关键一步
+      2. backward
+      3. ir
+         1. append_backward_ops 方向计算op
+         2. calc_gradient 
+         3. grad
+   3. graph
+      1. dy
+      2. static
+      3. jit
+      4. pir
+   4. cinn 
+   5. runtime 执行层包括硬件和分布式
+      1. pass
+      2. device
+   6. 第三方集成
+      1. onnx
+      2. inference
+2. python-test
+   1. 定义并打印梯度计算
+   2. 定义动态图
+   3. 定义静态图
+   4. dy2static
+   5. 定义并执行pass
+   6. 
+3. c++
+4. cpp-test
+
 ## Python 源码
 
 ### 纵向拆解 - layer
 1. 神经网络模型的Program，由多个Block（控制流结构）构成，每个Block是由Operator（算子）和数据表示Variable（变量）构成
-2. 思考问题
+2. 微分计算
+   1. 前向重计算：https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/guides/06_distributed_training/data_parallel/recompute_cn.html
+3. 思考问题
    1. 自定义layer
    2. 自定义op
    3. 自定义program
    4. 自定义block
    5. python测试用例 如何验证以上关键类
-3. LayerHelper
+4. LayerHelper
    1. create_variable_for_type_inference 变量类型推导
    2. append_op op管理
-4. 核心类
+5. 核心类
    1. framework.py 引入 libpaddle c++
       1. Program
    2. core.py 引入 libpaddle c++
@@ -232,7 +335,7 @@ PaddlePaddle + 公司项目
    4. backward.py
    5. executor.py
    6. fluid
-5. 概念
+6. 概念
    1. trt
 
 #### 基本概念
@@ -450,6 +553,65 @@ with static.program_guard(train_program, start_program):
 
 ```
 
+#### Program 和 Executor 组合
+```
+
+def cal_composite(inputs, running_mean, running_variance, weight, bias):
+    paddle.enable_static()
+
+    startup_program = paddle.static.Program()
+    main_program = paddle.static.Program()
+    with paddle.static.program_guard(main_program, startup_program):
+        x1 = paddle.static.data(
+            'x1', shape=inputs.shape, dtype=str(inputs.dtype)
+        )
+        x1.stop_gradient = False
+        x2 = paddle.static.data(
+            'x2', shape=running_mean.shape, dtype=str(running_mean.dtype)
+        )
+        x3 = paddle.static.data(
+            'x3',
+            shape=running_variance.shape,
+            dtype=str(running_variance.dtype),
+        )
+        x4 = paddle.static.data(
+            'x4', shape=weight.shape, dtype=str(weight.dtype)
+        )
+        x5 = paddle.static.data('x5', shape=bias.shape, dtype=str(bias.dtype))
+        y = fn(
+            x1,
+            x2,
+            x3,
+            x4,
+            x5,
+            attrs.training,
+            attrs.momentum,
+            attrs.epsilon,
+            attrs.data_format,
+            attrs.use_global_stats,
+        )
+        z = paddle.static.gradients([y], [x1])
+
+    exe = paddle.static.Executor()
+    exe.run(startup_program)
+    res = exe.run(
+        main_program,
+        feed={
+            'x1': inputs,
+            'x2': running_mean,
+            'x3': running_variance,
+            'x4': weight,
+            'x5': bias,
+        },
+        fetch_list=[z],
+    )
+    paddle.disable_static()
+    return res
+
+
+
+```
+
 
 #### _C_ops 导出 c形式op
 1. python/paddle/_C_ops.py
@@ -499,6 +661,24 @@ loss, = exe.run(compiled_prog,
 
 ```
 
+#### 
+
+### vjp vmap grad
+1. pytorch实现：https://pytorch.ac.cn/docs/stable/generated/torch.func.vjp.html#torch.func.vjp
+
+### autograd
+
+#### forward
+1. 计算流程
+
+#### backward
+1. python/paddle/autograd/ir_backward.py
+2. python/paddle/autograd/backward_utils.py
+
+#### optimizer
+1. test/legacy_test/test_optimizer_grad.py
+2. python/paddle/optimizer/optimizer.py
+
 ### 纵向拆解 - 动态图 & 静态图
 1. 调用链路：
    1. https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/Dygraph/20221201_dygraph_forward.md
@@ -518,12 +698,14 @@ loss, = exe.run(compiled_prog,
    4. 代码执行方式不同
       1. 在静态图模式下，完整的网络结构在执行前是已知的，因此图优化分析的灵活性比较大，往往执行性能更佳，但调试难度大。
 #### 设计
-1. 动态执行过程：https://www.paddlepaddle.org.cn/tutorials/projectdetail/4047189#anchor-7
-2. 图的设计思想：https://www.paddlepaddle.org.cn/tutorials/projectdetail/3991882
-3. 新动态图前向调用过程代码详解：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/Dygraph/20221201_dygraph_forward.md
-4. 官方概念：https://www.paddlepaddle.org.cn/tutorials/projectdetail/4047189
-5. 执行过程：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/static_graph_execution/20221230_static_graph_execution.md
-6. 动态图
+1. 使用case：https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/guides/jit/basic_usage_cn.html
+2. 动态执行过程：https://www.paddlepaddle.org.cn/tutorials/projectdetail/4047189#anchor-7
+3. 图的设计思想：https://www.paddlepaddle.org.cn/tutorials/projectdetail/3991882
+4. 新动态图前向调用过程代码详解：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/Dygraph/20221201_dygraph_forward.md
+5. 官方概念：https://www.paddlepaddle.org.cn/tutorials/projectdetail/4047189
+6. 执行过程：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/static_graph_execution/20221230_static_graph_execution.md
+7. buildstrategy：https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/static/BuildStrategy_cn.html#buildstrategy
+8. 动态图
    1. 在动态图模式下，Operator 是即时执行的，即用户每调用一个飞桨API，API均会马上执行返回结果
    2. 在模型训练过程中，在运行前向 Operator 的同时，框架底层会自动记录对应的反向 Operator 所需的信息，即一边执行前向网络，另一边同时构建反向计算图。
    3. 在动态图模式下，执行器并不是先掌握完整的网络全图，再按照固定模式批量执行。而是根据Python的原生控制流代码，逐条执行前向计算过程和后向计算过程，其中后向计算的逻辑飞桨框架会在前向计算的时候自动化构建，不需要用户再操心。
@@ -542,6 +724,7 @@ Executor：用于快速调度 Operator ，完成网络训练/预测。
 ```
 
 
+#### 动态图转静态图
 
 ### 纵向拆解 - Funcional
 
@@ -728,6 +911,38 @@ to_string.py
 1. https://github.com/PaddlePaddle/docs/blob/develop/docs/design/dist_train/distributed_traing_review.md
 
 
+
+
+#### 混合精度训练
+
+
+#### 模型保存与载入
+
+
+#### 分布式训练优化
+1. 支持千亿语言模型混合并行训练：支持基于executor接口的流水线并行训练，sharding-DP策略，GradientMerge+AMP策略，Recompute+Offload策略，megatron策略
+2. 支持动态图：支持多流通信策略，自动rebuild group策略，高性能稀疏参数通信，多卡梯度顺序一致性策略
+3. 支持基于控制流的多任务分布式训练，性能较基于Intag的多任务提升50%以上
+
+#### 参数服务器PS
+1. 大规模稀疏功能升级：升级大规模稀疏PS-API，抽象通信组件/参数表/优化器基类，方便用户通过子类派生方式进行二次开发；同时还支持千亿特征流式训练，含特征准入，退场，增量训练，分布式指标预测等；通信方式从GRPC切换成了BRPC
+2. 开源异构参数服务器，既支持传统的纯CPU机器PS，也支持基于三级存储(SSD/内存/显存)的纯GPU机器PS，还支持CPU机器+GPU机器/昆仑机器混布PS，可以完成万亿参数点击率预估模型的分钟级训练
+
+
+
+
+
+
+
+
+#### 模型量化
+1. 采用per-layer方式量化的模型trt量化预测
+
+#### API
+1. 基础通信类API到paddle.distributed: broadcast, all_reduce, reduce, all_gather, scatter, barrier
+2. 多卡训练启动API spawn, init_parallel_env
+3. 动静统一启动方式fleetrun
+4. DistributedStrategy来支持多种优化策略组合和自动并行、分布式指标计算、InMemoryDataset
 
 ## C++ 源码
 ### 编译
@@ -1051,6 +1266,7 @@ paddle/phi/kernels
 6. IR 基础库会抽象出一套 Pass 基础组件
 7. 源码
    1. paddle/pir/src/core
+   2. 
 
 #### 类型系统 - 对比Flink Spark Calcite
 
@@ -1081,22 +1297,249 @@ paddle/phi/kernels
 
 ```
 
+#### JIT
+1. program翻译为IR
+   1. develop/Paddle/python/paddle/jit/dy2static/program_translator.py
+   2. develop/Paddle/python/paddle/jit/dy2static/pir_partial_program.py
+
+#### PassManager 管理pass逻辑
+1
+
+#### Pass
+1. framework::ProgramDesc  =>  ir::Graph   =>  frontend::Program (NetBuilder 层)   =>  hlir::Graph =>    
+Compute/Schedule()   =>  AST 层面   =>  Module::Builder  =>  CodeGen+NVRTC =>  Runtime::Program
+2. 系统内置pass
+   1. /root/develop/Paddle/python/paddle/distributed/auto_parallel/static/pir_pass.py
+3. 环境变量
+   1. GLOG_v=2
+
+#### Pass注册
+```cpp
+// Copyright (c) 2024 PaddlePaddle Authors. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include "paddle/cinn/hlir/dialect/operator/transforms/convert_memory_effec_attn_to_flash_attn_pass.h"
+
+#include "paddle/cinn/hlir/dialect/operator/ir/cinn_op.h"
+#include "paddle/cinn/hlir/dialect/operator/ir/manual_op.h"
+#include "paddle/cinn/hlir/framework/pir/utils.h"
+#include "paddle/common/ddim.h"
+#include "paddle/fluid/pir/dialect/operator/ir/op_attribute.h"
+#include "paddle/fluid/pir/dialect/operator/ir/op_type.h"
+#include "paddle/fluid/pir/dialect/operator/ir/pd_op.h"
+#include "paddle/pir/include/core/builtin_dialect.h"
+#include "paddle/pir/include/pass/pass.h"
+#include "paddle/pir/include/pass/pass_registry.h"
+#include "paddle/pir/include/pattern_rewrite/frozen_rewrite_pattern_set.h"
+#include "paddle/pir/include/pattern_rewrite/pattern_applicator.h"
+#include "paddle/pir/include/pattern_rewrite/pattern_match.h"
+#include "paddle/pir/include/pattern_rewrite/pattern_rewrite_driver.h"
+
+namespace cinn {
+namespace dialect {
+namespace ir {
+
+class ConvertMEA2FAPattern : public pir::OpRewritePattern<
+                                 paddle::dialect::MemoryEfficientAttentionOp> {
+ public:
+  using pir::OpRewritePattern<
+      paddle::dialect::MemoryEfficientAttentionOp>::OpRewritePattern;
+
+  bool Match(paddle::dialect::MemoryEfficientAttentionOp op) const override {
+#ifndef PADDLE_WITH_FLASHATTN
+    return false;
+#endif
+    auto bias = op->operand_source(3);
+    auto cu_seq_q = op->operand_source(4);
+    auto cu_seq_k = op->operand_source(5);
+    auto causal_diagonal = op->operand_source(6);
+    auto seq_k = op->operand_source(7);
+
+    // bias, cur_seq_q, cur_seq_k,  causal_diagonal, seq_k should be null
+    if (bias || cu_seq_q || cu_seq_k || causal_diagonal || seq_k) {
+      return false;
+    }
+    // flash attention does not support float32
+    if (paddle::dialect::TransToPhiDataType(
+            op->operand_source(0)
+                .type()
+                .dyn_cast<paddle::dialect::DenseTensorType>()
+                .dtype()) == phi::DataType::FLOAT32) {
+      return false;
+    }
+
+    bool is_test =
+        op->attribute("is_test").dyn_cast<pir::BoolAttribute>().data();
+    if (!is_test) {
+      return false;
+    }
+
+    float scale = op->attribute("scale").dyn_cast<pir::FloatAttribute>().data();
+
+    if (scale > 0) {
+      auto hidden_size =
+          phi::vectorize(op->operand_source(0)
+                             .type()
+                             .dyn_cast<paddle::dialect::DenseTensorType>()
+                             .dims())
+              .back();
+      auto scale_t = 1.0 / std::sqrt(hidden_size);
+      if ((std::abs(scale_t - scale) / scale_t) < 1e-5) {
+        return true;
+      }
+      return false;
+    }
+
+    auto max_seqlen_q =
+        op->attribute("max_seqlen_q").dyn_cast<pir::FloatAttribute>().data();
+    auto max_seqlen_k =
+        op->attribute("max_seqlen_k").dyn_cast<pir::FloatAttribute>().data();
+    if (max_seqlen_q > 0 || max_seqlen_k > 0) {
+      return false;
+    }
+
+    return true;
+  }
+
+  void Rewrite(paddle::dialect::MemoryEfficientAttentionOp op,
+               pir::PatternRewriter& rewriter) const override {
+    auto q = op->operand_source(0);
+    auto k = op->operand_source(1);
+    auto v = op->operand_source(2);
+
+    auto dropout_p =
+        op->attribute("dropout_p").dyn_cast<pir::DoubleAttribute>().data();
+
+    auto causal = op->attribute("causal").dyn_cast<pir::BoolAttribute>().data();
+
+    pir::Value fixed_seed;
+    pir::Value attn_mask;
+    auto fa = rewriter.Build<paddle::dialect::FlashAttnOp>(
+        q, k, v, fixed_seed, attn_mask, dropout_p, causal, false, true, "");
+
+    rewriter.ReplaceAllUsesWith(op->result(0), fa.result(0));
+    rewriter.EraseOp(op);
+  }
+};
+
+class ConvertMEA2FAPass : public pir::PatternRewritePass {
+ public:
+  ConvertMEA2FAPass() : pir::PatternRewritePass("convert_MEA_to_FA", 1) {}
+
+  pir::RewritePatternSet InitializePatterns(pir::IrContext* context) override {
+    pir::RewritePatternSet ps(context);
+    ps.Add<ConvertMEA2FAPattern>(context);
+    return ps;
+  }
+};
+
+std::unique_ptr<pir::Pass> CreateConvertMEA2FAPass() {
+  return std::make_unique<ConvertMEA2FAPass>();
+}
+
+}  // namespace ir
+}  // namespace dialect
+}  // namespace cinn
+
+REGISTER_IR_PASS(convert_MEA_to_FA, ::cinn::dialect::ir::ConvertMEA2FAPass);
+
+
+```
+
 #### Partitioned IR切分 
 
 
-#### Pass升级
-1. framework::ProgramDesc  =>  ir::Graph   =>  frontend::Program (NetBuilder 层)   =>  hlir::Graph =>    
-Compute/Schedule()   =>  AST 层面   =>  Module::Builder  =>  CodeGen+NVRTC =>  Runtime::Program
 
+
+#### PassManager
+1. 源码参考 
+   1. /root/develop/Paddle/test/cpp/pir/cinn/build_cinn_pass_test.cc
+   2. /root/develop/Paddle/test/ir/pir/fused_pass/pass_test.py
+   3. /root/develop/Paddle/test/distributed_passes/test_fuse_allreduce_split_to_reducescatter_pass.py
+```
+
+
+```
 
 
 #### MLIR设计借鉴
 1. MLIR 文章视频汇总 - 法斯特豪斯的文章 - 知乎 https://zhuanlan.zhihu.com/p/141256429
 
+
+#### 控制流
+1. paddle/fluid/pir/dialect/operator/ir/control_flow_op.h
+2. paddle/fluid/pybind/control_flow_api.cc
+3. paddle/pir/core/op_base.h
+4. paddle/pir/core/operation.h
+5. paddle/pir/dialect/control_flow/ir/cf_type.h
+6. test/ir/pir/test_while_api.py
+7. test/ir/pir/test_while_api.py
+8. paddle/fluid/pybind/pir.cc
+
+#### 硬件IR
+1. https://github.com/PaddlePaddle/Paddle/pull/59790
+2. paddle/fluid/pir/dialect/kernel/ir/kernel_op.h
+3. paddle/fluid/pir/dialect/kernel/ir/kernel_dialect.h
+4. paddle/fluid/pir/dialect/operator/interface/op_yaml_info.h
+5. paddle/fluid/pir/dialect/operator/ir/op_dialect.h
+6. paddle/fluid/pir/transforms/inplace_pass.cc
+7. paddle/fluid/pir/transforms/pd_op_to_kernel_pass.cc
+8. paddle/phi/kernels/autotune/cache_base.h
+9. 自定义算子硬件：https://github.com/PaddlePaddle/PaddleCustomDevice
+
 ### 纵向拆解 - Program & Graph (CINN)
 1. cinn  Compiler Infrastructure for Neural Networks：https://github.com/PaddlePaddle/CINN
 2. Paddle 训练框架应用 CINN 进行编译优化加速：https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/cinn/paddle2cinn_intro_cn.html
 3. CINN 神经网络编译器：https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/paddle_v3_features/cinn_cn.html
+4. tvm vs cinn：https://www.cnblogs.com/CocoML/p/17465322.html
+5. 前端优化
+   1. 组合算子拆分：由于非基础算子数量较多，并且在编译器中较难识别和处理，因此我们使用组合算子拆分的方式将非基础算子拆分为等价的基础算子组合，原始计算图经过组合算子拆分后可以大幅提升性能的可优化空间。
+   2. 图优化 Pass：常量折叠、死代码消除（DCE）、公共子表达式消除（CSE）、冗余算子消除、算子计算合并等。
+   3. 算子融合：主要是将多个算子打包到一个子图中（对应为一个 FusionOp），交给编译器后端生成一个高效的硬件相关计算 Kernel。 算子融合的本质是通过 IO 优化加速访存密集算子，如果我们将两个连续 Kernel 合并为一个 Kernel 调用，我们会减少中间变量的读写开销，因此在访存密集型的 2 个 Op 上，融合可以获取更高的性能。
+6. 后端优化
+   1. CINN AST IR
+   2. 基于 AST IR 的 Schedule：LoopAlignment, Tile, Inline, Vectorize, Unroll 等
+   3. Kernel 代码生成与编译
+   4. 执行器
+
+#### AST
+```
+
+
+```
+
+#### Pass
+1. test/cpp/pir/pass/pass_manager_test.cc
+
+
+
+
+
+
+#### codegen
+```
+
+
+```
+
+
+
+#### Executor
+```
+
+
+```
 
 
 
@@ -1118,13 +1561,14 @@ Compute/Schedule()   =>  AST 层面   =>  Module::Builder  =>  CodeGen+NVRTC => 
 
 
 ### 纵向拆解 - 算子设计
-1. 算子组合开发问题：https://github.com/PFCCLab/Camp/blob/main/Docs/Hackathon_5th/04_TheUnityOfOperatorForwardAndBackwardInCombinationFeatures/CodeReading/the_unity_of_operator_forward_and_backward_in_combination_features.md
-2. 组合机制设计文档：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/operator_decomposition_mechanism/design.md
-3. 问题背景
+1. 自定义算子：https://www.paddlepaddle.org.cn/tutorials/projectdetail/5715105
+2. 算子组合开发问题：https://github.com/PFCCLab/Camp/blob/main/Docs/Hackathon_5th/04_TheUnityOfOperatorForwardAndBackwardInCombinationFeatures/CodeReading/the_unity_of_operator_forward_and_backward_in_combination_features.md
+3. 组合机制设计文档：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/operator_decomposition_mechanism/design.md
+4. 问题背景
    1. NVIDIA数据公布， GPT-3 175B 使用1024块A100 训练34天，需要强大分布式训练能力。
    2. 科学计算微分方程求解如EulerBeam，前向运算四阶微分，加上一次反向传播过程，需要五阶微分。
    3. 编译器加速、国产硬件支持也近期深度学习框架演进重要方向。
-4. 飞桨框架底层基于原生算子体系(1061个，正向 691个，反向 370个，且持续增长)构建，导致上述场景适配难度极大，具体原因如下：
+5. 飞桨框架底层基于原生算子体系(1061个，正向 691个，反向 370个，且持续增长)构建，导致上述场景适配难度极大，具体原因如下：
    1. 分布式：需要基于原生算子体系手写自动并行策略。
    2. 高阶微分：需要手写高阶微分算子，如Matmul五阶代码行数超过3000。
    3. 编译器：需要将原生大算子拆解成细粒度编译器小算子，才能进一步融合优化。
@@ -1145,9 +1589,21 @@ Compute/Schedule()   =>  AST 层面   =>  Module::Builder  =>  CodeGen+NVRTC => 
 1. Inplace 介绍 & 使用介绍：https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/Inplace/inplace_introduction.md
 2. Paddle Inplace 使用指南：https://github.com/AndSonder/community/blob/ae18ba0d0b3b4ddd5ebc814c8190cd8f7a42b1bc/rfcs/Article/20240321_guide_to_using_Inplace.md
 
+
+
+### 纵向拆解 - AMP
+1. 自动混合精度：https://www.paddlepaddle.org.cn/tutorials/projectdetail/5668385
+2. 调优：https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/performance_improving/index_cn.html
+```
+
+
+```
+
 ### 纵向拆解 - 微分规则 VJP
 
 ### 纵向拆解 - 自动并行 分布式
+
+
 
 ### 纵向拆解 - Parameter Server
 1. https://github.com/PaddlePaddle/docs/blob/develop/docs/design/dist_train/parameter_server.md
@@ -1364,9 +1820,19 @@ fleetrun --ips="xx.xx.xx.xx,yy.yy.yy.yy" train.py
 
 
 
+## 性能优化
 
+### 稀疏优化
+1. 一文带你读懂非结构化稀疏模型压缩和推理优化技术：https://mp.weixin.qq.com/s/l__C5IOu3z7uQdcWKnViOw
+2. 模型的非结构化稀疏：https://www.paddlepaddle.org.cn/lite/v2.12/user_guides/sparse.html
+
+
+### 4D训练
+1. 4D混合并行：https://cloud.baidu.com/article/292988
 
 ## 其他设计
+
+
 ### 垃圾回收器
 1. github/Paddle/paddle/fluid/framework/new_executor/garbage_collector
 
