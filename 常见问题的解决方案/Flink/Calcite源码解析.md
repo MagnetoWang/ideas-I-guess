@@ -86,14 +86,18 @@ calcite + 公司项目
    8. core/src/test/java/org/apache/calcite/test/RelOptRulesTest.java
    9. core/src/test/java/org/apache/calcite/rel/rel2sql/RelToSqlConverterTest.java
    10. core/src/test/java/org/apache/calcite/test/SqlToRelConverterTest.java
+4. release note
+   1. 判断新增feature和修复的bug，是否能解决业务问题
+   2. https://calcite.apache.org/docs/history.html#v1-28-0
 
 
 
 ### 概念地图
 1. 概念图解：https://www.cnblogs.com/wcgstudy/p/11795886.html
 2. 物化视图-数据格框架(Lattice Framework)：https://cloud.tencent.com/developer/article/2450528
-3. Thunk：程序地址
-4. RexNode：行表达式（标量表达式），蕴含的是对一行数据的处理逻辑。每个行表达式都有数据的类型
+3. 
+4. Thunk：程序地址
+5. RexNode：行表达式（标量表达式），蕴含的是对一行数据的处理逻辑。每个行表达式都有数据的类型
    1. RexProgram：表达式管理 组件 可以做到全局表达式融合
    2. RexBuilder：构建RexNode 组件
    3. RexUtil：类型推导工具
@@ -101,8 +105,8 @@ calcite + 公司项目
    5. RexLiteral
    6. RexVariable
    7. RexCall
-   8. 
-5. SqlToRelConverter：sql转换关系表达式 组件
+6. RelShuttle
+7. SqlToRelConverter：sql转换关系表达式 组件
    1. SubQueryConverter：子查询转换器 组件
    2. SqlNodeToRexConverter：sql转换标量表达式 组件 抽象接口
    3. SqlNodeToRexConverterImpl：sql转换标量表达式 组件 具体实现逻辑
@@ -111,7 +115,7 @@ calcite + 公司项目
    6. ReflectiveConvertletTable：sql转换标量表达式 表 通过反射机制实现
       1. 反射是为了调用UDF函数，UDF也属于表达式一个计算逻辑
    7. StandardConvertletTable：sql转换标量表达式 表 内置表达式实现 比如 加减乘除
-6. RelDataType 关系表达式数据类型
+8. RelDataType 关系表达式数据类型
    1. SqlOperandTypeChecker
    2. Consistency：Strategy used to make arguments consistent
    3. SqlOperandTypeInference
@@ -167,6 +171,7 @@ RelOptCost： 优化器成本模型会依赖。
     3. dafei1288：http://dafei1288.com/
     4. https://www.zhihu.com/people/yu-qi-30-65
     5. wuyiwen：https://cloud.tencent.com/developer/user/1350579
+23. 字节multi sink场景：https://juejin.cn/post/7405476511187681331
 
 
 ### 技术流图
@@ -2600,7 +2605,7 @@ public static JoinInfo of(RelNode left, RelNode right, RexNode condition) {
 5. RexBuilder RexProgram不再需要RexBuilder了 
    1. RexNode 已经足够描述整个表达式描述信息了
 6. RexProgram
-```
+```java
 
 ProjectToCalcRule 会把rowtype 合并到 rexprogram
   public void onMatch(RelOptRuleCall call) {
@@ -2617,7 +2622,15 @@ ProjectToCalcRule 会把rowtype 合并到 rexprogram
     call.transformTo(calc);
   }
 
+
+
+
+
+
 ```
+
+
+
 
 ### 表达式合并 - RexProgramBuilder
 ```java
@@ -2747,6 +2760,9 @@ ProjectToCalcRule 会把rowtype 合并到 rexprogram
 ```
 
 
+### 表达式拆解 - splitCorrelatedFilterCondition
+1. 
+
 ### 表达式反推到具体字段 - RexInputRef
 1. 行表达式：https://juejin.cn/post/7113828979567493133
 ```java
@@ -2866,6 +2882,55 @@ RexLocalRef t2 =
 
 //            RexNode rexNode =
             RexProgram program = builder.getProgram();
+```
+
+### 业务自定义表达式 - 用AND 或者 OR组合表达式
+```java
+
+switch (variant) {
+    case 2:
+      // $t7 = $t4 > $i0 (i.e. (x + y) > 0)
+      t7 =
+          builder.addExpr(
+              rexBuilder.makeCall(
+                  SqlStdOperatorTable.GREATER_THAN,
+                  t4,
+                  i0));
+      // $t8 = $t7 AND $t7
+      t8 =
+          builder.addExpr(
+              and(t7, t7));
+      builder.addCondition(t8);
+      builder.addCondition(t7);
+      break;
+
+  protected RexNode and(Iterable<? extends RexNode> nodes) {
+    // Does not flatten nested ANDs. We want test input to contain nested ANDs.
+    return rexBuilder.makeCall(SqlStdOperatorTable.AND,
+        ImmutableList.copyOf(nodes));
+  }
+
+
+业务自定义
+RexBuilder rexBuilder = fg.getCluster().getRexBuilder();
+final RexProgramBuilder builder =
+        new RexProgramBuilder(inputRowType, rexBuilder);
+  
+
+
+ExecJoin join = call.rel(0);
+Pair<Program, RelDataType> pair = getLeftTableProgram(join);
+RexBuilder rexBuilder = join.getCluster().getRexBuilder();
+final RexProgramBuilder builder =
+        new RexProgramBuilder(pair.right, rexBuilder);
+// where conf
+List<RexNode> leftFilter = join.getLeftFilter();
+if (leftFilter.size() > 0) {
+    RexNode filter = rexBuilder.makeCall(SqlStdOperatorTable.AND,leftFilter);
+}
+
+
+
 ```
 
 ## 纵向拆解 - RelOptRule
@@ -3056,9 +3121,113 @@ public ConverterRule(Class<? extends RelNode> clazz, RelTrait in,
 }
 
 
+```
 
+### 算子匹配 - join 多输入定义
+```java
+v19 版本
+public class JoinUnionTransposeRule extends RelOptRule {
+  public static final JoinUnionTransposeRule LEFT_UNION =
+      new JoinUnionTransposeRule(
+          operand(Join.class,
+              operand(Union.class, any()),
+              operand(RelNode.class, any())),
+          RelFactories.LOGICAL_BUILDER,
+          "JoinUnionTransposeRule(Union-Other)");
+
+  public static final JoinUnionTransposeRule RIGHT_UNION =
+      new JoinUnionTransposeRule(
+          operand(Join.class,
+              operand(RelNode.class, any()),
+              operand(Union.class, any())),
+          RelFactories.LOGICAL_BUILDER,
+          "JoinUnionTransposeRule(Other-Union)");
+
+public void onMatch(RelOptRuleCall call) {
+    final Join join = call.rel(0);
+    final Union unionRel;
+    RelNode otherInput;
+    boolean unionOnLeft;
+    if (call.rel(1) instanceof Union) {
+      unionRel = call.rel(1);
+      otherInput = call.rel(2);
+      unionOnLeft = true;
+    } else {
+      otherInput = call.rel(1);
+      unionRel = call.rel(2);
+      unionOnLeft = false;
+    }
+    if (!unionRel.all) {
+      return;
+    }
+    if (!join.getVariablesSet().isEmpty()) {
+      return;
+    }
+    // The UNION ALL cannot be on the null generating side
+    // of an outer join (otherwise we might generate incorrect
+    // rows for the other side for join keys which lack a match
+    // in one or both branches of the union)
+    if (unionOnLeft) {
+      if (join.getJoinType().generatesNullsOnLeft()) {
+        return;
+      }
+    } else {
+      if (join.getJoinType().generatesNullsOnRight()) {
+        return;
+      }
+    }
+    List<RelNode> newUnionInputs = new ArrayList<>();
+    for (RelNode input : unionRel.getInputs()) {
+      RelNode joinLeft;
+      RelNode joinRight;
+      if (unionOnLeft) {
+        joinLeft = input;
+        joinRight = otherInput;
+      } else {
+        joinLeft = otherInput;
+        joinRight = input;
+      }
+      newUnionInputs.add(
+          join.copy(
+              join.getTraitSet(),
+              join.getCondition(),
+              joinLeft,
+              joinRight,
+              join.getJoinType(),
+              join.isSemiJoinDone()));
+    }
+    final SetOp newUnionRel =
+        unionRel.copy(unionRel.getTraitSet(), newUnionInputs, true);
+    call.transformTo(newUnionRel);
+  }
+
+
+v38 版本
+    Config DEFAULT = ImmutableJoinProjectTransposeRule.Config.of()
+        .withOperandSupplier(b0 ->
+            b0.operand(LogicalJoin.class).inputs(
+                b1 -> b1.operand(LogicalProject.class).anyInputs(),
+                b2 -> b2.operand(LogicalProject.class).anyInputs()))
+        .withDescription("JoinProjectTransposeRule(Project-Project)");
+
+    Config LEFT = DEFAULT
+        .withOperandSupplier(b0 ->
+            b0.operand(LogicalJoin.class).inputs(
+                b1 -> b1.operand(LogicalProject.class).anyInputs()))
+        .withDescription("JoinProjectTransposeRule(Project-Other)")
+        .as(Config.class);
+
+    Config RIGHT = DEFAULT
+        .withOperandSupplier(b0 ->
+            b0.operand(LogicalJoin.class).inputs(
+                b1 -> b1.operand(RelNode.class).anyInputs(),
+                b2 -> b2.operand(LogicalProject.class).anyInputs()))
+        .withDescription("JoinProjectTransposeRule(Other-Project)")
+        .as(Config.class);
 
 ```
+
+
 ### 算子合并 - CalcMergeRule
 1. 比较常见的 filter 和 project 算子合并到 calc计算算子中
 2. FilterToCalcRule
@@ -3464,6 +3633,8 @@ JoinAddRedundantSemiJoinRule
 
 ```
 
+
+
 ### 优化流程 - program应用
 ```java
   @Test public void trimEmptyUnion32viaRelBuidler() throws Exception {
@@ -3632,6 +3803,80 @@ public AggregateJoinJoinRemoveRule(
 ### HepPlanner - transformTo 原理
 
 
+### HepPlanner - 多个规则注册，如何找到全局最优的执行路径
+1. 一个关系表达式树，遍历多个不同顺序的规则集，得到的树结构是不一样的
+2. 众多语法树如何挑选最优的，这是calcite的算法核心
+3. 我在自定义规则的时候，最多只能按业务的规则顺序执行，不具备可搜索性，一旦规则顺序被破坏，生成目标树结构都是有问题的
+```
+
+
+```
+
+
+### 高级操作 - 子图复用
+1. flink子图复用逻辑：https://www.cnblogs.com/Aitozi/p/16687308.html
+2. RelShuttle
+3. RelShuttleImpl
+
+
+### 高级操作 - 图打印
+1. RelWriterTest
+```
+/**
+   * Dumps a plan as a string.
+   *
+   * @param header      Header to print before the plan. Ignored if the format
+   *                    is XML
+   * @param rel         Relational expression to explain
+   * @param format      Output format
+   * @param detailLevel Detail level
+   * @return Plan
+   */
+  public static String dumpPlan(
+      String header,
+      RelNode rel,
+      SqlExplainFormat format,
+      SqlExplainLevel detailLevel) {
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+    if (!header.isEmpty()) {
+      pw.println(header);
+    }
+    RelWriter planWriter;
+    switch (format) {
+    case XML:
+      planWriter = new RelXmlWriter(pw, detailLevel);
+      break;
+    case JSON:
+      planWriter = new RelJsonWriter();
+      rel.explain(planWriter);
+      return ((RelJsonWriter) planWriter).asString();
+    case DOT:
+      planWriter = new RelDotWriter(pw, detailLevel, false);
+      break;
+    default:
+      planWriter = new RelWriterImpl(pw, detailLevel, false);
+    }
+    rel.explain(planWriter);
+    pw.flush();
+    return sw.toString();
+  }
+
+
+
+  @Override public RelWriter done(RelNode node) {
+    assert checkInputsPresentInExplain(node);
+    final List<Pair<String, @Nullable Object>> valuesCopy =
+        ImmutableList.copyOf(values);
+    values.clear();
+    explain_(node, valuesCopy);
+    pw.flush();
+    return this;
+  }
+
+  
+
+```
 
 ## 纵向拆解 - 视图的validate
 1. calcite 不支持DDL 包括创建view。但是有测试用例，从relnode层，扩展视图语法树
@@ -3872,6 +4117,19 @@ Caused by: java.lang.AssertionError
 
 ## 纵向拆解 - RelToSqlConverter
 
+
+## 纵向拆解 - Codegen
+1. janino：https://www.janino.net/
+2. 源码：https://janino-compiler.github.io/janino/
+3. 讲解：https://blog.51cto.com/u_16213702/10701204
+
+
+## 功能拆解 - 条件表达式如何融合和拆分
+1. 核心类
+   1. RexProgram
+   2. RelOptUtil
+2. 比如join表达式 wherer表达式 select表达式
+
 ## 竞品对比
 ### anltr 和 javacc 区别
 1. anltr场景：
@@ -3884,6 +4142,9 @@ Caused by: java.lang.AssertionError
 1. 比如Sort/Cluster/Distributed by Clause 暂不支持
    1. The Hive dialect is mainly used in batch mode. Some Hive’s syntax (Sort/Cluster/Distributed BY, Transform, etc.) haven’t been supported in streaming mode yet.
 2. flinkSQL是没有的，hiveSQL 2 FlinkSQL 通过calcite
+
+### 字节 Multi-sink 多棵语法树优化
+1. Multi-sink：https://juejin.cn/post/7405476511187681331
 
 ## 应用场景
 ### Flink使用Calcite
