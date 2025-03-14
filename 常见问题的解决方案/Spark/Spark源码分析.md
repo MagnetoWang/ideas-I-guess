@@ -73,9 +73,10 @@ tree -ACL 1
 
 
 
+## 大框
+1. 文档自动生成：https://github.com/apache/spark
 
-
-
+## 源码拆解
 ### 模块详解 - 横向拆解
 1. 数据结构
    1. ExternalAppendOnlyUnsafeRowArray
@@ -1920,7 +1921,131 @@ SortMergeJoinExec
 
 ```
 
+
+
 ```
+
+
+### 纵向拆解 计划图生成
+
+
+#### Spark 测试用例
+```java
+test("Correlated subqueries in LATERAL VIEW") {
+    withTempView("t1", "t2") {
+      Seq((1, 1), (2, 0)).toDF("c1", "c2").createOrReplaceTempView("t1")
+      Seq[(Int, Array[Int])]((1, Array(1, 2)), (2, Array(-1, -3)))
+        .toDF("c1", "arr_c2").createTempView("t2")
+//      checkAnswer(
+//        sql(
+//          """
+//          | SELECT c2
+//          | FROM t1
+//          | WHERE EXISTS (SELECT *
+//          |               FROM t2 LATERAL VIEW explode(arr_c2) q AS c2
+//                          WHERE t1.c1 = t2.c1)""".stripMargin),
+//        Row(1) :: Row(0) :: Nil)
+
+      val plan = sql(
+        """
+          | SELECT c2
+          | FROM t1
+          | WHERE EXISTS (SELECT *
+          |               FROM t2 LATERAL VIEW explode(arr_c2) q AS c2
+                          WHERE t1.c1 = t2.c1)""".stripMargin).logicalPlan
+
+      logWarning(plan.toString)
+
+      val msg1 = intercept[AnalysisException] {
+        sql(
+          """
+            | SELECT c1
+            | FROM t2
+            | WHERE EXISTS (SELECT *
+            |               FROM t1 LATERAL VIEW explode(t2.arr_c2) q AS c2
+            |               WHERE t1.c1 = t2.c1)
+          """.stripMargin)
+      }
+      assert(msg1.getMessage.contains(
+        "Expressions referencing the outer query are not supported outside of WHERE/HAVING"))
+    }
+  }
+
+```
+
+
+#### Lateral View
+```java
+      val plan = sql(
+        """
+          | SELECT c2
+          | FROM t1
+          | WHERE EXISTS (SELECT *
+          |               FROM t2 LATERAL VIEW explode(arr_c2) q AS c2
+                          WHERE t1.c1 = t2.c1)""".stripMargin).logicalPlan
+
+
+17:47:11.309 WARN org.apache.spark.sql.SubquerySuite: Project [c2#248]
++- Filter exists#262 [c1#247]
+   :  +- Project [c1#258, arr_c2#259, c2#263]
+   :     +- Filter (outer(c1#247) = c1#258)
+   :        +- Generate explode(arr_c2#259), false, q, [c2#263]
+   :           +- SubqueryAlias t2
+   :              +- Project [_1#253 AS c1#258, _2#254 AS arr_c2#259]
+   :                 +- LocalRelation [_1#253, _2#254]
+   +- SubqueryAlias t1
+      +- Project [_1#242 AS c1#247, _2#243 AS c2#248]
+         +- LocalRelation [_1#242, _2#243]
+
+
+
+val plan1 = sql(
+        """
+          |select * from t2
+          |
+          |""".stripMargin).logicalPlan
+      logWarning(plan1.toString)
+  
+Project [c1#258, arr_c2#259]
++- SubqueryAlias t2
+   +- Project [_1#253 AS c1#258, _2#254 AS arr_c2#259]
+      +- LocalRelation [_1#253, _2#254]
+
+
+val plan1 = sql(
+        """
+          |select * from t2 lateral view explode(arr_c2) expl as x
+          |
+          |""".stripMargin).logicalPlan
+Project [c1#258, arr_c2#259, x#265]
++- Generate explode(arr_c2#259), false, expl, [x#265]
+   +- SubqueryAlias t2
+      +- Project [_1#253 AS c1#258, _2#254 AS arr_c2#259]
+         +- LocalRelation [_1#253, _2#254]
+     
+```
+
+
+
+
+
+### 纵向拆解 代码生成 CodeGen
+1. janino：https://www.janino.net/
+2. 源码：https://janino-compiler.github.io/janino/
+3. 讲解：https://blog.51cto.com/u_16213702/10701204
+
+
+#### 表达式生成
+1. 一部分是最基本表达式的代码生成
+2. 全阶段代码生成，即WSCG
+3. 向量化
+```
+
+
+```
+
+#### 即时编译 JIT
+
 
 ### 纵向拆解 AQE
 1. AQE既定的规则和策略主要有4个，分为1个逻辑优化规则和3个物理优化策略
@@ -2020,17 +2145,17 @@ CoalescedRDDBenchmark-jdk17-results.txt
 3. 为了解决Late data的问题，Structured Streaming采用了一种叫作Watermark的机制来应对。为了让你能够更容易地理解Watermark机制的原理，在去探讨它之前，我们先来澄清两个极其相似但是又完全不同的概念：水印和水位线。
 4. 延迟容忍度T是Watermark机制中的决定性因素
 
-### Calalog 注册 - 如何全方位感知外部元数据
+### 纵向拆解 Calalog 注册 - 如何全方位感知外部元数据
 ```
 SessionCatalog 
 ExternalCatalog
 
 ```
 
-### aggregate 聚合实现
+### 纵向拆解 aggregate 聚合实现
 
 
-### 窗口实现
+### 纵向拆解 窗口实现
 1. 源码位置
    1. src/main/scala/org/apache/spark/sql/expressions/Window.scala
    2. src/main/scala/org/apache/spark/sql/catalyst/expressions/windowExpressions.scala
@@ -2278,19 +2403,10 @@ spark.executor.memory的设置，可以通过公式300MB + #User + #Storage + #E
 
 ```
 
-## codegen
-```
-codegen含义参考 横向拆解 代码生成
-
-```
-### 表达式生成
-1. 一部分是最基本表达式的代码生成
-2. 全阶段代码生成，即WSCG
-3. 向量化
-```
 
 
-```
+
+
 
 
 

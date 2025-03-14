@@ -5,6 +5,7 @@
 
 
 ### select
+```
 -- single comment
 SELECT * FROM a
 'Project [*]
@@ -28,7 +29,7 @@ select * fRoM a
 SELECT * FROM a
 'Project [*]
 +- 'UnresolvedRelation [a]
-
+```
 
 
 
@@ -36,6 +37,7 @@ SELECT * FROM a
 
 
 ### union
+```
 select * from a union select * from b
 'Distinct
 +- 'Union
@@ -59,8 +61,10 @@ select * from a union all select * from b
 +- 'Project [*]
    +- 'UnresolvedRelation [b]
 
-
+```
 ### except
+
+```
 select * from a except select * from b
 'Except false
 :- 'Project [*]
@@ -1170,3 +1174,4 @@ select a, b from db.c;;;
 select a, b from db.c; ;;  ;
 'Project ['a, 'b]
 +- 'UnresolvedRelation [db, c]
+```
