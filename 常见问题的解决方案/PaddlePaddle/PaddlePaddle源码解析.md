@@ -180,6 +180,7 @@ PaddlePaddle + 公司项目
    5. Hackathon 5th：https://github.com/PaddlePaddle/docs/blob/release/2.5/docs/guides/10_contribution/hackathon_cn.md
    6. Hackathon 6th：https://github.com/PaddlePaddle/Paddle/issues/62907
    7. Hackathon 7th：https://github.com/PaddlePaddle/Paddle/issues/68242
+   8. Hackathon 8th：https://github.com/PaddlePaddle/Paddle/issues/71310
 12. 人物经历
     1. nknan：https://pfcc.blog/posts/nknan-story
        1. https://github.com/NKNaN
