@@ -55,46 +55,60 @@ flink + 公司项目
 ```
 
 ### 核心思考问题
-1. flink为什么那么快
-   1. 内存复制
+1. 两头往中间看理解方法
+   1. 从基础core切入，并逐步找核心类的上层应用
+      1. 比如
+      2. 数据类型type 数据分片 inputsplit
+      3. transfomation
+      4. Function
+      5. op
+      6. io
+      7. 接口文档 分门别类 https://nightlies.apache.org/flink/flink-docs-release-1.9/api/java/index.html?org/apache/flink/api/common/functions/CoGroupFunction.html
+   2. 从对用户开发接口切入，并逐步拆分大功能和结构
+      1. 比如SQL
+      2. Graph Plan pipeline
+      3. job task slot
+2. flink为什么那么快
+   1. flink处理数据如何分配线程，是否有阻塞相关的影响
+   2. 内存复制
       1. BufferEntry
-   2. 指针运用
-   3. 单条数据处理的关键路径
-   4. 非常低的读写延迟（µs）
-   5. 轻量稳定的 Checkpointing 流程
-   6. fs优化
-   7. memory优化
+   3. 指针运用
+   4. 单条数据处理的关键路径
+   5. 非常低的读写延迟（µs）
+   6. 轻量稳定的 Checkpointing 流程
+   7. fs优化
+   8. memory优化
       1. BinaryRow 应用，高效索引
-   8. io优化
-2. flink内存管理
+   9. io优化
+3. flink内存管理
    1. flink中在自定义自己的内存组件，中间有哪些内存泄漏的情况，不可能一次性写的无bug
    2. 这类case需要积累下来，都是经验
-3. flink如何保证稳定性
+4. flink如何保证稳定性
    1. 回滚机制
    2. 资源申请与释放
    3. 机器节点故障排查
    4. 状态恢复机制
-4. flink设计
+5. flink设计
    1. dag 描述符 pipeline 和 Transformation
    2. op ，function ， input 和 output 的父类和所有子类关系
    3. 状态的应用
    4. 时间水位线的应用
-5. flink如何高效开发，测试，迭代和发布
+6. flink如何高效开发，测试，迭代和发布
    1. 代码如果看的越熟，开发效率越快。本身项目非常复杂，要想短时间内提高效率，那就只能多看代码解析的文章，帮助自己加速理解代码设计
    2. 从这个文章2023年7月10号到今天 2024年11月18号，我算是勉强能上手并开发flink代码，所以整个过程还是比较漫长的，门槛有一定要求
    3. 理解的过程中，直接看代码基本不现实，我是结合业务逻辑，业务报的异常，网络上的文章，不同公司落地视频分享，收集一些对flink的问题，spark和flink的异同点，流批一体的设计点和平时与同事的沟通聊天中
    4. 整理了许多问题，这些问题是多角度的，带着问题作为入口再去看flink，就能一点点撕开flink的整个设计流程，最终又像网状结构耦合在一起。
    5. 如果有人带是最好的，帮助你分析每个模块作用，模块与模块之间关系，甚至具体到类与类之间关系，以及类的设计含义，同时还能告诉你先看哪个模块，再看哪个模块，这样效率就能提高很多
-6. flink技术问题
+7. flink技术问题
    1. task 数据如何交换
    2. streamgraph jobgraph exegraph 映射图
    3. checkpoint如何实现
    4. OperatorChain
-7. 进一步高效深入理解flink，需要结合峰会主题分享，挖掘高价值问题
+8. 进一步高效深入理解flink，需要结合峰会主题分享，挖掘高价值问题
    1. 带着高价值问题，再深入找重要技术细节
    2. flink issue https://issues.apache.org/jira/projects/FLINK/issues/FLINK-36867?filter=allopenissues
       1. 找找有价值优化思路 和 排查问题的手段
-   3. 
+
 
 
 ### 参考资料
@@ -182,6 +196,13 @@ flink dag用法
    2. 大规模状态快速扩缩容的挑战
    3. 容器化环境下计算节点受本地磁盘大小限制的问题
    4. 原生的轻量级和快速检查点
+   5. 
+   6. MemorySegment
+      1. 没有
+         1. HybridMemorySegment
+         2. HeapMemorySegment
+      2. 只有
+         1. MemorySegment
 4. Flink 1.19
    1. https://mp.weixin.qq.com/s/DxoI38o7TpzpMXto8ep6ow
    2. 源表自定义并行度
@@ -925,18 +946,162 @@ public void testJoinPlain(){
 ```
 
 ### core - memory
+1. 对外内存管理接口 - MemorySegment
+   1. 大小端读写数据
+2. DataInputView
+3. DataOutputView
+4. runtime应用
+   1. MemorySegmentPool
+      1. LazyMemorySegmentPool
+   2. RawFormatDeserializationSchema
+   3. RawFormatSerializationSchema 序列化与反序列化
+   4. 缓冲区内存池
+   5. 
+
+#### 内存接口范式
+```
+put(int, byte): void
+get(int, byte[]): void
+put(int, byte[]): void
+get(int, byte[], int, int): void
+put(int, byte[], int, int): void
+
+
+getChar(int): char
+getCharLittleEndian(int): char
+getCharBigEndian(int): char
+putChar(int, char): void
+putCharLittleEndian(int, char): void
+putCharBigEndian(int, char): void
+
+
+getInt(int): int
+getIntLittleEndian(int): int
+getIntBigEndian(int): int
+putInt(int, int): void
+putIntLittleEndian(int, int): void
+putIntBigEndian(int, int): void
+
+
+getDouble(int): double
+getDoubleLittleEndian(int): double
+getDoubleBigEndian(int): double
+putDouble(int, double): void
+putDoubleLittleEndian(int, double): void
+putDoubleBigEndian(int, double): void
+
+
+内存copy
+copyTo(int, MemorySegment, int, int): void
+copyToUnsafe(int, Object, int, int): void
+copyFromUnsafe(int, Object, int, int): void
+
+```
+
 
 ### core - io
-1. 上层应用 - api.io
+1. 主要是数据分片，没有特别具体的设计
+2. InputSplit 输入数据，用户切分和拆包
+   1. 概念来自hadoop https://www.hadoopdoc.com/mapreduce/mapreduce-inputsplit
+   2. InputSplit 是数据的一种逻辑表示，即我们所说的文件的数据分片
+   3. InputSplit，即数据分片并不真正存储输入数据，它只是数据的一种引用，即一种数据的逻辑表示
 
 ### core - fs
+1. FileSystem：提供类似基础文件系统能力，创建和删除等等
+2. 主要支持 hadoop 和 local本地文件
 
+#### 文件接口范式
+```
+getWorkingDirectory(): Path
+getHomeDirectory(): Path
+getUri(): URI
+getFileStatus(Path): FileStatus
+getFileBlockLocations(FileStatus, long, long): BlockLocation[]
+open(Path, int): FSDataInputStream
+open(Path): FSDataInputStream
+createRecoverableWriter(): RecoverableWriter
+getDefaultBlockSize(): long
+listStatus(Path): FileStatus[]
+exists(Path): boolean
+delete(Path, boolean): boolean
+mkdirs(Path): boolean
+create(Path, boolean, int, short, long): FSDataOutputStream
+create(Path, boolean): FSDataOutputStream
+create(Path, WriteMode): FSDataOutputStream
+create(Path, WriteMode, short): FSDataOutputStream
+rename(Path, Path): boolean
+isDistributedFS(): boolean
+
+```
 
 ### core - execution 调度
+1. 任务流
+   1. PipelineExecutor
+2. 任务状态
+   1. JobListener
+   2. JobStatusHook
+3. 任务管理接口
+   1. JobClient
+   2. 集群版 ClusterClientJobClientAdapter MiniClusterJobClient 
+   3. 单机版 EmbeddedJobClient
+   4. 网页版 WebSubmissionJobClient
+   
+#### 任务管理器接口范式
+```
 
+getJobID(): JobID
+getJobStatus(): CompletableFuture<JobStatus>
+cancel(): CompletableFuture<Void>
+stopWithSavepoint(boolean, String): CompletableFuture<String>
+triggerSavepoint(String): CompletableFuture<String>
+getAccumulators(ClassLoader): CompletableFuture<Map<String, Object>>
+getJobExecutionResult(ClassLoader): CompletableFuture<JobExecutionResult>
+```
+
+### core - 类型解析器
+1. 参考 纵向拆解 - 数据类型系统
 
 ### api
-### api - Transformation
+1. 目录简单理解
+   1. common 核心代码都在common，放在common，也是希望大部分设计都是通用的
+      1. 
+   2. connector 聚焦连接数据源
+   3. dag 对外的dag能力，也是提供一种接口范式，整个逻辑都很简单，压力全在common上面
+   4. java 不清楚为什么冒出一个这个，也可以放到common
+
+#### 目录重要度
+```
+
+accumulators 简单，已看
+aggregators  简单，已看
+attribute    简单，已看
+cache        简单，已看
+distributions 中等
+eventtime     中等
+externalresource 简单，已看
+functions 重要
+io 重要
+operators 重要
+resources 简单，已看
+serialization 简单，已看
+state 中等
+time 简单，已看
+typeinfo 结合数据类型系统 参考 纵向拆解 - 数据类型系统
+typeutils 结合数据类型系统 参考 纵向拆解 - 数据类型系统
+
+
+
+```
+
+### api - DAG & Transformation
+1. DAG
+   1. plan 描述一个任务执行计划，本质就是一堆计算逻辑配置，无论是测试还是开发都比较简单
+   2. streamGraph
+2. Transformation 
+   1. 数据转化和处理算子 就叫 Transformation
+   2. 具体到物理执行，还有分片，并行度，缓冲区buffer情况
+
+### api - functions
 
 
 ### api - operators
@@ -944,8 +1109,6 @@ public void testJoinPlain(){
 ### api - State
 
 
-
-### api - functions
 
 ### api - eventtime
 
@@ -959,7 +1122,7 @@ public void testJoinPlain(){
 
 
 
-## 横向拆解 - Java API
+## 横向拆解 - Java API - 1.20拆成 datastream API 和 datastream两个模块
 1. 核心模块
    1. ExecutionEnvironment
    2. operators 比如map join filter
@@ -4760,6 +4923,12 @@ outWriter.complete();
 1. 参考codegen目录
 
 
+#### 代码生成 - UDTF 和 Correlate算子
+```java
+
+
+```
+
 
 
 ### SQL 流程 - 执行
@@ -5085,6 +5254,218 @@ def doVerifyPlan(
 4. EqualiserCodeGeneratorTest
 5. LimitFilterFunction
 
+## 纵向拆解 - 数据类型系统
+1. DataType Parser 数据类型解析器
+   1. FieldParser 从byte维度，解析出各种基本数据类型
+2. flink/flink-core/src/main/java/org/apache/flink/api/common/typeinfo
+3. flink/flink-core/src/main/java/org/apache/flink/api/common/typeutils
+4. 类型接口 org.apache.flink.api.common.typeinfo
+   1. TypeDescriptor
+   2. TypeUtils
+
+
+#### FieldParser - 支持解析类型
+```
+        PARSERS.put(Byte.class, ByteParser.class);
+        PARSERS.put(Short.class, ShortParser.class);
+        PARSERS.put(Integer.class, IntParser.class);
+        PARSERS.put(Long.class, LongParser.class);
+        PARSERS.put(String.class, StringParser.class);
+        PARSERS.put(Float.class, FloatParser.class);
+        PARSERS.put(Double.class, DoubleParser.class);
+        PARSERS.put(Boolean.class, BooleanParser.class);
+        PARSERS.put(BigDecimal.class, BigDecParser.class);
+        PARSERS.put(BigInteger.class, BigIntParser.class);
+
+        // value types
+        PARSERS.put(ByteValue.class, ByteValueParser.class);
+        PARSERS.put(ShortValue.class, ShortValueParser.class);
+        PARSERS.put(IntValue.class, IntValueParser.class);
+        PARSERS.put(LongValue.class, LongValueParser.class);
+        PARSERS.put(StringValue.class, StringValueParser.class);
+        PARSERS.put(FloatValue.class, FloatValueParser.class);
+        PARSERS.put(DoubleValue.class, DoubleValueParser.class);
+        PARSERS.put(BooleanValue.class, BooleanValueParser.class);
+
+        // SQL date/time types
+        PARSERS.put(java.sql.Time.class, SqlTimeParser.class);
+        PARSERS.put(java.sql.Date.class, SqlDateParser.class);
+        PARSERS.put(java.sql.Timestamp.class, SqlTimestampParser.class);
+
+```
+
+#### Typeinfo & Typeutils
+```
+
+
+
+BasicArrayTypeInfo.java 
+
+BasicTypeInfo.java 
+
+FractionalTypeInfo.java 
+
+IntegerTypeInfo.java 
+
+LocalTimeTypeInfo.java 
+
+NothingTypeInfo.java 
+
+NumericTypeInfo.java 
+
+PrimitiveArrayTypeInfo.java 
+
+SqlTimeTypeInfo.java
+
+```
+
+
+#### flink 校验返回类型流程
+```
+
+	at org.apache.flink.api.java.typeutils.TypeExtractor.validateInputType(TypeExtractor.java:1303)
+	at org.apache.flink.api.java.typeutils.TypeExtractor.getUnaryOperatorReturnType(TypeExtractor.java:585)
+	at org.apache.flink.api.java.typeutils.TypeExtractor.getFlatMapReturnTypes(TypeExtractor.java:196)
+	at org.apache.flink.streaming.api.datastream.DataStream.flatMap(DataStream.java:677)
+
+```
+
+
+#### flink 显示执行类型
+```
+
+ TypeHint<byte[]> byteType = new TypeHint<byte[]>() {
+        };
+
+        
+```
+
+## 纵向拆解 - Function & Operator & Transfomation
+1. 这三个是关联度非常高，单独抽出来理解反而更困难一些
+2. 而且基本上所有模块都会涉及这三个包
+
+### Function - 概览
+1. https://nightlies.apache.org/flink/flink-docs-release-1.9/api/java/index.html?org/apache/flink/api/common/functions/CoGroupFunction.html
+```
+RichFunction
+CoGroupFunction<IN1, IN2, O> 
+CombineFunction<IN, OUT>
+CrossFunction<IN1, IN2, OUT>
+AggregateFunction<IN,ACC,OUT>
+FilterFunction<T>
+FlatJoinFunction<IN1,IN2,OUT>
+FlatMapFunction<T,O>
+FoldFunction<O,T>
+GroupCombineFunction<IN,OUT>
+GroupReduceFunction<T,O>
+JoinFunction<IN1,IN2,OUT>
+MapFunction<T,O>
+MapPartitionFunction<T,O>
+ReduceFunction<T>
+
+
+public interface 
+
+```
+
+
+### Operator - 概览
+1. 重要概念
+   1. DualInput
+   2. ExpressionKey
+   3. executeOnCollections
+   4. RuntimeUDFContext
+```
+BulkIterationBase.java 
+CoGroupOperatorBase.java 
+CoGroupRawOperatorBase.java 
+CrossOperatorBase.java 
+DeltaIterationBase.java 
+FilterOperatorBase.java 
+FlatMapOperatorBase.java 
+GroupCombineOperatorBase.java 
+GroupReduceOperatorBase.java 
+InnerJoinOperatorBase.java 
+JoinOperatorBase.java 
+MapOperatorBase.java 
+MapPartitionOperatorBase.java 
+OuterJoinOperatorBase.java 
+PartitionOperatorBase.java 
+ReduceOperatorBase.java 
+SortPartitionOperatorBase.java
+
+
+```
+
+#### Operator - 执行用户具体代码
+1. 每个op实现 executeOnCollections 方法
+   1. 数据收集器
+```
+
+ @Test
+    void testMapPlain() throws Exception {
+        final MapFunction<String, Integer> parser = Integer::parseInt;
+
+        MapOperatorBase<String, Integer, MapFunction<String, Integer>> op =
+                new MapOperatorBase<>(
+                        parser,
+                        new UnaryOperatorInformation<>(
+                                BasicTypeInfo.STRING_TYPE_INFO, BasicTypeInfo.INT_TYPE_INFO),
+                        "TestMapper");
+
+        List<String> input = new ArrayList<>(asList("1", "2", "3", "4", "5", "6"));
+
+        ExecutionConfig executionConfig = new ExecutionConfig();
+        executionConfig.disableObjectReuse();
+        List<Integer> resultMutableSafe = op.executeOnCollections(input, null, executionConfig);
+        executionConfig.enableObjectReuse();
+        List<Integer> resultRegular = op.executeOnCollections(input, null, executionConfig);
+
+        assertThat(resultMutableSafe).isEqualTo(asList(1, 2, 3, 4, 5, 6));
+        assertThat(resultRegular).isEqualTo(asList(1, 2, 3, 4, 5, 6));
+    }
+
+
+protected List<OUT> executeOnCollections(
+            List<IN> input, RuntimeContext ctx, ExecutionConfig executionConfig) throws Exception {
+        FlatMapFunction<IN, OUT> function = userFunction.getUserCodeObject();
+
+        FunctionUtils.setFunctionRuntimeContext(function, ctx);
+        FunctionUtils.openFunction(function, DefaultOpenContext.INSTANCE);
+
+        ArrayList<OUT> result = new ArrayList<OUT>(input.size());
+
+        TypeSerializer<IN> inSerializer =
+                getOperatorInfo()
+                        .getInputType()
+                        .createSerializer(executionConfig.getSerializerConfig());
+        TypeSerializer<OUT> outSerializer =
+                getOperatorInfo()
+                        .getOutputType()
+                        .createSerializer(executionConfig.getSerializerConfig());
+
+        CopyingListCollector<OUT> resultCollector =
+                new CopyingListCollector<OUT>(result, outSerializer);
+
+        for (IN element : input) {
+            IN inCopy = inSerializer.copy(element);
+            function.flatMap(inCopy, resultCollector);
+        }
+
+        FunctionUtils.closeFunction(function);
+
+        return result;
+    }
+
+```
+
+
+#### CollectionExecutor 数据收集执行器
+1. https://yunqi.qq.com/read/39980437/26
+
+
+
+
 
 ## 纵向拆解 - Graph
 1. API/SQL -> Transformation -> StreamGraph -> JobGraph -> ExecutionGraph
@@ -5094,7 +5475,7 @@ def doVerifyPlan(
 1. 是一个挂载插件-文件级别
 2. 类似spark的connector 和 calcite的adapter
 
-## 纵向拆解 - Connector 数据源对接系统
+## 纵向拆解 - Connector 数据源对接系统 & IO & Sink & Source
 
 ## 纵向拆解 - State
 
@@ -5106,7 +5487,13 @@ def doVerifyPlan(
 
 ## 纵向拆解 - Flink TTL
 
-## 纵向拆解 - 
+## 纵向拆解 - 代码生成
+1. 第一次理解
+   1. udf代码如何生成
+   2. udtf代码如何生成
+
+
+
 
 ## 纵向拆解 - JobGraph ExecutionGraph OperatorChain
 1. Flink 会尽可能把能够 chaining 到一起的算子串联在一起，形成 OperatorChain，对应一个 JobVertex。
@@ -5322,6 +5709,38 @@ AggregateUtil
       1. function = input1.getExecutionEnvironment().clean(function);
    2. 
 
+
+### 闭包验证工具
+```
+    @Test
+    public void ClosureCleanerTest() throws Exception {
+//        StreamExecutionEnvironment
+        MapCreator creator = new NonSerializableMapCreator();
+        MapFunction<Integer, Integer> map = creator.getMap();
+
+        ClosureCleaner.ensureSerializable(map);
+
+        int result = map.map(3);
+    }
+
+    interface MapCreator {
+        MapFunction<Integer, Integer> getMap();
+    }
+
+    class NonSerializableMapCreator implements MapCreator {
+
+        @Override
+        public MapFunction<Integer, Integer> getMap() {
+            return new MapFunction<Integer, Integer>() {
+                @Override
+                public Integer map(Integer value) throws Exception {
+                    return value + 1;
+                }
+            };
+        }
+    }
+
+```
 
 ## 参考设计
 ### StreamTableEnvironment
@@ -5796,6 +6215,42 @@ Flink_state 的优化与 remote_state 的探索 - Flink 中文社区的文章 - 
 https://zhuanlan.zhihu.com/p/652100408
 
 ```
+
+
+### flink 客户端启动main函数 流程
+```
+   at xxxxxx.xxxx.xxxx.main(xxx.java:96)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.apache.flink.client.program.PackagedProgram.callMainMethod(PackagedProgram.java:327)
+	at org.apache.flink.client.program.PackagedProgram.invokeInteractiveModeForExecution(PackagedProgram.java:210)
+	at org.apache.flink.client.ClientUtils.executeProgram(ClientUtils.java:138)
+	at org.apache.flink.client.cli.CliFrontend.executeProgram(CliFrontend.java:740)
+	at org.apache.flink.client.cli.CliFrontend.runInternal(CliFrontend.java:221)
+	at org.apache.flink.client.cli.CliFrontend.run(CliFrontend.java:194)
+	at org.apache.flink.client.cli.CliFrontend.parseParameters(CliFrontend.java:986)
+	at org.apache.flink.client.cli.CliFrontend.lambda$main$11(CliFrontend.java:1062)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at javax.security.auth.Subject.doAs(Subject.java:422)
+	at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1796)
+	at org.apache.flink.runtime.security.HadoopSecurityContext.runSecured(HadoopSecurityContext.java:41)
+	at org.apache.flink.client.cli.CliFrontend.main(CliFrontend.java:1062)
+
+```
+
+### 用户代码是如何传递的
+1. UserCodeWrapper
+   1. UserCodeClassWrapper
+   2. UserCodeObjectWrapper
+2. AbstractUdfOperator
+3. getUserCodeObject
+
+
+### Flink Function的Open机制
+
+
 ### 去重
 ```
 
