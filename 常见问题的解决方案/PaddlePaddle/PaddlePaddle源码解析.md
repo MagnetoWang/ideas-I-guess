@@ -1612,6 +1612,88 @@ REGISTER_IR_PASS(convert_MEA_to_FA, ::cinn::dialect::ir::ConvertMEA2FAPass);
 3. PaddlePaddle源代码解析之：Parameter切分逻辑分析：https://github.com/PaddlePaddle/Paddle/issues/1994
 
 
+### 纵向拆解 - Tensor
+1. 官方介绍：https://www.paddlepaddle.org.cn/documentation/guides/beginner/tensor_cn.html
+2. https://github.com/PaddlePaddle/community/blob/master/pfcc/call-for-contributions/docs/tensor_concept_unification.md
+3. 源码实现
+   1. Tensor：PaddlePaddle/Paddle/paddle/phi/api/include/tensor.h
+   2. TensorBase：
+   3. DistTensor：
+   4. DenseTensor：PaddlePaddle/Paddle/paddle/phi/core/dense_tensor.h
+   5. SparseCooTensor
+   6. SparseCsrTensor
+
+#### Tensor 计算Op
+```cpp
+  /**
+   * @brief Tensor operants
+   *
+   * @param other
+   * @return Tensor
+   */
+  Tensor operator+(const Tensor& other) const;
+  Tensor operator-(const Tensor& other) const;
+  Tensor operator*(const Tensor& other) const;
+  Tensor operator/(const Tensor& other) const;
+  Tensor operator+(const Scalar& other) const;
+  Tensor operator-(const Scalar& other) const;
+  Tensor operator*(const Scalar& other) const;
+  Tensor operator/(const Scalar& other) const;
+  Tensor operator<(const Tensor& other) const;
+  Tensor operator<=(const Tensor& other) const;
+  Tensor operator==(const Tensor& other) const;
+  Tensor operator!=(const Tensor& other) const;
+  Tensor operator>(const Tensor& other) const;
+  Tensor operator>=(const Tensor& other) const;
+  Tensor operator-() const;
+  Tensor operator~() const;
+  Tensor operator&(const Tensor& other) const;
+  Tensor operator|(const Tensor& other) const;
+  Tensor operator^(const Tensor& other) const;
+
+```
+
+#### SparseCsrTensor 运用
+```cpp
+phi::CPUPlace cpu;
+  auto dense_dims = common::make_ddim({3, 3});
+  std::vector<float> non_zero_data = {1.0, 2.0, 3.0};
+  std::vector<int64_t> crows_data = {0, 1, 1, 3};
+  std::vector<int64_t> cols_data = {1, 0, 2};
+
+  auto fancy_allocator = std::unique_ptr<Allocator>(new FancyAllocator);
+  auto alloc = fancy_allocator.get();
+  // create non_zero_crows
+  auto crows_dims = common::make_ddim({static_cast<int>(crows_data.size())});
+  DenseTensorMeta crows_meta(DataType::INT64, crows_dims, DataLayout::NCHW);
+  DenseTensor crows(alloc, crows_meta);
+  memcpy(crows.mutable_data<int64_t>(cpu),
+         &crows_data[0],
+         crows_data.size() * sizeof(int64_t));
+
+  // create non_zero_cols
+  auto cols_dims = common::make_ddim({static_cast<int>(cols_data.size())});
+  DenseTensorMeta cols_meta(DataType::INT64, cols_dims, DataLayout::NCHW);
+  DenseTensor cols(alloc, cols_meta);
+  memcpy(cols.mutable_data<int64_t>(cpu),
+         &cols_data[0],
+         cols_data.size() * sizeof(int64_t));
+
+  // create non_zero_elements
+  auto elements_dims =
+      common::make_ddim({static_cast<int>(non_zero_data.size())});
+  DenseTensorMeta elements_meta(
+      DataType::FLOAT32, elements_dims, DataLayout::NCHW);
+  DenseTensor elements(alloc, elements_meta);
+  memcpy(elements.mutable_data<float>(cpu),
+         &non_zero_data[0],
+         non_zero_data.size() * sizeof(float));
+
+  SparseCsrTensor sparse(crows, cols, elements, dense_dims);
+
+
+```
+
 ### 算法视角 - paddle
 
 
