@@ -1705,7 +1705,7 @@ Result<std::shared_ptr<Array>> ArrayFromJSON(const std::shared_ptr<DataType>& ty
 
 ## 高阶拆解
 ## 高阶拆解 - Future & Result & AsyncGenerator 设计理念 和 运用
-1. 参考C++高阶解决方案 异步设计
+1. 参考 C++高阶解决方案 Arrow Future设计
 2. apache/arrow/cpp/src/arrow/util/async_generator.h
 ```cpp
   class ARROW_MUST_USE_TYPE Result : public util::EqualityComparable<Result<T>>
