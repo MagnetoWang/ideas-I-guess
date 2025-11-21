@@ -1,0 +1,496 @@
+从提供的文件列表来看，Velox对Arrow库的强依赖主要体现在以下几个方面：
+
+1. **位操作和位图处理**：
+   - Velox大量使用Arrow的位操作工具（如`bit_util.h`、`bitmap_writer.h`、`bit_block_counter.h`等），这些工具对于数据的压缩、编码以及位级别的操作至关重要。这种依赖是强依赖，因为位操作是数据处理的核心部分。
+
+2. **数据类型和类型转换**：
+   - Velox依赖Arrow的数据类型定义和类型转换工具（如`type.h`、`type_traits.h`、`checked_cast.h`等）来确保数据类型的安全转换和操作。这种依赖是强依赖，因为数据类型处理是数据操作的基础。
+
+3. **内存管理**：
+   - 使用Arrow的内存池管理功能（如`memory_pool.h`）来优化内存分配和管理。这种依赖是强依赖，因为高效的内存管理对于性能优化和资源利用非常重要。
+
+4. **I/O操作**：
+   - Velox依赖Arrow的I/O接口（如`io/memory.h`、`io/interfaces.h`等）来进行内存和文件的输入输出操作。这种依赖是强依赖，因为I/O操作是数据流动和存储的关键部分。
+
+这些功能模块是Velox实现其数据处理和分析能力的基础，因此对Arrow库的依赖是强依赖。没有这些功能，Velox的许多核心操作将无法实现。
+
+
+
+
+
+223 个结果 - 62 文件
+
+velox/dwio/parquet/common/BitStreamUtilsInternal.h:
+  28  
+  29: #include "arrow/util/bit_util.h"
+  30: #include "arrow/util/bpacking.h"
+  31  
+
+velox/dwio/parquet/common/LevelConversion.cpp:
+  24  
+  25: #include "arrow/util/bitmap_writer.h"
+  26  
+
+velox/dwio/parquet/common/LevelConversionUtil.h:
+  24  
+  25: #include "arrow/util/bit_util.h"
+  26: #include "arrow/util/bitmap_writer.h"
+  27  
+
+velox/dwio/parquet/common/RleEncodingInternal.h:
+  28  
+  29: #include "arrow/util/bit_block_counter.h"
+  30: #include "arrow/util/bit_run_reader.h"
+  31  
+
+velox/dwio/parquet/tests/common/LevelConversionTest.cpp:
+  29  
+  30: #include "arrow/util/bit_util.h"
+  31: #include "arrow/util/bitmap.h"
+  32: #include "arrow/util/ubsan.h"
+  33  
+
+velox/dwio/parquet/writer/Writer.h:
+  18  
+  19: #include "arrow/memory_pool.h"
+  20  #include "velox/common/compression/Compression.h"
+
+velox/dwio/parquet/writer/arrow/ArrowSchema.cpp:
+  25  
+  26: #include "arrow/extension_type.h"
+  27: #include "arrow/io/memory.h"
+  28: #include "arrow/ipc/api.h"
+  29: #include "arrow/type.h"
+  30: #include "arrow/util/base64.h"
+  31: #include "arrow/util/checked_cast.h"
+  32: #include "arrow/util/key_value_metadata.h"
+  33: #include "arrow/util/string.h"
+  34: #include "arrow/util/value_parsing.h"
+  35  
+
+velox/dwio/parquet/writer/arrow/ArrowSchema.h:
+  26  
+  27: #include "arrow/result.h"
+  28: #include "arrow/status.h"
+  29: #include "arrow/type.h"
+  30: #include "arrow/type_fwd.h"
+  31  
+
+velox/dwio/parquet/writer/arrow/ArrowSchemaInternal.cpp:
+  20  
+  21: #include "arrow/type.h"
+  22  
+
+velox/dwio/parquet/writer/arrow/ArrowSchemaInternal.h:
+  20  
+  21: #include "arrow/result.h"
+  22  #include "velox/dwio/parquet/writer/arrow/Schema.h"
+
+velox/dwio/parquet/writer/arrow/ColumnWriter.cpp:
+  29  
+  30: #include "arrow/array.h"
+  31: #include "arrow/buffer_builder.h"
+  32: #include "arrow/compute/api.h"
+  33: #include "arrow/io/memory.h"
+  34: #include "arrow/status.h"
+  35: #include "arrow/type.h"
+  36: #include "arrow/type_traits.h"
+  37: #include "arrow/util/bit_util.h"
+  38: #include "arrow/util/bitmap_ops.h"
+  39: #include "arrow/util/checked_cast.h"
+  40: #include "arrow/util/endian.h"
+  41: #include "arrow/util/type_traits.h"
+  42  
+
+velox/dwio/parquet/writer/arrow/Encoding.cpp:
+  32  
+  33: #include "arrow/array.h"
+  34: #include "arrow/array/builder_dict.h"
+  35: #include "arrow/stl_allocator.h"
+  36: #include "arrow/type_traits.h"
+  37: #include "arrow/util/bit_block_counter.h"
+  38: #include "arrow/util/bit_run_reader.h"
+  39: #include "arrow/util/bit_util.h"
+  40: #include "arrow/util/bitmap_ops.h"
+  41: #include "arrow/util/bitmap_writer.h"
+  42: #include "arrow/util/checked_cast.h"
+  43: #include "arrow/util/ubsan.h"
+  44: #include "arrow/visit_data_inline.h"
+  45  
+
+velox/dwio/parquet/writer/arrow/Encoding.h:
+  25  
+  26: #include "arrow/util/spaced.h"
+  27  
+
+velox/dwio/parquet/writer/arrow/Encryption.cpp:
+  25  
+  26: #include "arrow/util/utf8.h"
+  27  
+
+velox/dwio/parquet/writer/arrow/Exception.h:
+  25  
+  26: #include "arrow/type_fwd.h"
+  27: #include "arrow/util/string_builder.h"
+  28  #include "velox/dwio/parquet/writer/arrow/Platform.h"
+
+velox/dwio/parquet/writer/arrow/FileWriter.cpp:
+  26  
+  27: #include "arrow/util/key_value_metadata.h"
+  28  
+
+velox/dwio/parquet/writer/arrow/Metadata.cpp:
+  28  
+  29: #include "arrow/io/memory.h"
+  30: #include "arrow/util/key_value_metadata.h"
+  31  
+
+velox/dwio/parquet/writer/arrow/PageIndex.cpp:
+  28  
+  29: #include "arrow/util/unreachable.h"
+  30  
+
+velox/dwio/parquet/writer/arrow/PageIndex.h:
+  20  
+  21: #include "arrow/io/interfaces.h"
+  22  #include "velox/dwio/parquet/writer/arrow/Types.h"
+
+velox/dwio/parquet/writer/arrow/PathInternal.cpp:
+  102  
+  103: #include "arrow/array.h"
+  104: #include "arrow/buffer.h"
+  105: #include "arrow/buffer_builder.h"
+  106: #include "arrow/extension_type.h"
+  107: #include "arrow/memory_pool.h"
+  108: #include "arrow/type.h"
+  109: #include "arrow/type_traits.h"
+  110: #include "arrow/util/bit_run_reader.h"
+  111: #include "arrow/util/bit_util.h"
+  112: #include "arrow/util/bitmap_visit.h"
+  113: #include "arrow/util/macros.h"
+  114: #include "arrow/visit_array_inline.h"
+  115  
+
+velox/dwio/parquet/writer/arrow/PathInternal.h:
+  25  
+  26: #include "arrow/result.h"
+  27: #include "arrow/status.h"
+  28  
+
+velox/dwio/parquet/writer/arrow/Platform.cpp:
+  24  
+  25: #include "arrow/io/memory.h"
+  26  #include "velox/dwio/parquet/writer/arrow/Exception.h"
+
+velox/dwio/parquet/writer/arrow/Platform.h:
+  23  
+  24: #include "arrow/buffer.h" // IWYU pragma: export
+  25: #include "arrow/io/interfaces.h" // IWYU pragma: export
+  26: #include "arrow/status.h" // IWYU pragma: export
+  27: #include "arrow/type_fwd.h" // IWYU pragma: export
+  28: #include "arrow/util/macros.h" // IWYU pragma: export
+  29  
+
+velox/dwio/parquet/writer/arrow/Properties.cpp:
+  23  
+  24: #include "arrow/io/buffered.h"
+  25: #include "arrow/io/memory.h"
+  26: #include "arrow/util/thread_pool.h"
+  27  
+
+velox/dwio/parquet/writer/arrow/Properties.h:
+  26  
+  27: #include "arrow/io/caching.h"
+  28: #include "arrow/type.h"
+  29: #include "arrow/util/type_fwd.h"
+  30  #include "velox/dwio/parquet/writer/arrow/Encryption.h"
+
+velox/dwio/parquet/writer/arrow/Statistics.cpp:
+  28  
+  29: #include "arrow/array.h"
+  30: #include "arrow/type.h"
+  31: #include "arrow/type_traits.h"
+  32: #include "arrow/util/bit_run_reader.h"
+  33: #include "arrow/util/checked_cast.h"
+  34: #include "arrow/util/ubsan.h"
+  35: #include "arrow/visit_data_inline.h"
+  36  
+
+velox/dwio/parquet/writer/arrow/Types.cpp:
+  24  
+  25: #include "arrow/util/checked_cast.h"
+  26  
+
+velox/dwio/parquet/writer/arrow/Writer.cpp:
+  28  
+  29: #include "arrow/array.h"
+  30: #include "arrow/extension_type.h"
+  31: #include "arrow/ipc/writer.h"
+  32: #include "arrow/record_batch.h"
+  33: #include "arrow/table.h"
+  34: #include "arrow/type.h"
+  35: #include "arrow/util/base64.h"
+  36: #include "arrow/util/checked_cast.h"
+  37: #include "arrow/util/key_value_metadata.h"
+  38: #include "arrow/util/parallel.h"
+  39  
+
+velox/dwio/parquet/writer/arrow/tests/BloomFilter.cpp:
+  22  
+  23: #include "arrow/result.h"
+  24: #include "arrow/util/macros.h"
+  25  
+
+velox/dwio/parquet/writer/arrow/tests/BloomFilter.h:
+  24  
+  25: #include "arrow/util/bit_util.h"
+  26  
+
+velox/dwio/parquet/writer/arrow/tests/BloomFilterReader.h:
+  20  
+  21: #include "arrow/io/interfaces.h"
+  22  #include "velox/dwio/parquet/writer/arrow/Properties.h"
+
+velox/dwio/parquet/writer/arrow/tests/BloomFilterTest.cpp:
+  28  
+  29: #include "arrow/buffer.h"
+  30: #include "arrow/io/file.h"
+  31: #include "arrow/status.h"
+  32: #include "arrow/testing/gtest_util.h"
+  33: #include "arrow/testing/random.h"
+  34  
+
+velox/dwio/parquet/writer/arrow/tests/ColumnReader.cpp:
+  32  
+  33: #include "arrow/array.h"
+  34: #include "arrow/array/builder_binary.h"
+  35: #include "arrow/array/builder_dict.h"
+  36: #include "arrow/array/builder_primitive.h"
+  37: #include "arrow/chunked_array.h"
+  38: #include "arrow/type.h"
+  39: #include "arrow/util/bit_util.h"
+  40: #include "arrow/util/checked_cast.h"
+  41: #include "arrow/util/compression.h"
+  42: #include "arrow/util/crc32.h"
+  43: #include "arrow/util/int_util_overflow.h"
+  44  
+
+velox/dwio/parquet/writer/arrow/tests/ColumnReaderTest.cpp:
+  30  
+  31: #include "arrow/array/array_binary.h"
+  32: #include "arrow/util/macros.h"
+  33  
+
+velox/dwio/parquet/writer/arrow/tests/ColumnWriterTest.cpp:
+  23  
+  24: #include "arrow/io/buffered.h"
+  25: #include "arrow/testing/gtest_util.h"
+  26: #include "arrow/util/bit_util.h"
+  27: #include "arrow/util/bitmap_builders.h"
+  28  
+
+velox/dwio/parquet/writer/arrow/tests/EncodingTest.cpp:
+  30  
+  31: #include "arrow/array.h"
+  32: #include "arrow/array/builder_dict.h"
+  33: #include "arrow/stl_allocator.h"
+  34: #include "arrow/type_traits.h"
+  35: #include "arrow/util/bit_block_counter.h"
+  36: #include "arrow/util/bit_run_reader.h"
+  37: #include "arrow/util/bit_util.h"
+  38: #include "arrow/util/bitmap_ops.h"
+  39: #include "arrow/util/bitmap_writer.h"
+  40: #include "arrow/util/checked_cast.h"
+  41: #include "arrow/util/hashing.h"
+  42: #include "arrow/util/int_util_overflow.h"
+  43: #include "arrow/util/ubsan.h"
+  44: #include "arrow/visit_data_inline.h"
+  45  
+
+velox/dwio/parquet/writer/arrow/tests/FileDeserializeTest.cpp:
+  28  
+  29: #include "arrow/testing/gtest_util.h"
+  30: #include "arrow/util/crc32.h"
+  31  
+
+velox/dwio/parquet/writer/arrow/tests/FileReader.cpp:
+  29  
+  30: #include "arrow/io/caching.h"
+  31: #include "arrow/io/file.h"
+  32: #include "arrow/io/memory.h"
+  33: #include "arrow/util/bit_util.h"
+  34: #include "arrow/util/checked_cast.h"
+  35: #include "arrow/util/future.h"
+  36: #include "arrow/util/int_util_overflow.h"
+  37: #include "arrow/util/ubsan.h"
+  38  
+
+velox/dwio/parquet/writer/arrow/tests/FileReader.h:
+  25  
+  26: #include "arrow/io/caching.h"
+  27: #include "arrow/util/type_fwd.h"
+  28  #include "velox/dwio/parquet/writer/arrow/Metadata.h"
+
+velox/dwio/parquet/writer/arrow/tests/FileSerializeTest.cpp:
+  21  
+  22: #include "arrow/testing/gtest_compat.h"
+  23  
+
+velox/dwio/parquet/writer/arrow/tests/MetadataTest.cpp:
+  22  
+  23: #include "arrow/util/key_value_metadata.h"
+  24  #include "velox/dwio/parquet/reader/ParquetReader.h"
+
+velox/dwio/parquet/writer/arrow/tests/PropertiesTest.cpp:
+  22  
+  23: #include "arrow/buffer.h"
+  24: #include "arrow/io/memory.h"
+  25  
+
+velox/dwio/parquet/writer/arrow/tests/SchemaTest.cpp:
+  28  
+  29: #include "arrow/util/checked_cast.h"
+  30  #include "velox/dwio/parquet/writer/arrow/Exception.h"
+
+velox/dwio/parquet/writer/arrow/tests/StatisticsTest.cpp:
+  20  
+  21: #include "arrow/testing/builder.h"
+  22  
+
+velox/dwio/parquet/writer/arrow/tests/TestUtil.h:
+  30  
+  31: #include "arrow/io/memory.h"
+  32: #include "arrow/testing/util.h"
+  33  
+
+velox/dwio/parquet/writer/arrow/tests/TypesTest.cpp:
+  22  
+  23: #include "arrow/util/endian.h"
+  24  #include "velox/dwio/parquet/writer/arrow/Types.h"
+
+velox/dwio/parquet/writer/arrow/util/ByteStreamSplitInternal.h:
+  20  
+  21: #include "arrow/util/endian.h"
+  22: #include "arrow/util/simd.h"
+  23: #include "arrow/util/ubsan.h"
+  24  
+
+velox/dwio/parquet/writer/arrow/util/Compression.cpp:
+  24  
+  25: #include "arrow/result.h"
+  26: #include "arrow/status.h"
+  27  #include "velox/dwio/parquet/writer/arrow/util/CompressionInternal.h"
+
+velox/dwio/parquet/writer/arrow/util/Compression.h:
+  26  
+  27: #include "arrow/result.h"
+  28: #include "arrow/status.h"
+  29: #include "arrow/util/visibility.h"
+  30  
+
+velox/dwio/parquet/writer/arrow/util/CompressionLZ4.cpp:
+  26  
+  27: #include "arrow/result.h"
+  28: #include "arrow/status.h"
+  29: #include "arrow/util/endian.h"
+  30: #include "arrow/util/macros.h"
+  31: #include "arrow/util/ubsan.h"
+  32  
+
+velox/dwio/parquet/writer/arrow/util/CompressionSnappy.cpp:
+  26  
+  27: #include "arrow/result.h"
+  28: #include "arrow/status.h"
+  29: #include "arrow/util/macros.h"
+  30  
+
+velox/dwio/parquet/writer/arrow/util/CompressionZlib.cpp:
+  27  
+  28: #include "arrow/result.h"
+  29: #include "arrow/status.h"
+  30: #include "arrow/util/macros.h"
+  31  
+
+velox/dwio/parquet/writer/arrow/util/CompressionZstd.cpp:
+  26  
+  27: #include "arrow/result.h"
+  28: #include "arrow/status.h"
+  29: #include "arrow/util/macros.h"
+  30  
+
+velox/dwio/parquet/writer/arrow/util/Crc32.cpp:
+  93  
+  94: #include "arrow/util/endian.h"
+  95  
+
+velox/dwio/parquet/writer/arrow/util/Crc32.h:
+  21  
+  22: #include "arrow/util/visibility.h"
+  23  
+
+velox/dwio/parquet/writer/arrow/util/Hashing.cpp:
+  19  #include "velox/dwio/parquet/writer/arrow/util/Hashing.h"
+  20: #include "arrow/util/bit_util.h"
+  21: #include "arrow/util/bitmap_reader.h"
+  22: #include "arrow/util/macros.h"
+  23  
+
+velox/dwio/parquet/writer/arrow/util/Hashing.h:
+  34  
+  35: #include "arrow/array/builder_binary.h"
+  36: #include "arrow/buffer_builder.h"
+  37: #include "arrow/result.h"
+  38: #include "arrow/status.h"
+  39: #include "arrow/type_fwd.h"
+  40: #include "arrow/type_traits.h"
+  41: #include "arrow/util/bit_util.h"
+  42: #include "arrow/util/bitmap_builders.h"
+  43: #include "arrow/util/endian.h"
+  44: #include "arrow/util/macros.h"
+  45: #include "arrow/util/ubsan.h"
+  46  
+
+velox/dwio/parquet/writer/arrow/util/OverflowUtilInternal.h:
+  24  
+  25: #include "arrow/status.h"
+  26: #include "arrow/util/macros.h"
+  27: #include "arrow/util/visibility.h"
+  28  
+  29  // "safe-math.h" includes <intsafe.h> from the Windows headers.
+  30: #include "arrow/util/windows_compatibility.h"
+  31: // #include "arrow/vendored/portable-snippets/safe-math.h"
+  32  #include "velox/dwio/parquet/writer/arrow/util/safe-math.h"
+  33  // clang-format off (avoid include reordering)
+  34: #include "arrow/util/windows_fixup.h"
+  35  // clang-format on
+
+velox/dwio/parquet/writer/arrow/util/VisitArrayInline.h:
+  20  
+  21: #include "arrow/array.h"
+  22: #include "arrow/extension_type.h"
+  23: #include "arrow/visitor_generate.h"
+  24  
+
+velox/external/hdfs/ArrowHdfsInternal.cpp:
+  44  
+  45: #include "arrow/result.h"
+  46: #include "arrow/status.h"
+  47: #include "arrow/util/io_util.h"
+  48: #include "arrow/util/logging.h"
+  49  
+
+velox/external/hdfs/ArrowHdfsInternal.h:
+  27  
+  28: #include "arrow/util/visibility.h"
+  29: #include "arrow/util/windows_compatibility.h" // IWYU pragma: keep
+  30  
+
+velox/functions/sparksql/fuzzer/SparkQueryRunner.cpp:
+  20  
+  21: #include "arrow/buffer.h"
+  22: #include "arrow/c/bridge.h"
+  23: #include "arrow/io/api.h"
+  24: #include "arrow/ipc/api.h"
+  25: #include "arrow/result.h"
+  26: #include "arrow/status.h"
+  27  #include "grpc/grpc.h" // @manual
