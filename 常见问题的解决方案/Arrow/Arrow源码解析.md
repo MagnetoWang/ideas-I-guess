@@ -53,6 +53,9 @@ Arrow + 公司项目
    1. 内存管理：https://arrow.apache.org/docs/java/memory.html
 3. 竞品分析
    1. 全票通过｜多语言序列化框架 Fury 正式加入 Apache 孵化器 - Shawn的文章 - 知乎 https://zhuanlan.zhihu.com/p/677061734
+4. db-benchmark
+   1. https://h2oai.github.io/db-benchmark/
+   2. https://benchmark.clickhouse.com/
 
 
 
@@ -790,37 +793,7 @@ std::optional<compute::Expression> ParquetFileFragment::EvaluateStatisticsAsExpr
 
 ```
 
-## 纵向拆解 - acero计划图
-1. https://juejin.cn/post/7423022386880282633
-2. 示例代码：cpp/examples/arrow/acero_register_example.cc
-3. 流图计算：https://arrow.apache.org/docs/8.0/cpp/streaming_execution.html
-4. 代码示例：https://arrow.apache.org/docs/8.0/cpp/streaming_execution.html#summary
 
-### 定义plan  - 过滤逻辑
-```cpp
-auto filter_expr = cp::call("invert",
-    {cp::call("is_in", {cp::field_ref("homeworld")},
-                         cp::SetLookupOptions{
-                             *exclusions})});
-
-auto plan = ac::Declaration::Sequence(
-    {{"record_batch_reader_source",  
-      ac::RecordBatchReaderSourceNodeOptions{
-          std::move(rdr)}},
-     {"filter", ac::FilterNodeOptions{
-           std::move(filter_expr)}},
-     {"aggregate", ac::AggregateNodeOptions({{
-          {"hash_list", nullptr, "name", "name_list"},
-          {"hash_list", nullptr, "species", "species_list"},
-          {"hash_mean", nullptr, "height", "avg_height"}}},
-     {"homeworld"})}});
-
-作者：数据智能老司机
-链接：https://juejin.cn/post/7423022386880282633
-来源：稀土掘金
-著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
-
-```
 
 
 
@@ -1330,7 +1303,7 @@ TEST(ExecPlanExecution, SourceFilterSink) {
 
 
 ```
-## 纵向拆解 - plan 执行计划
+## 纵向拆解 - 构造 arrow plan 执行计划
 ### 执行 source -filter -sink
 ```cpp
 
@@ -1392,6 +1365,40 @@ EST(ExecPlanExecution, SourceProjectSink) {
 ```
 
 
+
+
+## 纵向拆解 - acero计划图 就是 arrow plan计划图
+1. 低版本arrow 是直接在compute里面调用plan类，但是高版本把这部分代码抽取到一个新模块，就是 acero 计划图
+2. https://juejin.cn/post/7423022386880282633
+3. 示例代码：cpp/examples/arrow/acero_register_example.cc
+4. 流图计算：https://arrow.apache.org/docs/8.0/cpp/streaming_execution.html
+5. 代码示例：https://arrow.apache.org/docs/8.0/cpp/streaming_execution.html#summary
+
+### 定义plan  - 过滤逻辑
+```cpp
+auto filter_expr = cp::call("invert",
+    {cp::call("is_in", {cp::field_ref("homeworld")},
+                         cp::SetLookupOptions{
+                             *exclusions})});
+
+auto plan = ac::Declaration::Sequence(
+    {{"record_batch_reader_source",  
+      ac::RecordBatchReaderSourceNodeOptions{
+          std::move(rdr)}},
+     {"filter", ac::FilterNodeOptions{
+           std::move(filter_expr)}},
+     {"aggregate", ac::AggregateNodeOptions({{
+          {"hash_list", nullptr, "name", "name_list"},
+          {"hash_list", nullptr, "species", "species_list"},
+          {"hash_mean", nullptr, "height", "avg_height"}}},
+     {"homeworld"})}});
+
+作者：数据智能老司机
+链接：https://juejin.cn/post/7423022386880282633
+来源：稀土掘金
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+
+```
 ## 纵向拆解 - Source算子
 
 ### recordbatch source算子
@@ -1487,6 +1494,138 @@ struct TableSinkNodeConsumer : public SinkNodeConsumer {
 
 ```
 
+
+## 纵向拆解 - filter 算子
+1. 初始化
+   1. FilterNodeOptions
+   2. FilterNode
+2. 算子执行
+   1. ExecuteScalarExpression
+   2. Result<Datum> Filter
+   3. vector_selection_filter_internal
+3. 示例
+   1. /cpp/src/arrow/acero/filter_node.cc
+   2. /cpp/src/arrow/acero/filter_benchmark.cc
+   3. /cpp/src/arrow/compute/kernels/vector_selection_filter_internal.cc
+
+```cpp
+
+执行逻辑
+    ARROW_ASSIGN_OR_RAISE(Datum simplified_value_set,
+                          Filter(options->value_set, filter_mask, filter_options));
+
+Result<Datum> Filter(const Datum& values, const Datum& filter,
+                     const FilterOptions& options, ExecContext* ctx) {
+  // Invoke metafunction which deals with Datum kinds other than just Array,
+  // ChunkedArray.
+  return CallFunction("filter", {values, filter}, &options, ctx);
+}
+
+Result<Datum> ExecuteScalarExpression(const Expression& expr, const ExecBatch& input,
+                                      compute::ExecContext* exec_context) {
+  if (exec_context == nullptr) {
+    compute::ExecContext exec_context;
+    return ExecuteScalarExpression(expr, input, &exec_context);
+  }
+
+  if (!expr.IsBound()) {
+    return Status::Invalid("Cannot Execute unbound expression.");
+  }
+
+  if (!expr.IsScalarExpression()) {
+    return Status::Invalid(
+        "ExecuteScalarExpression cannot Execute non-scalar expression ", expr.ToString());
+  }
+
+  if (auto lit = expr.literal()) return *lit;
+
+  if (auto param = expr.parameter()) {
+    if (param->type.id() == Type::NA) {
+      return MakeNullScalar(null());
+    }
+
+    Datum field = input[param->indices[0]];
+    if (param->indices.size() > 1) {
+      std::vector<int> indices(param->indices.begin() + 1, param->indices.end());
+      compute::StructFieldOptions options(std::move(indices));
+      ARROW_ASSIGN_OR_RAISE(
+          field, compute::CallFunction("struct_field", {std::move(field)}, &options));
+    }
+    if (!field.type()->Equals(*param->type.type)) {
+      return Status::Invalid("Referenced field ", expr.ToString(), " was ",
+                             field.type()->ToString(), " but should have been ",
+                             param->type.ToString());
+    }
+
+    return field;
+  }
+
+  auto call = CallNotNull(expr);
+
+  std::vector<Datum> arguments(call->arguments.size());
+
+  bool all_scalar = true;
+  for (size_t i = 0; i < arguments.size(); ++i) {
+    ARROW_ASSIGN_OR_RAISE(
+        arguments[i], ExecuteScalarExpression(call->arguments[i], input, exec_context));
+    all_scalar &= arguments[i].is_scalar();
+  }
+
+  int64_t input_length;
+  if (!arguments.empty() && all_scalar) {
+    // all inputs are scalar, so use a 1-long batch to avoid
+    // computing input.length equivalent outputs
+    input_length = 1;
+  } else {
+    input_length = input.length;
+  }
+
+  auto executor = compute::detail::KernelExecutor::MakeScalar();
+
+  compute::KernelContext kernel_context(exec_context, call->kernel);
+  kernel_context.SetState(call->kernel_state.get());
+
+  const Kernel* kernel = call->kernel;
+  std::vector<TypeHolder> types = GetTypes(arguments);
+  auto options = call->options.get();
+  RETURN_NOT_OK(executor->Init(&kernel_context, {kernel, types, options}));
+
+  compute::detail::DatumAccumulator listener;
+  RETURN_NOT_OK(executor->Execute(ExecBatch(arguments, input_length), &listener));
+  const auto out = executor->WrapResults(arguments, listener.values());
+#ifndef NDEBUG
+  DCHECK_OK(executor->CheckResultType(out, call->function_name.c_str()));
+#endif
+  return out;
+}
+
+
+```
+
+## 纵向拆解 - join算子
+1. 示例
+   1. /cpp/examples/arrow/execution_plan_documentation_examples.cc
+   2. /cpp/src/arrow/acero/hash_join_node_test.cc
+   3. /cpp/src/arrow/acero/plan_test.cc
+```cpp
+
+
+// 初始化
+  auto l_scan_node_options = arrow::dataset::ScanNodeOptions{l_dataset, l_options};
+  auto r_scan_node_options = arrow::dataset::ScanNodeOptions{r_dataset, r_options};
+
+  arrow::acero::Declaration left{"scan", std::move(l_scan_node_options)};
+  arrow::acero::Declaration right{"scan", std::move(r_scan_node_options)};
+
+  arrow::acero::HashJoinNodeOptions join_opts{arrow::acero::JoinType::INNER,
+                                              /*in_left_keys=*/{"lkey"},
+                                              /*in_right_keys=*/{"rkey"},
+                                              /*filter*/ arrow::compute::literal(true),
+                                              /*output_suffix_for_left*/ "_l",
+                                              /*output_suffix_for_right*/ "_r"};
+
+
+```
 
 ## 纵向拆解 - 第三方工具
 
@@ -1714,6 +1853,165 @@ Result<std::shared_ptr<Array>> ArrayFromJSON(const std::shared_ptr<DataType>& ty
 
 
 ```
+
+## 高阶拆解 - MapVector
+1. 本质上对应Java 就是 list.map(e -> e) 针对一个列表做不同类型的转化而已，这样就好理解了
+2. 只是cpp很难实现，要用模板
+```cpp
+template <typename Fn, typename From,
+          typename To = decltype(std::declval<Fn>()(std::declval<From>()))>
+std::vector<To> MapVector(Fn&& map, const std::vector<From>& source) {
+  std::vector<To> out;
+  out.reserve(source.size());
+  std::transform(source.begin(), source.end(), std::back_inserter(out),
+                 std::forward<Fn>(map));
+  return out;
+}
+
+
+
+应用
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+template <typename Fn, typename From,
+          typename To = decltype(std::declval<Fn>()(std::declval<From>()))>
+std::vector<To> MapVector(Fn&& map, const std::vector<From>& source) {
+  std::vector<To> out;
+  out.reserve(source.size());
+  std::transform(source.begin(), source.end(), std::back_inserter(out),
+                 std::forward<Fn>(map));
+  return out;
+}
+
+int main() {
+  std::vector<int> numbers = {1, 2, 3, 4, 5};
+  
+  auto squared_numbers = MapVector([](int x) { return x * x; }, numbers);
+
+  std::cout << "Squared numbers: ";
+  for (const auto& num : squared_numbers) {
+    std::cout << num << " ";
+  }
+  std::cout << std::endl;
+
+  return 0;
+}
+
+
+使用MapVector这样的模板函数有几个好处，尤其是在处理集合数据时：
+
+    代码复用：MapVector是一个通用的函数，可以应用于任何类型的向量和任何类型的转换函数。这意味着你可以在不同的上下文中使用相同的函数，而不需要为每种类型或转换编写新的代码。
+
+    简洁性：使用MapVector可以使代码更简洁和易读。你不需要手动编写循环来遍历向量并应用转换函数，MapVector已经封装了这些逻辑。
+
+    性能优化：通过使用std::transform和预留空间（out.reserve(source.size())），MapVector可以减少内存分配的次数，从而提高性能。
+
+    类型安全：模板参数To自动推导为转换函数的返回类型，这确保了类型安全，并减少了手动指定类型的错误。
+
+    灵活性：你可以传递任何可调用对象（函数指针、函数对象、lambda表达式）作为转换函数，这使得MapVector非常灵活。
+
+    现代C++风格：使用模板和标准库算法（如std::transform）是现代C++编程的推荐实践，它使代码更具表达力和可维护性。
+
+```
+
+
+## 高阶拆解 - MakeVectorGenerator
+1. 本质上就是个异步数据生成器
+2. 输入一个list，然后其他线程可以异步get出来，如果只有一个线程其实不需要
+   1. 本身是吧list转成迭代器，所以list放到 vertor后不能再修改了
+3. 如果是Java 用多线程数据结构就行了，但是cpp并没有，需要自己保证
+
+```cpp
+
+
+/// \brief Creates a generator that will yield finished futures from a vector
+///
+/// This generator is async-reentrant
+template <typename T>
+AsyncGenerator<T> MakeVectorGenerator(std::vector<T> vec) {
+  struct State {
+    explicit State(std::vector<T> vec_) : vec(std::move(vec_)), vec_idx(0) {}
+
+    std::vector<T> vec;
+    std::atomic<std::size_t> vec_idx;
+  };
+
+  auto state = std::make_shared<State>(std::move(vec));
+  return [state]() {
+    auto idx = state->vec_idx.fetch_add(1);
+    if (idx >= state->vec.size()) {
+      // Eagerly return memory
+      state->vec.clear();
+      return AsyncGeneratorEnd<T>();
+    }
+    return Future<T>::MakeFinished(state->vec[idx]);
+  };
+}
+
+
+
+应用
+#include <iostream>
+#include <vector>
+#include <atomic>
+#include <memory>
+#include <future>
+
+// 假设AsyncGenerator和Future是某个异步库中的类型
+template <typename T>
+using AsyncGenerator = std::function<std::future<T>()>;
+
+template <typename T>
+using Future = std::future<T>;
+
+template <typename T>
+Future<T> AsyncGeneratorEnd() {
+  return std::future<T>(); // 返回一个默认构造的future，表示结束
+}
+
+template <typename T>
+AsyncGenerator<T> MakeVectorGenerator(std::vector<T> vec) {
+  struct State {
+  explicit State(std::vector<T> vec_) : vec(std::move(vec_)), vec_idx(0) {}
+
+  std::vector<T> vec;
+  std::atomic<std::size_t> vec_idx;
+  };
+
+  auto state = std::make_shared<State>(std::move(vec));
+  return [state]() {
+    auto idx = state->vec_idx.fetch_add(1);
+    if (idx >= state->vec.size()) {
+      // Eagerly return memory
+      state->vec.clear();
+      return AsyncGeneratorEnd<T>();
+    }
+    return std::async(std::launch::deferred, [value = state->vec[idx]]() { return value; });
+  };
+}
+
+int main() {
+  std::vector<int> numbers = {1, 2, 3, 4, 5};
+
+  auto generator = MakeVectorGenerator(numbers);
+
+  for (int i = 0; i < numbers.size(); ++i) {
+    auto future = generator();
+    if (future.valid()) {
+      std::cout << "Generated value: " << future.get() << std::endl;
+    } else {
+      std::cout << "Generator has ended." << std::endl;
+    }
+  }
+
+  return 0;
+}
+
+```
+
+
 
 
 ## 应用
